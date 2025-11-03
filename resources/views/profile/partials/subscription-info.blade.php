@@ -65,7 +65,7 @@
                         </div>
                     @endif
 
-                    <!-- Events usage progress -->
+                    <!-- Events usage progress (paid events/month) -->
                     <div class="mt-3">
                         <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 dark:text-gray-400 mb-1">
                             <span>Events This Month</span>
@@ -75,6 +75,28 @@
                             <div class="bg-qricket-500 h-2 rounded-full" style="width: {{ $percentage }}%"></div>
                         </div>
                     </div>
+
+                    @php
+                        $freeLimit = (int)($currentSubscription->getPlan()?->free_events_count ?? 0);
+                        $freeUsed = auth()->user()->events()
+                            ->where('status','published')
+                            ->where('is_free', true)
+                            ->where('created_at', '>=', now()->startOfMonth())
+                            ->count();
+                        $freePct = $freeLimit > 0 ? min(100, ($freeUsed / max(1,$freeLimit)) * 100) : 0;
+                    @endphp
+                    @if($freeLimit > 0)
+                    <!-- Free events usage progress -->
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+                            <span>Free Events Used (This Month)</span>
+                            <span>{{ $freeUsed }} / {{ $freeLimit }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: {{ $freePct }}%"></div>
+                        </div>
+                    </div>
+                    @endif
 
                     <!-- Subscription Details -->
                     <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">

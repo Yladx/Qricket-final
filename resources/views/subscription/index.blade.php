@@ -35,6 +35,16 @@
                                     You've reached your monthly published event limit
                                 @endif
                             </p>
+                            @php
+                                $plan = auth()->user()->currentSubscription()?->getPlan();
+                                $freeCap = (int)($plan?->free_events_count ?? 0);
+                                $freeUsed = auth()->user()->events()->where('status','published')->where('is_free', true)->where('created_at', '>=', now()->startOfMonth())->count();
+                            @endphp
+                            @if($freeCap > 0)
+                            <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                                Free events this month: {{ $freeUsed }} / {{ $freeCap }}
+                            </p>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -81,7 +91,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 <span class="text-xs text-gray-700 dark:text-gray-300">
-                                    {{ $plan->events_per_month === null ? 'Unlimited' : $plan->events_per_month }} events/month
+                                    {{ $plan->events_per_month === null ? 'Unlimited' : $plan->events_per_month }} paid events/month
                                 </span>
                             </li>
                             <li class="flex items-center">

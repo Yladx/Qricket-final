@@ -196,23 +196,50 @@ class ReviewController extends Controller
         // Skip subscription check for admin-created events
         if ($publishOption !== 'draft' && !$isAdminEvent) {
             $user = Auth::user();
-            if ($user && !$user->canCreateEvent()) {
-                $remainingEvents = $user->getRemainingEventsThisMonth();
-                
-                if ($request->expectsJson()) {
-                    return response()->json([
-                        'error' => 'Event publishing limit reached',
-                        'message' => $remainingEvents === 0 
-                            ? 'You have reached your monthly event publishing limit. Please upgrade your subscription to publish more events.'
-                            : "You can publish {$remainingEvents} more events this month.",
-                        'subscription_required' => true,
-                        'remaining_events' => $remainingEvents,
-                    ], 403);
-                }
+            if ($user) {
+                // Distinguish free vs paid events: free events use free_events_count; paid use events_per_month
+                $subscription = $user->currentSubscription();
+                $plan = $subscription?->getPlan() ?? \App\Models\SubscriptionPlan::where('slug','free')->first();
+                $currentMonthStart = now()->startOfMonth();
 
-                return redirect()->back()
-                    ->with('error', 'You have reached your monthly event publishing limit. Please upgrade your subscription to publish more events.')
-                    ->withInput();
+                if (($event->is_free ?? false) && ($plan?->free_events_count ?? 0) > 0) {
+                    $publishedFree = $user->events()
+                        ->where('status', 'published')
+                        ->where('is_free', true)
+                        ->where('created_at', '>=', $currentMonthStart)
+                        ->count();
+                    $freeRemaining = max(0, (int)$plan->free_events_count - $publishedFree);
+                    if ($freeRemaining <= 0) {
+                        $msg = 'You have reached your monthly free event publishing limit for your plan.';
+                        if ($request->expectsJson()) {
+                            return response()->json([
+                                'error' => 'Free event publishing limit reached',
+                                'message' => $msg,
+                                'subscription_required' => true,
+                                'remaining_events' => 0,
+                            ], 403);
+                        }
+                        return redirect()->back()->with('error', $msg)->withInput();
+                    }
+                } else {
+                    // Paid event check using existing helper (events_per_month)
+                    if (!$user->canCreateEvent()) {
+                        $remainingEvents = $user->getRemainingEventsThisMonth();
+                        if ($request->expectsJson()) {
+                            return response()->json([
+                                'error' => 'Event publishing limit reached',
+                                'message' => $remainingEvents === 0 
+                                    ? 'You have reached your monthly event publishing limit. Please upgrade your subscription to publish more events.'
+                                    : "You can publish {$remainingEvents} more events this month.",
+                                'subscription_required' => true,
+                                'remaining_events' => $remainingEvents,
+                            ], 403);
+                        }
+                        return redirect()->back()
+                            ->with('error', 'You have reached your monthly event publishing limit. Please upgrade your subscription to publish more events.')
+                            ->withInput();
+                    }
+                }
             }
         }
 
