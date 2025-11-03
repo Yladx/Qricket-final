@@ -18,9 +18,9 @@
                     </div>
                 <div class="space-y-3 order-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
-                    <input type="text" id="${componentId}-title" onchange="updateComponentDetail('${componentId}', 'title', this.value)" class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Enter title...">
+                    <input type="text" id="${componentId}-title" onchange="updateComponentDetail('${componentId}', 'title', this.value)" class="block w-full bg-white text-gray-900 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Enter title...">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Content</label>
-                    <textarea id="${componentId}-content" onchange="updateComponentDetail('${componentId}', 'content', this.value)" class="w-full h-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" placeholder="Enter content..."></textarea>
+                    <textarea id="${componentId}-content" onchange="updateComponentDetail('${componentId}', 'content', this.value)" class="w-full h-40 bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" placeholder="Enter content..."></textarea>
                 </div>
             </div>
         `;

@@ -5,9 +5,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                 <div class="space-y-3 order-2 md:order-1">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
-                    <input id="${componentId}-title" type="text" class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-qricket-500 focus:ring-qricket-500" placeholder="Enter title..." onchange="updateComponentDetail('${componentId}', 'title', this.value)">
+                    <input id="${componentId}-title" type="text" class="w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm focus:border-qricket-500 focus:ring-qricket-500" placeholder="Enter title..." onchange="updateComponentDetail('${componentId}', 'title', this.value)">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Text Content</label>
-                    <textarea id="${componentId}-content" class="w-full h-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" placeholder="Enter text content..."></textarea>
+                    <textarea id="${componentId}-content" class="w-full h-40 bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" placeholder="Enter text content..."></textarea>
                 </div>
                 <div class="order-1 md:order-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image</label>

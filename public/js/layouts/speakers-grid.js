@@ -52,9 +52,11 @@
                 </div>
                 <div class="flex items-center justify-between mt-2">
                     <h4 class="text-sm font-medium text-gray-800 dark:text-gray-200">Speakers</h4>
-                    <button type="button" onclick="addSpeakerItem('${componentId}')" class="px-3 py-1.5 text-xs rounded bg-qricket-500 text-white hover:bg-qricket-600">Add Speaker</button>
                 </div>
                 <div id="${componentId}-speakers-container" class="space-y-3"></div>
+                <div class="pt-2">
+                    <button type="button" onclick="addSpeakerItem('${componentId}')" class="w-full md:w-auto px-3 py-1.5 text-xs rounded bg-qricket-500 text-white hover:bg-qricket-600">Add Speaker</button>
+                </div>
             </div>
         `;
     }
