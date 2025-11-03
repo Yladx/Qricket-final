@@ -1,4 +1,20 @@
 <div class="space-y-4">
+@php
+    $isFreeEvent = isset($event) ? (bool)($event->is_free ?? false) : (bool)($eventData['is_free'] ?? false);
+    $currentPlan = auth()->user()->currentSubscription()?->getPlan();
+    $freeEventTicketLimit = (int)($currentPlan->free_event_ticket_limit ?? 0);
+@endphp
+
+<!-- Expose limits for Step 3 JS -->
+<meta name="event-is-free" content="{{ $isFreeEvent ? '1' : '0' }}">
+<meta name="free-event-ticket-limit" content="{{ $freeEventTicketLimit > 0 ? $freeEventTicketLimit : '' }}">
+
+@if($isFreeEvent && $freeEventTicketLimit > 0)
+    <div class="p-2 rounded border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 text-xs text-yellow-800 dark:text-yellow-200">
+        This event is marked as Free. Total tickets across all types are capped at {{ $freeEventTicketLimit }} by your plan ({{ $currentPlan->name ?? 'Plan' }}).
+    </div>
+@endif
+
 <div>
                 <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">
                   Manage Ticket

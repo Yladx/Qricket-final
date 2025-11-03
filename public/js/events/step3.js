@@ -33,13 +33,22 @@
     typesInput.value = JSON.stringify(list);
   }
 
-  // Subscription ticket limit – fetched from meta tag rendered by Blade
+  // Subscription ticket limit – fetched from meta tags rendered by Blade
+  // If event is free and free-event-ticket-limit is set, cap by that
   function getTicketsPerEventLimit() {
-    const el = document.querySelector('meta[name="tickets-per-event"]');
-    const v = el ? el.getAttribute('content') : null;
-    if (v == null || v === '' || v === 'null') return null; // unlimited
-    const n = parseInt(v, 10);
-    return isNaN(n) ? null : n;
+    const planMeta = document.querySelector('meta[name="tickets-per-event"]');
+    const freeMeta = document.querySelector('meta[name="free-event-ticket-limit"]');
+    const isFreeMeta = document.querySelector('meta[name="event-is-free"]');
+    const planVal = planMeta ? planMeta.getAttribute('content') : null;
+    const freeVal = freeMeta ? freeMeta.getAttribute('content') : null;
+    const isFree = (isFreeMeta ? isFreeMeta.getAttribute('content') : '') === '1';
+    const planCap = (planVal == null || planVal === '' || planVal === 'null') ? null : (parseInt(planVal, 10) || null);
+    const freeCap = (freeVal == null || freeVal === '' || freeVal === 'null') ? null : (parseInt(freeVal, 10) || null);
+    if (isFree && freeCap != null) {
+      if (planCap == null) return freeCap;
+      return Math.min(planCap, freeCap);
+    }
+    return planCap;
   }
 
   function getUsedQuantity(list) {
