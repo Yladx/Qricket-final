@@ -27,6 +27,7 @@
                         $user = auth()->user();
                         $subscription = $user?->currentSubscription();
                         $plan = $subscription?->getPlan();
+                        $event = \App\Models\Event::find($eventId);
                         
                         // If no subscription, check free plan
                         if (!$plan) {
@@ -47,7 +48,7 @@
                     <meta name="tickets-per-event" content="{{ $cap === null ? 'null' : $cap }}">
                     <form method="POST" action="{{ route('organizer.events.ticket.store') }}?id={{ $eventId }}" class="space-y-8" data-autosave-url="{{ route('organizer.events.ticket.autosave') }}?id={{ $eventId }}">
                         @csrf
-                        @include('organizer.events.forms.tickets', ['eventId' => $eventId, 'eventData' => $eventData])
+                        @include('organizer.events.forms.tickets', ['eventId' => $eventId, 'eventData' => $eventData, 'event' => $event])
 
                         <!-- Navigation Buttons -->
                         <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
