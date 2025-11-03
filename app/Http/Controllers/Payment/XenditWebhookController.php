@@ -373,9 +373,9 @@ class XenditWebhookController extends Controller
                 'payment_status' => 'paid',
                 'xendit_payment_id' => $payload['payment_id'] ?? $payload['id'] ?? null,
                 'starts_at' => now(),
-                'expires_at' => $subscription->getPlan()?->slug === 'enterprise' ? null : now()->addMonth(),
+                'expires_at' => $subscription->getPlan()?->slug === 'intermediate' ? null : now()->addMonth(),
                 'start_date' => now(),
-                'end_date' => $subscription->getPlan()?->slug === 'enterprise' ? null : now()->addMonth(),
+                'end_date' => $subscription->getPlan()?->slug === 'intermediate' ? null : now()->addMonth(),
                 'paid_at' => now(),
                 'payment_method' => $paymentMethod,
                 'transaction_fee' => $fees['transaction_fee'],
@@ -1583,8 +1583,8 @@ class XenditWebhookController extends Controller
                     $planSlug = 'basic';
                 } elseif (strpos($itemName, 'pro') !== false) {
                     $planSlug = 'pro';
-                } elseif (strpos($itemName, 'enterprise') !== false) {
-                    $planSlug = 'enterprise';
+                } elseif (strpos($itemName, 'intermediate') !== false) {
+                    $planSlug = 'intermediate';
                 } elseif (strpos($itemName, 'free') !== false) {
                     $planSlug = 'free';
                 }
@@ -1621,9 +1621,9 @@ class XenditWebhookController extends Controller
                 'amount' => $amount,
                 'currency' => $currency,
                 'start_date' => now(),
-                'end_date' => $subscriptionPlan->slug === 'enterprise' ? null : now()->addMonth(),
+                'end_date' => $subscriptionPlan->slug === 'intermediate' ? null : now()->addMonth(),
                 'starts_at' => now(),
-                'expires_at' => $subscriptionPlan->slug === 'enterprise' ? null : now()->addMonth(),
+                'expires_at' => $subscriptionPlan->slug === 'intermediate' ? null : now()->addMonth(),
                 'payment_status' => 'paid',
                 'payment_method' => 'xendit',
                 'payment_reference' => $paymentId,
@@ -1899,7 +1899,7 @@ class XenditWebhookController extends Controller
                             'plan_id' => $plan->slug,
                             'status' => 'active',
                             'starts_at' => now(),
-                            'expires_at' => $plan->slug === 'enterprise' ? null : now()->addMonth(),
+                            'expires_at' => $plan->slug === 'intermediate' ? null : now()->addMonth(),
                             'payment_method' => $paymentMethod,
                             'payment_status' => 'paid',
                             'amount' => $intent['final_price'] ?? $plan->price,
@@ -1909,7 +1909,7 @@ class XenditWebhookController extends Controller
                             'net_amount' => $fees['net_amount'],
                             'total_fees' => $fees['total_fees'],
                             'start_date' => now(),
-                            'end_date' => $plan->slug === 'enterprise' ? null : now()->addMonth(),
+                            'end_date' => $plan->slug === 'intermediate' ? null : now()->addMonth(),
                             'discount_code' => $intent['discount_code'] ?? null,
                             'xendit_invoice_id' => $invoiceId,
                             'xendit_payment_id' => $payload['payment_id'] ?? $payload['data']['payment_id'] ?? null,

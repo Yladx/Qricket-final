@@ -86,14 +86,14 @@ class SubscriptionPlanSeeder extends Seeder
                 'sort_order' => 3,
             ],
             [
-                'name' => 'Enterprise',
-                'slug' => 'enterprise',
-                'description' => 'Unlimited features - publish unlimited events per month',
-                'price' => 0.00, // Custom pricing
+                'name' => 'Intermediate',
+                'slug' => 'intermediate',
+                'description' => 'Custom plan for growing organizers',
+                'price' => 0.00, // Custom pricing/contact sales
                         'currency' => 'PHP',
-                'events_per_month' => null, // Unlimited
-                'tickets_per_event' => null, // Unlimited
-                'max_event_duration_days' => null, // Unlimited
+                'events_per_month' => null, // Unlimited or configured by admin
+                'tickets_per_event' => null, // Unlimited or configured by admin
+                'max_event_duration_days' => null,
                 'advanced_layouts' => true,
                 'advanced_analytics' => true,
                 'api_access' => true,
@@ -105,10 +105,6 @@ class SubscriptionPlanSeeder extends Seeder
                     'White label solution',
                     'Dedicated support',
                     'Custom integrations',
-                    'Unlimited events',
-                    'Unlimited tickets',
-                    'SSO integration',
-                    'Advanced reporting',
                 ],
                 'is_active' => true,
                 'sort_order' => 4,

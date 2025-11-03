@@ -118,12 +118,7 @@
                     <!-- Action Button -->
                     <div class="mt-auto pt-4">
                         @auth
-                            @if($plan->slug === 'enterprise')
-                                <!-- Enterprise plan - Contact Sales link -->
-                                <a href="{{ route('help.index') }}" class="w-full {{ $plan->slug === 'pro' ? 'bg-qricket-500 hover:bg-qricket-600 text-white' : 'bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white' }} py-1.5 px-3 rounded text-sm font-medium transition-colors duration-200 inline-block text-center">
-                                    Contact Sales
-                                </a>
-                            @else
+                            @if(true)
                                 <!-- Regular subscription form for other plans -->
                                 <form method="POST" action="{{ route('subscription.create') }}" class="subscription-form" data-plan-id="{{ $plan->id }}">
                                     @csrf
@@ -300,12 +295,7 @@
                         @foreach($plans as $plan)
                         <div class="w-1/4 text-center {{ $plan->slug === 'pro' ? 'bg-qricket-50 dark:bg-qricket-900/20' : '' }}">
                             @auth
-                                @if($plan->slug === 'enterprise')
-                                    <!-- Enterprise plan - Contact Sales link -->
-                                    <a href="{{ route('help.index') }}" class="inline-block px-4 py-2 {{ $plan->slug === 'pro' ? 'bg-qricket-500 hover:bg-qricket-600 text-white' : 'bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white' }} rounded-lg font-medium transition-colors duration-200 text-sm">
-                                        Contact Sales
-                                    </a>
-                                @else
+                                @if(true)
                                     <!-- Regular subscription form for other plans -->
                                     <form method="POST" action="{{ route('subscription.create') }}" class="subscription-form inline" data-plan-id="{{ $plan->id }}">
                                         @csrf

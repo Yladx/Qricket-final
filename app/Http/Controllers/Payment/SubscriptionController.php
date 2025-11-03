@@ -46,7 +46,7 @@ class SubscriptionController extends Controller
 
     public function purchase(Request $request, $planSlug = null)
     {
-        $plans = SubscriptionPlan::active()->ordered()->where('slug', '!=', 'enterprise')->get();
+        $plans = SubscriptionPlan::active()->ordered()->get();
         $selectedPlan = null;
         
         // Get current subscription for logged-in user
@@ -57,7 +57,7 @@ class SubscriptionController extends Controller
         
         // Pre-select the plan if provided
         if ($planSlug) {
-            $selectedPlan = $plans->firstWhere('slug', $planSlug);
+                $selectedPlan = $plans->firstWhere('slug', $planSlug);
         }
         
         // If no plan selected, default to first plan (but skip current plan and free plan if user has free subscription)
@@ -496,13 +496,13 @@ class SubscriptionController extends Controller
                     'plan_id' => $plan->slug, // Legacy field
                     'status' => 'active',
                     'starts_at' => now(),
-                    'expires_at' => $plan->slug === 'enterprise' ? null : now()->addMonth(),
+                    'expires_at' => $plan->slug === 'intermediate' ? null : now()->addMonth(),
                     'payment_method' => $paymentMethod,
                     'payment_status' => 'paid',
                     'amount' => $finalPrice,
                     'currency' => $plan->currency,
                     'start_date' => now(),
-                    'end_date' => $plan->slug === 'enterprise' ? null : now()->addMonth(),
+                    'end_date' => $plan->slug === 'intermediate' ? null : now()->addMonth(),
                     'discount_code' => $discountCode,
                     'transaction_fee' => $fees['transaction_fee'],
                     'vat_amount' => $fees['vat_amount'],
@@ -893,13 +893,13 @@ class SubscriptionController extends Controller
                         'plan_id' => $plan->slug,
                         'status' => 'active',
                         'starts_at' => now(),
-                        'expires_at' => $plan->slug === 'enterprise' ? null : now()->addMonth(),
+                        'expires_at' => $plan->slug === 'intermediate' ? null : now()->addMonth(),
                         'payment_method' => $paymentMethod,
                         'payment_status' => 'paid',
                         'amount' => $amount,
                         'currency' => $plan->currency,
                         'start_date' => now(),
-                        'end_date' => $plan->slug === 'enterprise' ? null : now()->addMonth(),
+                        'end_date' => $plan->slug === 'intermediate' ? null : now()->addMonth(),
                         'discount_code' => $intent['discount_code'] ?? null,
                         'xendit_invoice_id' => $invoiceId,
                         'xendit_payment_id' => $payload['payment_id'] ?? $payload['data']['payment_id'] ?? $payload['payment']['id'] ?? null,
@@ -1286,8 +1286,8 @@ class SubscriptionController extends Controller
                     $planSlug = 'basic';
                 } elseif (strpos($itemName, 'pro') !== false) {
                     $planSlug = 'pro';
-                } elseif (strpos($itemName, 'enterprise') !== false) {
-                    $planSlug = 'enterprise';
+                } elseif (strpos($itemName, 'intermediate') !== false) {
+                    $planSlug = 'intermediate';
                 } elseif (strpos($itemName, 'free') !== false) {
                     $planSlug = 'free';
                 }
@@ -1330,9 +1330,9 @@ class SubscriptionController extends Controller
                 'amount' => $amount,
                 'currency' => $currency,
                 'start_date' => now(),
-                'end_date' => $subscriptionPlan->slug === 'enterprise' ? null : now()->addMonth(),
+                'end_date' => $subscriptionPlan->slug === 'intermediate' ? null : now()->addMonth(),
                 'starts_at' => now(),
-                'expires_at' => $subscriptionPlan->slug === 'enterprise' ? null : now()->addMonth(),
+                'expires_at' => $subscriptionPlan->slug === 'intermediate' ? null : now()->addMonth(),
                 'payment_status' => 'paid',
                 'payment_method' => $paymentMethod,
                 'payment_reference' => $paymentId,

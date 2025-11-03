@@ -174,7 +174,21 @@ document.addEventListener('DOMContentLoaded', function() {
         return total;
     }
 
-    function clampQuantities() {
+    function setPerInputMaxes(activeInput) {
+        const qtyInputs = Array.from(document.querySelectorAll('#ticketTypes .ticket-row input[name$="[quantity]"]'));
+        const total = qtyInputs.reduce((acc, el) => acc + (parseInt(el.value || '0', 10) || 0), 0);
+        const current = parseInt(activeInput?.value || '0', 10) || 0;
+        const remaining = Math.max(0, freeTicketLimit - (total - current));
+        qtyInputs.forEach(inp => {
+            const base = parseInt(inp.value || '0', 10) || 0;
+            const max = inp === activeInput ? remaining + base : Math.max(0, freeTicketLimit - (total - base));
+            inp.setAttribute('min', '0');
+            inp.setAttribute('max', String(max));
+        });
+        updateLimitNotice();
+    }
+
+    function clampQuantities(e) {
         let total = getTotalConfiguredQuantity();
         if (total <= freeTicketLimit) return;
         // Reduce the last edited or last row to fit the limit
@@ -190,10 +204,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 total = getTotalConfiguredQuantity();
             }
         }
-        showLimitNotice();
+        setPerInputMaxes(e?.target);
     }
 
-    function showLimitNotice() {
+    function updateLimitNotice() {
         const msgId = 'free-limit-notice';
         let el = document.getElementById(msgId);
         if (!el) {
@@ -203,7 +217,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('ticketTypes');
             container && container.prepend(el);
         }
-        el.textContent = `Free event limit: up to ${freeTicketLimit} total tickets across all types.`;
+        const remaining = Math.max(0, freeTicketLimit - getTotalConfiguredQuantity());
+        el.textContent = `Free event limit: up to ${freeTicketLimit} total tickets across all types. Remaining: ${remaining}`;
     }
 
     // Observe changes in ticket rows (added by JS) and quantities
@@ -211,16 +226,16 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('#ticketTypes .ticket-row input[name$="[quantity]"]').forEach(inp => {
             if (inp.dataset._limitBound) return;
             inp.dataset._limitBound = '1';
-            inp.addEventListener('input', clampQuantities);
-            inp.addEventListener('change', clampQuantities);
+            inp.addEventListener('input', (e)=>{ setPerInputMaxes(e.target); clampQuantities(e); });
+            inp.addEventListener('change', (e)=>{ setPerInputMaxes(e.target); clampQuantities(e); });
         });
-        showLimitNotice();
+        setPerInputMaxes();
         clampQuantities();
     });
     observer.observe(document.getElementById('ticketTypes'), { childList: true, subtree: true });
 
     // Initial attempt
-    showLimitNotice();
+    setPerInputMaxes();
     clampQuantities();
 });
 
