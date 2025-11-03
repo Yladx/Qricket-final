@@ -62,6 +62,21 @@
     return Math.max(0, cap - used);
   }
 
+  function updateQuantityMaxes() {
+    const cap = getTicketsPerEventLimit();
+    if (cap == null) return;
+    const list = readTypes();
+    const inputs = document.querySelectorAll('input[data-k="quantity"]');
+    // For each input, allow current value + remaining after subtracting others
+    inputs.forEach((inp, idx) => {
+      const others = list.reduce((sum, t, j) => sum + (j === idx ? 0 : (parseInt(t.quantity, 10) || 0)), 0);
+      const allowedForThis = Math.max(0, cap - others);
+      const cur = parseInt(inp.value, 10) || 0;
+      inp.min = '0';
+      inp.max = String(cur + Math.max(0, allowedForThis - cur));
+    });
+  }
+
   function readSettings() {
     try {
       const raw = settingsInput?.value || '{}';
@@ -378,6 +393,8 @@
     
     // Set up date validation after rendering
     validateAndSetMinMaxDates();
+    // Update max attributes for quantities under current cap
+    setTimeout(updateQuantityMaxes, 0);
   }
 
   function queueAutosave() {
@@ -602,6 +619,8 @@
           setTimeout(()=>e.target.classList.remove('ring-2','ring-red-400'), 600);
         }
         list[idx].quantity = String(val);
+        // Refresh max attributes after change
+        setTimeout(updateQuantityMaxes, 0);
       }
     }
 
