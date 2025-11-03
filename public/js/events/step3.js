@@ -44,9 +44,9 @@
     const isFree = (isFreeMeta ? isFreeMeta.getAttribute('content') : '') === '1';
     const planCap = (planVal == null || planVal === '' || planVal === 'null') ? null : (parseInt(planVal, 10) || null);
     const freeCap = (freeVal == null || freeVal === '' || freeVal === 'null') ? null : (parseInt(freeVal, 10) || null);
+    // If event is free, prioritize free cap exclusively
     if (isFree && freeCap != null) {
-      if (planCap == null) return freeCap;
-      return Math.min(planCap, freeCap);
+      return freeCap;
     }
     return planCap;
   }

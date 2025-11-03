@@ -473,15 +473,11 @@ class TicketsController extends Controller
                     ? null 
                     : $baseMaxTicketsPerEvent + $additionalTicketsPurchased;
 
-                // If event is marked free, cap by plan's free_event_ticket_limit when defined
+                // If event is marked free, PRIORITIZE free_event_ticket_limit exclusively
                 if ($event->is_free) {
                     $freeCap = (int)($plan?->free_event_ticket_limit ?? 0);
                     if ($freeCap > 0) {
-                        if ($maxTicketsPerEvent === null) {
-                            $maxTicketsPerEvent = $freeCap;
-                        } else {
-                            $maxTicketsPerEvent = min($maxTicketsPerEvent, $freeCap);
-                        }
+                        $maxTicketsPerEvent = $freeCap;
                     }
                 }
                 
