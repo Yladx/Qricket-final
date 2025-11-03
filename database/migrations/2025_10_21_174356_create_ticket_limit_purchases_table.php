@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('ticket_limit_purchases')) {
+            return; // table already exists
+        }
+
         Schema::create('ticket_limit_purchases', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
