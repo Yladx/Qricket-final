@@ -92,6 +92,26 @@
                                     {{ $plan->tickets_per_event === null ? 'Unlimited' : number_format($plan->tickets_per_event) }} tickets/event
                                 </span>
                             </li>
+                            @if(($plan->free_events_count ?? 0) > 0)
+                            <li class="flex items-center">
+                                <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="text-xs text-gray-700 dark:text-gray-300">
+                                    {{ $plan->free_events_count }} free event{{ $plan->free_events_count > 1 ? 's' : '' }} included
+                                </span>
+                            </li>
+                            @endif
+                            @if(($plan->free_event_ticket_limit ?? 0) > 0)
+                            <li class="flex items-center">
+                                <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="text-xs text-gray-700 dark:text-gray-300">
+                                    {{ number_format($plan->free_event_ticket_limit) }} tickets cap for free events
+                                </span>
+                            </li>
+                            @endif
                             @if($plan->advanced_layouts)
                             <li class="flex items-center">
                                 <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,6 +247,26 @@
                                     @else
                                         {{ number_format($plan->tickets_per_event) }}
                                     @endif
+                                </td>
+                                @endforeach
+                            </tr>
+
+                            <!-- Free Events Included -->
+                            <tr>
+                                <td class="px-4 py-3 text-xs font-medium text-gray-900 dark:text-gray-100">Free Events Included</td>
+                                @foreach($plans as $plan)
+                                <td class="px-4 py-3 text-center text-xs text-gray-900 dark:text-gray-100 {{ $plan->slug === 'pro' ? 'bg-qricket-50 dark:bg-qricket-900/20' : '' }}">
+                                    {{ (int)($plan->free_events_count ?? 0) }}
+                                </td>
+                                @endforeach
+                            </tr>
+
+                            <!-- Free Event Ticket Limit -->
+                            <tr>
+                                <td class="px-4 py-3 text-xs font-medium text-gray-900 dark:text-gray-100">Free Event Ticket Limit</td>
+                                @foreach($plans as $plan)
+                                <td class="px-4 py-3 text-center text-xs text-gray-900 dark:text-gray-100 {{ $plan->slug === 'pro' ? 'bg-qricket-50 dark:bg-qricket-900/20' : '' }}">
+                                    {{ number_format((int)($plan->free_event_ticket_limit ?? 0)) }}
                                 </td>
                                 @endforeach
                             </tr>

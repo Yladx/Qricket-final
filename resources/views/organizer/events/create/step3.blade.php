@@ -44,8 +44,18 @@
 
                         // Calculate the total maximum tickets allowed
                         $cap = ($baseCap === null) ? null : $baseCap + $additionalTicketsPurchased;
+
+                        // If the event is FREE, prioritize the plan's free_event_ticket_limit exclusively
+                        $freeCap = (int)($plan?->free_event_ticket_limit ?? 0);
+                        if (($event?->is_free ?? false) && $freeCap > 0) {
+                            $cap = $freeCap;
+                        }
                     @endphp
                     <meta name="tickets-per-event" content="{{ $cap === null ? 'null' : $cap }}">
+                    @if(($event?->is_free ?? false) && ($freeCap ?? 0) > 0)
+                        <meta name="event-is-free" content="1">
+                        <meta name="free-event-ticket-limit" content="{{ $freeCap }}">
+                    @endif
                     <form method="POST" action="{{ route('organizer.events.ticket.store') }}?id={{ $eventId }}" class="space-y-8" data-autosave-url="{{ route('organizer.events.ticket.autosave') }}?id={{ $eventId }}">
                         @csrf
                         @include('organizer.events.forms.tickets', ['eventId' => $eventId, 'eventData' => $eventData, 'event' => $event])
