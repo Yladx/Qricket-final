@@ -7,6 +7,19 @@
             </div>
             
 
+    @php
+        $isFreeEvent = isset($event) ? (bool)($event->is_free ?? false) : (bool)($eventData['is_free'] ?? false);
+        $currentPlan = auth()->user()->currentSubscription()?->getPlan();
+        $freeEventsCount = (int)($currentPlan->free_events_count ?? 0);
+        $freeEventTicketLimit = (int)($currentPlan->free_event_ticket_limit ?? 0);
+    @endphp
+
+    @if($isFreeEvent && $freeEventTicketLimit > 0)
+        <div class="mb-2 p-2 rounded border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 text-xs text-yellow-800 dark:text-yellow-200">
+            This is a Free Event. Ticket quantity is limited to {{ $freeEventTicketLimit }} by your plan ({{ $currentPlan->name ?? 'Plan' }}).
+        </div>
+    @endif
+
     <div class="flex items-center justify-between">
         <div>
             <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Ticket Types</div>
@@ -146,6 +159,71 @@
 </div>
 
 <script>
+// Enforce plan limits when event is free
+document.addEventListener('DOMContentLoaded', function() {
+    const isFreeEvent = @json($isFreeEvent);
+    const freeTicketLimit = @json($freeEventTicketLimit);
+    if (!isFreeEvent || !freeTicketLimit) return;
+
+    function getTotalConfiguredQuantity() {
+        let total = 0;
+        document.querySelectorAll('#ticketTypes .ticket-row input[name$="[quantity]"]').forEach(inp => {
+            const v = parseInt(inp.value || '0', 10);
+            if (!isNaN(v)) total += v;
+        });
+        return total;
+    }
+
+    function clampQuantities() {
+        let total = getTotalConfiguredQuantity();
+        if (total <= freeTicketLimit) return;
+        // Reduce the last edited or last row to fit the limit
+        const rows = Array.from(document.querySelectorAll('#ticketTypes .ticket-row input[name$="[quantity]"]'));
+        for (let i = rows.length - 1; i >= 0 && total > freeTicketLimit; i--) {
+            const inp = rows[i];
+            let v = parseInt(inp.value || '0', 10) || 0;
+            if (v <= 0) continue;
+            const excess = total - freeTicketLimit;
+            const newVal = Math.max(0, v - excess);
+            if (newVal !== v) {
+                inp.value = String(newVal);
+                total = getTotalConfiguredQuantity();
+            }
+        }
+        showLimitNotice();
+    }
+
+    function showLimitNotice() {
+        const msgId = 'free-limit-notice';
+        let el = document.getElementById(msgId);
+        if (!el) {
+            el = document.createElement('div');
+            el.id = msgId;
+            el.className = 'mt-2 text-xs text-yellow-700 dark:text-yellow-300';
+            const container = document.getElementById('ticketTypes');
+            container && container.prepend(el);
+        }
+        el.textContent = `Free event limit: up to ${freeTicketLimit} total tickets across all types.`;
+    }
+
+    // Observe changes in ticket rows (added by JS) and quantities
+    const observer = new MutationObserver(() => {
+        document.querySelectorAll('#ticketTypes .ticket-row input[name$="[quantity]"]').forEach(inp => {
+            if (inp.dataset._limitBound) return;
+            inp.dataset._limitBound = '1';
+            inp.addEventListener('input', clampQuantities);
+            inp.addEventListener('change', clampQuantities);
+        });
+        showLimitNotice();
+        clampQuantities();
+    });
+    observer.observe(document.getElementById('ticketTypes'), { childList: true, subtree: true });
+
+    // Initial attempt
+    showLimitNotice();
+    clampQuantities();
+});
+
 function toggleMaxTicketsPerUser() {
     const checkbox = document.getElementById('ts-limit-per-user');
     const container = document.getElementById('max-tickets-per-user-container');

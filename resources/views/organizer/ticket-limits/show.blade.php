@@ -228,14 +228,7 @@
                                         <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Complete Address *</label>
                                         <textarea name="address" id="address" rows="3" placeholder="Street, Barangay, City, Province, Postal Code" required class="w-full bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500"></textarea>
                                     </div>
-                                    <div>
-                                        <label for="company" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Company/Organization (Optional)</label>
-                                        <input type="text" name="company" id="company" placeholder="Your company or organization" class="w-full bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
-                                    </div>
-                                    <div>
-                                        <label for="tax_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tax ID/TIN (Optional)</label>
-                                        <input type="text" name="tax_id" id="tax_id" placeholder="For business purchases" class="w-full bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
-                                    </div>
+                                 
                                 </div>
                                 </div>
 

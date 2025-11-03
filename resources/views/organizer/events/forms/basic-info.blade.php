@@ -21,6 +21,14 @@
         </div>
     </div>
 
+    <div class="flex items-center space-x-3">
+        @php($isFreeInit = old('is_free', $eventData['is_free'] ?? ($event->is_free ?? false)))
+        <label class="inline-flex items-center space-x-2">
+            <input type="checkbox" name="is_free" value="1" {{ $isFreeInit ? 'checked' : '' }} class="rounded border-gray-300 text-qricket-600">
+            <span class="text-sm text-gray-700 dark:text-gray-300">Free Event</span>
+        </label>
+    </div>
+
     <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
         <textarea id="description" name="description" rows="5" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" oninput="this.value = this.value.replace(/\n/g, ' ').replace(/\r/g, '')">{{ old('description', $eventData['description'] ?? $event->description ?? '') }}</textarea>

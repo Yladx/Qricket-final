@@ -56,6 +56,7 @@ class BasicInfoController extends Controller
                 'end_date' => '', 
                 'location' => '',
                 'location_url' => '',
+                'is_free' => false,
                 'latitude' => '',
                 'longitude' => '',
                 'max_participants' => '',
@@ -122,6 +123,7 @@ class BasicInfoController extends Controller
             'end_date' => $event->end_date,
             'location' => $event->location,
             'location_url' => $event->location_url,
+            'is_free' => (bool)$event->is_free,
             'tags' => $event->tags,
             'latitude' => $event->latitude,
             'longitude' => $event->longitude,
@@ -229,6 +231,8 @@ class BasicInfoController extends Controller
 
         try {
             $step1Data = $request->only(['title','description','category','start_date','end_date','location','location_url','tags','latitude','longitude']);
+            // Normalize boolean for is_free
+            $step1Data['is_free'] = $request->boolean('is_free');
             
             \Log::info('Basic info update request', [
                 'event_id' => $eventId,
@@ -237,7 +241,7 @@ class BasicInfoController extends Controller
             ]);
             
             $wasExistingEvent = !is_null($eventId);
-            $originalData = $wasExistingEvent ? $event->only(['title','description','category','start_date','end_date','location','location_url','tags','latitude','longitude']) : null;
+            $originalData = $wasExistingEvent ? $event->only(['title','description','category','start_date','end_date','location','location_url','tags','latitude','longitude','is_free']) : null;
             
             \Log::info('Original event data', [
                 'event_id' => $eventId,
@@ -262,7 +266,7 @@ class BasicInfoController extends Controller
             
             \Log::info('Event saved successfully', [
                 'event_id' => $event->id,
-                'saved_data' => $event->only(['title','description','category','start_date','end_date','location','location_url','tags','latitude','longitude'])
+                'saved_data' => $event->only(['title','description','category','start_date','end_date','location','location_url','tags','latitude','longitude','is_free'])
             ]);
             
             // Get the final event ID (for new events, this will be the generated ID)
@@ -295,6 +299,7 @@ class BasicInfoController extends Controller
                         'end_date' => 'End date',
                         'location' => 'Location',
                         'location_url' => 'Location URL',
+                        'is_free' => 'Free event',
                         'latitude' => 'Latitude',
                         'longitude' => 'Longitude',
                     ];

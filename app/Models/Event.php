@@ -21,6 +21,7 @@ class Event extends Model
         'id',
         'user_id',
         'title',
+        'is_free',
         'description',
         'category',
         'start_date',
@@ -42,6 +43,7 @@ class Event extends Model
 
     protected $casts = [
         'id' => 'integer',
+        'is_free' => 'boolean',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         // approval-related casts removed

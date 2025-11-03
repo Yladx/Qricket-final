@@ -28,6 +28,8 @@ class SubscriptionPlan extends Model
         'features',
         'is_active',
         'sort_order',
+        'free_events_count',
+        'free_event_ticket_limit',
     ];
 
     protected $casts = [
@@ -44,6 +46,8 @@ class SubscriptionPlan extends Model
         'features' => 'array',
         'is_active' => 'boolean',
         'sort_order' => 'integer',
+        'free_events_count' => 'integer',
+        'free_event_ticket_limit' => 'integer',
     ];
 
     public function subscriptions(): HasMany
