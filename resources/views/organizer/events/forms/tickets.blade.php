@@ -38,7 +38,12 @@
 
     <div class="flex items-center justify-between">
         <div>
-            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Ticket Types</div>
+            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                Ticket Types
+                @if($isFreeEvent)
+                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 align-middle">Free Event</span>
+                @endif
+            </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">Add options like General Admission, VIP, or Student. Fields autosave.</p>
         </div>
         <div class="flex items-center space-x-2">
