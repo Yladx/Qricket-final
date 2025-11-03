@@ -243,15 +243,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Observe changes in ticket rows (added by JS) and quantities
+    let moScheduled = false;
     const observer = new MutationObserver(() => {
-        document.querySelectorAll('#ticketTypes .ticket-row input[name$="[quantity]"]').forEach(inp => {
-            if (inp.dataset._limitBound) return;
-            inp.dataset._limitBound = '1';
-            inp.addEventListener('input', (e)=>{ setPerInputMaxes(e.target); clampQuantities(e); });
-            inp.addEventListener('change', (e)=>{ setPerInputMaxes(e.target); clampQuantities(e); });
-        });
-        setPerInputMaxes();
-        clampQuantities();
+        if (moScheduled) return;
+        moScheduled = true;
+        setTimeout(() => {
+            document.querySelectorAll('#ticketTypes .ticket-row input[name$="[quantity]"]').forEach(inp => {
+                if (inp.dataset._limitBound) return;
+                inp.dataset._limitBound = '1';
+                inp.addEventListener('input', (e)=>{ setPerInputMaxes(e.target); clampQuantities(e); });
+                inp.addEventListener('change', (e)=>{ setPerInputMaxes(e.target); clampQuantities(e); });
+            });
+            setPerInputMaxes();
+            clampQuantities();
+            moScheduled = false;
+        }, 50);
     });
     observer.observe(document.getElementById('ticketTypes'), { childList: true, subtree: true });
 
