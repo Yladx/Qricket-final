@@ -10,7 +10,7 @@ return new class extends Migration
     {
         // Create events table
         Schema::create('events', function (Blueprint $table) {
-            $table->bigInteger('id')->primary(); // 10-digit randomized ID (non-auto-incrementing)
+            $table->unsignedBigInteger('id')->primary(); // 10-digit randomized ID (non-auto-incrementing, must be UNSIGNED to match foreignId)
             $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->string('title');
             $table->text('description');
