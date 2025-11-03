@@ -73,6 +73,17 @@ class TicketsController extends Controller
      */
     private function normalizeTicketSettings(array $settings): array
     {
+        $defaultColors = [
+            'primary' => '#10b981',
+            'secondary' => '#f59e0b',
+            'accent' => '#059669'
+        ];
+        
+        $ticketColors = $settings['ticket_colors'] ?? $defaultColors;
+        if (!is_array($ticketColors) || empty($ticketColors)) {
+            $ticketColors = $defaultColors;
+        }
+        
         return [
             'max_tickets_per_order' => isset($settings['max_tickets_per_order']) ? (int)$settings['max_tickets_per_order'] : 10,
             'refund_policy' => isset($settings['refund_policy']) ? (string)$settings['refund_policy'] : '',
@@ -81,6 +92,11 @@ class TicketsController extends Controller
             'allow_share_ticket' => (bool)($settings['allow_share_ticket'] ?? true),
             'limit_per_user' => (bool)($settings['limit_per_user'] ?? false),
             'max_tickets_per_user' => isset($settings['max_tickets_per_user']) ? (int)$settings['max_tickets_per_user'] : 1,
+            'ticket_colors' => [
+                'primary' => $ticketColors['primary'] ?? $defaultColors['primary'],
+                'secondary' => $ticketColors['secondary'] ?? $defaultColors['secondary'],
+                'accent' => $ticketColors['accent'] ?? $defaultColors['accent'],
+            ],
         ];
     }
 
@@ -389,6 +405,16 @@ class TicketsController extends Controller
             $ticketTypes = [];
         }
 
+        // If event is free, force all ticket prices to 0 before validation/save
+        if ($event && $event->is_free && is_array($ticketTypes)) {
+            foreach ($ticketTypes as &$t) {
+                if (is_array($t)) {
+                    $t['price'] = 0;
+                }
+            }
+            unset($t);
+        }
+
         // Validate decoded array structure instead of original request
         $validator = Validator::make([
             'ticket_types' => $ticketTypes,
@@ -648,6 +674,59 @@ class TicketsController extends Controller
         }
 
         // Store ticket settings data in R2
+        // Get ticket_colors from request or existing settings
+        $ticketColors = null;
+        
+        // Priority 1: Check directly in request (top-level ticket_colors)
+        if ($request->has('ticket_colors')) {
+            $ticketColors = $request->input('ticket_colors');
+            // Decode if it's a JSON string
+            if (is_string($ticketColors)) {
+                $decoded = json_decode($ticketColors, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $ticketColors = $decoded;
+                }
+            }
+        }
+        
+        // Priority 2: Check in ticket_settings nested object
+        $ticketSettingsInput = $request->input('ticket_settings');
+        if ((!$ticketColors || !is_array($ticketColors) || empty($ticketColors)) && $ticketSettingsInput && is_array($ticketSettingsInput)) {
+            if (isset($ticketSettingsInput['ticket_colors']) && is_array($ticketSettingsInput['ticket_colors'])) {
+                $ticketColors = $ticketSettingsInput['ticket_colors'];
+            }
+        }
+        
+        // If still no colors, load from existing settings or use defaults
+        if (!is_array($ticketColors) || empty($ticketColors)) {
+            try {
+                $existingSettings = $this->loadTicketSettingsFromR2($event);
+                if (isset($existingSettings['ticket_colors']) && is_array($existingSettings['ticket_colors'])) {
+                    $ticketColors = $existingSettings['ticket_colors'];
+                }
+            } catch (\Exception $e) {
+                // Ignore, will use defaults
+            }
+        }
+        
+        // Default colors if still not set
+        $defaultColors = [
+            'primary' => '#10b981',
+            'secondary' => '#f59e0b',
+            'accent' => '#059669'
+        ];
+        
+        if (!is_array($ticketColors) || empty($ticketColors)) {
+            $ticketColors = $defaultColors;
+        }
+        
+        // Ensure all color keys exist
+        $ticketColors = [
+            'primary' => $ticketColors['primary'] ?? $defaultColors['primary'],
+            'secondary' => $ticketColors['secondary'] ?? $defaultColors['secondary'],
+            'accent' => $ticketColors['accent'] ?? $defaultColors['accent'],
+        ];
+        
         $ticketSettings = [
             'max_tickets_per_order' => $request->input('max_tickets_per_order', 10),
             'refund_policy' => $request->input('refund_policy', ''),
@@ -656,6 +735,7 @@ class TicketsController extends Controller
             'allow_share_ticket' => $request->boolean('allow_share_ticket', true),
             'limit_per_user' => $request->boolean('limit_per_user', false),
             'max_tickets_per_user' => $request->input('max_tickets_per_user', 1),
+            'ticket_colors' => $ticketColors, // Always include ticket_colors
         ];
 
         try {

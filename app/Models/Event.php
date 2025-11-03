@@ -20,6 +20,7 @@ class Event extends Model
     protected $fillable = [
         'id',
         'user_id',
+        'subscription_id',
         'title',
         'is_free',
         'description',
@@ -102,6 +103,14 @@ class Event extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the subscription that was active when the event was created.
+     */
+    public function subscription(): BelongsTo
+    {
+        return $this->belongsTo(Subscription::class);
     }
 
     // Removed organizers relationship - using event_staff only

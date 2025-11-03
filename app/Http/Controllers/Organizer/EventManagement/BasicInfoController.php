@@ -250,6 +250,24 @@ class BasicInfoController extends Controller
             
             // Fill the event with data and save
             $event->fill($step1Data);
+            
+            // Capture subscription_id only when creating a new event (not on updates)
+            // This preserves the subscription that was active at event creation time
+            if (!$wasExistingEvent && !$event->subscription_id) {
+                $user = Auth::user();
+                if ($user && !Auth::guard('admin')->check()) {
+                    $currentSubscription = $user->currentSubscription();
+                    if ($currentSubscription) {
+                        $event->subscription_id = $currentSubscription->id;
+                        \Log::info('Captured subscription_id for new event', [
+                            'event_id' => $event->id,
+                            'subscription_id' => $currentSubscription->id,
+                            'user_id' => $user->id
+                        ]);
+                    }
+                }
+            }
+            
             $event->save();
             
             // Log admin activity for event creation (when user_id is null)

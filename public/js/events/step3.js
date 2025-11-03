@@ -51,6 +51,11 @@
     return planCap;
   }
 
+  function isFreeEvent() {
+    const isFreeMeta = document.querySelector('meta[name="event-is-free"]');
+    return (isFreeMeta ? isFreeMeta.getAttribute('content') : '') === '1';
+  }
+
   function getUsedQuantity(list) {
     return (list || []).reduce((sum, t) => sum + (parseInt(t.quantity, 10) || 0), 0);
   }
@@ -263,13 +268,14 @@
       fullSettings: currentSettings
     });
     
-    // Trigger autosave
-    queueAutosave();
+    // Trigger immediate autosave for colors (shorter delay for better UX)
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(autosave, 300); // Reduced from 600ms to 300ms for faster save
     
-    // Show save indicator
+    // Show save indicator immediately
     showColorSaveIndicator();
     
-    console.log('Ticket colors queued for autosave');
+    console.log('Ticket colors queued for autosave (300ms delay)');
   }
 
   function showColorSaveIndicator() {
@@ -329,6 +335,7 @@
       const empty = document.getElementById('ticket-empty');
       if (empty) empty.style.display = 'none';
     }
+    const free = isFreeEvent();
     list.forEach((t, idx) => {
       const row = document.createElement('div');
       row.className = 'space-y-2';
@@ -359,7 +366,7 @@
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Price</label>
-              <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.price ?? ''}">
+              <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${free ? '0' : (t.price ?? '')}" ${free ? 'readonly disabled' : ''}>
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Quantity</label>
@@ -400,6 +407,71 @@
   function queueAutosave() {
     clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(autosave, 600);
+  }
+
+  // Immediate autosave for colors only (no delay)
+  async function autosaveColorsOnly() {
+    try {
+      const url = form?.getAttribute('data-autosave-url') || `/organizer/events/ticket/autosave?id=${encodeURIComponent(getEventId())}`;
+      
+      // Get current ticket colors from form inputs
+      const primaryColorEl = document.getElementById('ticket-primary-color');
+      const secondaryColorEl = document.getElementById('ticket-secondary-color');
+      const accentColorEl = document.getElementById('ticket-accent-color');
+      
+      if (!primaryColorEl || !secondaryColorEl || !accentColorEl) {
+        console.warn('Color inputs not found for autosave');
+        return;
+      }
+      
+      const ticketColors = {
+        primary: primaryColorEl.value || '#10b981',
+        secondary: secondaryColorEl.value || '#f59e0b',
+        accent: accentColorEl.value || '#059669'
+      };
+      
+      // Get existing settings to preserve other values
+      const settings = readSettings();
+      const types = readTypes();
+      
+      // Build payload with colors
+      const payload = {
+        ticket_types: types.map(t => ({
+          id: t.id ?? undefined,
+          name: t.name ?? '',
+          description: t.description ?? '',
+          price: t.price ?? '',
+          quantity: t.quantity ?? '',
+          sale_start: t.sale_start ?? null,
+          sale_end: t.sale_end ?? null,
+        })),
+        ticket_settings: {
+          ...settings,
+          ticket_colors: ticketColors
+        },
+        ticket_colors: ticketColors
+      };
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify(payload),
+        credentials: 'same-origin'
+      });
+      
+      if (response.ok) {
+        console.log('Color autosave successful');
+      } else {
+        console.error('Color autosave failed:', response.status);
+      }
+    } catch (e) {
+      console.error('Color autosave error:', e);
+    }
   }
 
   async function autosave() {
@@ -498,6 +570,7 @@
 
   function addTicketType() {
     const list = readTypes();
+    const free = isFreeEvent();
     const cap = getTicketsPerEventLimit();
     if (cap != null && getUsedQuantity(list) >= cap) {
       if (typeof Swal !== 'undefined' && window.Swal) {
@@ -533,7 +606,7 @@
       id: null,
       name: 'General Admission',
       description: 'Standard access',
-      price: '500',
+      price: free ? '0' : '500',
       quantity: defaultQty,
       sale_start: defaultSaleStart,
       sale_end: defaultSaleEnd,
@@ -586,6 +659,12 @@
     if (e.target.type === 'checkbox') {
       list[Number(i)][k] = e.target.checked ? '1' : '0';
     } else {
+      // Prevent editing price for free events
+      if (k === 'price' && isFreeEvent()) {
+        e.target.value = '0';
+        list[Number(i)][k] = '0';
+        return;
+      }
       list[Number(i)][k] = e.target.value;
     }
     

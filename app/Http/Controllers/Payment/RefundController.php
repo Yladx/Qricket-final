@@ -665,7 +665,17 @@ class RefundController extends Controller
                     ]);
                     
                 } elseif ($refundRequest->type === 'subscription') {
-                    $refundRequest->subscription->update(['status' => 'refunded']);
+                    $subscription = $refundRequest->subscription;
+                    $subscription->update(['status' => 'refunded']);
+                    
+                    // Remove subscription_id from all events created with this subscription
+                    $eventsUpdated = \App\Models\Event::where('subscription_id', $subscription->id)
+                        ->update(['subscription_id' => null]);
+                    
+                    Log::info('Removed subscription_id from events after subscription refund', [
+                        'subscription_id' => $subscription->id,
+                        'events_updated' => $eventsUpdated,
+                    ]);
                 } elseif ($refundRequest->type === 'additional_ticket') {
                     $additionalTicketPurchase = $refundRequest->additionalTicketPurchase;
                     $additionalTicketPurchase->update(['status' => 'refunded']);
@@ -1493,9 +1503,14 @@ class RefundController extends Controller
                     'cancellation_reason' => 'Refunded by admin',
                 ]);
                 
+                // Remove subscription_id from all events created with this subscription
+                $eventsUpdated = \App\Models\Event::where('subscription_id', $subscription->id)
+                    ->update(['subscription_id' => null]);
+                
                 Log::info('Subscription cancelled after refund', [
                     'subscription_id' => $subscription->id,
                     'user_id' => $subscription->user_id,
+                    'events_updated' => $eventsUpdated,
                 ]);
             }
         } elseif ($refundRequest->type === 'additional_ticket') {
@@ -1739,9 +1754,14 @@ class RefundController extends Controller
                         'cancellation_reason' => 'Refunded by admin (manual)',
                     ]);
                     
+                    // Remove subscription_id from all events created with this subscription
+                    $eventsUpdated = \App\Models\Event::where('subscription_id', $subscription->id)
+                        ->update(['subscription_id' => null]);
+                    
                     Log::info('Subscription cancelled after manual refund', [
                         'subscription_id' => $subscription->id,
                         'user_id' => $subscription->user_id,
+                        'events_updated' => $eventsUpdated,
                     ]);
                 }
             } elseif ($refundRequest->type === 'additional_ticket') {

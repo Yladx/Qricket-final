@@ -171,6 +171,15 @@ class EventController extends Controller
             $data['user_id'] = null; // Admin-created event
         } else {
             $data['user_id'] = Auth::id();
+            
+            // Capture subscription_id for tracking which subscription was active at event creation
+            $user = Auth::user();
+            if ($user) {
+                $currentSubscription = $user->currentSubscription();
+                if ($currentSubscription) {
+                    $data['subscription_id'] = $currentSubscription->id;
+                }
+            }
         }
 
         $event = Event::create($data);
