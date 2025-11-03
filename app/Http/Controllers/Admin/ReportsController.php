@@ -177,10 +177,10 @@ class ReportsController extends Controller
                 'active_subscriptions' => $data['active_subscriptions'],
             ];
         })
-        // Remove only the Free plan; keep Enterprise even if price is 0
+        // Remove plans we don't sell directly (e.g., Free or deprecated Enterprise)
         ->reject(function($plan){
             $name = strtolower((string)($plan['plan_name'] ?? ''));
-            return $name === 'free';
+            return $name === 'free' || $name === 'enterprise';
         })
         ->sortByDesc('total_revenue')->values();
 

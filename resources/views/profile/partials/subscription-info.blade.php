@@ -121,21 +121,6 @@
                                 </span>
                             </dd>
                         </div>
-                        <div class="md:col-span-3">
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Auto-Renew</dt>
-                            <dd class="mt-1 flex items-center gap-3">
-                                @php $autoRenew = (bool)($currentSubscription->metadata['auto_renew'] ?? true); @endphp
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $autoRenew ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">
-                                    {{ $autoRenew ? 'Enabled' : 'Disabled' }}
-                                </span>
-                                <form method="POST" action="{{ route('organizer.subscription.autorenew.toggle') }}">
-                                    @csrf
-                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 border text-xs font-medium rounded-md {{ $autoRenew ? 'text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700' : 'text-green-700 dark:text-green-300 border-green-300 dark:border-green-600 hover:bg-green-50 dark:hover:bg-green-900/20' }}">
-                                        {{ $autoRenew ? 'Turn Off' : 'Turn On' }} Auto-Renew
-                                    </button>
-                                </form>
-                            </dd>
-                        </div>
                     </div>
 
                     <!-- Plan Features -->
@@ -234,10 +219,6 @@
                             Cancels on {{ optional($currentSubscription->expires_at)->format('M d, Y') }}
                         </span>
                         @endif
-                        <a href="{{ route('organizer.subscription.invoice') }}" target="_blank"
-                           class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            Download Invoice
-                        </a>
                     </div>
                 </div>
             </div>

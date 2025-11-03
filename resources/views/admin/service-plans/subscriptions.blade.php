@@ -131,7 +131,7 @@
             @if($subscriptionPlans->count())
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($subscriptionPlans as $plan)
-                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6 {{ $plan->slug === 'enterprise' ? 'ring-2 ring-qricket-500' : '' }}">
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
                             <div class="text-center">
                                 <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $plan->name }}</h4>
                                 <div class="mt-2">
@@ -260,6 +260,18 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tickets per Event</label>
                             <input type="number" name="tickets_per_event" min="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
                             <p class="text-xs text-gray-500 dark:text-gray-400">Leave empty for unlimited</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Free Events Included</label>
+                                <input type="number" name="free_events_count" min="0" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">0 to disable</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Free Event Ticket Limit</label>
+                                <input type="number" name="free_event_ticket_limit" min="0" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">0 to disable</p>
+                            </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
@@ -517,6 +529,13 @@
             document.querySelector('input[name="features"]').value = plan.features ? JSON.stringify(plan.features) : '';
             document.querySelector('input[name="is_active"]').checked = plan.is_active || false;
             document.querySelector('input[name="is_popular"]').checked = plan.is_popular || false;
+            // Free event fields
+            if (document.querySelector('input[name="free_events_count"]')) {
+                document.querySelector('input[name="free_events_count"]').value = plan.free_events_count ?? '';
+            }
+            if (document.querySelector('input[name="free_event_ticket_limit"]')) {
+                document.querySelector('input[name="free_event_ticket_limit"]').value = plan.free_event_ticket_limit ?? '';
+            }
         }
     </script>
 @endsection
