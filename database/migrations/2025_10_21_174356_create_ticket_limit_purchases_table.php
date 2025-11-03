@@ -50,7 +50,6 @@ return new class extends Migration
             $table->index('purchase_id');
             $table->index('xendit_invoice_id');
             $table->index('xendit_payment_id');
-            $table->index('ticket_limit_pricing_id');
         });
     }
 
