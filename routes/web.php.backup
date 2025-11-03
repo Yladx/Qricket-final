@@ -1,0 +1,341 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\XenditWebhookController;
+use App\Http\Controllers\OrganizerVerificationController;
+use App\Http\Controllers\HelpSupportController;
+use App\Services\NotificationService;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Notifications\NotificationController;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+Route::get('/', function () {
+    return view('welcome');
+})->name('welcome');
+
+// Test route without middleware
+Route::get('/test-staff', function() {
+    return 'Test staff route working! User: ' . (auth()->check() ? auth()->user()->email : 'Not authenticated');
+});
+
+// Test organizer route
+Route::get('/organizer/test', function() {
+    return 'Organizer route working!';
+})->middleware('auth');
+
+// Staff Management Routes - Step 5
+Route::prefix('organizer')->middleware(['auth', 'organizer.guard'])->group(function () {
+    Route::get('/events/create/staff', [\App\Http\Controllers\Organizer\EventManagement\StaffController::class, 'step5'])->name('organizer.events.create.staff');
+    Route::post('/events/staff', [\App\Http\Controllers\Organizer\EventManagement\StaffController::class, 'step5Store'])->name('organizer.events.staff.store');
+    Route::get('/events/staff/search', [\App\Http\Controllers\Organizer\EventManagement\StaffController::class, 'searchStaff'])->name('organizer.events.staff.search');
+});
+
+// Admin Event Approval Routes (use admin guard, not user auth)
+Route::prefix('admin')->middleware(['auth:admin', 'admin'])->group(function () {
+    Route::get('/events/approval', [\App\Http\Controllers\Admin\EventApprovalController::class, 'index'])->name('admin.events.approval');
+    Route::get('/events/approval/{id}', [\App\Http\Controllers\Admin\EventApprovalController::class, 'show'])->name('admin.events.approval.show');
+    Route::post('/events/approval/{id}/approve', [\App\Http\Controllers\Admin\EventApprovalController::class, 'approve'])->name('admin.events.approval.approve');
+    Route::post('/events/approval/{id}/reject', [\App\Http\Controllers\Admin\EventApprovalController::class, 'reject'])->name('admin.events.approval.reject');
+});
+
+Route::get('/dashboard', function () {
+    return redirect()->route('welcome');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+// Public subscription route - guests can view plans
+Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
+
+// Help & Support route - accessible to all users
+Route::get('/help', [HelpSupportController::class, 'index'])->name('help.index');
+Route::post('/help', [HelpSupportController::class, 'store'])->name('help.store');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Subscription routes - require authentication for purchase
+    Route::post('/subscription', [SubscriptionController::class, 'create'])->name('subscription.create');
+    Route::get('/subscription/success', [SubscriptionController::class, 'success'])->name('subscription.success');
+    Route::get('/subscription/failure', [SubscriptionController::class, 'failure'])->name('subscription.failure');
+    Route::post('/subscription/webhook', [SubscriptionController::class, 'webhook'])->name('subscription.webhook');
+    
+    // Payment status check route (for debugging)
+    Route::get('/subscription/{subscription}/check-payment', [SubscriptionController::class, 'checkPaymentStatus'])
+        ->name('subscription.check-payment');
+    
+    // Organizer verification routes
+    Route::get('/organizer/verification', [OrganizerVerificationController::class, 'show'])->name('organizer.verification');
+    Route::post('/organizer/verification', [OrganizerVerificationController::class, 'store'])->name('organizer.verification.store');
+    
+    // Organizer dashboard - accessible to all authenticated users
+    Route::prefix('organizer')->middleware(['organizer.guard'])->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Organizer\OrganizerDashboardController::class, 'index'])->name('organizer.dashboard');
+        Route::get('/events', [\App\Http\Controllers\EventController::class, 'index'])->name('organizer.events.index');
+    });
+    
+    // Event management routes - accessible to organizers and staff
+    Route::prefix('organizer')->middleware(['organizer.guard'])->group(function () {
+        // Event management (accessible to organizers and staff)
+        Route::get('/events/{event}/activity-log', [\App\Http\Controllers\EventController::class, 'activityLog'])->name('organizer.events.activity-log');
+        Route::get('/events/{event}/manage', [\App\Http\Controllers\Organizer\EventManagementController::class, 'index'])->name('organizer.events.manage');
+        Route::get('/events/{event}/activity-load-more', [\App\Http\Controllers\Organizer\EventManagementController::class, 'loadMoreActivity'])->name('organizer.events.activity-load-more');
+        Route::get('/events/{event}/attendance', [\App\Http\Controllers\Organizer\EventManagementController::class, 'attendance'])->name('organizer.events.attendance');
+        Route::get('/events/{event}/attendance/export', [\App\Http\Controllers\Organizer\EventManagementController::class, 'exportAttendance'])->name('organizer.events.attendance.export');
+        Route::get('/events/{event}/scanner', [\App\Http\Controllers\Organizer\EventManagementController::class, 'scanner'])->name('organizer.events.scanner');
+        Route::post('/events/{event}/attendance/qr-scan', [\App\Http\Controllers\Organizer\EventManagementController::class, 'processQRScan'])->name('organizer.events.attendance.qr-scan');
+        Route::post('/events/{event}/attendance/manual-checkin', [\App\Http\Controllers\Organizer\EventManagementController::class, 'manualCheckIn'])->name('organizer.events.attendance.manual-checkin');
+        Route::get('/events/{event}/attendance/search', [\App\Http\Controllers\Organizer\EventManagementController::class, 'searchAttendees'])->name('organizer.events.attendance.search');
+        Route::get('/events/{event}/tickets', [\App\Http\Controllers\Organizer\EventManagementController::class, 'tickets'])->name('organizer.events.tickets');
+        Route::get('/events/{event}/staff', [\App\Http\Controllers\Organizer\EventManagementController::class, 'staff'])->name('organizer.events.staff');
+        Route::get('/events/{event}/qr', [\App\Http\Controllers\Organizer\EventManagementController::class, 'qrCode'])->name('organizer.events.qr');
+        
+        // API endpoints for real-time updates
+        Route::get('/events/{event}/api/recent-sales', [\App\Http\Controllers\Organizer\EventManagementController::class, 'getRecentSales'])->name('organizer.events.api.recent-sales');
+        Route::get('/events/{event}/api/sales-summary', [\App\Http\Controllers\Organizer\EventManagementController::class, 'getSalesSummary'])->name('organizer.events.api.sales-summary');
+
+        // Event News (accessible to organizers and staff)
+        Route::get('/events/{event}/news', [\App\Http\Controllers\Organizer\EventNewsController::class, 'index'])->name('organizer.events.news.index');
+        // Edit Event quick links
+        Route::get('/events/{event}/edit/basic', [\App\Http\Controllers\Organizer\EventManagementController::class, 'editBasic'])
+            ->name('organizer.events.edit.basic');
+        Route::get('/events/{event}/edit/layout', [\App\Http\Controllers\Organizer\EventManagementController::class, 'editLayout'])
+            ->name('organizer.events.edit.layout');
+        Route::get('/events/{event}/edit/certificate', [\App\Http\Controllers\Organizer\EventManagementController::class, 'editCertificate'])
+            ->name('organizer.events.edit.certificate');
+        Route::get('/events/{event}/news/create', [\App\Http\Controllers\Organizer\EventNewsController::class, 'create'])->name('organizer.events.news.create');
+        Route::post('/events/{event}/news', [\App\Http\Controllers\Organizer\EventNewsController::class, 'store'])->name('organizer.events.news.store');
+        Route::get('/events/{event}/news/{news}/edit', [\App\Http\Controllers\Organizer\EventNewsController::class, 'edit'])->name('organizer.events.news.edit');
+        Route::put('/events/{event}/news/{news}', [\App\Http\Controllers\Organizer\EventNewsController::class, 'update'])->name('organizer.events.news.update');
+        Route::delete('/events/{event}/news/{news}', [\App\Http\Controllers\Organizer\EventNewsController::class, 'destroy'])->name('organizer.events.news.destroy');
+        Route::post('/events/{event}/news/{news}/publish', [\App\Http\Controllers\Organizer\EventNewsController::class, 'publish'])->name('organizer.events.news.publish');
+        Route::get('/events/{event}/news/{news}/image/{filename}', [\App\Http\Controllers\Organizer\EventNewsController::class, 'serveImage'])->name('organizer.events.news.image');
+    });
+    
+    // Event creation routes - require verified organizer middleware
+    Route::prefix('organizer')->middleware('verified.organizer')->group(function () {
+        // Event creation routes are now in routes/event.php
+        
+        // Legacy single-step creation (keeping for compatibility)
+        Route::get('/events/create/legacy', [\App\Http\Controllers\EventController::class, 'create'])->name('organizer.events.create.legacy');
+        Route::post('/events', [\App\Http\Controllers\EventController::class, 'store'])->name('organizer.events.store');
+    });
+
+    // User event browsing routes
+    Route::get('/events', [\App\Http\Controllers\EventController::class, 'browse'])->name('events.browse');
+    
+    // Mode switching route
+    Route::post('/user/mode-switch', [\App\Http\Controllers\UserController::class, 'switchMode'])->name('user.mode-switch');
+    
+    // Saved events routes (must come before /events/{event} route)
+    Route::get('/events/saved', [\App\Http\Controllers\SavedEventController::class, 'index'])->name('events.saved');
+    Route::post('/events/{event}/save', [\App\Http\Controllers\SavedEventController::class, 'store'])->name('events.save');
+    Route::delete('/events/{event}/unsave', [\App\Http\Controllers\SavedEventController::class, 'destroy'])->name('events.unsave');
+    Route::post('/events/{event}/toggle-save', [\App\Http\Controllers\SavedEventController::class, 'toggle'])->name('events.toggle-save');
+    
+    Route::get('/events/{event}', [\App\Http\Controllers\EventController::class, 'show'])->name('events.show');
+
+    // User Support Tickets
+    Route::get('/support/my-tickets', [\App\Http\Controllers\Support\SupportTicketController::class, 'myTickets'])->name('support.my');
+    Route::get('/support/tickets/{ticketNumber}', [\App\Http\Controllers\Support\SupportTicketController::class, 'myTicketShow'])->name('support.ticket');
+    Route::post('/support/tickets/{ticketNumber}/reply', [\App\Http\Controllers\Support\SupportTicketController::class, 'userReply'])->name('support.ticket.reply');
+
+    // Notifications page
+    Route::get('/notifications', [\App\Http\Controllers\Notifications\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{notification}/go', [\App\Http\Controllers\Notifications\NotificationController::class, 'go'])->name('notifications.go');
+    Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\Notifications\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Notifications\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+});
+
+// API routes for AJAX requests
+Route::prefix('api')->group(function () {
+    Route::get('/user/verified-organizer', function () {
+        $user = auth()->user();
+        return response()->json([
+            'is_verified_organizer' => $user ? $user->isVerifiedOrganizer() : false
+        ]);
+    });
+    
+    // Debug route to check current user status
+    Route::get('/user/debug', function () {
+        $user = auth()->user();
+        return response()->json([
+            'user_id' => $user->id,
+            'full_name' => $user->full_name,
+            'organizer' => $user->organizer,
+            'verified_organizer' => $user->verified_organizer,
+            'is_verified_organizer' => $user->isVerifiedOrganizer(),
+            'is_organizer' => $user->isOrganizer()
+        ]);
+    });
+});
+
+// Public-safe endpoint: returns 0 when not authenticated, used by header badge pre-login
+Route::prefix('api')->group(function () {
+    Route::get('/notifications/unread-count', function () {
+        $userId = auth()->id();
+        if (!$userId) {
+            return response()->json(['count' => 0]);
+        }
+        $count = \App\Models\Notification::where('user_id', $userId)
+            ->where('is_read', false)
+            ->count();
+        return response()->json(['count' => $count]);
+    });
+});
+
+// Email preview routes (only in development)
+if (app()->environment('local')) {
+    Route::get('/email/preview/invoice', function () {
+        $subscription = \App\Models\Subscription::with('user')->first();
+        if (!$subscription) {
+            return 'No subscription found. Please create a subscription first.';
+        }
+        
+        $plan = [
+            'id' => $subscription->plan_id,
+            'name' => ucfirst($subscription->plan_id) . ' Plan',
+            'price' => $subscription->amount,
+        ];
+        
+        $invoiceUrl = route('subscription.success') . '?test=true';
+        
+        return view('emails.invoice', [
+            'subscription' => $subscription,
+            'invoiceUrl' => $invoiceUrl,
+            'planDetails' => $plan,
+            'user' => $subscription->user,
+        ]);
+    })->name('email.preview.invoice');
+
+    Route::get('/email/preview/payment-confirmation', function () {
+        $subscription = \App\Models\Subscription::with('user')->first();
+        if (!$subscription) {
+            return 'No subscription found. Please create a subscription first.';
+        }
+        
+        $plan = [
+            'id' => $subscription->plan_id,
+            'name' => ucfirst($subscription->plan_id) . ' Plan',
+            'price' => $subscription->amount,
+        ];
+        
+        return view('emails.payment-confirmation', [
+            'subscription' => $subscription,
+            'planDetails' => $plan,
+            'user' => $subscription->user,
+        ]);
+    })->name('email.preview.payment-confirmation');
+}
+
+// Xendit webhook routes (no auth required)
+Route::post('/xendit/webhook', [XenditWebhookController::class, 'handle'])->name('xendit.webhook');
+Route::post('/webhook/xendit', [XenditWebhookController::class, 'handle'])->name('webhook.xendit');
+
+// Include separate route files for better organization
+require __DIR__.'/admin.php';
+require __DIR__.'/test.php';
+require __DIR__.'/auth.php';
+require __DIR__.'/event.php';
+
+// Ticket Purchase Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/events/{event}/buy-tickets', [App\Http\Controllers\TicketPurchaseController::class, 'show'])->name('tickets.purchase.show');
+    Route::post('/events/{event}/buy-tickets', [App\Http\Controllers\TicketPurchaseController::class, 'purchase'])->name('tickets.purchase');
+    Route::get('/tickets/purchase/success/{purchaseId}', [App\Http\Controllers\TicketPurchaseController::class, 'success'])->name('tickets.purchase.success');
+    Route::get('/tickets/purchase/failure/{purchaseId}', [App\Http\Controllers\TicketPurchaseController::class, 'failure'])->name('tickets.purchase.failure');
+    Route::get('/tickets/my-purchases', [App\Http\Controllers\TicketPurchaseController::class, 'myPurchases'])->name('tickets.my-purchases');
+    Route::get('/tickets/details/{purchaseId}', [App\Http\Controllers\TicketPurchaseController::class, 'details'])->name('tickets.details');
+    Route::get('/ticket/{ticketId}', [App\Http\Controllers\TicketPurchaseController::class, 'showIndividualTicket'])->name('tickets.individual');
+    Route::get('/ticket/{ticketId}/qr-code', [App\Http\Controllers\TicketPurchaseController::class, 'generateQRCode'])->name('tickets.qr-code');
+});
+
+// Xendit webhook for tickets (no auth required)
+Route::post('/webhook/tickets/xendit', [App\Http\Controllers\TicketPurchaseController::class, 'webhook'])->name('tickets.webhook.xendit');
+
+// Public layout rendering route for event show pages
+Route::post('/events/layouts/{layout}', [App\Http\Controllers\EventController::class, 'renderLayout'])->name('events.layouts.render');
+
+// Invoice route for tickets
+Route::middleware('auth')->get('/tickets/invoice/{purchaseId}/{ticketId}', [App\Http\Controllers\TicketPurchaseController::class, 'viewInvoice'])->name('tickets.invoice');
+
+Route::get('/email/preview/invoice', function () {
+    $subscription = \App\Models\Subscription::with('user')->first();
+    if (!$subscription) {
+        return 'No subscription found. Please create a subscription first.';
+    }
+    
+    return view('emails.payment-confirmation', [
+            'user' => $subscription->user,
+        ]);
+    })->name('email.preview.invoice');
+
+// Add the new Xendit webhook route (no auth required)
+Route::post('/xendit/webhook', [XenditWebhookController::class, 'handle'])->name('xendit.webhook');
+
+// Add the webhook/xendit route for the specific URL mentioned
+Route::post('/webhook/xendit', [XenditWebhookController::class, 'handle'])->name('webhook.xendit');
+
+// Include separate route files for better organization
+require __DIR__.'/admin.php';
+require __DIR__.'/test.php';
+require __DIR__.'/auth.php';
+require __DIR__.'/event.php';
+
+// Ticket Purchase Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/events/{event}/buy-tickets', [App\Http\Controllers\TicketPurchaseController::class, 'show'])->name('tickets.purchase.show');
+    Route::post('/events/{event}/buy-tickets', [App\Http\Controllers\TicketPurchaseController::class, 'purchase'])->name('tickets.purchase');
+    Route::get('/tickets/purchase/success/{purchaseId}', [App\Http\Controllers\TicketPurchaseController::class, 'success'])->name('tickets.purchase.success');
+    Route::get('/tickets/purchase/failure/{purchaseId}', [App\Http\Controllers\TicketPurchaseController::class, 'failure'])->name('tickets.purchase.failure');
+    Route::get('/tickets/my-purchases', [App\Http\Controllers\TicketPurchaseController::class, 'myPurchases'])->name('tickets.my-purchases');
+    Route::get('/tickets/details/{purchaseId}', [App\Http\Controllers\TicketPurchaseController::class, 'details'])->name('tickets.details');
+    Route::get('/ticket/{ticketId}', [App\Http\Controllers\TicketPurchaseController::class, 'showIndividualTicket'])->name('tickets.individual');
+    Route::get('/ticket/{ticketId}/qr-code', [App\Http\Controllers\TicketPurchaseController::class, 'generateQRCode'])->name('tickets.qr-code');
+});
+
+// Xendit webhook for tickets (no auth required)
+Route::post('/webhook/tickets/xendit', [App\Http\Controllers\TicketPurchaseController::class, 'webhook'])->name('tickets.webhook.xendit');
+
+// Public layout rendering route for event show pages
+Route::post('/events/layouts/{layout}', [App\Http\Controllers\EventController::class, 'renderLayout'])->name('events.layouts.render');
+
+// Invoice route for tickets
+Route::middleware('auth')->get('/tickets/invoice/{purchaseId}/{ticketId}', [App\Http\Controllers\TicketPurchaseController::class, 'viewInvoice'])->name('tickets.invoice');
+
+// Add the new Xendit webhook route (no auth required)
+Route::post('/xendit/webhook', [XenditWebhookController::class, 'handle'])->name('xendit.webhook');
+
+// Add the webhook/xendit route for the specific URL mentioned
+Route::post('/webhook/xendit', [XenditWebhookController::class, 'handle'])->name('webhook.xendit');
+
+// Include separate route files for better organization
+require __DIR__.'/admin.php';
+require __DIR__.'/test.php';
+require __DIR__.'/auth.php';
+require __DIR__.'/event.php';
+
+// Ticket Purchase Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/events/{event}/buy-tickets', [App\Http\Controllers\TicketPurchaseController::class, 'show'])->name('tickets.purchase.show');
+    Route::post('/events/{event}/buy-tickets', [App\Http\Controllers\TicketPurchaseController::class, 'purchase'])->name('tickets.purchase');
+    Route::get('/tickets/purchase/success/{purchaseId}', [App\Http\Controllers\TicketPurchaseController::class, 'success'])->name('tickets.purchase.success');
+    Route::get('/tickets/purchase/failure/{purchaseId}', [App\Http\Controllers\TicketPurchaseController::class, 'failure'])->name('tickets.purchase.failure');
+    Route::get('/tickets/my-purchases', [App\Http\Controllers\TicketPurchaseController::class, 'myPurchases'])->name('tickets.my-purchases');
+    Route::get('/tickets/details/{purchaseId}', [App\Http\Controllers\TicketPurchaseController::class, 'details'])->name('tickets.details');
+    Route::get('/ticket/{ticketId}', [App\Http\Controllers\TicketPurchaseController::class, 'showIndividualTicket'])->name('tickets.individual');
+    Route::get('/ticket/{ticketId}/qr-code', [App\Http\Controllers\TicketPurchaseController::class, 'generateQRCode'])->name('tickets.qr-code');
+});
+
+// Xendit webhook for tickets (no auth required)
+Route::post('/webhook/tickets/xendit', [App\Http\Controllers\TicketPurchaseController::class, 'webhook'])->name('tickets.webhook.xendit');
+
+// Public layout rendering route for event show pages
+Route::post('/events/layouts/{layout}', [App\Http\Controllers\EventController::class, 'renderLayout'])->name('events.layouts.render');
+
+// Invoice route for tickets
+Route::middleware('auth')->get('/tickets/invoice/{purchaseId}/{ticketId}', [App\Http\Controllers\TicketPurchaseController::class, 'viewInvoice'])->name('tickets.invoice');R o u t e : : m i d d l e w a r e ( ' a u t h ' ) - > g e t ( ' / e v e n t s / { e v e n t } / t i c k e t s ' ,   [ A p p \ H t t p \ C o n t r o l l e r s \ T i c k e t P u r c h a s e C o n t r o l l e r : : c l a s s ,   ' s h o w ' ] ) - > n a m e ( ' t i c k e t s . p u r c h a s e . p a g e ' ) ;  
+ 

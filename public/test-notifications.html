@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+</head>
+<body>
+    <h1>Notification System Test</h1>
+    
+    <div>
+        <h2>Test Functions</h2>
+        <button onclick="testToastSuccess()">Test Toast Success</button>
+        <button onclick="testToastError()">Test Toast Error</button>
+        <button onclick="testToastWarning()">Test Toast Warning</button>
+        <button onclick="testToastInfo()">Test Toast Info</button>
+        <button onclick="testFallback()">Test Fallback</button>
+        <button onclick="testServerNotification()">Test Server Notification</button>
+    </div>
+    
+    <div>
+        <h2>Debug Info</h2>
+        <div id="debug-info"></div>
+    </div>
+
+    <script>
+        // Debug info
+        function updateDebugInfo() {
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.innerHTML = `
+                <p><strong>SweetAlert Available:</strong> ${typeof Swal !== 'undefined' ? 'Yes' : 'No'}</p>
+                <p><strong>Pusher Available:</strong> ${typeof Pusher !== 'undefined' ? 'Yes' : 'No'}</p>
+                <p><strong>Toast Functions:</strong></p>
+                <ul>
+                    <li>toastSuccess: ${typeof window.toastSuccess}</li>
+                    <li>toastError: ${typeof window.toastError}</li>
+                    <li>toastWarning: ${typeof window.toastWarning}</li>
+                    <li>toastInfo: ${typeof window.toastInfo}</li>
+                </ul>
+            `;
+        }
+        
+        // Test functions
+        function testToastSuccess() {
+            showFallbackNotification('success', 'Success', 'This is a success test!');
+        }
+        
+        function testToastError() {
+            showFallbackNotification('error', 'Error', 'This is an error test!');
+        }
+        
+        function testToastWarning() {
+            showFallbackNotification('warning', 'Warning', 'This is a warning test!');
+        }
+        
+        function testToastInfo() {
+            showFallbackNotification('info', 'Support Ticket Reply', 'An admin has replied to your support ticket #TKT-123456');
+        }
+        
+        function testFallback() {
+            showFallbackNotification('info', 'Fallback Test', 'This is a fallback notification test!');
+        }
+        
+        function testServerNotification() {
+            fetch('/test-notification-simple')
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Server response:', data);
+                    alert('Server notification sent: ' + data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error sending server notification: ' + error);
+                });
+        }
+        
+        // Fallback notification function
+        function showFallbackNotification(type, title, message) {
+            console.log('Using fallback notification:', { type, title, message });
+            
+            if (typeof Swal !== 'undefined') {
+                // Check if dark mode is enabled
+                const isDark = document.documentElement.classList.contains('dark') || 
+                              (localStorage.getItem('darkMode') === 'true') ||
+                              window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                Swal.fire({
+                    title: title,
+                    text: message,
+                    timer: 4000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end',
+                    width: '320px',
+                    padding: '0.75rem',
+                    background: isDark ? '#1f2937' : '#ffffff',
+                    color: isDark ? '#e5e7eb' : '#111827'
+                });
+            } else {
+                alert(`${title}: ${message}`);
+            }
+        }
+        
+        // Load SweetAlert utilities
+        fetch('/js/sweetalert-utils.js')
+            .then(response => response.text())
+            .then(script => {
+                eval(script);
+                updateDebugInfo();
+            })
+            .catch(error => {
+                console.error('Error loading SweetAlert utilities:', error);
+                updateDebugInfo();
+            });
+        
+        // Initialize debug info
+        updateDebugInfo();
+    </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Notification Toast Styles */
+.notification-toast {
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid #e5e7eb !important;
+    margin-top: 10px !important;
+}
+
+.notification-title {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    margin-bottom: 4px !important;
+}
+
+.notification-content {
+    font-size: 13px !important;
+    color: #6b7280 !important;
+    line-height: 1.4 !important;
+}
+
+/* Dark mode notification styles */
+.dark .notification-toast {
+    border: 1px solid #374151 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .notification-title {
+    color: #e5e7eb !important;
+}
+
+.dark .notification-content {
+    color: #9ca3af !important;
+}
+
+/* Ensure notifications appear below the notification bell */
+.swal2-toast-container {
+    top: 70px !important;
+    right: 20px !important;
+    z-index: 9999 !important;
+    max-width: 400px !important;
+}
+
+.swal2-toast {
+    margin-bottom: 8px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+.swal2-toast .swal2-title {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    margin-bottom: 4px !important;
+}
+
+.swal2-toast .swal2-html-container {
+    font-size: 13px !important;
+    color: #6b7280 !important;
+    line-height: 1.4 !important;
+}
+
+/* Dark mode toast styles */
+.dark .swal2-toast {
+    border: 1px solid #374151 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .swal2-toast .swal2-title {
+    color: #e5e7eb !important;
+}
+
+.dark .swal2-toast .swal2-html-container {
+    color: #9ca3af !important;
+}
+    
