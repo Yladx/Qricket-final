@@ -39,7 +39,7 @@ class SubscriptionPlanSeeder extends Seeder
                 'name' => 'Basic',
                 'slug' => 'basic',
                 'description' => 'Great for small events - publish up to 5 events per month',
-                        'price' => 299.00,
+                        'price' => 399.00,
                         'currency' => 'PHP',
                 'events_per_month' => 5,
                 'tickets_per_event' => 500,
@@ -62,12 +62,12 @@ class SubscriptionPlanSeeder extends Seeder
             [
                 'name' => 'Intermediate',
                 'slug' => 'intermediate',
-                'description' => 'Custom plan for growing organizers',
-                'price' => 0.00, // Custom pricing/contact sales
+                'description' => 'Advanced features for growing organizers - publish up to 10 events per month',
+                'price' => 750.00,
                         'currency' => 'PHP',
-                'events_per_month' => null, // Unlimited or configured by admin
-                'tickets_per_event' => null, // Unlimited or configured by admin
-                'max_event_duration_days' => null,
+                'events_per_month' => 10,
+                'tickets_per_event' => 1500,
+                'max_event_duration_days' => 60,
                 'advanced_layouts' => true,
                 'advanced_analytics' => true,
                 'api_access' => true,
@@ -87,7 +87,7 @@ class SubscriptionPlanSeeder extends Seeder
                 'name' => 'Pro',
                 'slug' => 'pro',
                 'description' => 'Advanced features - publish up to 20 events per month',
-                        'price' => 799.00,
+                        'price' => 1000.00,
                         'currency' => 'PHP',
                 'events_per_month' => 20,
                 'tickets_per_event' => 2000,
