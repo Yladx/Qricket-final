@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
-            $table->foreignId('ticket_limit_pricing_id')->nullable()->constrained('ticket_limit_pricing')->onDelete('cascade');
+            // Define column first; FK added in later migration to avoid order issues
+            $table->unsignedBigInteger('ticket_limit_pricing_id')->nullable();
+            $table->index('ticket_limit_pricing_id');
             $table->string('purchase_id')->unique(); // Unique identifier for this purchase
             $table->integer('additional_tickets'); // Number of additional tickets purchased
             $table->decimal('amount', 10, 2); // Price paid for additional tickets
