@@ -60,6 +60,30 @@ class SubscriptionPlanSeeder extends Seeder
                 'sort_order' => 2,
             ],
             [
+                'name' => 'Intermediate',
+                'slug' => 'intermediate',
+                'description' => 'Custom plan for growing organizers',
+                'price' => 0.00, // Custom pricing/contact sales
+                        'currency' => 'PHP',
+                'events_per_month' => null, // Unlimited or configured by admin
+                'tickets_per_event' => null, // Unlimited or configured by admin
+                'max_event_duration_days' => null,
+                'advanced_layouts' => true,
+                'advanced_analytics' => true,
+                'api_access' => true,
+                'white_label' => true,
+                'features' => [
+                    'All advanced features',
+                    'Custom branding',
+                    'API access',
+                    'White label solution',
+                    'Dedicated support',
+                    'Custom integrations',
+                ],
+                'is_active' => true,
+                'sort_order' => 3,
+            ],
+            [
                 'name' => 'Pro',
                 'slug' => 'pro',
                 'description' => 'Advanced features - publish up to 20 events per month',
@@ -81,30 +105,6 @@ class SubscriptionPlanSeeder extends Seeder
                     'Social media integration',
                     'QR code generation',
                     'Export capabilities',
-                ],
-                'is_active' => true,
-                'sort_order' => 3,
-            ],
-            [
-                'name' => 'Intermediate',
-                'slug' => 'intermediate',
-                'description' => 'Custom plan for growing organizers',
-                'price' => 0.00, // Custom pricing/contact sales
-                        'currency' => 'PHP',
-                'events_per_month' => null, // Unlimited or configured by admin
-                'tickets_per_event' => null, // Unlimited or configured by admin
-                'max_event_duration_days' => null,
-                'advanced_layouts' => true,
-                'advanced_analytics' => true,
-                'api_access' => true,
-                'white_label' => true,
-                'features' => [
-                    'All advanced features',
-                    'Custom branding',
-                    'API access',
-                    'White label solution',
-                    'Dedicated support',
-                    'Custom integrations',
                 ],
                 'is_active' => true,
                 'sort_order' => 4,
