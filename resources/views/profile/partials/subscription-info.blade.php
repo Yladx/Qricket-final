@@ -77,7 +77,8 @@
                     </div>
 
                     @php
-                        $freeLimit = (int)($currentSubscription->getPlan()?->free_events_count ?? 0);
+                        $plan = $currentSubscription->getPlan();
+                        $freeLimit = (int)($plan?->free_events_count ?? 0);
                         $freeUsed = auth()->user()->events()
                             ->where('status','published')
                             ->where('is_free', true)
@@ -241,22 +242,59 @@
                 </div>
             </div>
         @else
-            <!-- No Active Subscription -->
+            <!-- No Active Subscription (Free Plan) -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
-                <div class="px-4 py-5 sm:p-6 text-center">
-                    <div class="mx-auto h-12 w-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="h-6 w-6 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="text-center mb-4">
+                        <div class="mx-auto h-12 w-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4">
+                            <svg class="h-6 w-6 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Free Plan</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            You're currently on the free plan. Upgrade to unlock more features.
+                        </p>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No Active Subscription</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                        You don't have an active subscription. Choose a plan to get started.
-                    </p>
-                    <a href="{{ route('subscription.index') }}" 
-                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        View Plans
-                    </a>
+
+                    @php
+                        $freePlan = \App\Models\SubscriptionPlan::where('slug', 'free')->first();
+                        $freeLimit = (int)($freePlan?->free_events_count ?? 0);
+                        $freeUsed = auth()->user()->events()
+                            ->where('status','published')
+                            ->where('is_free', true)
+                            ->where('created_at', '>=', now()->startOfMonth())
+                            ->count();
+                        $freePct = $freeLimit > 0 ? min(100, ($freeUsed / max(1,$freeLimit)) * 100) : 0;
+                        $freeRemaining = max(0, $freeLimit - $freeUsed);
+                    @endphp
+                    
+                    @if($freeLimit > 0)
+                    <!-- Free events usage progress -->
+                    <div class="mb-4">
+                        <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+                            <span>Free Events Used (This Month)</span>
+                            <span>{{ $freeUsed }} / {{ $freeLimit }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: {{ $freePct }}%"></div>
+                        </div>
+                        <div class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                            @if($freeRemaining > 0)
+                                <span class="text-green-600 dark:text-green-400">{{ $freeRemaining }} free events remaining</span>
+                            @else
+                                <span class="text-red-600 dark:text-red-400">Free event limit reached</span>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="text-center">
+                        <a href="{{ route('subscription.index') }}" 
+                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            View Plans
+                        </a>
+                    </div>
                 </div>
             </div>
         @endif

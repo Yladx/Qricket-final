@@ -49,6 +49,38 @@
                     </div>
                 </div>
             </div>
+            @else
+            <!-- Free Plan Alert -->
+            <div class="mb-6">
+                <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 text-gray-600 dark:text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <h3 class="text-xs font-medium text-gray-800 dark:text-gray-200">
+                                Current Plan: Free
+                            </h3>
+                            @php
+                                $freePlan = \App\Models\SubscriptionPlan::where('slug', 'free')->first();
+                                $freeCap = (int)($freePlan?->free_events_count ?? 0);
+                                $freeUsed = auth()->user()->events()->where('status','published')->where('is_free', true)->where('created_at', '>=', now()->startOfMonth())->count();
+                                $freeRemaining = max(0, $freeCap - $freeUsed);
+                            @endphp
+                            @if($freeCap > 0)
+                            <p class="text-xs text-gray-700 dark:text-gray-300 mt-1">
+                                Free events this month: {{ $freeUsed }} / {{ $freeCap }}
+                                @if($freeRemaining > 0)
+                                    <span class="text-green-600 dark:text-green-400">({{ $freeRemaining }} remaining)</span>
+                                @else
+                                    <span class="text-red-600 dark:text-red-400">(limit reached)</span>
+                                @endif
+                            </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
             @endif
         @endauth
 

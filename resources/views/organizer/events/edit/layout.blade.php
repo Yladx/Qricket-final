@@ -40,14 +40,7 @@
                             </svg>
                             Back to Event
                         </a>
-                        <div class="flex items-center space-x-4">
-                            <button type="submit" class="px-6 py-3 text-sm font-medium text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 flex items-center">
-                                Save Changes
-                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </button>
-                        </div>
+                       
                     </div>
                 </div>
             </form>
