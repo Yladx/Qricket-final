@@ -63,7 +63,6 @@ Route::prefix('organizer')->middleware('verified.organizer')->group(function () 
     Route::get('/events/{event}/staff', [\App\Http\Controllers\Organizer\EventManagement\StaffController::class, 'manage'])->name('organizer.events.staff');
     Route::post('/events/staff', [\App\Http\Controllers\Organizer\EventManagement\StaffController::class, 'step5Store'])->name('organizer.events.staff.store');
     Route::post('/events/staff/autosave', [\App\Http\Controllers\Organizer\EventManagement\StaffController::class, 'autosaveStep5'])->name('organizer.events.staff.autosave');
-    Route::delete('/events/staff/remove', [\App\Http\Controllers\Organizer\EventManagement\StaffController::class, 'deleteStaff'])->name('organizer.events.staff.delete');
     Route::post('/events/staff/autosave/flush', [\App\Http\Controllers\Organizer\EventManagement\StaffController::class, 'autosaveFlush'])->name('organizer.events.staff.autosave.flush');
     Route::get('/events/staff/search', [\App\Http\Controllers\Organizer\EventManagement\StaffController::class, 'searchStaff'])->name('organizer.events.staff.search');
 
