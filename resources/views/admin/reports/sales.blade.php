@@ -43,11 +43,6 @@
                     <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Net: ₱{{ number_format($ticketNetRevenue ?? 0, 2) }}</div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                    <div class="text-xs text-gray-500 dark:text-gray-400">Free Tickets Sold</div>
-                    <div class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ number_format($freeTicketsSold ?? 0) }}</div>
-                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Unit price ₱0</div>
-                </div>
-                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 p-4">
                     <div class="text-xs text-gray-500 dark:text-gray-400">Total Refunded</div>
                     <div class="mt-1 text-lg font-bold text-red-600 dark:text-red-400">₱{{ number_format($totalRefundedAmount ?? 0, 2) }}</div>
                     <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ number_format($totalRefundedCount ?? 0) }} refunds • Tickets: {{ number_format($refundTicketsCount ?? 0) }} • Subs: {{ number_format($refundSubsCount ?? 0) }} • Addl: {{ number_format($refundAddlCount ?? 0) }}</div>

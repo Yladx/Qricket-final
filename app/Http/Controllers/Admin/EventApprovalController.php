@@ -43,6 +43,11 @@ class EventApprovalController extends Controller
             $allQuery->whereNull('user_id');
         }
 
+        // Filter for "Free Events"
+        if ($request->boolean('free_events', false)) {
+            $allQuery->where('is_free', true);
+        }
+
         if ($request->filled('q')) {
             $allQuery->where('title', 'like', '%'.$request->q.'%');
         }

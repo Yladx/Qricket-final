@@ -83,11 +83,16 @@ class OrganizerDashboardController extends Controller
             $recentSales = $recentSales->whereIn('event_id', $eventIds->all())->values();
         }
 
-        // Calculate sales statistics filtered by event IDs
-        $salesStats = $this->calculateSalesStatsForEvents($eventIds);
-        
         // Check if user can manage sales for any of the events
         $canManageSales = $this->canUserManageSales($user, $eventIds);
+
+        // Check if user is owner of any event (not just staff)
+        $isOwner = Event::whereIn('id', $eventIds)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        // Calculate sales statistics filtered by event IDs (only if user can manage sales)
+        $salesStats = $canManageSales ? $this->calculateSalesStatsForEvents($eventIds) : [];
 
         // Get revenue trend data for chart
         $revenueTrend = $this->getRevenueTrendForEvents($eventIds);
@@ -145,7 +150,8 @@ class OrganizerDashboardController extends Controller
             'salesStats',
             'revenueTrend',
             'calendarEvents',
-            'canManageSales'
+            'canManageSales',
+            'isOwner'
         ));
     }
 
@@ -177,9 +183,10 @@ class OrganizerDashboardController extends Controller
             ->where('unit_price', 0)
             ->sum('quantity');
         
-        // Calculate unclaimed payout from ended events using net amount
+        // Calculate unclaimed payout from ended events using net amount minus Qricket fee
         $unclaimedPayout = Event::whereIn('id', $eventIds)
             ->where('end_date', '<', now()) // Only ended events
+            ->where('is_free', false) // Exclude free events
             ->whereDoesntHave('payoutRequests', function($q) {
                 $q->whereIn('status', ['pending', 'released', 'paid']);
             })
@@ -188,9 +195,22 @@ class OrganizerDashboardController extends Controller
             }])
             ->get()
             ->sum(function($event) {
-                return $event->ticketPurchases->sum(function($purchase) {
+                // Calculate net revenue for this event
+                $netAmount = $event->ticketPurchases->sum(function($purchase) {
                     return $purchase->net_amount ?? $purchase->total_amount;
                 });
+                
+                // If event is free or net is zero/non-positive, payout is 0
+                if ($event->is_free || $netAmount <= 0) {
+                    return 0;
+                }
+                
+                // Apply Qricket fee and calculate expected payout
+                $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
+                $qricketFee = $netAmount * ($qricketFeePercentage / 100);
+                $expectedPayout = max(0, $netAmount - $qricketFee);
+                
+                return $expectedPayout;
             });
         
         $thisMonthRevenue = (clone $paid)->whereMonth('paid_at', now()->month)->whereYear('paid_at', now()->year)->sum('total_amount');

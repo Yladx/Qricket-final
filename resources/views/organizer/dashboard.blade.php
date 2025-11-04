@@ -209,6 +209,7 @@
                 </div>
 
                 <!-- Revenue Growth -->
+                @if($isOwner ?? false)
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="flex items-center">
@@ -221,11 +222,12 @@
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Unclaimed Payout</p>
-                                <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100" data-stat="unclaimedPayout">₱{{ number_format($salesStats['unclaimedPayout'] ?? 0, 2) }}</p>
+                                <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100" data-stat="unclaimedPayout">₱{{ number_format(max(0, $salesStats['unclaimedPayout'] ?? 0), 2) }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
             @endif
 
@@ -561,7 +563,15 @@
                 ['totalRevenue','totalTicketsSold','thisMonthRevenue','unclaimedPayout','averageOrderValue'].forEach(function(key){
                     var to = document.querySelector('[data-stat="'+key+'"]');
                     var from = doc.querySelector('[data-stat="'+key+'"]');
-                    if(to && from){ to.textContent = from.textContent; }
+                    if(to && from){ 
+                        // For unclaimedPayout, clamp to 0 to prevent negatives
+                        if(key === 'unclaimedPayout') {
+                            var value = parseFloat(from.textContent.replace(/[₱,]/g, '')) || 0;
+                            to.textContent = '₱' + Math.max(0, value).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+                        } else {
+                            to.textContent = from.textContent; 
+                        }
+                    }
                 });
             }
             function setActive(view){
