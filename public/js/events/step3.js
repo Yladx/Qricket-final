@@ -1,10 +1,12 @@
 /* Step 3 - Tickets: add/remove types and autosave to R2 */
 (function() {
+  console.log('[step3.js] Script starting to load...');
   const form = document.querySelector('form[data-autosave-url], form[action*="ticket"]') || document.querySelector('form');
   const ticketContainer = document.getElementById('ticketTypes');
   const typesInput = document.getElementById('ticket_types_json');
   const settingsInput = document.getElementById('ticket_settings_json');
   let autosaveTimer = null;
+  console.log('[step3.js] Initial elements found:', { form: !!form, ticketContainer: !!ticketContainer, typesInput: !!typesInput, settingsInput: !!settingsInput });
 
   function getEventId() {
     // Try form action/query, autosave url, or location
@@ -849,10 +851,31 @@
     if (idx != null) removeTicketType(Number(idx));
   }
 
-  // expose for inline buttons
+  // expose for inline buttons - do this immediately, not in DOMContentLoaded
   window.addTicketType = addTicketType;
+  console.log('[step3.js] addTicketType function exposed to window:', typeof window.addTicketType);
+  console.log('[step3.js] window.addTicketType === addTicketType:', window.addTicketType === addTicketType);
+
+  // Also add event listener as fallback for button clicks
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button[onclick*="addTicketType"]');
+    if (btn) {
+      console.log('[step3.js] Button with addTicketType onclick clicked!');
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof window.addTicketType === 'function') {
+        console.log('[step3.js] Calling window.addTicketType from event listener');
+        window.addTicketType();
+      } else {
+        console.error('[step3.js] window.addTicketType is not a function!', typeof window.addTicketType);
+      }
+      return false;
+    }
+  }, true);
 
   document.addEventListener('DOMContentLoaded', () => {
+    console.log('[step3.js] DOMContentLoaded - addTicketType available:', typeof window.addTicketType);
+    console.log('[step3.js] Checking for addTicketType buttons:', document.querySelectorAll('button[onclick*="addTicketType"]').length);
     // if server provided initial data, prefer it
     const initialTypes = typesInput?.getAttribute('data-initial');
     if (initialTypes) {
