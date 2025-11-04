@@ -78,13 +78,13 @@ class UserSessionService
             
             if ($exists) {
                 // Update existing record
-                DB::table('sessions')
-                    ->where('id', $sessionId)
-                    ->update([
-                        'role' => 'user',
-                        'user_id' => $userId,
-                        'last_activity' => now()->timestamp,
-                    ]);
+            DB::table('sessions')
+                ->where('id', $sessionId)
+                ->update([
+                    'role' => 'user',
+                    'user_id' => $userId,
+                    'last_activity' => now()->timestamp,
+                ]);
             } else {
                 // Insert new record with required payload field
                 DB::table('sessions')->insert([
@@ -151,9 +151,9 @@ class UserSessionService
             
             if ($exists) {
                 // Update existing record
-                DB::table('sessions')
-                    ->where('id', $sessionId)
-                    ->update([
+            DB::table('sessions')
+                ->where('id', $sessionId)
+                ->update([
                         'role' => 'admin',
                         'user_id' => $userId,
                         'last_activity' => now()->timestamp,
@@ -335,20 +335,20 @@ class UserSessionService
         } else {
             // For file sessions, count from database sessions table (which is maintained separately for tracking)
             // Even when using file driver, we maintain the sessions table for online tracking
-            $counts = DB::table('sessions')
-                ->where('last_activity', '>', now()->subMinutes(30)->timestamp)
-                ->selectRaw('
-                    SUM(CASE WHEN (user_id IS NOT NULL AND (role IS NULL OR role <> "admin")) OR role = "user" THEN 1 ELSE 0 END) as users,
-                    SUM(CASE WHEN (user_id IS NULL AND (role IS NULL OR role <> "admin")) OR role = "guest" THEN 1 ELSE 0 END) as guests,
-                    SUM(CASE WHEN role = "admin" THEN 1 ELSE 0 END) as admins
-                ')
-                ->first();
+        $counts = DB::table('sessions')
+            ->where('last_activity', '>', now()->subMinutes(30)->timestamp)
+            ->selectRaw('
+                SUM(CASE WHEN (user_id IS NOT NULL AND (role IS NULL OR role <> "admin")) OR role = "user" THEN 1 ELSE 0 END) as users,
+                SUM(CASE WHEN (user_id IS NULL AND (role IS NULL OR role <> "admin")) OR role = "guest" THEN 1 ELSE 0 END) as guests,
+                SUM(CASE WHEN role = "admin" THEN 1 ELSE 0 END) as admins
+            ')
+            ->first();
 
-            return [
+        return [
                 'users' => (int) ($counts->users ?? 0),
                 'guests' => (int) ($counts->guests ?? 0),
                 'admins' => (int) ($counts->admins ?? 0),
-            ];
+        ];
         }
     }
 

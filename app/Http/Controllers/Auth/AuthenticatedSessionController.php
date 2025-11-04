@@ -44,16 +44,16 @@ class AuthenticatedSessionController extends Controller
             // Update session in database only if using database session driver
             $sessionDriver = config('session.driver');
             if ($sessionDriver === 'database') {
-                try {
-                    DB::table('sessions')
-                        ->where('id', $sessionId)
-                        ->update([
-                            'role' => 'user',
-                            'user_id' => $user->id,
-                            'last_activity' => now()->timestamp,
-                        ]);
-                } catch (\Exception $e) {
-                    \Log::error('Failed to update session role and user_id: ' . $e->getMessage());
+            try {
+                DB::table('sessions')
+                    ->where('id', $sessionId)
+                    ->update([
+                        'role' => 'user',
+                        'user_id' => $user->id,
+                        'last_activity' => now()->timestamp,
+                    ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to update session role and user_id: ' . $e->getMessage());
                 }
             }
             

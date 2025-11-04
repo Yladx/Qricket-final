@@ -69,13 +69,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     // console.log('[Admin Support] Reply successful, adding to DOM');
                     if (messageTextarea) {
-                        messageTextarea.value = '';
-                        messageTextarea.style.height = 'auto';
+                messageTextarea.value = '';
+                    messageTextarea.style.height = 'auto';
                     }
                 
                     // Add reply immediately to DOM
                     if (data.reply) {
-                        addReplyToDOM(data.reply, true);
+                    addReplyToDOM(data.reply, true);
                     }
                 
                 // Show success message
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // console.log('[Admin Support] Adding reply to DOM:', replyId, isAdminReply ? '(admin)' : '(user)');
 
-            const replyElement = document.createElement('div');
+        const replyElement = document.createElement('div');
             replyElement.className = `flex ${isAdminReply ? 'justify-end' : 'justify-start'}`;
             replyElement.setAttribute('data-reply-id', replyId);
             replyElement.style.opacity = '0';
@@ -156,8 +156,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const author = escapeHtml(reply.admin_name || reply.author || (isAdminReply ? 'Admin' : 'User'));
             const createdAt = reply.created_at || 'Just now';
             const messageHtml = escapeHtml(reply.message || '');
-
-            replyElement.innerHTML = `
+        
+        replyElement.innerHTML = `
                 <div class="max-w-[80%]">
                     <div class="flex items-center space-x-2 ${isAdminReply ? 'justify-end flex-row-reverse space-x-reverse' : ''} mb-1">
                         <div class="h-7 w-7 rounded-full ${isAdminReply ? 'bg-qricket-600' : 'bg-gray-300 dark:bg-gray-600'} flex items-center justify-center text-[11px] font-bold text-white">${author.charAt(0)}</div>
@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
             replyElement.style.opacity = '0';
             replyElement.style.transform = 'translateY(6px)';
             replyElement.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-
+            
             replyElement.innerHTML = `
                 <div class="max-w-[80%]">
                     <div class="flex items-center space-x-2 ${isAdmin ? 'justify-end flex-row-reverse space-x-reverse' : ''} mb-1">

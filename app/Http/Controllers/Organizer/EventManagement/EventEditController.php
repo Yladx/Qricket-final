@@ -673,8 +673,22 @@ class EventEditController extends Controller
             return view('organizer.events.info.tickets', compact('event', 'ticketTypes', 'ticketSettings', 'layoutType'));
         }
 
-        // Load ticket data from event
-        $ticketTypes = $event->eventTickets()->get()->toArray();
+        // Load ticket data from event with purchased count and delete guard
+        $ticketTypes = $event->eventTickets()->orderBy('id')->get()->map(function($t){
+            $sold = (int)($t->sold_count ?? 0);
+            return [
+                'id' => $t->id,
+                'name' => $t->name,
+                'description' => $t->description,
+                'price' => $t->price,
+                'quantity' => $t->quantity,
+                'sale_start' => optional($t->sale_start)->format('Y-m-d H:i'),
+                'sale_end' => optional($t->sale_end)->format('Y-m-d H:i'),
+                'purchased_count' => $sold,
+                'can_delete' => $sold === 0,
+                'is_active' => (bool)($t->is_active ?? true),
+            ];
+        })->toArray();
         
         // If event is free, normalize all ticket prices to 0
         if ($event->is_free ?? false) {
