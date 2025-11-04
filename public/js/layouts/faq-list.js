@@ -47,11 +47,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Question</label>
-                        <input type="text" class="faq-question w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="What should I bring to the event?">
+                        <input type="text" class="faq-question w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="What should I bring to the event?">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Answer</label>
-                        <textarea class="faq-answer w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" rows="2" placeholder="Please bring a valid ID and your ticket."></textarea>
+                        <textarea class="faq-answer w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" rows="2" placeholder="Please bring a valid ID and your ticket."></textarea>
                     </div>
                 </div>
                 <button type="button" onclick="removeFaqItem(this)" class="mt-2 text-red-600 hover:text-red-800 text-sm">Remove</button>`;
@@ -82,11 +82,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Question</label>
-                            <input type="text" class="faq-question w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="What should I bring to the event?" value="${(q||'').replace(/"/g, '&quot;')}">
+                            <input type="text" class="faq-question w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="What should I bring to the event?" value="${(q||'').replace(/"/g, '&quot;')}">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Answer</label>
-                            <textarea class="faq-answer w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" rows="2" placeholder="Please bring a valid ID and your ticket.">${(a||'').replace(/</g,'&lt;')}</textarea>
+                            <textarea class="faq-answer w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" rows="2" placeholder="Please bring a valid ID and your ticket.">${(a||'').replace(/</g,'&lt;')}</textarea>
                         </div>
                     </div>
                     <button type="button" onclick="removeFaqItem(this)" class="mt-2 text-red-600 hover:text-red-800 text-sm">Remove</button>`;

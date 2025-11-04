@@ -362,6 +362,7 @@ class TicketsController extends Controller
             'thumbnail' => $event->thumbnail,
             'existing_poster_url' => $event->poster_url,
             'existing_thumbnail_url' => $event->thumbnail_url,
+            'is_free' => $event->is_free ?? false,
             'ticket_types' => $event->eventTickets()->orderBy('id')->get()->map(function($t){
                 return [
                     'id' => $t->id,
@@ -603,7 +604,7 @@ class TicketsController extends Controller
                         $existingByKey[$k]->update([
                             'name' => $t['name'] ?? $existingByKey[$k]->name,
                             'description' => $t['description'] ?? $existingByKey[$k]->description,
-                            'price' => $t['price'] ?? $existingByKey[$k]->price,
+                            'price' => ($event->is_free ?? false) ? 0 : ($t['price'] ?? $existingByKey[$k]->price),
                             'quantity' => $t['quantity'] ?? $existingByKey[$k]->quantity,
                             'sale_start' => $t['sale_start'] ?? $existingByKey[$k]->sale_start,
                             'sale_end' => $t['sale_end'] ?? $existingByKey[$k]->sale_end,
@@ -613,7 +614,7 @@ class TicketsController extends Controller
                             'event_id' => $event->id,
                             'name' => $t['name'] ?? 'Unnamed',
                             'description' => $t['description'] ?? null,
-                            'price' => $t['price'] ?? 0,
+                            'price' => ($event->is_free ?? false) ? 0 : ($t['price'] ?? 0),
                             'quantity' => $t['quantity'] ?? null,
                             'sale_start' => $t['sale_start'] ?? null,
                             'sale_end' => $t['sale_end'] ?? null,
@@ -815,6 +816,16 @@ class TicketsController extends Controller
                     return response()->json(['success' => false, 'message' => 'Invalid ticket data format'], 400);
                 }
             }
+
+            // If event is free, force all ticket prices to 0 before processing
+            if ($event && $event->is_free && is_array($ticketTypes)) {
+                foreach ($ticketTypes as &$t) {
+                    if (is_array($t)) {
+                        $t['price'] = 0;
+                    }
+                }
+                unset($t);
+            }
             // Upsert ticket types into DB and log only add/remove
             if (!empty($ticketTypes)) {
                 // Normalize incoming
@@ -860,7 +871,7 @@ class TicketsController extends Controller
                         $row->update([
                             'name' => $newName,
                             'description' => $t['description'] ?? $row->description,
-                            'price' => $t['price'] ?? $row->price,
+                            'price' => ($event->is_free ?? false) ? 0 : ($t['price'] ?? $row->price),
                             'quantity' => $t['quantity'] ?? $row->quantity,
                             'sale_start' => $t['sale_start'] ?? $row->sale_start,
                             'sale_end' => $t['sale_end'] ?? $row->sale_end,

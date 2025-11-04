@@ -34,8 +34,18 @@
 
                         // Calculate the total maximum tickets allowed
                         $cap = ($baseCap === null) ? null : $baseCap + $additionalTicketsPurchased;
+
+                        // If event is FREE, prioritize free_event_ticket_limit exclusively
+                        $freeCap = (int)($plan?->free_event_ticket_limit ?? 0);
+                        if (($event->is_free ?? false) && $freeCap > 0) {
+                            $cap = $freeCap;
+                        }
                     @endphp
                     <meta name="tickets-per-event" content="{{ $cap === null ? 'null' : $cap }}">
+                    @if(($event->is_free ?? false) && ($freeCap ?? 0) > 0)
+                        <meta name="event-is-free" content="1">
+                        <meta name="free-event-ticket-limit" content="{{ $freeCap }}">
+                    @endif
                     
                     <!-- Subscription Limit Info -->
                     <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">

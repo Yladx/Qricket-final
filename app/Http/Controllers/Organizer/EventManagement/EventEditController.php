@@ -687,6 +687,7 @@ class EventEditController extends Controller
             'start_date' => $event->start_date,
             'end_date' => $event->end_date,
             'location' => $event->location,
+            'is_free' => $event->is_free ?? false,
         ];
 
         // Determine layout type

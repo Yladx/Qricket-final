@@ -5,7 +5,7 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Section Title</label>
-                    <input type="text" id="${componentId}-title" onchange="updateComponentDetail('${componentId}', 'title', this.value)" class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Enter section title...">
+                    <input type="text" id="${componentId}-title" onchange="updateComponentDetail('${componentId}', 'title', this.value)" class="block w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Enter section title...">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cards</label>
@@ -14,15 +14,15 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Icon</label>
-                                    <input list="icon_list_datalist" type="text" value="calendar" onchange="updateCardDetail('${componentId}', 0, 'icon', this.value)" class="block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="calendar">
+                                    <input list="icon_list_datalist" type="text" value="calendar" onchange="updateCardDetail('${componentId}', 0, 'icon', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="calendar">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Title</label>
-                                    <input type="text" value="Date" onchange="updateCardDetail('${componentId}', 0, 'title', this.value)" class="block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Date">
+                                    <input type="text" value="Date" onchange="updateCardDetail('${componentId}', 0, 'title', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Date">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Content</label>
-                                    <input type="text" value="Event Date" onchange="updateCardDetail('${componentId}', 0, 'content', this.value)" class="block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Event Date">
+                                    <input type="text" value="Event Date" onchange="updateCardDetail('${componentId}', 0, 'content', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Event Date">
                                 </div>
                             </div>
                         </div>
@@ -78,15 +78,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Icon</label>
-                        <input list="icon_list_datalist" type="text" value="calendar" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'icon', this.value)" class="block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="calendar">
+                        <input list="icon_list_datalist" type="text" value="calendar" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'icon', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="calendar">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Title</label>
-                        <input type="text" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'title', this.value)" class="block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Date">
+                        <input type="text" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'title', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Date">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Content</label>
-                        <input type="text" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'content', this.value)" class="block w-full text-sm rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Event Date">
+                        <input type="text" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'content', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Event Date">
                     </div>
                 </div>`;
             container.appendChild(cardItem);

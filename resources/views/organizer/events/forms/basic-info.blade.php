@@ -24,8 +24,8 @@
     <div class="flex items-center space-x-3">
         @php($isFreeInit = old('is_free', $eventData['is_free'] ?? ($event->is_free ?? false)))
         <label class="inline-flex items-center space-x-2">
-            <input type="checkbox" name="is_free" value="1" {{ $isFreeInit ? 'checked' : '' }} class="rounded border-gray-300 text-qricket-600">
-            <span class="text-sm text-gray-700 dark:text-gray-300">Free Event</span>
+            <input type="checkbox" name="is_free" value="1" id="is_free_checkbox" {{ $isFreeInit ? 'checked' : '' }} class="rounded border-gray-300 text-qricket-600">
+            <span class="text-sm text-gray-700 dark:text-gray-300">Is your event free?</span>
         </label>
     </div>
 
@@ -419,6 +419,71 @@ document.addEventListener('DOMContentLoaded', function() {
             hideSuggestions();
         }
     });
+
+    // Free Event checkbox SweetAlert confirmation
+    const freeEventCheckbox = document.getElementById('is_free_checkbox');
+    if (freeEventCheckbox) {
+        freeEventCheckbox.addEventListener('click', function(e) {
+            // Check the current state before the click toggles it
+            const wasChecked = this.checked;
+            
+            // Only show SweetAlert if trying to check (was unchecked, will be checked)
+            if (!wasChecked) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Show SweetAlert confirmation
+                const showSweetAlert = () => {
+                    if (window.Swal && typeof window.Swal.fire === 'function') {
+                        window.Swal.fire({
+                            title: 'Free Event Confirmation',
+                            html: 'You are creating this event as <strong>free</strong>. This means:<br><br>' +
+                                  '• All ticket prices will be set to <strong>0</strong> (free)<br>' +
+                                  '• You <strong>cannot</strong> set a price for your tickets<br>' +
+                                  '• Tickets will be free for all attendees',
+                            icon: 'info',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, Continue',
+                            cancelButtonText: 'No, Cancel',
+                            confirmButtonColor: '#059669',
+                            cancelButtonColor: '#6b7280',
+                            reverseButtons: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // User confirmed - check the checkbox
+                                freeEventCheckbox.checked = true;
+                                // Trigger change event manually
+                                freeEventCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                            } else {
+                                // User cancelled - keep checkbox unchecked
+                                freeEventCheckbox.checked = false;
+                            }
+                        });
+                    } else {
+                        // Fallback if SweetAlert is not loaded - use native confirm
+                        const confirmed = confirm('You are creating this event as free. This means all ticket prices will be set to 0 and you cannot set a price for your tickets. Do you want to continue?');
+                        if (confirmed) {
+                            freeEventCheckbox.checked = true;
+                            freeEventCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                        } else {
+                            freeEventCheckbox.checked = false;
+                        }
+                    }
+                };
+
+                // Check if SweetAlert is loaded, if not wait a bit
+                if (window.Swal && typeof window.Swal.fire === 'function') {
+                    showSweetAlert();
+                } else {
+                    // Wait for SweetAlert to load (it's loaded in step1.blade.php and edit pages)
+                    setTimeout(() => {
+                        showSweetAlert();
+                    }, 100);
+                }
+            }
+            // If unchecking (was checked), allow it without SweetAlert
+        });
+    }
 });
 </script>
 

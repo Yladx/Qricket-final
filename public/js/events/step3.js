@@ -72,13 +72,19 @@
     if (cap == null) return;
     const list = readTypes();
     const inputs = document.querySelectorAll('input[data-k="quantity"]');
+    const free = isFreeEvent();
     // For each input, allow current value + remaining after subtracting others
     inputs.forEach((inp, idx) => {
       const others = list.reduce((sum, t, j) => sum + (j === idx ? 0 : (parseInt(t.quantity, 10) || 0)), 0);
       const allowedForThis = Math.max(0, cap - others);
       const cur = parseInt(inp.value, 10) || 0;
       inp.min = '0';
-      inp.max = String(cur + Math.max(0, allowedForThis - cur));
+      // For free events, max is the cap itself (total limit); for others, allow current + remaining
+      if (free) {
+        inp.max = String(cap);
+      } else {
+        inp.max = String(cur + Math.max(0, allowedForThis - cur));
+      }
     });
   }
 
@@ -342,7 +348,7 @@
       const rowIdAttr = t.id != null ? `data-id="${String(t.id)}"` : '';
       const canDelete = t.can_delete !== false && (t.purchased_count || 0) === 0;
       const deleteButtonClass = canDelete 
-        ? 'inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 dark:border-gray-600 text-gray-500 hover:text-red-600 hover:border-red-500 transition'
+        ? 'inline-flex items-center justify-center w-9 h-9 rounded-md border border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:border-red-500 dark:hover:border-red-500 transition'
         : 'inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 dark:border-gray-600 text-gray-400 cursor-not-allowed opacity-50';
       const deleteButtonTitle = canDelete 
         ? 'Remove' 
@@ -370,7 +376,7 @@
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Quantity</label>
-              <input data-k="quantity" data-i="${idx}" type="number" min="0" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.quantity ?? ''}">
+              <input data-k="quantity" data-i="${idx}" type="number" min="0" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.quantity ?? ''}" ${free ? `max="${getTicketsPerEventLimit() || ''}"` : ''}>
             </div>
           </div>
           <div>
@@ -600,7 +606,8 @@
     
     // Default quantity respects remaining quota when capped
     const remain = remainingQuota(list);
-    const defaultQty = remain == null ? '100' : String(Math.max(1, Math.min(100, remain)));
+    const cap = getTicketsPerEventLimit();
+    const defaultQty = remain == null ? (cap ? String(Math.min(100, cap)) : '100') : String(Math.max(1, Math.min(100, remain)));
 
     list.push({
       id: null,
