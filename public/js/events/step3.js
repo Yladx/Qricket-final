@@ -380,7 +380,7 @@
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Price</label>
-              <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10 ${free ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-700' : ''}" value="${free ? '0' : (t.price ?? '500')}" ${free ? 'readonly disabled' : ''} ${free ? 'tabindex="-1"' : ''}>
+              <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10 ${free ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-700' : ''}" value="${free ? '0' : (t.price || '500')}" ${free ? 'readonly disabled' : ''} ${free ? 'tabindex="-1"' : ''}>
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Quantity</label>
@@ -647,8 +647,9 @@
     const remain = remainingQuota(list);
     const defaultQty = remain == null ? (cap ? String(Math.min(100, cap)) : '100') : String(Math.max(1, Math.min(100, remain)));
 
-    // Always set price to 0 for free events, regardless of what free variable says (double-check)
+    // ALWAYS set price to 0 for free events - check multiple times to be sure
     const isFree = isFreeEvent();
+    // Force price to 0 if free, otherwise default to 500
     const ticketPrice = isFree ? '0' : '500';
     console.log('[addTicketType] Setting price to:', ticketPrice, 'isFree:', isFree);
 
@@ -656,19 +657,29 @@
       id: null,
       name: 'General Admission',
       description: 'Standard access',
-      price: ticketPrice,
+      price: isFree ? '0' : '500', // Force 0 if free
       quantity: defaultQty,
       sale_start: defaultSaleStart,
       sale_end: defaultSaleEnd,
       is_active: '1'
     };
-    // Force price to 0 if free event (extra safety)
+    
+    // Double-check: Force price to 0 if free event (extra safety)
     if (isFree) {
       newTicket.price = '0';
       console.log('[addTicketType] Forced price to 0 for free event');
     }
+    
     console.log('[addTicketType] Final ticket object:', newTicket);
     list.push(newTicket);
+    
+    // Triple-check: Normalize all prices in list before saving
+    if (isFree) {
+      list.forEach(t => {
+        t.price = '0';
+      });
+    }
+    
     writeTypes(list);
     render();
     // Immediately block price field after adding new ticket type
