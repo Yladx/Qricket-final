@@ -42,9 +42,13 @@
                         }
                     @endphp
                     <meta name="tickets-per-event" content="{{ $cap === null ? 'null' : $cap }}">
-                    @if(($event->is_free ?? false) && ($freeCap ?? 0) > 0)
+                    @if($event->is_free ?? false)
                         <meta name="event-is-free" content="1">
-                        <meta name="free-event-ticket-limit" content="{{ $freeCap }}">
+                        @if(($freeCap ?? 0) > 0)
+                            <meta name="free-event-ticket-limit" content="{{ $freeCap }}">
+                        @endif
+                    @else
+                        <meta name="event-is-free" content="0">
                     @endif
                     
                     <!-- Subscription Limit Info -->
