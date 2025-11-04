@@ -142,11 +142,24 @@
                             </label>
                         </div>
                         
+                                <!-- Show Free Events -->
+                        <div class="flex items-end">
+                            <label class="flex items-center">
+                                        <input type="checkbox" 
+                                               name="show_free" 
+                                               value="1"
+                                               {{ request('show_free') ? 'checked' : '' }}
+                                               class="h-4 w-4 text-qricket-600 focus:ring-qricket-500 border-gray-300 rounded">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Free events only</span>
+                            </label>
+                        </div>
+                        
                                 <!-- Hidden fields to preserve basic filters -->
                                 <input type="hidden" name="search" value="{{ request('search') }}">
                         <input type="hidden" name="category" value="{{ request('category') }}">
                         <input type="hidden" name="price_min" value="{{ request('price_min') }}">
                         <input type="hidden" name="price_max" value="{{ request('price_max') }}">
+                        <input type="hidden" name="show_free" value="{{ request('show_free') ? '1' : '' }}">
                         
                                 <div class="md:col-span-2 lg:col-span-4 flex justify-end">
                                     <a href="{{ route('events.browse') }}" 

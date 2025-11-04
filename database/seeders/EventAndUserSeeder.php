@@ -375,10 +375,6 @@ class EventAndUserSeeder extends Seeder
 
     private function seedTicketLimitPricing(): void
     {
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        TicketLimitPricing::truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
         // Paid event pricing plans
         $paidPricingPlans = [
             [
@@ -467,12 +463,19 @@ class EventAndUserSeeder extends Seeder
             ],
         ];
 
+        // Create only if doesn't exist (based on ticket_quantity + type unique constraint)
         foreach ($paidPricingPlans as $plan) {
-            TicketLimitPricing::create($plan);
+            TicketLimitPricing::firstOrCreate(
+                ['ticket_quantity' => $plan['ticket_quantity'], 'type' => 'paid'],
+                $plan
+            );
         }
 
         foreach ($freePricingPlans as $plan) {
-            TicketLimitPricing::create($plan);
+            TicketLimitPricing::firstOrCreate(
+                ['ticket_quantity' => $plan['ticket_quantity'], 'type' => 'free'],
+                $plan
+            );
         }
     }
 }

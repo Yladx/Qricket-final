@@ -63,6 +63,11 @@ class EventBrowsingController extends Controller
             });
         }
 
+        // Free events filter
+        if ($request->boolean('show_free')) {
+            $query->where('is_free', true);
+        }
+
         // Handle upcoming vs past events filter
         // By default, show only upcoming events. If user checks "show_past", show all.
         $showPast = $request->boolean('show_past');
