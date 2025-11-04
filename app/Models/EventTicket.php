@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * - sold_count: number already sold (used to protect deletes/downsizing)
  * - sale_start: when this ticket becomes available
  * - sale_end: when this ticket stops selling (forced to event end)
+ * - is_active: whether this ticket type is currently active and available for purchase
+ * - sort_order: display order for ticket types
  */
 class EventTicket extends Model
 {
@@ -35,12 +37,16 @@ class EventTicket extends Model
         'sold_count',
         'sale_start',
         'sale_end',
+        'is_active',
+        'sort_order',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'sale_start' => 'datetime',
         'sale_end' => 'datetime',
+        'is_active' => 'boolean',
+        'sort_order' => 'integer',
     ];
 
     /**

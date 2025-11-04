@@ -56,7 +56,7 @@ class TicketPurchaseController extends Controller
         // Allow organizers and staff to buy tickets as requested (no blocks here)
 
         // Get available ticket types for this event
-        // For organizers, staff, and admins, show all tickets regardless of sale dates
+        // For organizers, staff, and admins, show all tickets regardless of sale dates and active status
         if ($isEventOrganizer || $isEventStaff || $isAdmin) {
             $ticketTypes = $event->eventTickets()
                 ->where(function($query) {
@@ -66,8 +66,9 @@ class TicketPurchaseController extends Controller
                 })
                 ->get();
         } else {
-            // For regular users, apply sale date filters
+            // For regular users, apply sale date filters and active status
             $ticketTypes = $event->eventTickets()
+                ->where('is_active', true) // Only active tickets
                 ->where(function($query) {
                     $query->whereNull('sale_start')
                           ->orWhere('sale_start', '<=', now());
@@ -217,6 +218,37 @@ class TicketPurchaseController extends Controller
                         'success' => false,
                         'message' => 'Invalid ticket type for this event'
                     ], 400);
+                }
+
+                // Check if ticket type is active (for regular users, organizers/staff/admins bypass)
+                if (!$isEventOrganizer && !$isEventStaff && !$isAdmin) {
+                    if (!$ticketType->is_active) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "{$ticketType->name} tickets are currently inactive and not available for purchase."
+                        ], 400);
+                    }
+                }
+
+                // Validate sale start/end dates for regular users (organizers/staff/admins bypass)
+                if (!$isEventOrganizer && !$isEventStaff && !$isAdmin) {
+                    $now = now();
+                    
+                    // Check if ticket sale has started
+                    if ($ticketType->sale_start && \Carbon\Carbon::parse($ticketType->sale_start)->isFuture()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "{$ticketType->name} tickets are not yet available for purchase. Sales start on " . \Carbon\Carbon::parse($ticketType->sale_start)->format('M d, Y H:i') . "."
+                        ], 400);
+                    }
+                    
+                    // Check if ticket sale has ended
+                    if ($ticketType->sale_end && \Carbon\Carbon::parse($ticketType->sale_end)->isPast()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "{$ticketType->name} tickets are no longer available for purchase. Sales ended on " . \Carbon\Carbon::parse($ticketType->sale_end)->format('M d, Y H:i') . "."
+                        ], 400);
+                    }
                 }
 
                 // Check if tickets are still available
