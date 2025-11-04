@@ -38,6 +38,12 @@
             <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
                 <div id="replies-list" class="p-6 space-y-5">
                     @forelse($ticket->replies as $reply)
+                        @php(
+                            $isDupOfOrigin = !$reply->is_admin_reply
+                                && (int)($reply->user_id) === (int)($ticket->user_id)
+                                && trim((string)$reply->message) === trim((string)($ticket->message ?? ''))
+                        )
+                        @continue($isDupOfOrigin)
                         @php($isMine = !$reply->is_admin_reply && ($reply->user_id === Auth::id()))
                         <div class="flex items-start {{ $isMine ? 'flex-row-reverse' : '' }}">
                             <div class="flex-shrink-0 {{ $isMine ? 'ml-3' : '' }} {{ $isMine ? '' : 'mr-3' }}">
@@ -141,6 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const userIdMeta = document.querySelector('meta[name="csrf-token"]');
         const ticketNumber = @json($ticket->ticket_number);
         const listContainer = document.getElementById('replies-list');
+        const originMessage = (document.querySelector('.bg-white.dark\\:bg-gray-800.shadow-sm.rounded-lg .mt-4')?.textContent || '').trim();
 
         if (typeof Pusher === 'undefined' || !window.PUSHER_APP_KEY) return;
 
@@ -159,6 +166,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const channel = p.subscribe('private-user.' + uid);
         channel.bind('support.reply', function(data) {
             if (!data || data.ticket_number !== ticketNumber) return;
+            const incomingText = (data.message || '').trim();
+            if (!data.is_admin_reply && originMessage && incomingText === originMessage) {
+                return; // Avoid duplicating the original ticket message
+            }
             // Append new reply to the list
             const wrapper = document.createElement('div');
             const isMine = !data.is_admin_reply; // user-side channel receives own replies as non-admin

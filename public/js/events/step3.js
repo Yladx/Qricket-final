@@ -383,6 +383,7 @@
         ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 align-middle">${soldCount} sold</span>`
         : '';
       
+      const displayQty = Math.max(soldCount, parseInt(t.quantity ?? '0', 10) || 0);
       row.innerHTML = `
         <div class="flex justify-end items-center space-x-2">
           ${purchaseIndicator}
@@ -402,7 +403,7 @@
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Quantity</label>
-              <input data-k="quantity" data-i="${idx}" type="number" min="${soldCount}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.quantity ?? ''}" ${free ? `max="${getTicketsPerEventLimit() || ''}"` : ''}>
+              <input data-k="quantity" data-i="${idx}" type="number" min="${soldCount}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${displayQty}" ${free ? `max="${getTicketsPerEventLimit() || ''}"` : ''}>
             </div>
           </div>
           <div>
@@ -834,6 +835,9 @@
         const minSold = Number(list[idx]?.purchased_count || 0);
         if (val < minSold) {
           val = minSold;
+          e.target.value = String(val);
+          e.target.classList.add('ring-2','ring-red-400');
+          setTimeout(()=>e.target.classList.remove('ring-2','ring-red-400'), 600);
         }
         if (val > allowedForThis) {
           val = allowedForThis;
