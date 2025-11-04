@@ -160,9 +160,13 @@
             console.error('[Event Overview] ❌ Subscription error on', eventChannelName + ':', status);
         });
 
-        // Listen for event-specific events
+        // Listen for event-specific events (support both names)
         eventChannel.bind('event.stats.updated', function(eventData) {
             console.log('[Event Overview] ⚡⚡⚡ RECEIVED event.stats.updated! ⚡⚡⚡', eventData);
+            handleEventStatsUpdate(eventData);
+        });
+        eventChannel.bind('event.stats.changed', function(eventData) {
+            console.log('[Event Overview] ⚡⚡⚡ RECEIVED event.stats.changed! ⚡⚡⚡', eventData);
             handleEventStatsUpdate(eventData);
         });
     }
@@ -277,23 +281,25 @@
             return;
         }
 
-        console.log('[Event Overview] Processing event stats update:', eventData);
+        // Support both schemas: direct fields or nested under `stats`
+        const stats = eventData.stats ? eventData.stats : eventData;
+        console.log('[Event Overview] Processing event stats update:', stats);
 
         // Update event metrics from stats
-        if (eventData.total_revenue !== undefined) {
-            updateElement('event-total-revenue', '₱' + parseFloat(eventData.total_revenue).toLocaleString('en-US', {minimumFractionDigits: 2}));
+        if (stats.total_revenue !== undefined) {
+            updateElement('event-total-revenue', '₱' + parseFloat(stats.total_revenue).toLocaleString('en-US', {minimumFractionDigits: 2}));
         }
 
-        if (eventData.total_tickets_sold !== undefined) {
-            updateElement('event-tickets-sold', eventData.total_tickets_sold.toLocaleString());
+        if (stats.total_tickets_sold !== undefined) {
+            updateElement('event-tickets-sold', stats.total_tickets_sold.toLocaleString());
         }
 
-        if (eventData.total_orders !== undefined) {
-            updateElement('event-total-orders', eventData.total_orders.toLocaleString());
+        if (stats.total_orders !== undefined) {
+            updateElement('event-total-orders', stats.total_orders.toLocaleString());
         }
 
-        if (eventData.expected_revenue !== undefined) {
-            const safeValue = Math.max(0, parseFloat(eventData.expected_revenue));
+        if (stats.expected_revenue !== undefined) {
+            const safeValue = Math.max(0, parseFloat(stats.expected_revenue));
             updateElement('event-expected-revenue', '₱' + safeValue.toLocaleString('en-US', {minimumFractionDigits: 2}));
         }
 

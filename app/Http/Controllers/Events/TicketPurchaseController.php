@@ -1389,6 +1389,14 @@ class TicketPurchaseController extends Controller
             ->where('status', 'paid')
             ->sum('total_amount');
 
+        // Compute net and expected revenue (net minus platform fee), never negative, 0 if free
+        $netAmount = (float) TicketPurchase::where('event_id', $event->id)
+            ->where('status', 'paid')
+            ->sum(\DB::raw('COALESCE(net_amount, total_amount)'));
+        $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
+        $qricketFee = max(0, $netAmount) * ($qricketFeePercentage / 100);
+        $expectedRevenue = ($event->is_free || $netAmount <= 0) ? 0 : max(0, $netAmount - $qricketFee);
+
         $totalTicketsSold = TicketPurchase::where('event_id', $event->id)
             ->where('status', 'paid')
             ->sum('quantity');
@@ -1414,6 +1422,7 @@ class TicketPurchaseController extends Controller
             'attendanceRate' => round($attendanceRate, 1),
             // Sales stats
             'totalRevenue' => $totalRevenue,
+            'expected_revenue' => $expectedRevenue,
             'totalTicketsSold' => $totalTicketsSold,
             'totalOrders' => $totalOrders,
             'conversionRate' => round($conversionRate, 1),

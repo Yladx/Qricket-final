@@ -679,11 +679,16 @@ class XenditWebhookController extends Controller
                             'created_at' => $additionalTicketPurchase->created_at->format('Y-m-d H:i:s'),
                         ];
 
-                        // Calculate event stats
+                        // Calculate event stats with expected_revenue (clamped)
+                        $netAmount = (float) $event->ticketPurchases()->where('status','paid')->sum(\DB::raw('COALESCE(net_amount,total_amount)'));
+                        $feePct = config('app.qricket_fee_percentage', 5);
+                        $fee = max(0, $netAmount) * ($feePct / 100);
+                        $expected = ($event->is_free || $netAmount <= 0) ? 0 : max(0, $netAmount - $fee);
                         $eventStats = [
                             'total_tickets_sold' => $event->ticketInformation()->count(),
                             'total_revenue' => $event->ticketPurchases()->where('status', 'paid')->sum('total_amount'),
                             'total_orders' => $event->ticketPurchases()->where('status', 'paid')->count(),
+                            'expected_revenue' => $expected,
                         ];
 
                         // Broadcast to organizer dashboard
@@ -794,10 +799,15 @@ class XenditWebhookController extends Controller
             ];
 
             // Calculate event stats
+            $netAmount = (float) $event->ticketPurchases()->where('status','paid')->sum(\DB::raw('COALESCE(net_amount,total_amount)'));
+            $feePct = config('app.qricket_fee_percentage', 5);
+            $fee = max(0, $netAmount) * ($feePct / 100);
+            $expected = ($event->is_free || $netAmount <= 0) ? 0 : max(0, $netAmount - $fee);
             $eventStats = [
                 'total_tickets_sold' => $event->ticketInformation()->count(),
                 'total_revenue' => $event->ticketPurchases()->where('status', 'paid')->sum('total_amount'),
                 'total_orders' => $event->ticketPurchases()->where('status', 'paid')->count(),
+                'expected_revenue' => $expected,
             ];
 
             // Broadcast sales report updates and dashboard stats for each organizer
