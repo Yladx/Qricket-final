@@ -381,7 +381,7 @@
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Price</label>
-              <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10 ${free ? 'opacity-60 cursor-not-allowed' : ''}" value="${free ? '0' : (t.price ?? '')}" ${free ? 'readonly disabled' : ''}>
+              <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10 ${free ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-700' : ''}" value="${free ? '0' : (t.price ?? '')}" ${free ? 'readonly disabled' : ''} ${free ? 'tabindex="-1"' : ''}>
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Quantity</label>
@@ -417,6 +417,36 @@
     validateAndSetMinMaxDates();
     // Update max attributes for quantities under current cap
     setTimeout(updateQuantityMaxes, 0);
+    
+    // Block price inputs for free events after rendering
+    if (free) {
+      setTimeout(() => {
+        document.querySelectorAll('input[data-k="price"]').forEach(input => {
+          input.setAttribute('readonly', 'readonly');
+          input.setAttribute('disabled', 'disabled');
+          input.value = '0';
+          input.style.pointerEvents = 'none';
+          input.style.backgroundColor = '#f3f4f6';
+          // Prevent any input events
+          input.addEventListener('keydown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }, true);
+          input.addEventListener('input', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            input.value = '0';
+            return false;
+          }, true);
+          input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }, true);
+        });
+      }, 0);
+    }
   }
 
   function queueAutosave() {
@@ -635,6 +665,37 @@
     list.push(newTicket);
     writeTypes(list);
     render();
+    // Immediately block price field after adding new ticket type
+    setTimeout(() => {
+      const free = isFreeEvent();
+      if (free) {
+        const priceInputs = document.querySelectorAll('input[data-k="price"]');
+        priceInputs.forEach(input => {
+          input.setAttribute('readonly', 'readonly');
+          input.setAttribute('disabled', 'disabled');
+          input.value = '0';
+          input.style.pointerEvents = 'none';
+          input.style.backgroundColor = '#f3f4f6';
+          // Prevent any input events
+          input.addEventListener('keydown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }, true);
+          input.addEventListener('input', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            input.value = '0';
+            return false;
+          }, true);
+          input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }, true);
+        });
+      }
+    }, 0);
     queueAutosave();
   }
 
@@ -795,11 +856,44 @@
     ticketContainer?.addEventListener('input', onContainerInput);
     ticketContainer?.addEventListener('click', onContainerClick);
     
+    // Block price field input for free events
+    const blockPriceInputs = () => {
+      const free = isFreeEvent();
+      if (free) {
+        document.querySelectorAll('input[data-k="price"]').forEach(input => {
+          input.setAttribute('readonly', 'readonly');
+          input.setAttribute('disabled', 'disabled');
+          input.value = '0';
+          input.style.pointerEvents = 'none';
+          input.style.backgroundColor = '#f3f4f6';
+          // Prevent any input events
+          input.addEventListener('keydown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          });
+          input.addEventListener('input', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            input.value = '0';
+            return false;
+          });
+          input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          });
+        });
+      }
+    };
+    
     // Initialize description counters for existing tickets
     setTimeout(() => {
       document.querySelectorAll('textarea[data-k="description"]').forEach(textarea => {
         updateDescriptionCounter(textarea);
       });
+      // Block price inputs after render
+      blockPriceInputs();
     }, 100);
 
     // hydrate settings UI
