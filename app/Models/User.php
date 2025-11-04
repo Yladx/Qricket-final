@@ -10,6 +10,16 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+/**
+ * User model (application end-users)
+ *
+ * Columns:
+ * - first_name, last_name, email, password
+ * - organizer: flag to enable organizer features
+ * - verified_organizer: datetime when organizer verification approved
+ * - profile_picture: R2 path to avatar
+ * - status: active|deleted|banned with corresponding timestamps (deleted_at, banned_at, banned_until, banned_reason)
+ */
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */

@@ -1,4 +1,13 @@
 <?php
+/**
+ * EventFeedback model (post-event feedback submissions)
+ *
+ * Common columns (inferred):
+ * - event_id: target event
+ * - user_id: respondent
+ * - rating: numeric rating value
+ * - comments: free-text feedback
+ */
 
 namespace App\Models;
 

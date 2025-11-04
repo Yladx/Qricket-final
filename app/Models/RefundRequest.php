@@ -1,4 +1,8 @@
 <?php
+/**
+ * RefundRequest model (refund workflow)
+ * Columns: user_id, event_id, ticket_purchase_id, amount, currency, reason, status, decided_at
+ */
 
 namespace App\Models;
 

@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * TicketInformation model (legacy alias to event_ticket_information)
+ * Columns: ticket_id, user_id, event_id, ticket_purchase_id, qr_code_data, checked_in_at, certificate_given
+ */
 class TicketInformation extends Model
 {
     use HasFactory;

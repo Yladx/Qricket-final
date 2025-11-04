@@ -1,4 +1,8 @@
 <?php
+/**
+ * SocialMediaLink model (user profile links)
+ * Columns: user_id, platform, url, username
+ */
 
 namespace App\Models;
 

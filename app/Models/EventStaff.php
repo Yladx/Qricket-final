@@ -1,4 +1,8 @@
 <?php
+/**
+ * EventStaff model (event staff assignments)
+ * Columns: event_id, user_id, role, can_manage_event, can_manage_staff, can_manage_ticket, can_manage_news, can_manage_attendance, can_manage_sales
+ */
 
 namespace App\Models;
 

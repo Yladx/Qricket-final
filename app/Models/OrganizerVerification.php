@@ -1,4 +1,8 @@
 <?php
+/**
+ * OrganizerVerification model (KYC for organizers)
+ * Columns: user_id, status, rejection_reason, submitted_at, reviewed_at, documents(json)
+ */
 
 namespace App\Models;
 

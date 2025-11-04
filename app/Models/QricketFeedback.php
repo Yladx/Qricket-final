@@ -1,4 +1,8 @@
 <?php
+/**
+ * QricketFeedback model (platform feedback)
+ * Columns: user_id, rating, message, page, metadata
+ */
 
 namespace App\Models;
 

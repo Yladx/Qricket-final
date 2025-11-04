@@ -6,6 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * TicketLimitPricing model (additional ticket bundles/pricing)
+ *
+ * Columns:
+ * - name: label for this bundle
+ * - ticket_quantity: number of extra tickets included
+ * - price: bundle price
+ * - currency: currency code
+ * - description: admin-facing notes/short copy
+ * - is_active: whether selectable in UI
+ * - sort_order: display ordering
+ * - type: 'free' or 'paid' event applicability
+ */
 class TicketLimitPricing extends Model
 {
     use HasFactory;

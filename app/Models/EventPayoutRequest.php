@@ -1,4 +1,8 @@
 <?php
+/**
+ * EventPayoutRequest model (requested payouts from organizers)
+ * Columns: event_id, user_id, amount, currency, status, requested_at, processed_at
+ */
 
 namespace App\Models;
 

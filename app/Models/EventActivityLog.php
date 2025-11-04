@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * EventActivityLog model (activities tied to a specific event)
+ *
+ * Columns:
+ * - event_id: target event
+ * - user_id: actor (nullable when admin)
+ * - action: event/ticket/news/staff actions key
+ * - description: readable text
+ * - metadata: JSON context
+ * - ip_address, user_agent: request info
+ */
 class EventActivityLog extends Model
 {
     use HasFactory;

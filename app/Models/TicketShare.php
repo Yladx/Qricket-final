@@ -1,4 +1,8 @@
 <?php
+/**
+ * TicketShare model (legacy generic share records)
+ * Columns: ticket_information_id, from_user_id, to_user_id, status, accepted_at
+ */
 
 namespace App\Models;
 

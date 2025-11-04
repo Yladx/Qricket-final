@@ -6,6 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * AdminActivityLog model (admin activity audit)
+ *
+ * Columns:
+ * - admin_id: actor admin
+ * - action: action key (login, logout, update_user, ...)
+ * - description: human readable note
+ * - ip_address: source IP
+ * - user_agent: agent string
+ * - metadata: JSON payload
+ */
 class AdminActivityLog extends Model
 {
     use HasFactory;

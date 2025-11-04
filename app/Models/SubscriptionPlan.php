@@ -6,6 +6,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * SubscriptionPlan model (pricing tier definition)
+ *
+ * Columns:
+ * - name: plan name
+ * - slug: unique slug key
+ * - description: marketing description
+ * - price: monthly price of the plan
+ * - currency: currency code for price
+ * - events_per_month: allowed new events per month (null = unlimited)
+ * - tickets_per_event: base ticket cap per event (null = unlimited)
+ * - advanced_layouts: access flag for premium layouts
+ * - advanced_analytics: access flag for analytics
+ * - features: array of extra feature flags
+ * - is_active: whether plan is sellable
+ * - sort_order: ordering weight in UI
+ * - free_events_count: included free events quota
+ * - free_event_ticket_limit: per-event ticket cap for free events
+ */
 class SubscriptionPlan extends Model
 {
     use HasFactory;

@@ -1,4 +1,8 @@
 <?php
+/**
+ * SavedEvent model (user bookmarks)
+ * Columns: user_id, event_id, saved_at
+ */
 
 namespace App\Models;
 

@@ -1,4 +1,8 @@
 <?php
+/**
+ * EventRegistration model (RSVP/registration records)
+ * Columns: event_id, user_id, status, registered_at, checked_in_at
+ */
 
 namespace App\Models;
 

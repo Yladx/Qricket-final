@@ -7,6 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
 
+/**
+ * Subscription model (user’s active plan state)
+ *
+ * Columns:
+ * - user_id: subscriber
+ * - subscription_plan_id|plan_id: plan reference (new|legacy)
+ * - status: active|cancelled|expired|trialing
+ * - starts_at, expires_at: active window
+ * - cancel_at_period_end, cancel_at, cancelled_at: cancellation markers
+ * - cancellation_reason: optional reason text
+ * - payment_method, payment_reference: billing info snapshot
+ * - discount_code: applied promo code
+ * - metadata: arbitrary JSON
+ * - xendit_invoice_id, xendit_payment_id: gateway references (legacy)
+ * - amount, currency, start_date, end_date, payment_status: legacy billing
+ * - transaction_fee, vat_amount, net_amount, total_fees: fee breakdown
+ */
 class Subscription extends Model
 {
     use HasFactory;

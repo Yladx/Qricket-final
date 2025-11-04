@@ -1,4 +1,8 @@
 <?php
+/**
+ * EventTicketType model (legacy ticket type table)
+ * Columns: event_id, name, price, description, quantity, sold_count, is_active
+ */
 
 namespace App\Models;
 

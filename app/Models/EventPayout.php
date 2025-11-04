@@ -1,4 +1,8 @@
 <?php
+/**
+ * EventPayout model (finalized payouts for events)
+ * Columns (typical): event_id, amount, currency, status, paid_at, reference
+ */
 
 namespace App\Models;
 

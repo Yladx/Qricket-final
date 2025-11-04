@@ -10,6 +10,19 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
 
+/**
+ * Admin model (backoffice users)
+ *
+ * Columns:
+ * - username: unique admin handle
+ * - password: hashed password
+ * - role: superadmin|manager|support|... used for authorization
+ * - pin: encrypted short PIN used for sensitive actions
+ * - last_login_at: last successful login time
+ * - failed_login_attempts: counter for lockout policy
+ * - locked_until: datetime lock expires
+ * - current_session_id: session marker for single-session policies
+ */
 class Admin extends Authenticatable
 {
     use HasFactory, Notifiable;

@@ -6,6 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * ActivityLog model (generic user/admin activity events)
+ *
+ * Columns:
+ * - user_id: actor id
+ * - action: short action key (e.g., login, event_update)
+ * - description: human readable details
+ * - ip_address: source IP
+ * - user_agent: browser agent string
+ * - metadata: extra JSON context
+ */
 class ActivityLog extends Model
 {
     use HasFactory;

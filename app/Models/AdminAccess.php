@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * AdminAccess model (fine-grained admin permissions)
+ *
+ * Columns:
+ * - admin_id: owner admin
+ * - can_manage_admins|users|verifications|support: capability switches
+ * - can_view_logs: audit access
+ * - custom_permissions: additional JSON flags per feature
+ */
 class AdminAccess extends Model
 {
     use HasFactory;

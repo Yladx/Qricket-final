@@ -1,4 +1,8 @@
 <?php
+/**
+ * DiscountUsage model (audit usage of discount codes)
+ * Columns: discount_id, user_id, usage_type, reference_id, reference_type, discount_amount, original_amount
+ */
 
 namespace App\Models;
 

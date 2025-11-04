@@ -7,6 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 
+/**
+ * Discount model (promo codes)
+ * Columns:
+ * - name, code: identifiers
+ * - type: percentage|fixed
+ * - value: percent or fixed amount
+ * - currency: when type=fixed
+ * - applicable_to: scope (event, subscription, etc.)
+ * - usage_limit, per_user_limit, used_count: quotas
+ * - starts_at, expires_at: validity window
+ * - is_active: enable/disable
+ * - description, conditions: extra metadata
+ */
 class Discount extends Model
 {
     use HasFactory;

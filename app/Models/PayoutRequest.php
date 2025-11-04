@@ -1,4 +1,8 @@
 <?php
+/**
+ * PayoutRequest model (general payout requests)
+ * Columns: user_id, amount, currency, status, requested_at, processed_at, reference
+ */
 
 namespace App\Models;
 

@@ -7,6 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\SupportTicket;
 use App\Models\Event;
 
+/**
+ * Notification model (in-app notifications for users/admins)
+ *
+ * Columns:
+ * - user_id|admin_id: recipient
+ * - type: domain area (event|ticket|support|organizer|...)
+ * - action: specific action key
+ * - reference_id: related record id (event, ticket, etc.)
+ * - title, message: stored/customized text (computed if missing)
+ * - data: JSON payload for dynamic rendering
+ * - is_read: read flag
+ */
 class Notification extends Model
 {
     use HasFactory;

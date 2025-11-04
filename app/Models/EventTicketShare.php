@@ -1,4 +1,8 @@
 <?php
+/**
+ * EventTicketShare model (share invitations/records for tickets)
+ * Columns: shared_ticket_id, from_user_id, to_user_id, status, accepted_at
+ */
 
 namespace App\Models;
 

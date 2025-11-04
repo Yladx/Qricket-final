@@ -1,4 +1,8 @@
 <?php
+/**
+ * EventOrganizer model (legacy/event-to-organizer mapping)
+ * Columns (typical): event_id, user_id, role
+ */
 
 namespace App\Models;
 

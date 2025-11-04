@@ -1,4 +1,8 @@
 <?php
+/**
+ * EventVerificationRequest model (moderation/approval workflow)
+ * Columns: event_id, admin_id, status, notes, submitted_at, reviewed_at
+ */
 
 namespace App\Models;
 

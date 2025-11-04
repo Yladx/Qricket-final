@@ -1,4 +1,8 @@
 <?php
+/**
+ * EventNews model (news posts tied to events)
+ * Columns (typical): event_id, title, body, is_published, published_at
+ */
 
 namespace App\Models;
 

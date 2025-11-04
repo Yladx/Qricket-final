@@ -6,6 +6,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * TicketLimitPurchase model (orders for additional ticket bundles)
+ *
+ * Columns:
+ * - user_id: buyer
+ * - event_id: event receiving additional tickets
+ * - ticket_limit_pricing_id: selected bundle
+ * - additional_tickets: quantity unlocked by this order
+ * - amount, currency: bundle price and currency
+ * - status: pending|paid|failed|expired|refunded
+ * - payment_method, payment_reference: gateway info
+ * - purchase_id: order reference
+ * - xendit_invoice_id, xendit_payment_id: provider ids
+ * - payment_details, customer_details: payload snapshots
+ * - expires_at, paid_at: invoice expiry and payment time
+ * - discount_code, metadata: extras
+ * - transaction_fee, vat_amount, net_amount, total_fees: fee breakdown
+ */
 class TicketLimitPurchase extends Model
 {
     use HasFactory;
