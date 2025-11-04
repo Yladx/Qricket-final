@@ -61,7 +61,7 @@
                     <div id="layout-components-display" class="space-y-8"></div>
 
                     <!-- Event News Section -->
-                    <div id="event-news-section" style="display: {{ $section === 'news' ? 'block' : 'none' }};" class="mt-6">
+                    <div id="event-news-section" style="display: {{ $section === 'news' ? 'block' : 'none' }};" class="mt-6 mb-16 md:mb-24">
                         <x-events.news :news="$news" :event="$event" />
                     </div>
                 </div>

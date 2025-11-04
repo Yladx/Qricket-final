@@ -38,18 +38,21 @@
             <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
                 <div id="replies-list" class="p-6 space-y-5">
                     @forelse($ticket->replies as $reply)
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
+                        @php($isMine = !$reply->is_admin_reply && ($reply->user_id === Auth::id()))
+                        <div class="flex items-start {{ $isMine ? 'flex-row-reverse' : '' }}">
+                            <div class="flex-shrink-0 {{ $isMine ? 'ml-3' : '' }} {{ $isMine ? '' : 'mr-3' }}">
                                 <div class="h-8 w-8 rounded-full {{ $reply->is_admin_reply ? 'bg-qricket-600' : 'bg-gray-500' }} text-white flex items-center justify-center text-xs font-semibold">
                                     {{ $reply->is_admin_reply ? strtoupper(substr($reply->admin?->username ?? 'A',0,1)) : strtoupper(substr($reply->user?->first_name ?? 'U',0,1)) }}
                                 </div>
                             </div>
-                            <div class="ml-3 flex-1">
-                                <div class="flex items-center justify-between">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $reply->is_admin_reply ? ($reply->admin?->username ?? 'Admin') : ($reply->user?->full_name ?? 'You') }}</p>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ $reply->created_at->diffForHumans() }}</span>
+                            <div class="flex-1">
+                                <div class="flex items-center {{ $isMine ? 'justify-between flex-row-reverse' : 'justify-between' }}">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 {{ $isMine ? 'text-right' : '' }}">{{ $reply->is_admin_reply ? ($reply->admin?->username ?? 'Admin') : ($reply->user?->full_name ?? 'You') }}</p>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 {{ $isMine ? '' : '' }}">{{ $reply->created_at->diffForHumans() }}</span>
                                 </div>
-                                <div class="mt-1 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line">{{ $reply->message }}</div>
+                                <div class="mt-1 {{ $isMine ? 'text-right' : '' }}">
+                                    <span class="inline-block px-3 py-2 rounded-lg {{ $isMine ? 'bg-qricket-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} whitespace-pre-line">{{ $reply->message }}</span>
+                                </div>
                             </div>
                         </div>
                     @empty
@@ -158,20 +161,23 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!data || data.ticket_number !== ticketNumber) return;
             // Append new reply to the list
             const wrapper = document.createElement('div');
-            wrapper.className = 'flex items-start';
+            const isMine = !data.is_admin_reply; // user-side channel receives own replies as non-admin
+            wrapper.className = 'flex items-start ' + (isMine ? 'flex-row-reverse' : '');
             const badgeBg = data.is_admin_reply ? 'bg-qricket-600' : 'bg-gray-500';
             wrapper.innerHTML = `
-                <div class="flex-shrink-0">
+                <div class="flex-shrink-0 ${isMine ? 'ml-3' : 'mr-3'}">
                     <div class="h-8 w-8 rounded-full ${badgeBg} text-white flex items-center justify-center text-xs font-semibold">
                         ${data.author?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
                 </div>
-                <div class="ml-3 flex-1">
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">${data.is_admin_reply ? (data.author || 'Admin') : (data.author || 'You')}</p>
+                <div class="flex-1">
+                    <div class="flex items-center ${isMine ? 'justify-between flex-row-reverse' : 'justify-between'}">
+                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100 ${isMine ? 'text-right' : ''}">${data.is_admin_reply ? (data.author || 'Admin') : (data.author || 'You')}</p>
                         <span class="text-xs text-gray-500 dark:text-gray-400">just now</span>
                     </div>
-                    <div class="mt-1 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line"></div>
+                    <div class="mt-1 ${isMine ? 'text-right' : ''}">
+                        <span class="inline-block px-3 py-2 rounded-lg ${isMine ? 'bg-qricket-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'} whitespace-pre-line"></span>
+                    </div>
                 </div>
             `;
             wrapper.querySelector('.whitespace-pre-line').textContent = data.message;

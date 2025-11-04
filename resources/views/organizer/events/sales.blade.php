@@ -64,7 +64,6 @@
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
                                 <th class="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Buyer</th>
-                                <th class="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Invoice ID</th>
                                 <th class="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Purchase ID</th>
                                 <th class="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Ticket</th>
                                 <th class="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-200">Status</th>
@@ -81,7 +80,6 @@
                             @forelse($sales as $sale)
                                 <tr class="group">
                                     <td class="px-4 py-2 text-gray-900 dark:text-gray-100">{{ trim(($sale->user->first_name ?? '').' '.($sale->user->last_name ?? '')) ?: 'Unknown' }}</td>
-                                    <td class="px-4 py-2 text-gray-700 dark:text-gray-300">{{ $sale->invoice_id ?? $sale->invoice ?? $sale->invoice_no ?? $sale->invoice_number ?? $sale->reference ?? $sale->payment_reference ?? '—' }}</td>
                                     <td class="px-4 py-2 text-gray-700 dark:text-gray-300">{{ $sale->id }}</td>
                                     <td class="px-4 py-2 text-gray-700 dark:text-gray-300">{{ $sale->ticketType->name ?? 'Ticket' }}</td>
                                     <td class="px-4 py-2">
@@ -106,7 +104,7 @@
                                     </td>
                                 </tr>
                                 <tr id="sale-{{ $sale->id }}" class="hidden">
-                                    <td colspan="12" class="px-6 py-4 bg-gray-50 dark:bg-gray-900">
+                                    <td colspan="11" class="px-6 py-4 bg-gray-50 dark:bg-gray-900">
                                         <div class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                                             <div class="font-semibold">Tickets</div>
                                             <div class="overflow-x-auto">
@@ -136,7 +134,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="12" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">No ticket sales yet.</td>
+                                    <td colspan="11" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">No ticket sales yet.</td>
                                 </tr>
                             @endforelse
                         </tbody>
