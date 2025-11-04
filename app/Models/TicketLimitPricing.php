@@ -20,6 +20,7 @@ class TicketLimitPricing extends Model
         'description',
         'is_active',
         'sort_order',
+        'type',
     ];
 
     protected $casts = [
@@ -33,6 +34,15 @@ class TicketLimitPricing extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope for filtering by event type
+     */
+    public function scopeForEventType($query, $eventType)
+    {
+        $type = $eventType === true || $eventType === 1 || $eventType === '1' ? 'free' : 'paid';
+        return $query->where('type', $type);
     }
 
     /**

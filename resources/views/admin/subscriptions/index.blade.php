@@ -95,14 +95,6 @@
                                                     <span class="text-gray-700 dark:text-gray-300">Advanced analytics</span>
                                                 </div>
                                             @endif
-                                            @if($plan->priority_support)
-                                                <div class="flex items-center text-sm">
-                                                    <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                    <span class="text-gray-700 dark:text-gray-300">Priority support</span>
-                                                </div>
-                                            @endif
                                         </div>
                                         
                                         <!-- Status -->
@@ -161,7 +153,12 @@
                                 @foreach($pricingPlans as $plan)
                                     <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                                         <div class="flex-1">
-                                            <h4 class="font-semibold text-gray-900 dark:text-gray-100">{{ $plan->name }}</h4>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <h4 class="font-semibold text-gray-900 dark:text-gray-100">{{ $plan->name }}</h4>
+                                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $plan->type === 'free' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' }}">
+                                                    {{ ucfirst($plan->type) }}
+                                                </span>
+                                            </div>
                                             <p class="text-sm text-gray-600 dark:text-gray-400">{{ $plan->ticket_quantity }} additional tickets</p>
                                             <p class="text-lg font-bold text-qricket-600 dark:text-qricket-400">{{ $plan->formatted_price }}</p>
                                             @if($plan->description)
@@ -359,18 +356,6 @@
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Advanced Analytics</span>
                                 </label>
                             </div>
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="checkbox" name="priority_support" class="rounded border-gray-300 text-qricket-600 shadow-sm focus:border-qricket-300 focus:ring focus:ring-qricket-200 focus:ring-opacity-50">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Priority Support</span>
-                                </label>
-                            </div>
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="checkbox" name="api_access" class="rounded border-gray-300 text-qricket-600 shadow-sm focus:border-qricket-300 focus:ring focus:ring-qricket-200 focus:ring-opacity-50">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">API Access</span>
-                                </label>
-                            </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sort Order</label>
@@ -422,8 +407,21 @@
                             <textarea name="description" rows="3" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500"></textarea>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Event Type</label>
+                            <select name="type" required class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
+                                <option value="paid">Paid Event</option>
+                                <option value="free">Free Event</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sort Order</label>
                             <input type="number" name="sort_order" min="0" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
+                        </div>
+                        <div>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="is_active" value="1" class="rounded border-gray-300 text-qricket-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500">
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Active</span>
+                            </label>
                         </div>
                     </div>
                     <div class="flex justify-end space-x-3 mt-6">
@@ -611,6 +609,14 @@
             document.getElementById('pricingModalTitle').textContent = 'Add Pricing Plan';
             document.getElementById('pricingForm').action = '{{ route("admin.subscriptions.pricing.store") }}';
             document.getElementById('pricingForm').method = 'POST';
+            
+            // Remove method override if it exists
+            let methodInput = document.getElementById('pricingForm').querySelector('input[name="_method"]');
+            if (methodInput) {
+                methodInput.remove();
+            }
+            
+            // Reset form
             document.getElementById('pricingForm').reset();
         }
 
@@ -619,8 +625,42 @@
         }
 
         function editPricingPlan(id) {
-            // Implementation for editing pricing plan
-            console.log('Edit pricing plan:', id);
+            // Find the pricing plan data
+            const planData = @json($pricingPlans->keyBy('id'));
+            const plan = planData[id];
+            
+            if (!plan) {
+                console.error('Pricing plan not found:', id);
+                return;
+            }
+            
+            // Open modal and populate with existing data
+            document.getElementById('pricingModal').classList.remove('hidden');
+            document.getElementById('pricingModalTitle').textContent = 'Edit Pricing Plan';
+            
+            // Set form action for update
+            document.getElementById('pricingForm').action = `{{ url('admin/subscriptions/pricing') }}/${id}`;
+            document.getElementById('pricingForm').method = 'POST';
+            
+            // Add method override for PUT request
+            let methodInput = document.getElementById('pricingForm').querySelector('input[name="_method"]');
+            if (!methodInput) {
+                methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                document.getElementById('pricingForm').appendChild(methodInput);
+            }
+            methodInput.value = 'PUT';
+            
+            // Populate form fields
+            document.querySelector('#pricingForm input[name="name"]').value = plan.name || '';
+            document.querySelector('#pricingForm input[name="ticket_quantity"]').value = plan.ticket_quantity || '';
+            document.querySelector('#pricingForm input[name="price"]').value = plan.price || '';
+            document.querySelector('#pricingForm select[name="currency"]').value = plan.currency || 'PHP';
+            document.querySelector('#pricingForm select[name="type"]').value = plan.type || 'paid';
+            document.querySelector('#pricingForm textarea[name="description"]').value = plan.description || '';
+            document.querySelector('#pricingForm input[name="sort_order"]').value = plan.sort_order || '';
+            document.querySelector('#pricingForm input[name="is_active"]').checked = plan.is_active || false;
         }
 
         function deletePricingPlan(id) {

@@ -229,13 +229,8 @@ class EventAndUserSeeder extends Seeder
                 'currency' => 'PHP',
                 'events_per_month' => 1,
                 'tickets_per_event' => 100,
-                'max_event_duration_days' => 1,
                 'advanced_layouts' => false,
                 'advanced_analytics' => false,
-                'custom_domain' => false,
-                'priority_support' => false,
-                'api_access' => false,
-                'white_label' => false,
                 'features' => ['Basic analytics', 'Email support'],
                 'is_active' => true,
                 'sort_order' => 1,
@@ -248,13 +243,8 @@ class EventAndUserSeeder extends Seeder
                 'currency' => 'PHP',
                 'events_per_month' => 5,
                 'tickets_per_event' => 500,
-                'max_event_duration_days' => 7,
                 'advanced_layouts' => true,
                 'advanced_analytics' => true,
-                'custom_domain' => false,
-                'priority_support' => false,
-                'api_access' => false,
-                'white_label' => false,
                 'features' => ['Advanced analytics', 'Email support', 'Advanced layouts'],
                 'is_active' => true,
                 'sort_order' => 2,
@@ -267,13 +257,8 @@ class EventAndUserSeeder extends Seeder
                 'currency' => 'PHP',
                 'events_per_month' => 15,
                 'tickets_per_event' => 2000,
-                'max_event_duration_days' => 7,
                 'advanced_layouts' => true,
                 'advanced_analytics' => true,
-                'custom_domain' => true,
-                'priority_support' => true,
-                'api_access' => true,
-                'white_label' => false,
                 'features' => ['Priority support', 'API access', 'Custom domain', 'White label options'],
                 'is_active' => true,
                 'sort_order' => 3,
@@ -286,13 +271,8 @@ class EventAndUserSeeder extends Seeder
                 'currency' => 'PHP',
                 'events_per_month' => null, // Unlimited
                 'tickets_per_event' => null, // Unlimited
-                'max_event_duration_days' => null, // Unlimited
                 'advanced_layouts' => true,
                 'advanced_analytics' => true,
-                'custom_domain' => true,
-                'priority_support' => true,
-                'api_access' => true,
-                'white_label' => true,
                 'features' => ['Dedicated account manager', 'Custom integrations', 'Unlimited everything'],
                 'is_active' => true,
                 'sort_order' => 4,
@@ -399,7 +379,8 @@ class EventAndUserSeeder extends Seeder
         TicketLimitPricing::truncate();
         \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        $pricingPlans = [
+        // Paid event pricing plans
+        $paidPricingPlans = [
             [
                 'name' => 'Small Pack',
                 'ticket_quantity' => 50,
@@ -408,6 +389,7 @@ class EventAndUserSeeder extends Seeder
                 'description' => 'Perfect for small events',
                 'is_active' => true,
                 'sort_order' => 1,
+                'type' => 'paid',
             ],
             [
                 'name' => 'Standard Pack',
@@ -417,6 +399,7 @@ class EventAndUserSeeder extends Seeder
                 'description' => 'Great value for regular events',
                 'is_active' => true,
                 'sort_order' => 2,
+                'type' => 'paid',
             ],
             [
                 'name' => 'Large Pack',
@@ -426,6 +409,7 @@ class EventAndUserSeeder extends Seeder
                 'description' => 'Best for larger gatherings',
                 'is_active' => true,
                 'sort_order' => 3,
+                'type' => 'paid',
             ],
             [
                 'name' => 'Premium Pack',
@@ -435,6 +419,7 @@ class EventAndUserSeeder extends Seeder
                 'description' => 'Premium option for major events',
                 'is_active' => true,
                 'sort_order' => 4,
+                'type' => 'paid',
             ],
             [
                 'name' => 'Enterprise Pack',
@@ -444,10 +429,49 @@ class EventAndUserSeeder extends Seeder
                 'description' => 'Maximum tickets for enterprise events',
                 'is_active' => true,
                 'sort_order' => 5,
+                'type' => 'paid',
             ],
         ];
 
-        foreach ($pricingPlans as $plan) {
+        // Free event pricing plans
+        $freePricingPlans = [
+            [
+                'name' => 'Small Pack (Free)',
+                'ticket_quantity' => 50,
+                'price' => 249.00,
+                'currency' => 'PHP',
+                'description' => 'Perfect for small free events',
+                'is_active' => true,
+                'sort_order' => 1,
+                'type' => 'free',
+            ],
+            [
+                'name' => 'Standard Pack (Free)',
+                'ticket_quantity' => 100,
+                'price' => 449.00,
+                'currency' => 'PHP',
+                'description' => 'Great value for free events',
+                'is_active' => true,
+                'sort_order' => 2,
+                'type' => 'free',
+            ],
+            [
+                'name' => 'Large Pack (Free)',
+                'ticket_quantity' => 200,
+                'price' => 799.00,
+                'currency' => 'PHP',
+                'description' => 'Best for larger free gatherings',
+                'is_active' => true,
+                'sort_order' => 3,
+                'type' => 'free',
+            ],
+        ];
+
+        foreach ($paidPricingPlans as $plan) {
+            TicketLimitPricing::create($plan);
+        }
+
+        foreach ($freePricingPlans as $plan) {
             TicketLimitPricing::create($plan);
         }
     }

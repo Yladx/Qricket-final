@@ -190,12 +190,22 @@ class SubscriptionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'ticket_quantity' => 'required|integer|min:1|unique:ticket_limit_pricing',
+            'ticket_quantity' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
             'currency' => 'required|string|size:3',
             'description' => 'nullable|string',
             'sort_order' => 'integer|min:0',
+            'type' => 'required|in:free,paid',
         ]);
+
+        // Check unique ticket_quantity per type
+        $existing = TicketLimitPricing::where('ticket_quantity', $request->ticket_quantity)
+            ->where('type', $request->type)
+            ->first();
+        
+        if ($existing) {
+            $validator->errors()->add('ticket_quantity', 'This ticket quantity already exists for ' . $request->type . ' events.');
+        }
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -211,7 +221,8 @@ class SubscriptionController extends Controller
             'ticket_quantity' => $request->ticket_quantity,
             'price' => $request->price,
             'currency' => $request->currency,
-        ], 'Created ticket limit pricing: ' . $request->name);
+            'type' => $request->type,
+        ], 'Created ticket limit pricing: ' . $request->name . ' (' . $request->type . ' events)');
 
         return redirect()->route('admin.subscriptions.index')
             ->with('success', 'Pricing plan created successfully.');
@@ -224,13 +235,24 @@ class SubscriptionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'ticket_quantity' => 'required|integer|min:1|unique:ticket_limit_pricing,ticket_quantity,' . $pricing->id,
+            'ticket_quantity' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
             'currency' => 'required|string|size:3',
             'description' => 'nullable|string',
             'sort_order' => 'integer|min:0',
             'is_active' => 'boolean',
+            'type' => 'required|in:free,paid',
         ]);
+
+        // Check unique ticket_quantity per type
+        $existing = TicketLimitPricing::where('ticket_quantity', $request->ticket_quantity)
+            ->where('type', $request->type)
+            ->where('id', '!=', $pricing->id)
+            ->first();
+        
+        if ($existing) {
+            $validator->errors()->add('ticket_quantity', 'This ticket quantity already exists for ' . $request->type . ' events.');
+        }
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -397,8 +419,6 @@ class SubscriptionController extends Controller
             'tickets_per_event' => 'nullable|integer|min:1',
             'advanced_layouts' => 'boolean',
             'advanced_analytics' => 'boolean',
-            'priority_support' => 'boolean',
-            'api_access' => 'boolean',
             'sort_order' => 'integer|min:0',
         ]);
 
@@ -420,8 +440,6 @@ class SubscriptionController extends Controller
             'features' => [
                 'advanced_layouts' => $request->advanced_layouts,
                 'advanced_analytics' => $request->advanced_analytics,
-                'priority_support' => $request->priority_support,
-                'api_access' => $request->api_access,
             ],
         ], 'Created subscription plan: ' . $request->name);
 
@@ -443,8 +461,6 @@ class SubscriptionController extends Controller
             'tickets_per_event' => 'nullable|integer|min:1',
             'advanced_layouts' => 'boolean',
             'advanced_analytics' => 'boolean',
-            'priority_support' => 'boolean',
-            'api_access' => 'boolean',
             'sort_order' => 'integer|min:0',
             'is_active' => 'boolean',
         ]);
@@ -469,8 +485,6 @@ class SubscriptionController extends Controller
             'features' => [
                 'advanced_layouts' => $plan->advanced_layouts,
                 'advanced_analytics' => $plan->advanced_analytics,
-                'priority_support' => $plan->priority_support,
-                'api_access' => $plan->api_access,
             ],
         ], 'Updated subscription plan: ' . $plan->name);
 

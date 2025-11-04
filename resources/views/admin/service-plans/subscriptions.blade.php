@@ -186,14 +186,6 @@
                                             <span class="text-gray-700 dark:text-gray-300">Advanced analytics</span>
                                         </div>
                                     @endif
-                                    @if($plan->priority_support)
-                                        <div class="flex items-center text-sm">
-                                            <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                            <span class="text-gray-700 dark:text-gray-300">Priority support</span>
-                                        </div>
-                                    @endif
                                 </div>
                                 
                                 <!-- Status -->
@@ -284,18 +276,6 @@
                                 <label class="flex items-center">
                                     <input type="checkbox" name="advanced_analytics" class="rounded border-gray-300 text-qricket-600 shadow-sm focus:border-qricket-300 focus:ring focus:ring-qricket-200 focus:ring-opacity-50">
                                     <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Advanced Analytics</span>
-                                </label>
-                            </div>
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="checkbox" name="priority_support" class="rounded border-gray-300 text-qricket-600 shadow-sm focus:border-qricket-300 focus:ring focus:ring-qricket-200 focus:ring-opacity-50">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Priority Support</span>
-                                </label>
-                            </div>
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="checkbox" name="api_access" class="rounded border-gray-300 text-qricket-600 shadow-sm focus:border-qricket-300 focus:ring focus:ring-qricket-200 focus:ring-opacity-50">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">API Access</span>
                                 </label>
                             </div>
                         </div>
@@ -521,14 +501,21 @@
             document.querySelector('input[name="name"]').value = plan.name || '';
             document.querySelector('input[name="slug"]').value = plan.slug || '';
             document.querySelector('input[name="price"]').value = plan.price || '';
-            document.querySelector('select[name="currency"]').value = plan.currency || 'PHP';
             document.querySelector('input[name="tickets_per_event"]').value = plan.tickets_per_event || '';
             document.querySelector('input[name="events_per_month"]').value = plan.events_per_month || '';
             document.querySelector('input[name="sort_order"]').value = plan.sort_order || '';
             document.querySelector('textarea[name="description"]').value = plan.description || '';
-            document.querySelector('input[name="features"]').value = plan.features ? JSON.stringify(plan.features) : '';
-            document.querySelector('input[name="is_active"]').checked = plan.is_active || false;
-            document.querySelector('input[name="is_popular"]').checked = plan.is_popular || false;
+            
+            // Set checkboxes
+            const advancedLayoutsCheckbox = document.querySelector('input[name="advanced_layouts"]');
+            if (advancedLayoutsCheckbox) {
+                advancedLayoutsCheckbox.checked = plan.advanced_layouts || false;
+            }
+            const advancedAnalyticsCheckbox = document.querySelector('input[name="advanced_analytics"]');
+            if (advancedAnalyticsCheckbox) {
+                advancedAnalyticsCheckbox.checked = plan.advanced_analytics || false;
+            }
+            
             // Free event fields
             if (document.querySelector('input[name="free_events_count"]')) {
                 document.querySelector('input[name="free_events_count"]').value = plan.free_events_count ?? '';

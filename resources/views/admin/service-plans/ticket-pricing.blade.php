@@ -121,6 +121,7 @@
                         <thead class="bg-gray-50 dark:bg-gray-900">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tickets</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Price</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Purchases</th>
@@ -137,6 +138,11 @@
                                         @if($plan->description)
                                             <div class="text-sm text-gray-500 dark:text-gray-400">{{ $plan->description }}</div>
                                         @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ $plan->type === 'free' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' }}">
+                                            {{ ucfirst($plan->type) }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                         {{ $plan->ticket_quantity }}
@@ -218,8 +224,21 @@
                             <textarea name="description" rows="3" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500"></textarea>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Event Type</label>
+                            <select name="type" required class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
+                                <option value="paid">Paid Event</option>
+                                <option value="free">Free Event</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sort Order</label>
                             <input type="number" name="sort_order" min="0" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
+                        </div>
+                        <div>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="is_active" value="1" class="rounded border-gray-300 text-qricket-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500">
+                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Active</span>
+                            </label>
                         </div>
                     </div>
                     <div class="flex justify-end space-x-3 mt-6">
@@ -369,6 +388,7 @@
             document.querySelector('input[name="ticket_quantity"]').value = plan.ticket_quantity || '';
             document.querySelector('input[name="price"]').value = plan.price || '';
             document.querySelector('select[name="currency"]').value = plan.currency || 'PHP';
+            document.querySelector('select[name="type"]').value = plan.type || 'paid';
             document.querySelector('textarea[name="description"]').value = plan.description || '';
             document.querySelector('input[name="sort_order"]').value = plan.sort_order || '';
             document.querySelector('input[name="is_active"]').checked = plan.is_active || false;

@@ -37,7 +37,12 @@ class TicketLimitController extends Controller
             abort(403, 'Unauthorized access to this event.');
         }
 
-        $pricingPlans = TicketLimitPricing::active()->ordered()->get();
+        // Filter pricing plans based on event type (free or paid)
+        $eventType = $event->is_free ? 'free' : 'paid';
+        $pricingPlans = TicketLimitPricing::active()
+            ->where('type', $eventType)
+            ->ordered()
+            ->get();
         $userId = auth()->id();
         $discounts = Discount::where('is_active', true)
             ->where(function($query) {
@@ -129,6 +134,15 @@ class TicketLimitController extends Controller
         }
 
         $pricing = TicketLimitPricing::findOrFail($request->pricing_id);
+        
+        // Validate that the pricing type matches the event type
+        $eventType = $event->is_free ? 'free' : 'paid';
+        if ($pricing->type !== $eventType) {
+            return redirect()->back()
+                ->withErrors(['pricing_id' => 'This pricing plan is for ' . $pricing->type . ' events, but your event is ' . $eventType . '.'])
+                ->withInput();
+        }
+        
         $discount = null;
         $finalAmount = $pricing->price;
 

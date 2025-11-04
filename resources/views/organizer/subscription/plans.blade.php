@@ -103,26 +103,6 @@
                             </span>
                         </li>
                         @endif
-                        @if($plan->priority_support)
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <span class="text-sm text-gray-700 dark:text-gray-300">
-                                Priority support
-                            </span>
-                        </li>
-                        @endif
-                        @if($plan->custom_domain)
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <span class="text-sm text-gray-700 dark:text-gray-300">
-                                Custom domain
-                            </span>
-                        </li>
-                        @endif
                     </ul>
 
                     <!-- Action Button -->
@@ -303,26 +283,6 @@
                             </svg>
                             <span class="text-sm text-gray-700 dark:text-gray-300">
                                 Advanced analytics
-                            </span>
-                        </li>
-                        @endif
-                        @if($plan->priority_support)
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <span class="text-sm text-gray-700 dark:text-gray-300">
-                                Priority support
-                            </span>
-                        </li>
-                        @endif
-                        @if($plan->custom_domain)
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            <span class="text-sm text-gray-700 dark:text-gray-300">
-                                Custom domain
                             </span>
                         </li>
                         @endif

@@ -349,23 +349,6 @@
                                 @endforeach
                             </tr>
                             
-                            <!-- White Label -->
-                            <tr>
-                                <td class="px-4 py-3 text-xs font-medium text-gray-900 dark:text-gray-100">White Label</td>
-                                @foreach($plans as $plan)
-                                <td class="px-4 py-3 text-center text-xs {{ $plan->slug === 'pro' ? 'bg-qricket-50 dark:bg-qricket-900/20' : '' }}">
-                                    @if($plan->white_label)
-                                        <svg class="w-4 h-4 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                    @else
-                                        <svg class="w-4 h-4 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                    @endif
-                                </td>
-                                @endforeach
-                            </tr>
                         </tbody>
                     </table>
                 </div>
