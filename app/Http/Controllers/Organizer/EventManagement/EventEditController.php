@@ -676,6 +676,9 @@ class EventEditController extends Controller
         // Load ticket data from event with purchased count and delete guard
         $ticketTypes = $event->eventTickets()->orderBy('id')->get()->map(function($t){
             $sold = (int)($t->sold_count ?? 0);
+            try {
+                $sold = max($sold, (int)$t->ticketInformation()->count());
+            } catch (\Throwable $e) {}
             return [
                 'id' => $t->id,
                 'name' => $t->name,

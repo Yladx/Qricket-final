@@ -1,5 +1,6 @@
 /* Step 3 - Tickets: add/remove types and autosave to R2 */
 (function() {
+  const DEBUG_TICKETS = true; // TEMP: enable verbose logging for ticket management
   // console.log('[step3.js] Script starting to load...');
   const form = document.querySelector('form[data-autosave-url], form[action*="ticket"]') || document.querySelector('form');
   const ticketContainer = document.getElementById('ticketTypes');
@@ -22,6 +23,9 @@
     try {
       const raw = typesInput?.value || '[]';
       let data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (DEBUG_TICKETS) {
+        console.log('[Tickets][readTypes] raw length:', typeof raw === 'string' ? raw.length : 'obj', 'parsed type:', Array.isArray(data) ? 'array' : typeof data, data);
+      }
       if (Array.isArray(data)) return data;
       // normalize legacy shapes
       if (data && Array.isArray(data.tickets)) return data.tickets;
@@ -33,6 +37,9 @@
 
   function writeTypes(list) {
     typesInput.value = JSON.stringify(list);
+    if (DEBUG_TICKETS) {
+      console.log('[Tickets][writeTypes] list size:', Array.isArray(list) ? list.length : 'n/a', list);
+    }
   }
 
   // Subscription ticket limit – fetched from meta tags rendered by Blade
@@ -353,6 +360,9 @@
       writeTypes(list); // Save normalized data
     }
     list.forEach((t, idx) => {
+      if (DEBUG_TICKETS) {
+        console.log('[Tickets][render] idx:', idx, 'id:', t.id, 'name:', t.name, 'purchased_count:', t.purchased_count, 'can_delete:', t.can_delete);
+      }
       const row = document.createElement('div');
       row.className = 'space-y-2';
       const rowIdAttr = t.id != null ? `data-id="${String(t.id)}"` : '';
@@ -363,8 +373,12 @@
       const deleteButtonTitle = canDelete 
         ? 'Remove' 
         : `Cannot remove - ${t.purchased_count || 0} tickets sold`;
-      const purchaseIndicator = (t.purchased_count || 0) > 0 
-        ? `<div class="text-xs text-orange-600 dark:text-orange-400 font-medium">${t.purchased_count} sold</div>`
+      const soldCount = Number(t.purchased_count || 0);
+      const purchaseIndicator = soldCount > 0 
+        ? `<div class="text-xs text-orange-600 dark:text-orange-400 font-medium">${soldCount} sold</div>`
+        : '';
+      const nameBadge = soldCount > 0
+        ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 align-middle">${soldCount} sold</span>`
         : '';
       
       row.innerHTML = `
@@ -377,7 +391,7 @@
         <div ${rowIdAttr} class="border border-gray-200 dark:border-gray-700 rounded-md p-3 space-y-3 bg-white dark:bg-gray-800">
           <div class="grid grid-cols-12 gap-3 items-end">
             <div class="col-span-12 md:col-span-6">
-              <label class="block text-xs text-gray-500">Name</label>
+              <label class="block text-xs text-gray-500">Name ${nameBadge}</label>
               <input data-k="name" data-i="${idx}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.name || ''}">
             </div>
             <div class="col-span-6 md:col-span-3">
@@ -412,6 +426,10 @@
           </div>
         </div>`;
       ticketContainer.appendChild(row);
+      if (DEBUG_TICKETS) {
+        const btn = row.querySelector('button[data-remove]');
+        console.log('[Tickets][render] delete button state (disabled?):', btn ? btn.disabled : null, 'title:', btn ? btn.title : null);
+      }
     });
     
     // Set up date validation after rendering
@@ -734,9 +752,13 @@
   function removeTicketType(index) {
     const list = readTypes();
     const ticket = list[index];
+    if (DEBUG_TICKETS) {
+      console.log('[Tickets][removeTicketType] attempt index:', index, ticket);
+    }
     
     // Check if ticket has been purchased
     if (ticket && ticket.purchased_count > 0) {
+      if (DEBUG_TICKETS) console.warn('[Tickets][removeTicketType] blocked: purchased_count > 0:', ticket.purchased_count);
       Swal.fire({
         title: 'Cannot Delete Ticket',
         text: `This ticket type has been purchased ${ticket.purchased_count} time(s) and cannot be deleted.`,
@@ -749,6 +771,7 @@
     
     // Check if ticket has can_delete flag set to false
     if (ticket && ticket.can_delete === false) {
+      if (DEBUG_TICKETS) console.warn('[Tickets][removeTicketType] blocked: can_delete === false');
       Swal.fire({
         title: 'Cannot Delete Ticket',
         text: 'This ticket type cannot be deleted because it has been purchased.',
@@ -763,6 +786,7 @@
     writeTypes(list);
     render();
     queueAutosave();
+    if (DEBUG_TICKETS) console.log('[Tickets][removeTicketType] removed index:', index, 'remaining:', list.length);
   }
 
   function onContainerInput(e) {
