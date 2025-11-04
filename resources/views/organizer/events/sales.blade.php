@@ -23,6 +23,7 @@
                                 • Net Amount: <span class="font-semibold text-green-600" data-stat="net-amount">₱{{ number_format($netAmount ?? 0, 2) }}</span>
                                 • Total Fees: <span class="font-semibold text-red-600" data-stat="total-fees">₱{{ number_format($totalFees ?? 0, 2) }}</span>
                                 • Expected Earnings: <span class="font-semibold text-blue-600" data-stat="expected-earnings">₱{{ number_format($expectedEarnings ?? 0, 2) }}</span>
+                                • Free Tickets Sold: <span class="font-semibold">{{ number_format($freeTicketsSold ?? 0) }}</span>
                             </div>
                             <a href="{{ route($layoutType === 'admin' ? 'admin.event.sales.export' : 'organizer.events.sales.export', $event) }}?{{ http_build_query(request()->query()) }}" 
                                class="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-md transition-colors flex items-center text-xs font-medium">

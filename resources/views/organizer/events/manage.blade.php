@@ -367,7 +367,7 @@
                         $eventEnded = $event->end_date && now()->gte($event->end_date);
                     @endphp
 
-                    @if($eventEnded)
+                    @if($eventEnded && !$event->is_free && (($salesStats['expectedRevenue'] ?? 0) > 0))
                     <!-- Payout Status (Only when event ended - TOP POSITION) -->
                     @php
                         $payout = \App\Models\PayoutRequest::where('event_id', $event->id)->orderBy('created_at', 'desc')->first();
@@ -480,6 +480,10 @@
                             <div class="flex justify-between items-center">
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Spent on Additional Tickets</span>
                                 <span class="text-sm font-semibold text-gray-900 dark:text-gray-100" data-sales-update="additionalTicketSpend">₱{{ number_format($salesStats['additionalTicketSpend'] ?? 0, 2) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Free Tickets Sold</span>
+                                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ number_format($salesStats['freeTicketsSold'] ?? 0) }}</span>
                             </div>
                             @if($salesStats['totalCapacity'] > 0)
                             <div class="flex justify-between items-center">

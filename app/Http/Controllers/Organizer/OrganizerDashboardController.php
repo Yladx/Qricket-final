@@ -170,6 +170,12 @@ class OrganizerDashboardController extends Controller
         $totalTicketsSold = \App\Models\EventTicketInformation::whereIn('event_id', $eventIds)
             ->whereHas('ticketPurchase', function($q){ $q->where('status','paid'); })
             ->count();
+
+        // Free tickets sold across events
+        $freeTicketsSold = TicketPurchase::whereIn('event_id', $eventIds)
+            ->where('status','paid')
+            ->where('unit_price', 0)
+            ->sum('quantity');
         
         // Calculate unclaimed payout from ended events using net amount
         $unclaimedPayout = Event::whereIn('id', $eventIds)
@@ -201,6 +207,7 @@ class OrganizerDashboardController extends Controller
             'thisMonthRevenue' => $thisMonthRevenue,
             'unclaimedPayout' => $unclaimedPayout,
             'totalOrders' => $revenueStats->total_orders ?? 0,
+            'freeTicketsSold' => (int) $freeTicketsSold,
         ];
     }
 

@@ -135,6 +135,7 @@
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Tickets Sold</p>
                                 <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100" data-stat="totalTicketsSold">{{ number_format($salesStats['totalTicketsSold']) }}</p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Free: {{ number_format($salesStats['freeTicketsSold'] ?? 0) }}</p>
                             </div>
                         </div>
                     </div>

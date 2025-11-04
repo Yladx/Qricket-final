@@ -33,6 +33,8 @@ class ReportsController extends Controller
         $ticketAdminEarnings = (float) $ticketNetRevenue * ($adminRevenuePercentage / 100);
         $ticketOrders = (int) $ticketPurchases->count();
         $ticketPending = 0; // deprecated in UI
+        // Free tickets sold KPI
+        $freeTicketsSold = (int) TicketPurchase::where('status','paid')->where('unit_price',0)->sum('quantity');
 
         // Payout aggregates
         $payoutPaidTotal = (float) \App\Models\EventPayoutRequest::where('status','paid')->sum('net_amount');
@@ -303,6 +305,7 @@ class ReportsController extends Controller
             'ticketAdminEarnings' => $ticketAdminEarnings,
             'ticketOrders' => $ticketOrders,
             'ticketPending' => $ticketPending,
+            'freeTicketsSold' => $freeTicketsSold,
             'payoutPaidTotal' => $payoutPaidTotal,
             'payoutProcessedTotal' => $payoutProcessedTotal,
             'totalRefundedAmount' => $totalRefundedAmount,

@@ -66,7 +66,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expected Revenue</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100" data-stat="event-expected-revenue">₱{{ number_format($salesStats['totalRevenue'] * (1 - config('app.admin_revenue_percentage') / 100), 2) }}</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100" data-stat="event-expected-revenue">₱{{ number_format($salesStats['expectedRevenue'] ?? 0, 2) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -169,7 +169,7 @@
                 $eventEnded = $event->end_date && now()->gte($event->end_date);
             @endphp
             <div class="space-y-6">
-                @if($eventEnded)
+                @if($eventEnded && !$event->is_free && (($salesStats['expectedRevenue'] ?? 0) > 0))
                 <!-- Payout -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -260,6 +260,7 @@
                         <div class="flex justify-between items-center"><span class="text-sm font-medium text-gray-700 dark:text-gray-300">Avg Order Value</span><span class="text-sm font-semibold text-gray-900 dark:text-gray-100" data-sales-update="averageOrderValue">₱{{ number_format($salesStats['averageOrderValue'], 2) }}</span></div>
                         <div class="flex justify-between items-center"><span class="text-sm font-medium text-gray-700 dark:text-gray-300">This Month</span><span class="text-sm font-semibold text-gray-900 dark:text-gray-100" data-sales-update="thisMonthRevenue">₱{{ number_format($salesStats['thisMonthRevenue'], 2) }}</span></div>
                         <div class="flex justify-between items-center"><span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Spent on Additional Tickets</span><span class="text-sm font-semibold text-gray-900 dark:text-gray-100" data-sales-update="additionalTicketSpend">₱{{ number_format($salesStats['additionalTicketSpend'] ?? 0, 2) }}</span></div>
+                        <div class="flex justify-between items-center"><span class="text-sm font-medium text-gray-700 dark:text-gray-300">Free Tickets Sold</span><span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ number_format($salesStats['freeTicketsSold'] ?? 0) }}</span></div>
                         @if(($salesStats['totalCapacity'] ?? 0) > 0)
                         <div class="flex justify-between items-center"><span class="text-sm font-medium text-gray-700 dark:text-gray-300">Capacity Utilization</span><span class="text-sm font-semibold text-gray-900 dark:text-gray-100" data-sales-update="capacityUtilization">{{ number_format($salesStats['capacityUtilization'], 1) }}%</span></div>
                         @endif

@@ -205,7 +205,13 @@ class EventDashboardController extends Controller
         // Calculate expected earnings based on net amount (net amount - Qricket fee)
         $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
         $qricketFee = $netAmount * ($qricketFeePercentage / 100);
-        $expectedEarnings = $netAmount - $qricketFee;
+        $expectedEarnings = max(0, $netAmount - $qricketFee);
+
+        // Free tickets sold for this event
+        $freeTicketsSold = \App\Models\TicketPurchase::where('event_id', $event->id)
+            ->where('status','paid')
+            ->where('unit_price', 0)
+            ->sum('quantity');
         
         $sales = $query->paginate(20)->appends($request->query());
 
@@ -215,7 +221,7 @@ class EventDashboardController extends Controller
         $isAdmin = Auth::guard('admin')->check();
         $layoutType = $isAdmin ? 'admin' : 'organizer';
 
-        return view('organizer.events.sales', compact('event', 'sales', 'isOwner', 'totalAmount', 'netAmount', 'totalFees', 'expectedEarnings', 'statuses', 'status', 'search', 'dateFrom', 'dateTo', 'sort', 'dir', 'isAdmin', 'layoutType'));
+        return view('organizer.events.sales', compact('event', 'sales', 'isOwner', 'totalAmount', 'netAmount', 'totalFees', 'expectedEarnings', 'statuses', 'status', 'search', 'dateFrom', 'dateTo', 'sort', 'dir', 'isAdmin', 'layoutType', 'freeTicketsSold'));
     }
 
     /**
@@ -367,9 +373,13 @@ class EventDashboardController extends Controller
         // Net revenue is already after Xendit fees, now apply Qricket fee (5%)
         // Expected revenue should be based on net amount total, then less by Qricket fee
         $netAmountTotal = $revenueStats->net_revenue ?? 0;
+        // If event is free, force zero expected
+        if ($event->is_free) {
+            $netAmountTotal = 0;
+        }
         $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
         $qricketFee = $netAmountTotal * ($qricketFeePercentage / 100);
-        $expectedRevenue = $netAmountTotal - $qricketFee; // Expected revenue based on net amount less Qricket fee
+        $expectedRevenue = max(0, $netAmountTotal - $qricketFee); // clamp to zero for free/edge cases
         $netRevenue = $expectedRevenue; // Use expected revenue as net revenue
         $totalFees = ($revenueStats->total_transaction_fees ?? 0) + ($revenueStats->total_vat ?? 0);
 
@@ -379,6 +389,12 @@ class EventDashboardController extends Controller
                 $query->where('status', 'paid');
             })
             ->count();
+
+        // Free tickets sold (unit_price == 0)
+        $freeTicketsSold = TicketPurchase::where('event_id', $event->id)
+            ->where('status','paid')
+            ->where('unit_price', 0)
+            ->sum('quantity');
 
         // Total tickets checked in
         $totalCheckedIn = EventTicketInformation::where('event_id', $event->id)
@@ -441,6 +457,7 @@ class EventDashboardController extends Controller
             'additionalTicketSpend' => $additionalTicketSpend,
             'totalCapacity' => $totalTicketsSold + 100, // Mock capacity
             'capacityUtilization' => $totalTicketsSold > 0 ? round(($totalTicketsSold / ($totalTicketsSold + 100)) * 100, 1) : 0,
+            'freeTicketsSold' => (int) $freeTicketsSold,
         ];
     }
 
