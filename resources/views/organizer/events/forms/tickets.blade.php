@@ -67,7 +67,17 @@
     </div>
 
     <!-- Name must be ticket_types for controller validation on submit -->
-    <input type="hidden" id="ticket_types_json" name="ticket_types" value='@json($eventData['ticket_types'] ?? [])' data-initial='@json($eventData['ticket_types'] ?? [])'>
+    @php
+        // Normalize ticket prices to 0 for free events before passing to JavaScript
+        $normalizedTicketTypes = $eventData['ticket_types'] ?? [];
+        if ($isFreeEvent) {
+            foreach ($normalizedTicketTypes as &$ticket) {
+                $ticket['price'] = 0;
+            }
+            unset($ticket);
+        }
+    @endphp
+    <input type="hidden" id="ticket_types_json" name="ticket_types" value='@json($normalizedTicketTypes)' data-initial='@json($normalizedTicketTypes)'>
 
     <!-- Ticket Preview Section -->
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 mb-4">

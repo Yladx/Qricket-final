@@ -676,6 +676,14 @@ class EventEditController extends Controller
         // Load ticket data from event
         $ticketTypes = $event->eventTickets()->get()->toArray();
         
+        // If event is free, normalize all ticket prices to 0
+        if ($event->is_free ?? false) {
+            foreach ($ticketTypes as &$ticket) {
+                $ticket['price'] = 0;
+            }
+            unset($ticket);
+        }
+        
         // Load ticket settings from R2 storage
         $ticketSettings = $this->loadTicketSettingsFromR2($event->id);
         
