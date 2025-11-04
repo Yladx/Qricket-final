@@ -364,6 +364,7 @@ class TicketsController extends Controller
             'existing_thumbnail_url' => $event->thumbnail_url,
             'is_free' => $event->is_free ?? false,
             'ticket_types' => $event->eventTickets()->orderBy('id')->get()->map(function($t){
+                $sold = (int)($t->sold_count ?? 0);
                 return [
                     'id' => $t->id,
                     'name' => $t->name,
@@ -372,6 +373,8 @@ class TicketsController extends Controller
                     'quantity' => $t->quantity,
                     'sale_start' => optional($t->sale_start)->format('Y-m-d H:i'),
                     'sale_end' => optional($t->sale_end)->format('Y-m-d H:i'),
+                    'purchased_count' => $sold,
+                    'can_delete' => $sold === 0,
                 ];
             })->toArray(),
             'ticket_settings' => $this->loadTicketSettingsFromR2($event),
@@ -910,8 +913,21 @@ class TicketsController extends Controller
                         ]);
                     }
                 }
+                $blockedDeletes = [];
                 foreach ($removed as $k) {
-                    $existingByKey[$k]->delete();
+                    $row = $existingByKey[$k];
+                    $sold = (int)($row->sold_count ?? 0);
+                    if ($sold > 0) {
+                        $blockedDeletes[] = $row->name ?? (string)$row->id;
+                        continue;
+                    }
+                    $row->delete();
+                }
+                if (!empty($blockedDeletes)) {
+                    \Log::info('Skipped deleting purchased ticket types', [
+                        'event_id' => $event->id,
+                        'tickets' => $blockedDeletes,
+                    ]);
                 }
 
                 if (!empty($added) || !empty($removed)) {
