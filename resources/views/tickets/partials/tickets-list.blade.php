@@ -43,7 +43,7 @@
                     </div>
                 </div>
                 <div class="ml-4 flex-shrink-0 relative z-10">
-                    @if(!$eventEnded && $hasAvailableTickets)
+                    @if(!$eventEnded && $hasAvailableTickets && ($eventSharingSettings[$eventId] ?? false))
                         <button onclick="openShareModal({{ $eventId }})" 
                                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors shadow-lg">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

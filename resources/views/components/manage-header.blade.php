@@ -30,7 +30,7 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
-            <h2 class="font-bold text-2xl md:text-3xl leading-tight m-0 text-teal-600 dark:text-teal-400" style="color: {{ $themeColor }};">
+            <h2 class="font-bold text-2xl md:text-3xl leading-tight m-0" style="color: {{ $themeColor }} !important;">
                 {{ $event->title }}
             </h2>
             <div class="flex items-center gap-3">

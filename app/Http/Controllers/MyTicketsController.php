@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\EventTicketInformation;
 use App\Models\TicketShare;
 use App\Models\User;
+use App\Models\Event;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class MyTicketsController extends Controller
 {
@@ -99,7 +101,36 @@ class MyTicketsController extends Controller
                 ->get()
                 ->groupBy('event_id');
 
-            return view('tickets.my-tickets', compact('ticketsByEvent', 'pendingSharesReceived', 'pendingSharesSent', 'hideShared', 'hidePastEvents', 'sortBy'));
+            // Check if sharing is allowed for each event (load from R2 ticket settings)
+            $eventSharingSettings = [];
+            foreach ($ticketsByEvent as $eventId => $tickets) {
+                $event = $tickets->first()->event;
+                if ($event) {
+                    // Check if user owns tickets for this event (not just received)
+                    $hasOwnedTickets = $tickets->filter(function($ticket) use ($user) {
+                        return $ticket->user_id === $user->id && 
+                               ($ticket->shared_by_user_id === null || $ticket->shared_by_user_id === $user->id);
+                    })->count() > 0;
+                    
+                    $allowSharing = false;
+                    if ($hasOwnedTickets) {
+                        try {
+                            $ticketSettings = $this->loadTicketSettings($event);
+                            $allowSharing = $ticketSettings['allow_share_ticket'] ?? false;
+                        } catch (\Exception $e) {
+                            // If settings can't be loaded, default to false
+                            Log::warning('Failed to load ticket settings for sharing check', [
+                                'event_id' => $eventId,
+                                'error' => $e->getMessage()
+                            ]);
+                        }
+                    }
+                    
+                    $eventSharingSettings[$eventId] = $allowSharing;
+                }
+            }
+
+            return view('tickets.my-tickets', compact('ticketsByEvent', 'pendingSharesReceived', 'pendingSharesSent', 'hideShared', 'hidePastEvents', 'sortBy', 'eventSharingSettings'));
             
         } catch (\Exception $e) {
             Log::error('Error loading tickets: ' . $e->getMessage(), [
@@ -115,6 +146,7 @@ class MyTicketsController extends Controller
                 'hideShared' => $hideShared,
                 'hidePastEvents' => $hidePastEvents,
                 'sortBy' => $sortBy,
+                'eventSharingSettings' => [],
                 'error' => 'Failed to load tickets. Please try again.'
             ]);
         }
@@ -191,7 +223,36 @@ class MyTicketsController extends Controller
                 }
             });
 
-            $html = view('tickets.partials.tickets-list', compact('ticketsByEvent'))->render();
+            // Check if sharing is allowed for each event (load from R2 ticket settings)
+            $eventSharingSettings = [];
+            foreach ($ticketsByEvent as $eventId => $tickets) {
+                $event = $tickets->first()->event;
+                if ($event) {
+                    // Check if user owns tickets for this event (not just received)
+                    $hasOwnedTickets = $tickets->filter(function($ticket) use ($user) {
+                        return $ticket->user_id === $user->id && 
+                               ($ticket->shared_by_user_id === null || $ticket->shared_by_user_id === $user->id);
+                    })->count() > 0;
+                    
+                    $allowSharing = false;
+                    if ($hasOwnedTickets) {
+                        try {
+                            $ticketSettings = $this->loadTicketSettings($event);
+                            $allowSharing = $ticketSettings['allow_share_ticket'] ?? false;
+                        } catch (\Exception $e) {
+                            // If settings can't be loaded, default to false
+                            Log::warning('Failed to load ticket settings for sharing check', [
+                                'event_id' => $eventId,
+                                'error' => $e->getMessage()
+                            ]);
+                        }
+                    }
+                    
+                    $eventSharingSettings[$eventId] = $allowSharing;
+                }
+            }
+
+            $html = view('tickets.partials.tickets-list', compact('ticketsByEvent', 'eventSharingSettings'))->render();
             
             return response()->json([
                 'success' => true,
@@ -326,6 +387,28 @@ class MyTicketsController extends Controller
                 'success' => false,
                 'message' => 'Event not found'
             ], 404);
+        }
+
+        // Check if sharing is allowed for this event
+        try {
+            $ticketSettings = $this->loadTicketSettings($event);
+            $allowSharing = $ticketSettings['allow_share_ticket'] ?? false;
+            
+            if (!$allowSharing) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ticket sharing is not allowed for this event'
+                ], 403);
+            }
+        } catch (\Exception $e) {
+            Log::warning('Failed to load ticket settings for sharing validation', [
+                'event_id' => $eventId,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to verify sharing settings for this event'
+            ], 500);
         }
 
         // Check if event has ended
@@ -600,6 +683,61 @@ class MyTicketsController extends Controller
                 'success' => false,
                 'message' => 'Failed to search users'
             ], 500);
+        }
+    }
+
+    /**
+     * Load ticket settings from R2 storage.
+     */
+    private function loadTicketSettings(Event $event)
+    {
+        try {
+            $eventDir = "events/{$event->id}";
+            $disk = Storage::disk('r2');
+            $settingsPath = $eventDir . '/ticket_settings.json';
+            
+            if ($disk->exists($settingsPath)) {
+                $content = $disk->get($settingsPath);
+                
+                if ($content) {
+                    $settings = json_decode($content, true);
+                    
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        Log::error("Failed to parse ticket settings JSON: " . json_last_error_msg());
+                        return [];
+                    }
+                    
+                    return $settings;
+                }
+            }
+            
+            // Return default settings if file doesn't exist
+            return [
+                'max_tickets_per_order' => 10,
+                'refund_policy' => 'Refunds are available up to 7 days before the event. A processing fee may apply.',
+                'allow_refunds' => true,
+                'require_approval' => false,
+                'allow_share_ticket' => true,
+                'limit_per_user' => false,
+                'max_tickets_per_user' => 1,
+            ];
+            
+        } catch (\Exception $e) {
+            Log::error('Error loading ticket settings from R2', [
+                'event_id' => $event->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            // Return default settings on error
+            return [
+                'max_tickets_per_order' => 10,
+                'refund_policy' => 'Refunds are available up to 7 days before the event. A processing fee may apply.',
+                'allow_refunds' => true,
+                'require_approval' => false,
+                'allow_share_ticket' => true,
+                'limit_per_user' => false,
+                'max_tickets_per_user' => 1,
+            ];
         }
     }
 }

@@ -83,7 +83,7 @@
             <div class="flex-1">
                 <!-- Tickets List -->
                 <div id="tickets-container">
-                    @include('tickets.partials.tickets-list', ['ticketsByEvent' => $ticketsByEvent])
+                    @include('tickets.partials.tickets-list', ['ticketsByEvent' => $ticketsByEvent, 'eventSharingSettings' => $eventSharingSettings ?? []])
                 </div>
 
                 <!-- Empty State -->

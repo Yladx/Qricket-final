@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\EventActivityLog;
 use App\Models\EventStaff;
 use App\Models\TicketPurchase;
+use App\Models\TicketLimitPurchase;
 use App\Services\XenditFeeCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -612,19 +613,37 @@ class OrganizerDashboardController extends Controller
             ->with(['eventTickets', 'staff'])
             ->get()
             ->map(function($event) use ($monthStart, $monthEnd) {
-                // Calculate actual revenue for the month
+                // Calculate actual revenue for the month (gross revenue)
                 $actualRevenue = TicketPurchase::where('event_id', $event->id)
                     ->where('status', 'paid')
                     ->whereBetween('paid_at', [$monthStart, $monthEnd])
                     ->sum('total_amount');
                 
-                // Calculate expected revenue (if event has tickets)
-                $expectedRevenue = 0;
-                if ($event->eventTickets->isNotEmpty()) {
-                    foreach ($event->eventTickets as $ticket) {
-                        $expectedRevenue += ($ticket->price * $ticket->quantity);
-                    }
+                // Calculate total net amount: ticket purchases net + additional ticket purchases net
+                $ticketNet = TicketPurchase::where('event_id', $event->id)
+                    ->where('status', 'paid')
+                    ->whereBetween('paid_at', [$monthStart, $monthEnd])
+                    ->sum(DB::raw('COALESCE(net_amount, total_amount)'));
+                
+                $addlNet = TicketLimitPurchase::where('event_id', $event->id)
+                    ->where('status', 'paid')
+                    ->whereBetween('paid_at', [$monthStart, $monthEnd])
+                    ->sum(DB::raw('COALESCE(net_amount, amount)'));
+                
+                $totalNetAmount = max(0, $ticketNet + $addlNet);
+                
+                // Calculate expected revenue: net amount minus Qricket fee (5%)
+                // If event is free or net is zero/non-positive, expected revenue is 0
+                if ($event->is_free || $totalNetAmount <= 0) {
+                    $expectedRevenue = 0;
+                } else {
+                    $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
+                    $qricketFee = $totalNetAmount * ($qricketFeePercentage / 100);
+                    $expectedRevenue = max(0, $totalNetAmount - $qricketFee);
                 }
+                
+                // Calculate expected payout (same as expected revenue, but only if not free and > 0)
+                $expectedPayout = (!$event->is_free && $expectedRevenue > 0) ? $expectedRevenue : null;
                 
                 // Calculate tickets sold
                 $ticketsSold = TicketPurchase::where('event_id', $event->id)
@@ -635,7 +654,9 @@ class OrganizerDashboardController extends Controller
                 return [
                     'event' => $event,
                     'actual_revenue' => $actualRevenue,
+                    'total_net_amount' => $totalNetAmount,
                     'expected_revenue' => $expectedRevenue,
+                    'expected_payout' => $expectedPayout,
                     'tickets_sold' => $ticketsSold ?? 0,
                     'order_count' => TicketPurchase::where('event_id', $event->id)
                         ->where('status', 'paid')
@@ -681,9 +702,12 @@ class OrganizerDashboardController extends Controller
                         return $ticket->name . ' (₱' . number_format($ticket->price, 2) . ')';
                     })->implode(', '),
                     'actual_revenue' => $item['actual_revenue'],
+                    'total_net_amount' => $item['total_net_amount'],
                     'expected_revenue' => $item['expected_revenue'],
+                    'expected_payout' => $item['expected_payout'],
                     'tickets_sold' => $item['tickets_sold'],
                     'orders' => $item['order_count'],
+                    'is_free' => $event->is_free,
                 ];
             })->toArray(),
             'statistics' => [
@@ -808,12 +832,12 @@ class OrganizerDashboardController extends Controller
         
         // Title
         $xml .= '<Row ss:Height="30">';
-        $xml .= '<Cell ss:MergeAcross="9" ss:StyleID="Title"><Data ss:Type="String">Event Revenue Details</Data></Cell>';
+        $xml .= '<Cell ss:MergeAcross="11" ss:StyleID="Title"><Data ss:Type="String">Event Revenue Details</Data></Cell>';
         $xml .= '</Row>';
         
         // Headers
         $xml .= '<Row ss:Height="25">';
-        $headers = ['Title', 'Category', 'Start Date', 'End Date', 'Location', 'Ticket Types', 'Actual Revenue', 'Expected Revenue', 'Tickets Sold', 'Orders'];
+        $headers = ['Title', 'Category', 'Start Date', 'End Date', 'Location', 'Ticket Types', 'Actual Revenue', 'Total Net Amount', 'Expected Revenue', 'Expected Payout', 'Tickets Sold', 'Orders'];
         foreach ($headers as $header) {
             $xml .= '<Cell ss:StyleID="Header"><Data ss:Type="String">' . htmlspecialchars($header) . '</Data></Cell>';
         }
@@ -833,7 +857,14 @@ class OrganizerDashboardController extends Controller
             $xml .= '<Cell ss:StyleID="' . $rowStyle . '"><Data ss:Type="String">' . htmlspecialchars($event['location'] ?? '') . '</Data></Cell>';
             $xml .= '<Cell ss:StyleID="' . $rowStyle . '"><Data ss:Type="String">' . htmlspecialchars($event['ticket_types']) . '</Data></Cell>';
             $xml .= '<Cell ss:StyleID="Currency"><Data ss:Type="Number">' . $event['actual_revenue'] . '</Data></Cell>';
+            $xml .= '<Cell ss:StyleID="Currency"><Data ss:Type="Number">' . $event['total_net_amount'] . '</Data></Cell>';
             $xml .= '<Cell ss:StyleID="Currency"><Data ss:Type="Number">' . $event['expected_revenue'] . '</Data></Cell>';
+            // Expected Payout: only show if not null (event is not free and expected revenue > 0)
+            if ($event['expected_payout'] !== null) {
+                $xml .= '<Cell ss:StyleID="Currency"><Data ss:Type="Number">' . $event['expected_payout'] . '</Data></Cell>';
+            } else {
+                $xml .= '<Cell ss:StyleID="' . $rowStyle . '"><Data ss:Type="String">N/A</Data></Cell>';
+            }
             $xml .= '<Cell ss:StyleID="' . $rowStyle . '"><Data ss:Type="Number">' . $event['tickets_sold'] . '</Data></Cell>';
             $xml .= '<Cell ss:StyleID="' . $rowStyle . '"><Data ss:Type="Number">' . $event['orders'] . '</Data></Cell>';
             $xml .= '</Row>';
