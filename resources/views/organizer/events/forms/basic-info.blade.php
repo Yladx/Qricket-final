@@ -423,14 +423,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Free Event checkbox SweetAlert confirmation
     const freeEventCheckbox = document.getElementById('is_free_checkbox');
     if (freeEventCheckbox) {
+        // Store the previous state before any click
+        let previousCheckedState = freeEventCheckbox.checked;
+        
+        freeEventCheckbox.addEventListener('mousedown', function(e) {
+            // Capture state before the click toggles it
+            previousCheckedState = this.checked;
+        });
+        
         freeEventCheckbox.addEventListener('click', function(e) {
-            // Check the current state before the click toggles it
-            const wasChecked = this.checked;
-            
-            // Only show SweetAlert if trying to check (was unchecked, will be checked)
-            if (!wasChecked) {
+            // If checkbox is now checked (meaning it was just checked from unchecked)
+            if (this.checked && !previousCheckedState) {
                 e.preventDefault();
                 e.stopPropagation();
+                // Revert the checkbox state immediately
+                this.checked = false;
                 
                 // Show SweetAlert confirmation
                 const showSweetAlert = () => {
@@ -481,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 100);
                 }
             }
-            // If unchecking (was checked), allow it without SweetAlert
+            // If unchecking (was checked), allow it without SweetAlert - do nothing
         });
     }
 });

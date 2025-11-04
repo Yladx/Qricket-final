@@ -342,6 +342,15 @@
       if (empty) empty.style.display = 'none';
     }
     const free = isFreeEvent();
+    // Normalize prices for free events - ensure all prices are 0
+    if (free) {
+      list.forEach(t => {
+        if (t.price && t.price !== '0' && parseFloat(t.price) !== 0) {
+          t.price = '0';
+        }
+      });
+      writeTypes(list); // Save normalized data
+    }
     list.forEach((t, idx) => {
       const row = document.createElement('div');
       row.className = 'space-y-2';
@@ -372,7 +381,7 @@
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Price</label>
-              <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${free ? '0' : (t.price ?? '')}" ${free ? 'readonly disabled' : ''}>
+              <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10 ${free ? 'opacity-60 cursor-not-allowed' : ''}" value="${free ? '0' : (t.price ?? '')}" ${free ? 'readonly disabled' : ''}>
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Quantity</label>
@@ -609,7 +618,7 @@
     const cap = getTicketsPerEventLimit();
     const defaultQty = remain == null ? (cap ? String(Math.min(100, cap)) : '100') : String(Math.max(1, Math.min(100, remain)));
 
-    list.push({
+    const newTicket = {
       id: null,
       name: 'General Admission',
       description: 'Standard access',
@@ -618,7 +627,12 @@
       sale_start: defaultSaleStart,
       sale_end: defaultSaleEnd,
       is_active: '1'
-    });
+    };
+    // Force price to 0 if free event (extra safety)
+    if (free) {
+      newTicket.price = '0';
+    }
+    list.push(newTicket);
     writeTypes(list);
     render();
     queueAutosave();
