@@ -31,7 +31,9 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400">Ticket #{{ $ticket->ticket_number }} • Updated {{ $ticket->updated_at->diffForHumans() }}</p>
                     </div>
                 </div>
+                @if(Auth::guard('admin')->check())
                 <div class="mt-4 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line">{{ $ticket->message ?? '' }}</div>
+                @endif
             </div>
 
             <!-- Comments style replies -->
