@@ -613,7 +613,9 @@
   }
 
   function addTicketType() {
+    console.log('[addTicketType] FUNCTION CALLED - Starting addTicketType');
     const list = readTypes();
+    console.log('[addTicketType] Current list:', list);
     const free = isFreeEvent();
     console.log('[addTicketType] isFreeEvent:', free, 'meta tag:', document.querySelector('meta[name="event-is-free"]')?.getAttribute('content'));
     const cap = getTicketsPerEventLimit();
@@ -649,6 +651,7 @@
 
     // ALWAYS set price to 0 for free events - check multiple times to be sure
     const isFree = isFreeEvent();
+    console.log('[addTicketType] Checking isFree again:', isFree);
     // Force price to 0 if free, otherwise default to 500
     const ticketPrice = isFree ? '0' : '500';
     console.log('[addTicketType] Setting price to:', ticketPrice, 'isFree:', isFree);
@@ -663,6 +666,7 @@
       sale_end: defaultSaleEnd,
       is_active: '1'
     };
+    console.log('[addTicketType] New ticket created with price:', newTicket.price);
     
     // Double-check: Force price to 0 if free event (extra safety)
     if (isFree) {
@@ -670,18 +674,23 @@
       console.log('[addTicketType] Forced price to 0 for free event');
     }
     
-    console.log('[addTicketType] Final ticket object:', newTicket);
+    console.log('[addTicketType] Final ticket object before push:', newTicket);
     list.push(newTicket);
+    console.log('[addTicketType] List after push, last item price:', list[list.length - 1].price);
     
     // Triple-check: Normalize all prices in list before saving
     if (isFree) {
+      console.log('[addTicketType] Normalizing all prices to 0');
       list.forEach(t => {
         t.price = '0';
       });
+      console.log('[addTicketType] After normalization, last item price:', list[list.length - 1].price);
     }
     
     writeTypes(list);
+    console.log('[addTicketType] Calling render()');
     render();
+    console.log('[addTicketType] Render complete');
     // Immediately block price field after adding new ticket type
     setTimeout(() => {
       const free = isFreeEvent();
