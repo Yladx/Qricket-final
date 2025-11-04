@@ -34,6 +34,7 @@
     </div>
 
     <!-- Include Step 5 JavaScript -->
-    <script src="{{ asset('js/events/step5.js') }}" defer></script>
+    <script src="{{ asset('js/events/step5.js') }}?v={{ time() }}" defer></script>
+
 </x-app-layout>
 
