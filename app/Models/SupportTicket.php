@@ -7,6 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * SupportTicket model (user support request)
+ *
+ * Columns:
+ * - ticket_number: public ticket id (e.g., TKT-XXXX)
+ * - user_id: creator (requester) user id
+ * - name: requester name (fallback when no user)
+ * - email: requester email (fallback when no user)
+ * - subject: short subject shown in lists
+ * - message: initial message/body created with the ticket
+ * - status: open|in_progress|resolved|closed
+ * - priority: low|medium|high|urgent
+ * - assigned_to: admin id handling this ticket
+ * - resolved_at: timestamp when closed/resolved
+ */
 class SupportTicket extends Model
 {
     use HasFactory;

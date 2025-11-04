@@ -6,6 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * EventTicketInformation model (individual issued ticket)
+ *
+ * Columns:
+ * - ticket_id: public ticket code shown on the ticket (EVENTID_UNIQUE)
+ * - user_id: current holder/owner of this ticket
+ * - shared_at: datetime when this ticket was shared to another user
+ * - shared_by_user_id: user who initiated the share
+ * - event_id: owning event
+ * - ticket_type_id: reference to EventTicket configuration
+ * - ticket_purchase_id: parent purchase that generated this ticket
+ * - qr_code_data: encrypted payload used at check-in
+ * - checked_in_at: datetime when scanned and admitted
+ * - certificate_given: whether a certificate was issued for this ticket
+ */
 class EventTicketInformation extends Model
 {
     use HasFactory;

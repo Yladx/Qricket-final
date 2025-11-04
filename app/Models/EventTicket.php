@@ -7,6 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * EventTicket (ticket type/config) model
+ *
+ * Columns:
+ * - event_id: owning event
+ * - name: ticket type name (e.g., General Admission)
+ * - description: short customer-facing description
+ * - price: unit price for this ticket type (0 for free)
+ * - quantity: total inventory configured for this type
+ * - sold_count: number already sold (used to protect deletes/downsizing)
+ * - sale_start: when this ticket becomes available
+ * - sale_end: when this ticket stops selling (forced to event end)
+ */
 class EventTicket extends Model
 {
     use HasFactory;

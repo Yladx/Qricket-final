@@ -10,6 +10,31 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
+/**
+ * Event model
+ *
+ * Properties (columns):
+ * - id: numeric event identifier (10-digit) used across URLs and QR data
+ * - user_id: creator user id (null when created by admin)
+ * - subscription_id: subscription snapshot when event was created
+ * - title: public event title
+ * - is_free: whether all tickets are forced free (price 0)
+ * - description: long-form event description shown on event page
+ * - category: event category/tag for browsing
+ * - start_date: datetime the event starts
+ * - end_date: datetime the event ends (also used to force ticket sale_end)
+ * - location: human readable venue/location
+ * - location_url: optional map/location URL
+ * - tags: comma separated keywords
+ * - poster: R2/local storage path to poster image
+ * - thumbnail: R2/local storage path to thumbnail image
+ * - layout_path: R2 path to custom layout JSON
+ * - status: moderation/publish state (draft|pending_approval|approved|published|rejected|scheduled)
+ * - scheduled_publish_at: optional datetime to auto-publish later
+ * - feedback_emails_sent_at: timestamp when feedback emails were sent
+ * - end_notified_at: timestamp when end-of-event notifications were sent
+ * - feedback_notified_at: timestamp when feedback notifications were sent
+ */
 class Event extends Model
 {
     use HasFactory;

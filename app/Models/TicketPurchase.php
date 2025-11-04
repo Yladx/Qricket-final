@@ -8,6 +8,31 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 
+/**
+ * TicketPurchase model (order-level record)
+ *
+ * Columns:
+ * - user_id: buyer user id
+ * - event_id: related event
+ * - ticket_type_id: legacy/nullable; we primarily infer via unit_price
+ * - purchase_id: human-readable/order reference id
+ * - quantity: number of tickets purchased in this order
+ * - unit_price: price per ticket at time of purchase
+ * - total_amount: gross amount (quantity * unit_price)
+ * - currency: ISO currency code (e.g., PHP)
+ * - status: pending|paid|failed|expired|refunded
+ * - payment_method: summary label (e.g., EWallet, Card)
+ * - xendit_payment_id: provider payment id
+ * - xendit_invoice_id: provider invoice id
+ * - payment_details: provider/raw payload snapshot
+ * - customer_details: name/email/phone/address snapshot used for invoice
+ * - expires_at: time when a pending invoice expires
+ * - paid_at: time when payment completed (status=paid)
+ * - transaction_fee: provider fee amount
+ * - vat_amount: VAT portion (if applicable)
+ * - net_amount: net revenue after fees/taxes
+ * - total_fees: combined fees (gateway + platform) snapshot
+ */
 class TicketPurchase extends Model
 {
     use HasFactory;

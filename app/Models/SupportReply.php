@@ -6,6 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * SupportReply model (threaded messages for a support ticket)
+ *
+ * Columns:
+ * - ticket_id: parent support ticket id
+ * - user_id: replying user id (when message from user)
+ * - admin_id: replying admin id (when message from admin)
+ * - message: reply body text
+ * - is_admin_reply: boolean flag retained for backward compatibility
+ */
 class SupportReply extends Model
 {
     use HasFactory;

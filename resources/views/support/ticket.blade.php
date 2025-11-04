@@ -41,12 +41,13 @@
                 <div id="replies-list" class="p-6 space-y-5">
                     @forelse($ticket->replies as $reply)
                         @php(
-                            $isDupOfOrigin = !$reply->is_admin_reply
-                                && (int)($reply->user_id) === (int)($ticket->user_id)
-                                && trim((string)$reply->message) === trim((string)($ticket->message ?? ''))
+                            $originMsg = trim((string)($ticket->message ?? ''))
+                        )
+                        @php(
+                            $isDupOfOrigin = trim((string)$reply->message) === $originMsg
                         )
                         @continue($isDupOfOrigin)
-                        @php($isMine = !$reply->is_admin_reply && ($reply->user_id === Auth::id()))
+                        @php($isMine = ((int)$reply->user_id === (int)Auth::id()))
                         <div class="flex items-start {{ $isMine ? 'flex-row-reverse' : '' }}">
                             <div class="flex-shrink-0 {{ $isMine ? 'ml-3' : '' }} {{ $isMine ? '' : 'mr-3' }}">
                                 <div class="h-8 w-8 rounded-full {{ $reply->is_admin_reply ? 'bg-qricket-600' : 'bg-gray-500' }} text-white flex items-center justify-center text-xs font-semibold">
@@ -174,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             // Append new reply to the list
             const wrapper = document.createElement('div');
-            const isMine = !data.is_admin_reply; // user-side channel receives own replies as non-admin
+            const isMine = Number(data.user_id) === Number({{ (int)Auth::id() }});
             wrapper.className = 'flex items-start ' + (isMine ? 'flex-row-reverse' : '');
             const badgeBg = data.is_admin_reply ? 'bg-qricket-600' : 'bg-gray-500';
             wrapper.innerHTML = `
