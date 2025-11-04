@@ -39,6 +39,26 @@
             <!-- Comments style replies -->
             <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
                 <div id="replies-list" class="p-6 space-y-5">
+                    @auth
+                        @if($ticket->user_id === Auth::id() && !empty(trim($ticket->message ?? '')))
+                        <div class="flex items-start flex-row-reverse">
+                            <div class="flex-shrink-0 ml-3">
+                                <div class="h-8 w-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-xs font-semibold">
+                                    {{ strtoupper(substr(Auth::user()->first_name ?? 'U',0,1)) }}
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between flex-row-reverse">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 text-right">You</p>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ $ticket->created_at->diffForHumans() }}</span>
+                                </div>
+                                <div class="mt-1 text-right">
+                                    <span class="inline-block px-3 py-2 rounded-lg bg-qricket-500 text-white whitespace-pre-line">{{ $ticket->message }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                    @endauth
                     @forelse($ticket->replies as $reply)
                         @php(
                             $originMsg = trim((string)($ticket->message ?? ''))

@@ -54,13 +54,7 @@ class HelpSupportController extends Controller
             'priority' => $this->determinePriority($request->subject, $request->message),
         ]);
 
-        // Create the initial reply (user's message)
-        SupportReply::create([
-            'ticket_id' => $ticket->id,
-            'user_id' => Auth::id(),
-            'message' => $request->message,
-            'is_admin_reply' => false,
-        ]);
+        // Do NOT create an initial reply; the ticket body will be shown in the UI as the first user message
 
         // Create admin notification for new support ticket
         try {
