@@ -199,16 +199,18 @@ class EventDashboardController extends Controller
             SUM(COALESCE(vat_amount, 0)) as total_vat
         ')->first();
         
-        $netAmount = $totals->net_revenue ?? 0;
+        $netAmount = max(0, $totals->net_revenue ?? 0); // Ensure non-negative
         $totalFees = ($totals->total_transaction_fees ?? 0) + ($totals->total_vat ?? 0);
         
         // Calculate expected earnings based on net amount (net amount - Qricket fee)
-        $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
-        $qricketFee = $netAmount * ($qricketFeePercentage / 100);
-        // Extra safety: never allow negatives and treat free/zero-net as zero
-        $expectedEarnings = ($event->is_free || $netAmount <= 0)
-            ? 0
-            : max(0, $netAmount - $qricketFee);
+        // If event is free or net is zero/non-positive, force zero expected (skip fee calculation)
+        if ($event->is_free || $netAmount <= 0) {
+            $expectedEarnings = 0;
+        } else {
+            $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
+            $qricketFee = $netAmount * ($qricketFeePercentage / 100);
+            $expectedEarnings = max(0, $netAmount - $qricketFee); // clamp to zero
+        }
 
         // Free tickets sold for this event
         $freeTicketsSold = \App\Models\TicketPurchase::where('event_id', $event->id)
@@ -375,14 +377,15 @@ class EventDashboardController extends Controller
         $totalRevenue = $revenueStats->gross_revenue ?? 0;
         // Net revenue is already after Xendit fees, now apply Qricket fee (5%)
         // Expected revenue should be based on net amount total, then less by Qricket fee
-        $netAmountTotal = $revenueStats->net_revenue ?? 0;
-        // If event is free or net is non-positive, force zero expected
+        $netAmountTotal = max(0, $revenueStats->net_revenue ?? 0); // Ensure non-negative
+        // If event is free or net is zero/non-positive, force zero expected (skip fee calculation)
         if ($event->is_free || $netAmountTotal <= 0) {
-            $netAmountTotal = 0;
+            $expectedRevenue = 0;
+        } else {
+            $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
+            $qricketFee = $netAmountTotal * ($qricketFeePercentage / 100);
+            $expectedRevenue = max(0, $netAmountTotal - $qricketFee); // clamp to zero
         }
-        $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
-        $qricketFee = $netAmountTotal * ($qricketFeePercentage / 100);
-        $expectedRevenue = max(0, $netAmountTotal - $qricketFee); // clamp to zero for free/edge cases
         $netRevenue = $expectedRevenue; // Use expected revenue as net revenue
         $totalFees = ($revenueStats->total_transaction_fees ?? 0) + ($revenueStats->total_vat ?? 0);
 
