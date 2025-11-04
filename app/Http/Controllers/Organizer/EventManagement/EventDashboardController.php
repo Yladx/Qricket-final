@@ -205,7 +205,10 @@ class EventDashboardController extends Controller
         // Calculate expected earnings based on net amount (net amount - Qricket fee)
         $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
         $qricketFee = $netAmount * ($qricketFeePercentage / 100);
-        $expectedEarnings = max(0, $netAmount - $qricketFee);
+        // Extra safety: never allow negatives and treat free/zero-net as zero
+        $expectedEarnings = ($event->is_free || $netAmount <= 0)
+            ? 0
+            : max(0, $netAmount - $qricketFee);
 
         // Free tickets sold for this event
         $freeTicketsSold = \App\Models\TicketPurchase::where('event_id', $event->id)
@@ -373,8 +376,8 @@ class EventDashboardController extends Controller
         // Net revenue is already after Xendit fees, now apply Qricket fee (5%)
         // Expected revenue should be based on net amount total, then less by Qricket fee
         $netAmountTotal = $revenueStats->net_revenue ?? 0;
-        // If event is free, force zero expected
-        if ($event->is_free) {
+        // If event is free or net is non-positive, force zero expected
+        if ($event->is_free || $netAmountTotal <= 0) {
             $netAmountTotal = 0;
         }
         $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
