@@ -30,7 +30,7 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl leading-tight m-0" style="color: {{ $themeColor }};">
+            <h2 class="font-bold text-2xl md:text-3xl leading-tight m-0 text-teal-600 dark:text-teal-400" style="color: {{ $themeColor }};">
                 {{ $event->title }}
             </h2>
             <div class="flex items-center gap-3">
@@ -79,6 +79,7 @@
                         $staff = $event->staff->firstWhere('user_id', $user?->id);
                         $isOwner = $user && (int)$event->user_id === (int)$user->id;
                         $isAdminEvent = $event->user_id === null && $isAdmin;
+                        $eventEnded = optional($event->end_date)->isPast();
                         // Admins have full access to all navigation
                         $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_attendance ?? false) || ($staff?->role === 'organizer');
                         $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_ticket ?? false) || ($staff?->role === 'organizer');
@@ -170,15 +171,14 @@
                         <a href="{{ $route('staff') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.staff') || request()->routeIs('admin.event.staff') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Staff</a>
                     @endif
                     @if($canManageEvent || $canManageNews)
-                    <!-- Edit Event dropdown -->
+                    <!-- Edit Event / Event Info dropdown -->
                     <div class="relative">
                         @php
-                            $isAdmin = \Illuminate\Support\Facades\Auth::guard('admin')->check();
-                            $user = auth()->user();
-                            $isOwner = $user && (int)$event->user_id === (int)$user->id;
-                            $staff = $event->staff->firstWhere('user_id', $user?->id);
+                            // Reuse variables from earlier definition
                             $canManageEventForUser = $isAdmin || $isOwner || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
-                            $dropdownLabel = ($isAdmin || !$canManageEventForUser) ? 'Event Info' : 'Edit Event';
+                            // Show "Event Info" if event ended, admin, or user can't manage event
+                            $dropdownLabel = ($eventEnded || $isAdmin || !$canManageEventForUser) ? 'Event Info' : 'Edit Event';
+                            $useInfoRoutes = $eventEnded || !$canManageEvent;
                         @endphp
                         <button type="button" id="editEventDropdownButton-{{ $event->id }}" class="whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100 px-1 pb-1 text-sm font-medium inline-flex items-center">
                             {{ $dropdownLabel }}
@@ -187,14 +187,14 @@
                             </svg>
                         </button>
                         <div id="editEventDropdownMenu-{{ $event->id }}" class="absolute hidden mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50 min-w-[200px] right-0">
-                            @if($canManageEvent)
-                                <a href="{{ $route('edit.basic') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">{{ $canManageEventForUser ? 'Basic' : 'Basic Info' }}</a>
-                                <a href="{{ $route('edit.layout') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">{{ $canManageEventForUser ? 'Layout' : 'Layout Info' }}</a>
-                                <a href="{{ $route('edit.certificate') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">{{ $canManageEventForUser ? 'Certificate' : 'Certificate Info' }}</a>
-                            @else
+                            @if($useInfoRoutes)
                                 <a href="{{ $route('info.basic') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Basic Info</a>
                                 <a href="{{ $route('info.layout') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Layout Info</a>
                                 <a href="{{ $route('info.certificate') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Certificate Info</a>
+                            @else
+                                <a href="{{ $route('edit.basic') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">{{ $canManageEventForUser ? 'Basic' : 'Basic Info' }}</a>
+                                <a href="{{ $route('edit.layout') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">{{ $canManageEventForUser ? 'Layout' : 'Layout Info' }}</a>
+                                <a href="{{ $route('edit.certificate') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">{{ $canManageEventForUser ? 'Certificate' : 'Certificate Info' }}</a>
                             @endif
                         </div>
                     </div>
@@ -204,7 +204,7 @@
                     @endif
                     <a href="{{ $route('activity-log') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.activity-log') || request()->routeIs('admin.event.activity-log') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Activity</a>
                     @php
-                        $eventEnded = optional($event->end_date)->isPast();
+                        // Reuse eventEnded from earlier definition
                         $canManageFeedback = $isAdmin || $isOwner || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
                     @endphp
                     @if($eventEnded && $canManageFeedback)
