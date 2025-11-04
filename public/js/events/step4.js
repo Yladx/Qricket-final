@@ -85,7 +85,7 @@
       loadPDF(makeStreamUrl());
     })
     .catch(err => { 
-      console.error('Upload error:', err); 
+      // console.error('Upload error:', err); 
       Swal.fire({
         icon: 'error',
         title: 'Upload Failed',
@@ -135,7 +135,7 @@
           updateNamePosition();
         });
       });
-    }).catch(function(err){ console.warn('PDF.js load failed:', err); fallbackRenderPDF(url); });
+    }).catch(function(err){ /* console.warn('PDF.js load failed:', err); */ fallbackRenderPDF(url); });
   }
 
   function makeStreamUrl(){
@@ -165,7 +165,7 @@
       if (indicator) indicator.style.display = 'block';
       if (textPreview) textPreview.style.display = 'block';
       updateNamePosition();
-    } catch(e){ console.error('Fallback embed failed:', e); }
+    } catch(e){ /* console.error('Fallback embed failed:', e); */ }
   }
 
   let autosaveTimer = null;
@@ -271,7 +271,7 @@
           });
         })
         .catch(err => { 
-          console.error('Remove error:', err); 
+          // console.error('Remove error:', err); 
           Swal.fire({
             icon: 'error',
             title: 'Error',

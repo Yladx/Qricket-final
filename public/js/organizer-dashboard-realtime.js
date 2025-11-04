@@ -11,20 +11,20 @@
     function initRealtimeUpdates() {
         // Check Pusher availability
         if (typeof Pusher === 'undefined') {
-            console.error('[Organizer Dashboard] ❌ Pusher library not loaded');
+            // console.error('[Organizer Dashboard] ❌ Pusher library not loaded');
             return;
         }
 
         // Check Pusher key
         if (!window.PUSHER_APP_KEY || window.PUSHER_APP_KEY === '' || window.PUSHER_APP_KEY === 'undefined') {
-            console.error('[Organizer Dashboard] ❌ PUSHER_APP_KEY not configured');
+            // console.error('[Organizer Dashboard] ❌ PUSHER_APP_KEY not configured');
             return;
         }
 
         // Get user ID
         const userId = window.USER_ID;
         if (!userId) {
-            console.error('[Organizer Dashboard] ❌ USER_ID not set');
+            // console.error('[Organizer Dashboard] ❌ USER_ID not set');
             return;
         }
 
@@ -42,7 +42,7 @@
             }
         };
 
-        console.log('[Organizer Dashboard] Creating Pusher instance...', {
+        // console.log('[Organizer Dashboard] Creating Pusher instance...', {
             pusherKey: window.PUSHER_APP_KEY ? window.PUSHER_APP_KEY.substring(0, 10) + '...' : 'NOT SET',
             cluster: window.PUSHER_APP_CLUSTER || 'mt1',
             authEndpoint: window.PUSHER_AUTH_ENDPOINT || '/broadcasting/auth',
@@ -53,41 +53,41 @@
 
         // Connection event handlers
         pusher.connection.bind('connecting', () => {
-            console.log('[Organizer Dashboard] 🔌 Pusher connecting...');
+            // console.log('[Organizer Dashboard] 🔌 Pusher connecting...');
         });
 
         pusher.connection.bind('connected', () => {
-            console.log('[Organizer Dashboard] ✅ Pusher connected successfully');
+            // console.log('[Organizer Dashboard] ✅ Pusher connected successfully');
             isConnected = true;
         });
 
         pusher.connection.bind('disconnected', () => {
-            console.warn('[Organizer Dashboard] ⚠️ Pusher disconnected');
+            // console.warn('[Organizer Dashboard] ⚠️ Pusher disconnected');
             isConnected = false;
         });
 
         pusher.connection.bind('error', (error) => {
-            console.error('[Organizer Dashboard] ❌ Pusher error:', error);
+            // console.error('[Organizer Dashboard] ❌ Pusher error:', error);
             isConnected = false;
         });
 
         // Subscribe to public sales-updates channel
-        console.log('[Organizer Dashboard] Subscribing to public channel: sales-updates');
+        // console.log('[Organizer Dashboard] Subscribing to public channel: sales-updates');
         publicChannel = pusher.subscribe('sales-updates');
 
         publicChannel.bind('pusher:subscription_succeeded', () => {
-            console.log('[Organizer Dashboard] ✅ Successfully subscribed to sales-updates');
+            // console.log('[Organizer Dashboard] ✅ Successfully subscribed to sales-updates');
         });
 
         publicChannel.bind('pusher:subscription_error', (status) => {
-            console.error('[Organizer Dashboard] ❌ Subscription error on sales-updates:', status);
+            // console.error('[Organizer Dashboard] ❌ Subscription error on sales-updates:', status);
         });
 
         // Listen for sales.report.updated events on public channel
         publicChannel.bind('sales.report.updated', function(eventData) {
-            console.log('[Organizer Dashboard] ⚡⚡⚡ RECEIVED sales.report.updated on public channel! ⚡⚡⚡');
-            console.log('[Organizer Dashboard] Full event data:', JSON.stringify(eventData, null, 2));
-            console.log('[Organizer Dashboard] Checking organizer_id match:', {
+            // console.log('[Organizer Dashboard] ⚡⚡⚡ RECEIVED sales.report.updated on public channel! ⚡⚡⚡');
+            // console.log('[Organizer Dashboard] Full event data:', JSON.stringify(eventData, null, 2));
+            // console.log('[Organizer Dashboard] Checking organizer_id match:', {
                 received_organizer_id: eventData.organizer_id,
                 current_userId: userId,
                 match: eventData.organizer_id === userId || eventData.organizer_id === 0

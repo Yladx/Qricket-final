@@ -72,7 +72,7 @@
         
         // Only autosave if there are changes
         if (Object.keys(formData).length > 0) {
-            console.log('Autosaving form field changes:', formData);
+            // console.log('Autosaving form field changes:', formData);
             if (typeof window.autosaveStep2Files === 'function') {
                 autosaveStep2Files(formData);
             }

@@ -399,7 +399,21 @@ class EventEditController extends Controller
             \Log::error('Failed to load layout data: ' . $e->getMessage());
         }
 
-        return view('organizer.events.edit.layout', compact('event', 'eventData', 'layoutData', 'layoutPath', 'layoutType'));
+        // Load footer.json from R2 for autosaved footer settings
+        $footerData = [];
+        try {
+            $disk = Storage::disk('r2');
+            $footerPath = "events/{$event->id}/footer.json";
+            if ($disk->exists($footerPath)) {
+                $json = $disk->get($footerPath);
+                $decoded = json_decode($json, true);
+                if (is_array($decoded)) { $footerData = $decoded; }
+            }
+        } catch (\Throwable $t) {
+            \Log::warning('Failed to load footer.json', ['event_id' => $event->id, 'error' => $t->getMessage()]);
+        }
+
+        return view('organizer.events.edit.layout', compact('event', 'eventData', 'layoutData', 'layoutPath', 'layoutType', 'footerData'));
     }
 
     /**

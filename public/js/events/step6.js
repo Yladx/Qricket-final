@@ -99,14 +99,14 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Certificate preview functionality
   if (previewCertificateBtn) {
-    console.log('Certificate preview button found, adding event listener');
+    // console.log('Certificate preview button found, adding event listener');
     previewCertificateBtn.addEventListener('click', function() {
-      console.log('Certificate preview button clicked');
+      // console.log('Certificate preview button clicked');
       // Get event ID from URL
       const urlParams = new URLSearchParams(window.location.search);
       const eventId = urlParams.get('id');
       
-      console.log('Event ID from URL:', eventId);
+      // console.log('Event ID from URL:', eventId);
       
       if (eventId) {
         // Show inline certificate preview modal
@@ -124,12 +124,12 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   } else {
-    console.log('Certificate preview button not found');
+    // console.log('Certificate preview button not found');
   }
   
   // Function to show certificate preview in modal
   function showCertificatePreviewModal(eventId) {
-    console.log('showCertificatePreviewModal called with eventId:', eventId);
+    // console.log('showCertificatePreviewModal called with eventId:', eventId);
     
     // Create modal overlay
     const modalOverlay = document.createElement('div');

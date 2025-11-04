@@ -24,7 +24,7 @@
       const raw = typesInput?.value || '[]';
       let data = typeof raw === 'string' ? JSON.parse(raw) : raw;
       if (DEBUG_TICKETS) {
-        console.log('[Tickets][readTypes] raw length:', typeof raw === 'string' ? raw.length : 'obj', 'parsed type:', Array.isArray(data) ? 'array' : typeof data, data);
+        // console.log('[Tickets][readTypes] raw length:', typeof raw === 'string' ? raw.length : 'obj', 'parsed type:', Array.isArray(data) ? 'array' : typeof data, data);
       }
       if (Array.isArray(data)) return data;
       // normalize legacy shapes
@@ -38,7 +38,7 @@
   function writeTypes(list) {
     typesInput.value = JSON.stringify(list);
     if (DEBUG_TICKETS) {
-      console.log('[Tickets][writeTypes] list size:', Array.isArray(list) ? list.length : 'n/a', list);
+      // console.log('[Tickets][writeTypes] list size:', Array.isArray(list) ? list.length : 'n/a', list);
     }
   }
 
@@ -363,7 +363,7 @@
     }
     list.forEach((t, idx) => {
       if (DEBUG_TICKETS) {
-        console.log('[Tickets][render] idx:', idx, 'id:', t.id, 'name:', t.name, 'purchased_count:', t.purchased_count, 'can_delete:', t.can_delete);
+        // console.log('[Tickets][render] idx:', idx, 'id:', t.id, 'name:', t.name, 'purchased_count:', t.purchased_count, 'can_delete:', t.can_delete);
       }
       const row = document.createElement('div');
       row.className = 'space-y-2';
@@ -431,7 +431,7 @@
       ticketContainer.appendChild(row);
       if (DEBUG_TICKETS) {
         const btn = row.querySelector('button[data-remove]');
-        console.log('[Tickets][render] delete button state (disabled?):', btn ? btn.disabled : null, 'title:', btn ? btn.title : null);
+        // console.log('[Tickets][render] delete button state (disabled?):', btn ? btn.disabled : null, 'title:', btn ? btn.title : null);
       }
     });
     
@@ -756,12 +756,12 @@
     const list = readTypes();
     const ticket = list[index];
     if (DEBUG_TICKETS) {
-      console.log('[Tickets][removeTicketType] attempt index:', index, ticket);
+      // console.log('[Tickets][removeTicketType] attempt index:', index, ticket);
     }
     
     // Check if ticket has been purchased
     if (ticket && ticket.purchased_count > 0) {
-      if (DEBUG_TICKETS) console.warn('[Tickets][removeTicketType] blocked: purchased_count > 0:', ticket.purchased_count);
+      // if (DEBUG_TICKETS) console.warn('[Tickets][removeTicketType] blocked: purchased_count > 0:', ticket.purchased_count);
       Swal.fire({
         title: 'Cannot Delete Ticket',
         text: `This ticket type has been purchased ${ticket.purchased_count} time(s) and cannot be deleted.`,
@@ -774,7 +774,7 @@
     
     // Check if ticket has can_delete flag set to false
     if (ticket && ticket.can_delete === false) {
-      if (DEBUG_TICKETS) console.warn('[Tickets][removeTicketType] blocked: can_delete === false');
+      // if (DEBUG_TICKETS) console.warn('[Tickets][removeTicketType] blocked: can_delete === false');
       Swal.fire({
         title: 'Cannot Delete Ticket',
         text: 'This ticket type cannot be deleted because it has been purchased.',
@@ -789,7 +789,9 @@
     writeTypes(list);
     render();
     queueAutosave();
-    if (DEBUG_TICKETS) console.log('[Tickets][removeTicketType] removed index:', index, 'remaining:', list.length);
+    if (DEBUG_TICKETS) {
+      // console.log('[Tickets][removeTicketType] removed index:', index, 'remaining:', list.length);
+    }
   }
 
   function onContainerInput(e) {

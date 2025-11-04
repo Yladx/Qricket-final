@@ -42,7 +42,7 @@
 
   function renderCards() {
     if (!cards) {
-      console.error('[Step5] Cards container not found');
+      // console.error('[Step5] Cards container not found');
       return;
     }
     
@@ -181,12 +181,12 @@
         credentials: 'same-origin'
       });
       if (!resp.ok) {
-        console.warn('[Step5] Autosave response not OK', resp.status);
+        // console.warn('[Step5] Autosave response not OK', resp.status);
       } else {
-        console.log('[Step5] Autosave succeeded');
+        // console.log('[Step5] Autosave succeeded');
       }
     } catch (e) {
-      console.error('[Step5] Autosave failed', e);
+      // console.error('[Step5] Autosave failed', e);
     }
   }
 
@@ -206,7 +206,7 @@
         keepalive: true,
         credentials: 'same-origin'
       });
-      console.log('[Step5] Autosave flush requested');
+      // console.log('[Step5] Autosave flush requested');
     } catch (e) {
       // swallow errors during page unload
     }
@@ -284,7 +284,7 @@
         autocomplete.appendChild(item);
       });
       if ((list || []).length) { autocomplete.classList.remove('hidden'); } else { autocomplete.classList.add('hidden'); }
-    } catch (e) { console.error('[Step5] search failed', e); }
+    } catch (e) { /* console.error('[Step5] search failed', e); */ }
   }
 
   // Flush queued staff activity on page exit like tickets
@@ -298,7 +298,7 @@
 
   function addMember(user) {
     if (!user || !user.id) {
-      console.error('[Step5] Invalid user data for adding:', user);
+      // console.error('[Step5] Invalid user data for adding:', user);
       return;
     }
     
@@ -379,7 +379,7 @@
     }
     
     if (!member) {
-      console.error('[Step5] Member not found for removal. ID:', memberId, 'Index:', fallbackIndex);
+      // console.error('[Step5] Member not found for removal. ID:', memberId, 'Index:', fallbackIndex);
       return;
     }
     
@@ -411,7 +411,7 @@
       const foundIndex = currentMembers.findIndex(m => m.id === member.id);
       
       if (foundIndex === -1) {
-        console.error('[Step5] Member not found in current data after confirmation, ID:', member.id);
+        // console.error('[Step5] Member not found in current data after confirmation, ID:', member.id);
         return;
       }
       
@@ -474,7 +474,7 @@
     const members = data.members || [];
     
     if (index < 0 || index >= members.length) {
-      console.error('[Step5] Invalid index for removal:', index);
+      // console.error('[Step5] Invalid index for removal:', index);
       return;
     }
     
@@ -596,7 +596,7 @@
     
     // Debug flush button
     document.getElementById('debug-flush')?.addEventListener('click', async () => {
-      console.log('[Step5] Manual flush triggered');
+      // console.log('[Step5] Manual flush triggered');
       await flushOnExit();
     });
   });

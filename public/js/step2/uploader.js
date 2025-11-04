@@ -130,7 +130,7 @@
                 if (typeof window.updateLayoutJSON === 'function') window.updateLayoutJSON();
             })
             .catch(err => { 
-                console.error('Image upload error:', err); 
+                // console.error('Image upload error:', err); 
                 if (typeof Swal !== 'undefined' && window.Swal) {
                     Swal.fire({
                         icon: 'error',

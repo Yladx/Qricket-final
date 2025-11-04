@@ -1,5 +1,5 @@
 function autosaveStep2Files(payload) {
-    console.log('autosaveStep2Files called with payload:', payload);
+    // console.log('autosaveStep2Files called with payload:', payload);
     try {
         const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         
@@ -34,7 +34,7 @@ function autosaveStep2Files(payload) {
             requestBody = fd;
         }
         
-        console.log('Sending autosave request to:', autosaveUrl);
+        // console.log('Sending autosave request to:', autosaveUrl);
         fetch(autosaveUrl, {
             method: 'POST',
             headers: {
@@ -44,7 +44,7 @@ function autosaveStep2Files(payload) {
         })
         .then(r => r.ok ? r.json() : null)
         .then(data => {
-            console.log('Autosave response:', data);
+            // console.log('Autosave response:', data);
             // Update header preview with returned URLs immediately
             if (data && data.success) {
                 if (data.poster_url) {
@@ -85,11 +85,11 @@ function autosaveStep2Files(payload) {
             showAutosaveIndicator('success');
         })
         .catch(error => {
-            console.error('Autosave error:', error);
+            // console.error('Autosave error:', error);
             showAutosaveIndicator('error');
         });
     } catch (e) {
-        console.error('autosaveStep2Files error:', e);
+        // console.error('autosaveStep2Files error:', e);
         showAutosaveIndicator('error');
     }
 }
@@ -102,7 +102,7 @@ function queueAutosave(jsonString) {
         try {
             autosaveStep2Files({ layout_data: jsonString });
         } catch (e) {
-            console.error('queueAutosave error:', e);
+            // console.error('queueAutosave error:', e);
         }
     }, 500);
 }
