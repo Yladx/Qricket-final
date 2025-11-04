@@ -1,12 +1,12 @@
 /* Step 3 - Tickets: add/remove types and autosave to R2 */
 (function() {
-  console.log('[step3.js] Script starting to load...');
+  // console.log('[step3.js] Script starting to load...');
   const form = document.querySelector('form[data-autosave-url], form[action*="ticket"]') || document.querySelector('form');
   const ticketContainer = document.getElementById('ticketTypes');
   const typesInput = document.getElementById('ticket_types_json');
   const settingsInput = document.getElementById('ticket_settings_json');
   let autosaveTimer = null;
-  console.log('[step3.js] Initial elements found:', { form: !!form, ticketContainer: !!ticketContainer, typesInput: !!typesInput, settingsInput: !!settingsInput });
+  // console.log('[step3.js] Initial elements found:', { form: !!form, ticketContainer: !!ticketContainer, typesInput: !!typesInput, settingsInput: !!settingsInput });
 
   function getEventId() {
     // Try form action/query, autosave url, or location
@@ -143,7 +143,7 @@
       });
     }
     
-    console.log('Applied ticket colors immediately:', { primaryColor, secondaryColor, accentColor });
+    // console.log('Applied ticket colors immediately:', { primaryColor, secondaryColor, accentColor });
   }
 
   function resetTicketColors() {
@@ -161,7 +161,7 @@
     document.getElementById('ticket-accent-color-hex').value = defaultColors.accent;
     
     applyTicketColors();
-    console.log('Reset ticket colors to default');
+    // console.log('Reset ticket colors to default');
   }
 
   // Track if listeners have been added to prevent duplicates
@@ -176,7 +176,7 @@
       const textInput = document.getElementById(colorId + '-hex');
       
       if (!colorPicker || !textInput) {
-        console.warn(`Color inputs not found for ${colorId}`);
+        // console.warn(`Color inputs not found for ${colorId}`);
         return;
       }
       
@@ -196,7 +196,7 @@
         }
         applyTicketColors();
         updateTicketColorsInSettings(); // Auto-save colors
-        console.log('Color picker changed, autosaving:', value);
+        // console.log('Color picker changed, autosaving:', value);
       };
       
       newColorPicker.addEventListener('input', handleColorPickerChange);
@@ -212,7 +212,7 @@
           }
           applyTicketColors();
           updateTicketColorsInSettings(); // Auto-save colors
-          console.log('Color text input changed, autosaving:', value);
+          // console.log('Color text input changed, autosaving:', value);
         } else if (value && value.length === 6 && /^[0-9A-F]{6}$/i.test(value)) {
           // Handle hex without #
           const fullHex = '#' + value;
@@ -223,7 +223,7 @@
           e.target.value = fullHex;
           applyTicketColors();
           updateTicketColorsInSettings(); // Auto-save colors
-          console.log('Color text input changed (without #), autosaving:', fullHex);
+          // console.log('Color text input changed (without #), autosaving:', fullHex);
         }
       };
       
@@ -238,7 +238,7 @@
     
     // Mark as initialized
     colorListenersInitialized = true;
-    console.log('Color input listeners initialized');
+    // console.log('Color input listeners initialized');
   }
 
   function updateTicketColorsInSettings() {
@@ -247,7 +247,7 @@
     const accentColorEl = document.getElementById('ticket-accent-color');
     
     if (!primaryColorEl || !secondaryColorEl || !accentColorEl) {
-      console.warn('Color input elements not found, cannot update settings');
+      // console.warn('Color input elements not found, cannot update settings');
       return;
     }
     
@@ -269,12 +269,12 @@
     
     writeSettings(currentSettings);
     
-    console.log('Updated ticket colors in settings:', {
-      primary: primaryColor,
-      secondary: secondaryColor,
-      accent: accentColor,
-      fullSettings: currentSettings
-    });
+    // console.log('Updated ticket colors in settings:', {
+    //   primary: primaryColor,
+    //   secondary: secondaryColor,
+    //   accent: accentColor,
+    //   fullSettings: currentSettings
+    // });
     
     // Trigger immediate autosave for colors (shorter delay for better UX)
     clearTimeout(autosaveTimer);
@@ -283,7 +283,7 @@
     // Show save indicator immediately
     showColorSaveIndicator();
     
-    console.log('Ticket colors queued for autosave (300ms delay)');
+    // console.log('Ticket colors queued for autosave (300ms delay)');
   }
 
   function showColorSaveIndicator() {
@@ -466,7 +466,7 @@
       const accentColorEl = document.getElementById('ticket-accent-color');
       
       if (!primaryColorEl || !secondaryColorEl || !accentColorEl) {
-        console.warn('Color inputs not found for autosave');
+        // console.warn('Color inputs not found for autosave');
         return;
       }
       
@@ -511,12 +511,12 @@
       });
       
       if (response.ok) {
-        console.log('Color autosave successful');
+        // console.log('Color autosave successful');
       } else {
-        console.error('Color autosave failed:', response.status);
+        // console.error('Color autosave failed:', response.status);
       }
     } catch (e) {
-      console.error('Color autosave error:', e);
+      // console.error('Color autosave error:', e);
     }
   }
 
@@ -524,7 +524,7 @@
     try {
       const url = form?.getAttribute('data-autosave-url') || `/organizer/events/ticket/autosave?id=${encodeURIComponent(getEventId())}`;
       const settings = readSettings();
-      console.log('Autosaving with settings:', settings);
+      // console.log('Autosaving with settings:', settings);
       const sanitizedTypes = readTypes().map(t => ({
         id: t.id ?? undefined,
         name: t.name ?? '',
@@ -571,8 +571,8 @@
         ticket_colors: ticketColors  // Also send directly for backwards compatibility
       };
       
-      console.log('Autosave payload - ticket_colors:', ticketColors);
-      console.log('Autosave payload - full settings:', payload.ticket_settings);
+      // console.log('Autosave payload - ticket_colors:', ticketColors);
+      // console.log('Autosave payload - full settings:', payload.ticket_settings);
       
       const response = await fetch(url, {
         method: 'POST',
@@ -588,7 +588,7 @@
       
       if (response.ok) {
         const responseData = await response.json();
-        console.log('Autosave successful:', responseData);
+        // console.log('Autosave successful:', responseData);
         
         // Update local settings with saved ticket colors to keep in sync
         const updatedSettings = readSettings();
@@ -600,9 +600,9 @@
           showColorSaveIndicator();
         }
       } else {
-        console.error('[Step3] Autosave failed with status:', response.status);
+        // console.error('[Step3] Autosave failed with status:', response.status);
         const errorText = await response.text();
-        console.error('[Step3] Autosave error response:', errorText);
+        // console.error('[Step3] Autosave error response:', errorText);
         
         // Show error indicator for color save
         if (ticketColors && (ticketColors.primary || ticketColors.secondary || ticketColors.accent)) {
@@ -610,20 +610,20 @@
         }
       }
     } catch (e) {
-      console.error('[Step3] Autosave failed', e);
+      // console.error('[Step3] Autosave failed', e);
     }
   }
 
   function addTicketType() {
-    console.log('========================================');
-    console.log('[addTicketType] FUNCTION CALLED - Starting addTicketType');
-    console.log('[addTicketType] Timestamp:', new Date().toISOString());
-    console.log('[addTicketType] window.addTicketType === addTicketType:', window.addTicketType === addTicketType);
-    console.log('========================================');
+    // console.log('========================================');
+    // console.log('[addTicketType] FUNCTION CALLED - Starting addTicketType');
+    // console.log('[addTicketType] Timestamp:', new Date().toISOString());
+    // console.log('[addTicketType] window.addTicketType === addTicketType:', window.addTicketType === addTicketType);
+    // console.log('========================================');
     const list = readTypes();
-    console.log('[addTicketType] Current list:', list);
+    // console.log('[addTicketType] Current list:', list);
     const free = isFreeEvent();
-    console.log('[addTicketType] isFreeEvent:', free, 'meta tag:', document.querySelector('meta[name="event-is-free"]')?.getAttribute('content'));
+    // console.log('[addTicketType] isFreeEvent:', free, 'meta tag:', document.querySelector('meta[name="event-is-free"]')?.getAttribute('content'));
     const cap = getTicketsPerEventLimit();
     if (cap != null && getUsedQuantity(list) >= cap) {
       if (typeof Swal !== 'undefined' && window.Swal) {
@@ -657,10 +657,10 @@
 
     // ALWAYS set price to 0 for free events - check multiple times to be sure
     const isFree = isFreeEvent();
-    console.log('[addTicketType] Checking isFree again:', isFree);
+    // console.log('[addTicketType] Checking isFree again:', isFree);
     // Force price to 0 if free, otherwise default to 500
     const ticketPrice = isFree ? '0' : '500';
-    console.log('[addTicketType] Setting price to:', ticketPrice, 'isFree:', isFree);
+    // console.log('[addTicketType] Setting price to:', ticketPrice, 'isFree:', isFree);
 
     const newTicket = {
       id: null,
@@ -672,31 +672,31 @@
       sale_end: defaultSaleEnd,
       is_active: '1'
     };
-    console.log('[addTicketType] New ticket created with price:', newTicket.price);
+    // console.log('[addTicketType] New ticket created with price:', newTicket.price);
     
     // Double-check: Force price to 0 if free event (extra safety)
     if (isFree) {
       newTicket.price = '0';
-      console.log('[addTicketType] Forced price to 0 for free event');
+      // console.log('[addTicketType] Forced price to 0 for free event');
     }
     
-    console.log('[addTicketType] Final ticket object before push:', newTicket);
+    // console.log('[addTicketType] Final ticket object before push:', newTicket);
     list.push(newTicket);
-    console.log('[addTicketType] List after push, last item price:', list[list.length - 1].price);
+    // console.log('[addTicketType] List after push, last item price:', list[list.length - 1].price);
     
     // Triple-check: Normalize all prices in list before saving
     if (isFree) {
-      console.log('[addTicketType] Normalizing all prices to 0');
+      // console.log('[addTicketType] Normalizing all prices to 0');
       list.forEach(t => {
         t.price = '0';
       });
-      console.log('[addTicketType] After normalization, last item price:', list[list.length - 1].price);
+      // console.log('[addTicketType] After normalization, last item price:', list[list.length - 1].price);
     }
     
     writeTypes(list);
-    console.log('[addTicketType] Calling render()');
+    // console.log('[addTicketType] Calling render()');
     render();
-    console.log('[addTicketType] Render complete');
+    // console.log('[addTicketType] Render complete');
     // Immediately block price field after adding new ticket type
     setTimeout(() => {
       const free = isFreeEvent();
@@ -857,33 +857,33 @@
 
   // expose for inline buttons - do this immediately, not in DOMContentLoaded
   window.addTicketType = addTicketType;
-  console.log('[step3.js] addTicketType function exposed to window:', typeof window.addTicketType);
-  console.log('[step3.js] window.addTicketType === addTicketType:', window.addTicketType === addTicketType);
+  // console.log('[step3.js] addTicketType function exposed to window:', typeof window.addTicketType);
+  // console.log('[step3.js] window.addTicketType === addTicketType:', window.addTicketType === addTicketType);
 
   // Also add event listener as fallback for button clicks
   document.addEventListener('click', function(e) {
     const btn = e.target.closest('button[onclick*="addTicketType"]');
     if (btn) {
-      console.log('========================================');
-      console.log('[step3.js] Button with addTicketType onclick clicked!');
-      console.log('[step3.js] Button element:', btn);
-      console.log('[step3.js] window.addTicketType type:', typeof window.addTicketType);
+      // console.log('========================================');
+      // console.log('[step3.js] Button with addTicketType onclick clicked!');
+      // console.log('[step3.js] Button element:', btn);
+      // console.log('[step3.js] window.addTicketType type:', typeof window.addTicketType);
       e.preventDefault();
       e.stopPropagation();
       if (typeof window.addTicketType === 'function') {
-        console.log('[step3.js] Calling window.addTicketType from event listener');
+        // console.log('[step3.js] Calling window.addTicketType from event listener');
         window.addTicketType();
       } else {
-        console.error('[step3.js] ERROR: window.addTicketType is not a function!', typeof window.addTicketType);
+        // console.error('[step3.js] ERROR: window.addTicketType is not a function!', typeof window.addTicketType);
       }
-      console.log('========================================');
+      // console.log('========================================');
       return false;
     }
   }, true);
 
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('[step3.js] DOMContentLoaded - addTicketType available:', typeof window.addTicketType);
-    console.log('[step3.js] Checking for addTicketType buttons:', document.querySelectorAll('button[onclick*="addTicketType"]').length);
+    // console.log('[step3.js] DOMContentLoaded - addTicketType available:', typeof window.addTicketType);
+    // console.log('[step3.js] Checking for addTicketType buttons:', document.querySelectorAll('button[onclick*="addTicketType"]').length);
     // if server provided initial data, prefer it
     const initialTypes = typesInput?.getAttribute('data-initial');
     if (initialTypes) {
@@ -986,7 +986,7 @@
     const secondaryColorHex = document.getElementById('ticket-secondary-color-hex');
     const accentColorHex = document.getElementById('ticket-accent-color-hex');
     
-    console.log('Initializing ticket colors from settings:', ticketColors);
+    // console.log('Initializing ticket colors from settings:', ticketColors);
     
     // Load saved colors or use defaults
     const savedPrimary = ticketColors.primary || '#10b981';
@@ -996,17 +996,17 @@
     if (primaryColor && primaryColorHex) {
       primaryColor.value = savedPrimary;
       primaryColorHex.value = savedPrimary;
-      console.log('Loaded primary color:', savedPrimary);
+      // console.log('Loaded primary color:', savedPrimary);
     }
     if (secondaryColor && secondaryColorHex) {
       secondaryColor.value = savedSecondary;
       secondaryColorHex.value = savedSecondary;
-      console.log('Loaded secondary color:', savedSecondary);
+      // console.log('Loaded secondary color:', savedSecondary);
     }
     if (accentColor && accentColorHex) {
       accentColor.value = savedAccent;
       accentColorHex.value = savedAccent;
-      console.log('Loaded accent color:', savedAccent);
+      // console.log('Loaded accent color:', savedAccent);
     }
     
     // Initialize color synchronization AFTER loading colors
@@ -1026,7 +1026,7 @@
         // Only autosave if colors have been loaded/changed
         const hasColors = primaryColorEl.value && secondaryColorEl.value && accentColorEl.value;
         if (hasColors) {
-          console.log('Initial colors detected, ensuring autosave...');
+          // console.log('Initial colors detected, ensuring autosave...');
           updateTicketColorsInSettings();
         }
       }
@@ -1054,9 +1054,9 @@
       
       if (needsSave) {
         updateTicketColorsInSettings();
-        console.log('Initial ticket colors saved to settings (colors were missing or different)');
+        // console.log('Initial ticket colors saved to settings (colors were missing or different)');
       } else {
-        console.log('Ticket colors already in settings, no need to save');
+        // console.log('Ticket colors already in settings, no need to save');
       }
     }, 200);
 
@@ -1075,7 +1075,7 @@
           accent: accentColor?.value || '#059669'
         }
       };
-      console.log('Settings changed:', updated);
+      // console.log('Settings changed:', updated);
       writeSettings(updated);
       queueAutosave();
       
@@ -1108,7 +1108,7 @@
     if (navForm) {
       navForm.addEventListener('submit', (e) => {
         const list = readTypes();
-        console.log('Form submitted, ticket list:', list); // Debug log
+        // console.log('Form submitted, ticket list:', list); // Debug log
         if (!list || list.length === 0) {
           e.preventDefault();
           e.stopPropagation();
@@ -1161,7 +1161,7 @@
         }
       });
     } else {
-      console.warn('Ticket form not found, validation may not work');
+      // console.warn('Ticket form not found, validation may not work');
     }
   });
 
@@ -1185,7 +1185,7 @@
         keepalive: true,
         credentials: 'same-origin'
       }).catch(()=>{});
-      try { console.log('[Step3] Flush requested before exit'); } catch(_){ }
+      // try { console.log('[Step3] Flush requested before exit'); } catch(_){ }
     } catch {}
   }
   window.addEventListener('pagehide', flushOnExit);
@@ -1272,15 +1272,15 @@
     
     // Validate sale start is not before event start (allow same date)
     if (saleStart && saleStartDate < eventStartDate) {
-      console.log('Date validation debug:', {
-        saleStart: saleStart,
-        saleStartDate: saleStartDate,
-        eventStart: eventStart,
-        eventStartDate: eventStartDate,
-        saleStartTime: saleStartDate.getTime(),
-        eventStartTime: eventStartDate.getTime(),
-        timeDiff: eventStartDate.getTime() - saleStartDate.getTime()
-      });
+      // console.log('Date validation debug:', {
+      //   saleStart: saleStart,
+      //   saleStartDate: saleStartDate,
+      //   eventStart: eventStart,
+      //   eventStartDate: eventStartDate,
+      //   saleStartTime: saleStartDate.getTime(),
+      //   eventStartTime: eventStartDate.getTime(),
+      //   timeDiff: eventStartDate.getTime() - saleStartDate.getTime()
+      // });
       
       return {
         isValid: false,
