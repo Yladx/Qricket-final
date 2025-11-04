@@ -293,7 +293,8 @@
         }
 
         if (eventData.expected_revenue !== undefined) {
-            updateElement('event-expected-revenue', '₱' + parseFloat(eventData.expected_revenue).toLocaleString('en-US', {minimumFractionDigits: 2}));
+            const safeValue = Math.max(0, parseFloat(eventData.expected_revenue));
+            updateElement('event-expected-revenue', '₱' + safeValue.toLocaleString('en-US', {minimumFractionDigits: 2}));
         }
 
         // Update charts if data provided
@@ -346,7 +347,8 @@
 
         // Update expected revenue
         if (eventStats.expected_revenue !== undefined) {
-            updateElement('event-expected-revenue', '₱' + parseFloat(eventStats.expected_revenue).toLocaleString('en-US', {minimumFractionDigits: 2}));
+            const safeValue = Math.max(0, parseFloat(eventStats.expected_revenue));
+            updateElement('event-expected-revenue', '₱' + safeValue.toLocaleString('en-US', {minimumFractionDigits: 2}));
         }
     }
 
