@@ -831,4 +831,100 @@ class StaffController extends Controller
 
         return [];
     }
+
+    /**
+     * Delete a staff member from an event via AJAX
+     */
+    public function deleteStaff(Request $request)
+    {
+        $eventId = $request->get('id');
+        $userId = $request->get('user_id');
+        
+        if (!$eventId || !$userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Event ID and User ID are required.'
+            ], 400);
+        }
+
+        $isAdmin = Auth::guard('admin')->check();
+        
+        // Find the event
+        $eventQuery = Event::where('id', $eventId);
+        
+        // Allow admins to access events with user_id === null (admin-created events)
+        if ($isAdmin) {
+            $eventQuery->where(function($query) {
+                $query->where('user_id', Auth::id())
+                      ->orWhereNull('user_id');
+            });
+        } else {
+            $eventQuery->where('user_id', Auth::id());
+        }
+        
+        $event = $eventQuery->first();
+
+        if (!$event) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Event not found or not authorized.'
+            ], 404);
+        }
+
+        // Prevent deletion of event creator
+        if ((int)$userId === (int)$event->user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot remove the event creator.'
+            ], 403);
+        }
+
+        // Check if event status allows staff editing
+        $isUpcoming = !$event->end_date || now()->lt($event->end_date);
+        $canEditStaff = in_array($event->status, ['draft', 'pending_approval'])
+                      || ($isUpcoming && in_array($event->status, ['published', 'approved', 'scheduled']));
+        
+        if (!$canEditStaff) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot edit staff for this event.'
+            ], 403);
+        }
+
+        try {
+            // Delete the staff member from event_staff table
+            $deleted = \App\Models\EventStaff::where('event_id', $eventId)
+                ->where('user_id', $userId)
+                ->delete();
+
+            if ($deleted) {
+                \Log::info('Staff member deleted via AJAX', [
+                    'event_id' => $eventId,
+                    'user_id' => $userId,
+                    'deleted_by' => Auth::id()
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Staff member removed successfully.'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Staff member not found.'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error deleting staff member', [
+                'event_id' => $eventId,
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove staff member. Please try again.'
+            ], 500);
+        }
+    }
 }

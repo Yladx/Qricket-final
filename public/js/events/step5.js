@@ -291,7 +291,7 @@
     }
   }
 
-  function removeMember(index) {
+  async function removeMember(index) {
     const data = readData();
     const member = data.members[index];
     const ownerId = ownerInfo?.getAttribute('data-owner-id');
@@ -312,18 +312,95 @@
     }
     
     const memberName = member?.name || member?.email || 'this staff member';
+    const memberId = member?.id;
+    const eventId = getEventId();
     
-    const proceedWithRemove = () => {
-      data.members.splice(index, 1);
-      writeData(data);
-      if (typeof window.renderMembers === 'function') {
-        window.renderMembers();
-      }
-      if (typeof window.renderCards === 'function') {
-        window.renderCards();
-      }
-      if (typeof window.queueAutosave === 'function') {
-        window.queueAutosave();
+    const proceedWithRemove = async () => {
+      // Show loading state
+      const loadingToast = typeof Swal !== 'undefined' && window.Swal ? Swal.fire({
+        title: 'Removing...',
+        text: 'Please wait',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      }) : null;
+
+      try {
+        // Call AJAX endpoint to delete staff member
+        const deleteUrl = `/organizer/events/staff/remove?id=${encodeURIComponent(eventId)}&user_id=${encodeURIComponent(memberId)}`;
+        const response = await fetch(deleteUrl, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+          },
+          credentials: 'same-origin'
+        });
+
+        const result = await response.json();
+
+        if (loadingToast && typeof Swal !== 'undefined') {
+          Swal.close();
+        }
+
+        if (result.success) {
+          // Remove from local data
+          data.members.splice(index, 1);
+          writeData(data);
+          
+          // Re-render cards
+          if (typeof window.renderMembers === 'function') {
+            window.renderMembers();
+          }
+          if (typeof window.renderCards === 'function') {
+            window.renderCards();
+          }
+          
+          // Show success message
+          if (typeof Swal !== 'undefined' && window.Swal) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Removed',
+              text: `${memberName} has been removed from the staff.`,
+              showConfirmButton: false,
+              timer: 2000
+            });
+          }
+        } else {
+          // Show error message
+          if (typeof Swal !== 'undefined' && window.Swal) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: result.message || 'Failed to remove staff member. Please try again.',
+              confirmButtonColor: '#10b981'
+            });
+          } else {
+            alert(result.message || 'Failed to remove staff member. Please try again.');
+          }
+        }
+      } catch (error) {
+        if (loadingToast && typeof Swal !== 'undefined') {
+          Swal.close();
+        }
+        
+        // Show error message
+        if (typeof Swal !== 'undefined' && window.Swal) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while removing the staff member. Please try again.',
+            confirmButtonColor: '#10b981'
+          });
+        } else {
+          alert('An error occurred while removing the staff member. Please try again.');
+        }
+        console.error('[Step5] Delete staff error:', error);
       }
     };
     
