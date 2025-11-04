@@ -645,7 +645,6 @@
     
     // Default quantity respects remaining quota when capped
     const remain = remainingQuota(list);
-    const cap = getTicketsPerEventLimit();
     const defaultQty = remain == null ? (cap ? String(Math.min(100, cap)) : '100') : String(Math.max(1, Math.min(100, remain)));
 
     const newTicket = {
