@@ -1270,38 +1270,19 @@
       return { isValid: false, message: 'Invalid event end date' };
     }
     
-    // Validate sale start is not before event start (allow same date)
-    if (saleStart && saleStartDate < eventStartDate) {
-      // console.log('Date validation debug:', {
-      //   saleStart: saleStart,
-      //   saleStartDate: saleStartDate,
-      //   eventStart: eventStart,
-      //   eventStartDate: eventStartDate,
-      //   saleStartTime: saleStartDate.getTime(),
-      //   eventStartTime: eventStartDate.getTime(),
-      //   timeDiff: eventStartDate.getTime() - saleStartDate.getTime()
-      // });
-      
-      return {
-        isValid: false,
-        message: `Sale start cannot be before event start date (${eventStartDate.toLocaleDateString()})`
-      };
-    }
+    // Remove restrictions on sale start; any start is allowed if format is valid
     
-    // Validate sale end is not after event end (if event end exists)
-    if (saleEnd && eventEndDate && saleEndDate > eventEndDate) {
-      return {
-        isValid: false,
-        message: `Sale end cannot be after event end date (${eventEndDate.toLocaleDateString()})`
-      };
-    }
-    
-    // Validate sale end is not before sale start (allow same date and time)
-    if (saleStart && saleEnd && saleEndDate < saleStartDate) {
-      return {
-        isValid: false,
-        message: 'Sale end must be after or equal to sale start date'
-      };
+    // Enforce: sale end must match event end exactly (date and time)
+    if (saleEnd) {
+      if (!eventEndDate) {
+        return { isValid: false, message: 'Event end date is required to set sale end' };
+      }
+      if (saleEndDate.getTime() !== eventEndDate.getTime()) {
+        return {
+          isValid: false,
+          message: `Sale end must match the event end (${eventEndDate.toLocaleString()})`
+        };
+      }
     }
     
     return { isValid: true, message: '' };
@@ -1354,20 +1335,26 @@
       return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
     };
     
-    // Set min/max attributes on all sale date inputs
+    // Set attributes on sale date inputs
     const saleStartInputs = document.querySelectorAll('input[data-k="sale_start"]');
     const saleEndInputs = document.querySelectorAll('input[data-k="sale_end"]');
     
+    // Remove restrictions on sale start
     saleStartInputs.forEach(input => {
-      input.min = formatForInput(eventStartDate);
-      if (eventEndDate) {
-        input.max = formatForInput(eventEndDate);
-      }
+      input.removeAttribute('min');
+      input.removeAttribute('max');
     });
     
     saleEndInputs.forEach(input => {
       if (eventEndDate) {
-        input.max = formatForInput(eventEndDate);
+        const exact = formatForInput(eventEndDate);
+        // Force sale_end to exactly equal event end
+        input.value = exact;
+        input.min = exact;
+        input.max = exact;
+        input.setAttribute('readonly', 'readonly');
+        input.setAttribute('disabled', 'disabled');
+        input.style.pointerEvents = 'none';
       }
     });
   }

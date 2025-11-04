@@ -416,6 +416,16 @@ class TicketsController extends Controller
             unset($t);
         }
 
+        // Enforce: ticket sale_end must match event end; remove restrictions on sale_start
+        if ($event && $event->end_date && is_array($ticketTypes)) {
+            foreach ($ticketTypes as &$t) {
+                if (is_array($t)) {
+                    $t['sale_end'] = optional($event->end_date)->format('Y-m-d H:i');
+                }
+            }
+            unset($t);
+        }
+
         // Validate decoded array structure instead of original request
         $validator = Validator::make([
             'ticket_types' => $ticketTypes,
@@ -826,6 +836,16 @@ class TicketsController extends Controller
                 }
                 unset($t);
             }
+
+            // Enforce: ticket sale_end must match event end during autosave as well
+            if ($event && $event->end_date && is_array($ticketTypes)) {
+                foreach ($ticketTypes as &$t) {
+                    if (is_array($t)) {
+                        $t['sale_end'] = optional($event->end_date)->format('Y-m-d H:i');
+                    }
+                }
+                unset($t);
+            }
             // Upsert ticket types into DB and log only add/remove
             if (!empty($ticketTypes)) {
                 // Normalize incoming
@@ -874,7 +894,8 @@ class TicketsController extends Controller
                             'price' => ($event->is_free ?? false) ? 0 : ($t['price'] ?? $row->price),
                             'quantity' => $t['quantity'] ?? $row->quantity,
                             'sale_start' => $t['sale_start'] ?? $row->sale_start,
-                            'sale_end' => $t['sale_end'] ?? $row->sale_end,
+                            // Force sale_end to event end
+                            'sale_end' => $event->end_date ?? ($t['sale_end'] ?? $row->sale_end),
                         ]);
                     } else {
                         EventTicket::create([
@@ -884,7 +905,8 @@ class TicketsController extends Controller
                             'price' => $t['price'] ?? 0,
                             'quantity' => $t['quantity'] ?? null,
                             'sale_start' => $t['sale_start'] ?? null,
-                            'sale_end' => $t['sale_end'] ?? null,
+                            // Force sale_end to event end
+                            'sale_end' => $event->end_date ?? ($t['sale_end'] ?? null),
                         ]);
                     }
                 }
