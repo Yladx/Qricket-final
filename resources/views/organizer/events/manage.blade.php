@@ -1046,7 +1046,9 @@
                             var revEl = document.querySelector('[data-stat="event-total-revenue"]');
                             if(revEl){ revEl.textContent = '₱' + (Number(data.ticketRevenue||0)).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2}); }
                             var expEl = document.querySelector('[data-stat="event-expected-revenue"]');
-                            if(expEl){ expEl.textContent = '₱' + (Number(data.ticketNetRevenue||0)).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2}); }
+                            // Use expectedRevenue if available (calculated correctly), fallback to ticketNetRevenue (clamped)
+                            var expectedRev = data.expectedRevenue !== undefined ? data.expectedRevenue : Math.max(0, data.ticketNetRevenue || 0);
+                            if(expEl){ expEl.textContent = '₱' + (Number(expectedRev)).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2}); }
                         }).catch(function(){});
                 }catch(e){}
             }
