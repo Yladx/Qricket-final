@@ -614,11 +614,12 @@ class TicketsController extends Controller
                 // Perform upserts
                 foreach ($incomingByKey as $k => $t) {
                     if (isset($existingByKey[$k])) {
+                        $row = $existingByKey[$k];
                         $existingByKey[$k]->update([
                             'name' => $t['name'] ?? $existingByKey[$k]->name,
                             'description' => $t['description'] ?? $existingByKey[$k]->description,
                             'price' => ($event->is_free ?? false) ? 0 : ($t['price'] ?? $existingByKey[$k]->price),
-                            'quantity' => $t['quantity'] ?? $existingByKey[$k]->quantity,
+                            'quantity' => max((int)($row->sold_count ?? 0), (int)($t['quantity'] ?? $existingByKey[$k]->quantity)),
                             'sale_start' => $t['sale_start'] ?? $existingByKey[$k]->sale_start,
                             'sale_end' => $t['sale_end'] ?? $existingByKey[$k]->sale_end,
                         ]);
@@ -895,7 +896,8 @@ class TicketsController extends Controller
                             'name' => $newName,
                             'description' => $t['description'] ?? $row->description,
                             'price' => ($event->is_free ?? false) ? 0 : ($t['price'] ?? $row->price),
-                            'quantity' => $t['quantity'] ?? $row->quantity,
+                            // Quantity cannot go below already sold
+                            'quantity' => max((int)($row->sold_count ?? 0), (int)($t['quantity'] ?? $row->quantity)),
                             'sale_start' => $t['sale_start'] ?? $row->sale_start,
                             // Force sale_end to event end
                             'sale_end' => $event->end_date ?? ($t['sale_end'] ?? $row->sale_end),

@@ -78,16 +78,18 @@
 
   function updateQuantityMaxes() {
     const cap = getTicketsPerEventLimit();
-    if (cap == null) return;
     const list = readTypes();
     const inputs = document.querySelectorAll('input[data-k="quantity"]');
     const free = isFreeEvent();
     // For each input, allow current value + remaining after subtracting others
     inputs.forEach((inp, idx) => {
+      // Always enforce minimum equal to sold count
+      const minSold = Number(list[idx]?.purchased_count || 0);
+      inp.min = String(minSold);
+      if (cap == null) return; // no max constraints if no cap
       const others = list.reduce((sum, t, j) => sum + (j === idx ? 0 : (parseInt(t.quantity, 10) || 0)), 0);
       const allowedForThis = Math.max(0, cap - others);
       const cur = parseInt(inp.value, 10) || 0;
-      inp.min = '0';
       // For free events, max is the cap itself (total limit); for others, allow current + remaining
       if (free) {
         inp.max = String(cap);
@@ -400,7 +402,7 @@
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Quantity</label>
-              <input data-k="quantity" data-i="${idx}" type="number" min="0" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.quantity ?? ''}" ${free ? `max="${getTicketsPerEventLimit() || ''}"` : ''}>
+              <input data-k="quantity" data-i="${idx}" type="number" min="${soldCount}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.quantity ?? ''}" ${free ? `max="${getTicketsPerEventLimit() || ''}"` : ''}>
             </div>
           </div>
           <div>
@@ -828,6 +830,11 @@
         const others = list.reduce((sum, t, j) => sum + (j === idx ? 0 : (parseInt(t.quantity, 10) || 0)), 0);
         const allowedForThis = Math.max(0, cap - others);
         let val = parseInt(e.target.value, 10) || 0;
+        // Enforce minimum equal to already sold for this ticket
+        const minSold = Number(list[idx]?.purchased_count || 0);
+        if (val < minSold) {
+          val = minSold;
+        }
         if (val > allowedForThis) {
           val = allowedForThis;
           e.target.value = String(val);
@@ -838,6 +845,19 @@
         list[idx].quantity = String(val);
         // Refresh max attributes after change
         setTimeout(updateQuantityMaxes, 0);
+      }
+      else {
+        // No cap configured: still cannot go below already sold
+        const idx = Number(i);
+        const minSold = Number(list[idx]?.purchased_count || 0);
+        let val = parseInt(e.target.value, 10) || 0;
+        if (val < minSold) {
+          val = minSold;
+          e.target.value = String(val);
+          e.target.classList.add('ring-2','ring-red-400');
+          setTimeout(()=>e.target.classList.remove('ring-2','ring-red-400'), 600);
+        }
+        list[idx].quantity = String(val);
       }
     }
 
