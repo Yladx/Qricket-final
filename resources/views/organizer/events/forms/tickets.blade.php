@@ -57,7 +57,7 @@
                 Buy Additional Tickets
             </a>
             @endif
-            <button type="button" class="px-2.5 py-1 rounded-md bg-qricket-500 text-white hover:bg-qricket-600 text-xs" onclick="addTicketType()">Add Ticket Type</button>
+            <button type="button" id="add-ticket-type-btn" class="px-2.5 py-1 rounded-md bg-qricket-500 text-white hover:bg-qricket-600 text-xs" onclick="console.log('Button onclick fired!'); if (typeof window.addTicketType === 'function') { window.addTicketType(); } else { console.error('addTicketType not available!'); }">Add Ticket Type</button>
         </div>
     </div>
 

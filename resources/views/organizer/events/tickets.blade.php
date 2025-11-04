@@ -136,7 +136,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- Include Step 3 JavaScript -->
-    <script src="{{ asset('js/events/step3.js') }}" defer></script>
+    <script src="{{ asset('js/events/step3.js') }}?v={{ time() }}" defer></script>
     
     <!-- Additional JavaScript for ticket management page -->
     <script>

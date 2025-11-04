@@ -86,5 +86,5 @@
     </script>
     
     <!-- Include Step 3 JavaScript -->
-    <script src="{{ asset('js/events/step3.js') }}" defer></script>
+    <script src="{{ asset('js/events/step3.js') }}?v={{ time() }}" defer></script>
 </x-app-layout>

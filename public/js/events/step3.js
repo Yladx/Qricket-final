@@ -615,7 +615,11 @@
   }
 
   function addTicketType() {
+    console.log('========================================');
     console.log('[addTicketType] FUNCTION CALLED - Starting addTicketType');
+    console.log('[addTicketType] Timestamp:', new Date().toISOString());
+    console.log('[addTicketType] window.addTicketType === addTicketType:', window.addTicketType === addTicketType);
+    console.log('========================================');
     const list = readTypes();
     console.log('[addTicketType] Current list:', list);
     const free = isFreeEvent();
@@ -860,15 +864,19 @@
   document.addEventListener('click', function(e) {
     const btn = e.target.closest('button[onclick*="addTicketType"]');
     if (btn) {
+      console.log('========================================');
       console.log('[step3.js] Button with addTicketType onclick clicked!');
+      console.log('[step3.js] Button element:', btn);
+      console.log('[step3.js] window.addTicketType type:', typeof window.addTicketType);
       e.preventDefault();
       e.stopPropagation();
       if (typeof window.addTicketType === 'function') {
         console.log('[step3.js] Calling window.addTicketType from event listener');
         window.addTicketType();
       } else {
-        console.error('[step3.js] window.addTicketType is not a function!', typeof window.addTicketType);
+        console.error('[step3.js] ERROR: window.addTicketType is not a function!', typeof window.addTicketType);
       }
+      console.log('========================================');
       return false;
     }
   }, true);
