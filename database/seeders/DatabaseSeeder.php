@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             TicketLimitPricingSeeder::class,
             DiscountSeeder::class,
             UserStatusSeeder::class,
+            DemoEventDataSeeder::class,
         ]);
     }
 }
