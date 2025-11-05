@@ -18,6 +18,8 @@ use App\Models\Admin;
 use App\Models\TicketPurchase;
 use App\Models\EventTicketInformation;
 use App\Models\EventPayoutRequest;
+use App\Models\EventVerificationRequest;
+use App\Models\OrganizerVerification;
 
 class DemoEventDataSeeder extends Seeder
 {
@@ -272,6 +274,12 @@ class DemoEventDataSeeder extends Seeder
                 } catch (\Throwable $e) {
                     // Ignore QR generation errors during seeding
                 }
+                // Mark the first ticket as checked-in and issued a certificate to simulate attendance
+                if ($i === 0) {
+                    $ti->checked_in_at = $eventPast->start_date->copy()->addHour();
+                    $ti->certificate_given = true;
+                    $ti->save();
+                }
             }
 
             // Create a payout record for the ended event
@@ -293,8 +301,78 @@ class DemoEventDataSeeder extends Seeder
             );
         }
 
-        // --- Sample support ticket + admin reply ---
+        // --- Organizer verification requests (KYC) ---
         $admin = Admin::first();
+        OrganizerVerification::firstOrCreate(
+            ['user_id' => $organizer1->id],
+            [
+                'user_id' => $organizer1->id,
+                'status' => 'approved',
+                'organization_name' => 'Alex Events Co.',
+                'document_type' => 'id_card',
+                'document_front_path' => 'verifications/' . $organizer1->id . '/front.png',
+                'document_back_path' => 'verifications/' . $organizer1->id . '/back.png',
+                'contact_phone' => '+63 900 000 0001',
+                'terms_accepted' => true,
+                'terms_accepted_at' => now()->subDays(30),
+                'reviewed_by' => $admin?->id,
+                'reviewed_at' => now()->subDays(29),
+            ]
+        );
+
+        OrganizerVerification::firstOrCreate(
+            ['user_id' => $organizer2->id],
+            [
+                'user_id' => $organizer2->id,
+                'status' => 'pending',
+                'organization_name' => 'Blake Productions',
+                'document_type' => 'passport',
+                'document_file_path' => 'verifications/' . $organizer2->id . '/passport.png',
+                'contact_phone' => '+63 900 000 0002',
+                'terms_accepted' => true,
+                'terms_accepted_at' => now()->subDays(2),
+            ]
+        );
+
+        // --- Event verification requests (moderation) ---
+        EventVerificationRequest::firstOrCreate(
+            ['event_id' => $eventPast->id],
+            [
+                'event_id' => $eventPast->id,
+                'organizer_id' => $organizer1->id,
+                'status' => 'approved',
+                'notes' => 'Auto‑approved for demo data',
+                'reviewed_by' => $admin?->id,
+                'reviewed_at' => now()->subDays(9),
+                'submitted_at' => now()->subDays(12),
+            ]
+        );
+
+        EventVerificationRequest::firstOrCreate(
+            ['event_id' => $eventUpcoming1->id],
+            [
+                'event_id' => $eventUpcoming1->id,
+                'organizer_id' => $organizer1->id,
+                'status' => 'approved',
+                'notes' => 'Approved upcoming launch.',
+                'reviewed_by' => $admin?->id,
+                'reviewed_at' => now()->subDay(),
+                'submitted_at' => now()->subDays(3),
+            ]
+        );
+
+        EventVerificationRequest::firstOrCreate(
+            ['event_id' => $eventUpcoming2->id],
+            [
+                'event_id' => $eventUpcoming2->id,
+                'organizer_id' => $organizer2->id,
+                'status' => 'pending',
+                'notes' => 'Awaiting review',
+                'submitted_at' => now()->subDay(),
+            ]
+        );
+
+        // --- Seed a sample support ticket and admin reply ---
         $ticket = SupportTicket::create([
             'user_id' => $attendee->id,
             'name' => $attendee->full_name,
