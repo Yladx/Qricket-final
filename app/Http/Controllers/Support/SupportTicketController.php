@@ -139,7 +139,7 @@ class SupportTicketController extends Controller
      */
     public function index(Request $request)
     {
-        $query = \App\Models\SupportTicket::with(['user', 'assignedAdmin', 'replies']);
+        $query = \App\Models\SupportTicket::with(['user', 'replies']);
 
         // Apply filters
         if ($request->filled('status')) {
@@ -163,9 +163,8 @@ class SupportTicketController extends Controller
         }
 
         $tickets = $query->latest('updated_at')->paginate(20)->withQueryString();
-        $admins = \App\Models\Admin::all();
 
-        return view('admin.support.index', compact('tickets', 'admins'));
+        return view('admin.support.index', compact('tickets'));
     }
 
     /**
@@ -173,10 +172,9 @@ class SupportTicketController extends Controller
      */
     public function show(\App\Models\SupportTicket $ticket)
     {
-        $ticket->load(['user', 'assignedAdmin', 'replies.user', 'replies.admin']);
-        $admins = \App\Models\Admin::all();
+        $ticket->load(['user', 'replies.user', 'replies.admin']);
 
-        return view('admin.support.show', compact('ticket', 'admins'));
+        return view('admin.support.show', compact('ticket'));
     }
 
     /**
@@ -321,19 +319,5 @@ class SupportTicketController extends Controller
         $ticket->update(['status' => $validated['status']]);
 
         return redirect()->back()->with('success', 'Ticket status updated successfully.');
-    }
-
-    /**
-     * Admin: Assign ticket to admin
-     */
-    public function assign(Request $request, \App\Models\SupportTicket $ticket)
-    {
-        $validated = $request->validate([
-            'assigned_admin_id' => 'nullable|exists:admins,id',
-        ]);
-
-        $ticket->update(['assigned_admin_id' => $validated['assigned_admin_id']]);
-
-        return redirect()->back()->with('success', 'Ticket assignment updated successfully.');
     }
 }

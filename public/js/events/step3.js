@@ -824,47 +824,10 @@
       }
     }
     
-    // Enforce real-time quantity cap
+    // Quantity: allow free typing (including temporary empty) and defer enforcement to blur/change
     if (k === 'quantity') {
-      const cap = getTicketsPerEventLimit();
-      if (cap != null) {
-        // Clamp this field so that total does not exceed cap
-        const idx = Number(i);
-        const others = list.reduce((sum, t, j) => sum + (j === idx ? 0 : (parseInt(t.quantity, 10) || 0)), 0);
-        const allowedForThis = Math.max(0, cap - others);
-        let val = parseInt(e.target.value, 10) || 0;
-        // Enforce minimum equal to already sold for this ticket
-        const minSold = Number(list[idx]?.purchased_count || 0);
-        if (val < minSold) {
-          val = minSold;
-          e.target.value = String(val);
-          e.target.classList.add('ring-2','ring-red-400');
-          setTimeout(()=>e.target.classList.remove('ring-2','ring-red-400'), 600);
-        }
-        if (val > allowedForThis) {
-          val = allowedForThis;
-          e.target.value = String(val);
-          // Optional: brief UI feedback
-          e.target.classList.add('ring-2','ring-red-400');
-          setTimeout(()=>e.target.classList.remove('ring-2','ring-red-400'), 600);
-        }
-        list[idx].quantity = String(val);
-        // Refresh max attributes after change
-        setTimeout(updateQuantityMaxes, 0);
-      }
-      else {
-        // No cap configured: still cannot go below already sold
-        const idx = Number(i);
-        const minSold = Number(list[idx]?.purchased_count || 0);
-        let val = parseInt(e.target.value, 10) || 0;
-        if (val < minSold) {
-          val = minSold;
-          e.target.value = String(val);
-          e.target.classList.add('ring-2','ring-red-400');
-          setTimeout(()=>e.target.classList.remove('ring-2','ring-red-400'), 600);
-        }
-        list[idx].quantity = String(val);
-      }
+      const idx = Number(i);
+      list[idx].quantity = String(e.target.value ?? '');
     }
 
     // Update description counter if this is a description field
@@ -873,6 +836,30 @@
     }
     
     writeTypes(list);
+    queueAutosave();
+  }
+
+  // Enforce quantity rules when user finishes editing (blur/change)
+  function onContainerCommit(e) {
+    const k = e.target.getAttribute('data-k');
+    const i = e.target.getAttribute('data-i');
+    if (k !== 'quantity' || i == null) return;
+    const list = readTypes();
+    const idx = Number(i);
+    const cap = getTicketsPerEventLimit();
+    const minSold = Number(list[idx]?.purchased_count || 0);
+    let val = parseInt(e.target.value, 10);
+    if (isNaN(val)) val = minSold; // empty or invalid -> snap back to sold count
+    if (cap != null) {
+      const others = list.reduce((sum, t, j) => sum + (j === idx ? 0 : (parseInt(t.quantity, 10) || 0)), 0);
+      const allowedForThis = Math.max(0, cap - others);
+      if (val > allowedForThis) val = allowedForThis;
+    }
+    if (val < minSold) val = minSold;
+    e.target.value = String(val);
+    list[idx].quantity = String(val);
+    writeTypes(list);
+    setTimeout(updateQuantityMaxes, 0);
     queueAutosave();
   }
   
@@ -961,6 +948,8 @@
 
     render();
     ticketContainer?.addEventListener('input', onContainerInput);
+    ticketContainer?.addEventListener('change', onContainerCommit);
+    ticketContainer?.addEventListener('blur', onContainerCommit, true);
     ticketContainer?.addEventListener('click', onContainerClick);
     
     // Block price field input for free events

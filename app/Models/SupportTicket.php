@@ -19,7 +19,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * - message: initial message/body created with the ticket
  * - status: open|in_progress|resolved|closed
  * - priority: low|medium|high|urgent
- * - assigned_to: admin id handling this ticket
  * - resolved_at: timestamp when closed/resolved
  */
 class SupportTicket extends Model
@@ -35,7 +34,6 @@ class SupportTicket extends Model
         'message',
         'status',
         'priority',
-        'assigned_to',
         'resolved_at',
     ];
 
@@ -63,14 +61,6 @@ class SupportTicket extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the admin assigned to the ticket.
-     */
-    public function assignedAdmin(): BelongsTo
-    {
-        return $this->belongsTo(Admin::class, 'assigned_to');
     }
 
     /**

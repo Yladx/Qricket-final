@@ -101,7 +101,6 @@ Route::prefix('admin')->name('admin.')->middleware('prevent.user.admin')->group(
         Route::get('/support/{ticket}', [SupportTicketController::class, 'show'])->name('support.show');
         Route::post('/support/{ticket}/reply', [SupportTicketController::class, 'reply'])->name('support.reply');
         Route::post('/support/{ticket}/status', [SupportTicketController::class, 'updateStatus'])->name('support.status');
-        Route::post('/support/{ticket}/assign', [SupportTicketController::class, 'assign'])->name('support.assign');
 
         // Admin activity log routes
         Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');

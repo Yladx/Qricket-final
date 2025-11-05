@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
@@ -95,11 +94,6 @@ class Admin extends Authenticatable
     public function activityLogs(): HasMany
     {
         return $this->hasMany(AdminActivityLog::class);
-    }
-
-    public function access(): HasOne
-    {
-        return $this->hasOne(AdminAccess::class);
     }
 
     /**
