@@ -282,34 +282,18 @@ class DemoEventDataSeeder extends Seeder
 
         // --- Cross-assign organizers as staff on each other's events ---
         foreach ([
-            [$eventPast, $organizer1, $organizer2],
-            [$eventUpcoming1, $organizer1, $organizer2],
-            [$eventUpcoming2, $organizer2, $organizer1],
-            [$eventUpcoming3, $organizer3, $organizer1],
-            [$eventUpcoming3, $organizer3, $organizer2]
+            [$eventPast, $organizer1],
+            [$eventUpcoming1, $organizer1],
+            [$eventUpcoming2, $organizer2],
+            [$eventUpcoming3, $organizer3]
         ] as $tuple) {
-            [$e, $owner, $other] = $tuple;
+            [$e, $owner] = $tuple;
             EventStaff::firstOrCreate(
                 ['event_id' => $e->id, 'user_id' => $owner->id],
                 [
                     'event_id' => $e->id,
                     'user_id' => $owner->id,
                     'role' => 'organizer',
-                    'can_manage_event' => true,
-                    'can_manage_staff' => true,
-                    'can_manage_news' => true,
-                    'can_manage_attendance' => true,
-                    'can_manage_ticket' => true,
-                    'can_manage_sales' => true,
-                ]
-            );
-
-            EventStaff::firstOrCreate(
-                ['event_id' => $e->id, 'user_id' => $other->id],
-                [
-                    'event_id' => $e->id,
-                    'user_id' => $other->id,
-                    'role' => 'manager',
                     'can_manage_event' => true,
                     'can_manage_staff' => true,
                     'can_manage_news' => true,
