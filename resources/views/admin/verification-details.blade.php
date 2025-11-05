@@ -342,7 +342,7 @@
                                     <div>
                                         <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Front Document</h4>
                                         <div class="space-y-2">
-                                            <a href="{{ $verification->getDocumentFrontUrlAttribute() }}" target="_blank" 
+                                            <a href="{{ $verification->document_front_url }}" target="_blank" 
                                                class="inline-flex items-center px-3 py-2 bg-qricket-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-qricket-700 focus:bg-qricket-700 active:bg-qricket-800 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -352,10 +352,10 @@
                                             </a>
                                             
                                             <div class="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-                                                <img src="{{ $verification->getDocumentFrontUrlAttribute() }}" 
+                                                <img src="{{ $verification->document_front_url }}" 
                                                      alt="Front Document" 
                                                      class="w-full h-auto max-h-64 object-contain bg-gray-50 dark:bg-gray-800"
-                                                     onclick="window.open('{{ $verification->getDocumentFrontUrlAttribute() }}', '_blank')"
+                                                     onclick="window.open('{{ $verification->document_front_url }}', '_blank')"
                                                      style="cursor: pointer;">
                                             </div>
                                         </div>
@@ -367,7 +367,7 @@
                                     <div>
                                         <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Back Document</h4>
                                         <div class="space-y-2">
-                                            <a href="{{ $verification->getDocumentBackUrlAttribute() }}" target="_blank" 
+                                            <a href="{{ $verification->document_back_url }}" target="_blank" 
                                                class="inline-flex items-center px-3 py-2 bg-qricket-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-qricket-700 focus:bg-qricket-700 active:bg-qricket-800 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -377,10 +377,10 @@
                                             </a>
                                             
                                             <div class="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-                                                <img src="{{ $verification->getDocumentBackUrlAttribute() }}" 
+                                                <img src="{{ $verification->document_back_url }}" 
                                                      alt="Back Document" 
                                                      class="w-full h-auto max-h-64 object-contain bg-gray-50 dark:bg-gray-800"
-                                                     onclick="window.open('{{ $verification->getDocumentBackUrlAttribute() }}', '_blank')"
+                                                     onclick="window.open('{{ $verification->document_back_url }}', '_blank')"
                                                      style="cursor: pointer;">
                                             </div>
                                         </div>

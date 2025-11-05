@@ -90,7 +90,7 @@
                     <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div class="flex items-center justify-between">
                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Primary Document</div>
-                            <a href="{{ Storage::disk('r2')->url($verification->document_file_path) }}" target="_blank" class="text-qricket-600 hover:text-qricket-700">View</a>
+                            <a href="{{ $verification->document_url }}" target="_blank" class="text-qricket-600 hover:text-qricket-700">View</a>
                         </div>
                     </div>
                 @endif
@@ -99,10 +99,10 @@
                     <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div class="flex items-center justify-between">
                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Front</div>
-                            <a href="{{ Storage::disk('r2')->url($verification->document_front_path) }}" target="_blank" class="text-qricket-600 hover:text-qricket-700">View</a>
+                            <a href="{{ $verification->document_front_url }}" target="_blank" class="text-qricket-600 hover:text-qricket-700">View</a>
                         </div>
                         <div class="mt-3">
-                            <img src="{{ Storage::disk('r2')->url($verification->document_front_path) }}" alt="Front" class="rounded-md border border-gray-200 dark:border-gray-700 object-cover max-h-40">
+                            <img src="{{ $verification->document_front_url }}" alt="Front" class="rounded-md border border-gray-200 dark:border-gray-700 object-cover max-h-40 w-full">
                         </div>
                     </div>
                 @endif
@@ -111,10 +111,10 @@
                     <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div class="flex items-center justify-between">
                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Back</div>
-                            <a href="{{ Storage::disk('r2')->url($verification->document_back_path) }}" target="_blank" class="text-qricket-600 hover:text-qricket-700">View</a>
+                            <a href="{{ $verification->document_back_url }}" target="_blank" class="text-qricket-600 hover:text-qricket-700">View</a>
                         </div>
                         <div class="mt-3">
-                            <img src="{{ Storage::disk('r2')->url($verification->document_back_path) }}" alt="Back" class="rounded-md border border-gray-200 dark:border-gray-700 object-cover max-h-40">
+                            <img src="{{ $verification->document_back_url }}" alt="Back" class="rounded-md border border-gray-200 dark:border-gray-700 object-cover max-h-40 w-full">
                         </div>
                     </div>
                 @endif
