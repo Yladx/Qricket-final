@@ -679,18 +679,18 @@
     <script>
         // Debug function to test real-time updates
         window.debugEventManage = function() {
-            console.log('=== Event Management Debug ===');
-            console.log('Config:', window.EventManageConfig);
-            console.log('State:', window.EventManageState);
-            console.log('Components:', {
-                pusher: !!window.EventManagePusher,
-                stats: !!window.EventManageStats,
-                sales: !!window.EventManageSales,
-                ticketPerformance: !!window.EventManageTicketPerformance,
-                attendance: !!window.EventManageAttendance,
-                chart: !!window.EventManageChart,
-                system: !!window.EventManageSystem
-            });
+            // console.log('=== Event Management Debug ===');
+            // console.log('Config:', window.EventManageConfig);
+            // console.log('State:', window.EventManageState);
+            // console.log('Components:', {
+            //     pusher: !!window.EventManagePusher,
+            //     stats: !!window.EventManageStats,
+            //     sales: !!window.EventManageSales,
+            //     ticketPerformance: !!window.EventManageTicketPerformance,
+            //     attendance: !!window.EventManageAttendance,
+            //     chart: !!window.EventManageChart,
+            //     system: !!window.EventManageSystem
+            // });
             
             // Test functions available but not auto-executed
             // Uncomment the line below to test stats updates manually
@@ -714,7 +714,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Test event view result:', data);
+                // console.log('Test event view result:', data);
                 if (data.success) {
                     alert('Test event-view triggered! Check console for activity chart update.');
                 }
@@ -732,7 +732,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Test event save result:', data);
+                // console.log('Test event save result:', data);
                 if (data.success) {
                     alert('Test event-saved triggered! Check console for activity chart update.');
                 }
@@ -750,7 +750,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Test ticket purchase result:', data);
+                // console.log('Test ticket purchase result:', data);
                 if (data.success) {
                     alert('Test ticket-purchased triggered! Check console for activity chart update.');
                 }
@@ -759,9 +759,9 @@
 
         // Fallback inline sales trend renderer (if external module fails or is not present)
         document.addEventListener('DOMContentLoaded', function(){
-            console.log('Chart initialization starting...');
-            console.log('Chart.js available:', typeof Chart !== 'undefined');
-            console.log('EventManageConfig:', window.EventManageConfig);
+            // console.log('Chart initialization starting...');
+            // console.log('Chart.js available:', typeof Chart !== 'undefined');
+            // console.log('EventManageConfig:', window.EventManageConfig);
             
             try {
                 if (window.EventManageState?.components?.chart) return; // external manager already created chart
@@ -769,7 +769,7 @@
                 const dataset = (window.EventManageConfig && Array.isArray(window.EventManageConfig.salesTrendChartData))
                     ? window.EventManageConfig.salesTrendChartData
                     : [];
-                console.log('Sales trend dataset:', dataset);
+                // console.log('Sales trend dataset:', dataset);
                 if (!canvas || typeof Chart === 'undefined') return;
                 const ctx = canvas.getContext('2d');
                 const labels = dataset.length > 0 ? dataset.map(d => d.display_date || d.date) : ['No data'];
@@ -820,8 +820,8 @@
                         }
                     }
                 });
-                console.log('Sales trend chart created successfully');
-            } catch (e) { console.error('Sales trend fallback error', e); }
+                // console.log('Sales trend chart created successfully');
+            } catch (e) { /* console.error('Sales trend fallback error', e); */ }
             
             // Activity trend chart initialization
             try {
@@ -829,7 +829,7 @@
                 const activityDataset = (window.EventManageConfig && Array.isArray(window.EventManageConfig.activityTrendChartData))
                     ? window.EventManageConfig.activityTrendChartData
                     : [];
-                console.log('Activity trend dataset:', activityDataset);
+                // console.log('Activity trend dataset:', activityDataset);
                 if (!activityCanvas || typeof Chart === 'undefined') return;
                 
                 const activityCtx = activityCanvas.getContext('2d');
@@ -906,15 +906,15 @@
                         }
                     }
                 });
-                console.log('Activity trend chart created successfully');
-            } catch (e) { console.error('Activity trend chart error', e); }
+                // console.log('Activity trend chart created successfully');
+            } catch (e) { /* console.error('Activity trend chart error', e); */ }
             
             // Real-time update functions
             window.updateActivityTrendChart = function(newData) {
                 try {
                     if (!window.__activityTrendChart) return;
                     
-                    console.log('Updating activity trend chart with:', newData);
+                    // console.log('Updating activity trend chart with:', newData);
                     
                     const chart = window.__activityTrendChart;
                     const labels = newData.length > 0 ? newData.map(d => d.date) : ['No data'];
@@ -930,9 +930,9 @@
                     chart.data.datasets[3].data = activities; // Activities
                     
                     chart.update('none'); // Update without animation for real-time feel
-                    console.log('Activity trend chart updated successfully');
+                    // console.log('Activity trend chart updated successfully');
                 } catch (e) {
-                    console.error('Error updating activity trend chart:', e);
+                    // console.error('Error updating activity trend chart:', e);
                 }
             };
             
@@ -940,7 +940,7 @@
                 try {
                     if (!window.__salesTrendChart) return;
                     
-                    console.log('Updating sales trend chart with:', newData);
+                    // console.log('Updating sales trend chart with:', newData);
                     
                     const chart = window.__salesTrendChart;
                     const labels = newData.length > 0 ? newData.map(d => d.display_date || d.date) : ['No data'];
@@ -952,9 +952,9 @@
                     chart.data.datasets[1].data = tickets;   // Tickets Sold
                     
                     chart.update('none'); // Update without animation for real-time feel
-                    console.log('Sales trend chart updated successfully');
+                    // console.log('Sales trend chart updated successfully');
                 } catch (e) {
-                    console.error('Error updating sales trend chart:', e);
+                    // console.error('Error updating sales trend chart:', e);
                 }
             };
             
@@ -972,7 +972,7 @@
             if (window.EventManagePusher) {
                 // Listen for event view activities
                 window.EventManagePusher.channel('event-updates').listen('event-viewed', (data) => {
-                    console.log('Event viewed:', data);
+                    // console.log('Event viewed:', data);
                     if (data.event_id == {{ $event->id }}) {
                         window.fetchActivityTrendData();
                     }
@@ -980,7 +980,7 @@
                 
                 // Listen for event save activities
                 window.EventManagePusher.channel('event-updates').listen('event-saved', (data) => {
-                    console.log('Event saved:', data);
+                    // console.log('Event saved:', data);
                     if (data.event_id == {{ $event->id }}) {
                         window.fetchActivityTrendData();
                     }
@@ -988,7 +988,7 @@
                 
                 // Listen for ticket purchase activities
                 window.EventManagePusher.channel('event-updates').listen('ticket-purchased', (data) => {
-                    console.log('Ticket purchased:', data);
+                    // console.log('Ticket purchased:', data);
                     if (data.event_id == {{ $event->id }}) {
                         window.fetchActivityTrendData();
                         // Also update sales chart if function exists
@@ -1000,7 +1000,7 @@
                 
                 // Listen for management activities
                 window.EventManagePusher.channel('event-updates').listen('event-activity', (data) => {
-                    console.log('Event activity:', data);
+                    // console.log('Event activity:', data);
                     if (data.event_id == {{ $event->id }}) {
                         window.fetchActivityTrendData();
                     }
@@ -1020,11 +1020,11 @@
                 .then(data => {
                     if (data.success && data.data) {
                         window.updateActivityTrendChart(data.data);
-                        console.log('Activity trend data updated via real-time event:', data.timestamp);
+                        // console.log('Activity trend data updated via real-time event:', data.timestamp);
                     }
                 })
                 .catch(error => {
-                    console.error('Error fetching activity trend data:', error);
+                    // console.error('Error fetching activity trend data:', error);
                 });
             };
         });

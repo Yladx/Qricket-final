@@ -1,36 +1,9 @@
 @props(['event'])
 
-@php
-    // Load ticket colors to apply theme color to title
-    $ticketColors = [
-        'primary' => '#10b981',
-        'secondary' => '#f59e0b',
-        'accent' => '#059669',
-    ];
-    
-    try {
-        $eventDir = "events/{$event->id}";
-        $settingsPath = $eventDir . '/ticket_settings.json';
-        
-        if (\Storage::disk('r2')->exists($settingsPath)) {
-            $json = \Storage::disk('r2')->get($settingsPath);
-            $data = json_decode($json, true);
-            
-            if (is_array($data) && isset($data['ticket_colors']) && is_array($data['ticket_colors'])) {
-                $ticketColors = array_merge($ticketColors, $data['ticket_colors']);
-            }
-        }
-    } catch (\Exception $e) {
-        // Use defaults if loading fails
-    }
-    
-    $themeColor = $ticketColors['primary'] ?? '#10b981';
-@endphp
-
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
-            <h2 class="font-bold text-2xl md:text-3xl leading-tight m-0" style="color: {{ $themeColor }} !important;">
+            <h2 class="font-bold text-2xl md:text-3xl leading-tight m-0 text-teal-600 dark:text-teal-400">
                 {{ $event->title }}
             </h2>
             <div class="flex items-center gap-3">
