@@ -43,12 +43,12 @@
         };
 
         // console.log('[Organizer Dashboard] Creating Pusher instance...', {
-            pusherKey: window.PUSHER_APP_KEY ? window.PUSHER_APP_KEY.substring(0, 10) + '...' : 'NOT SET',
-            cluster: window.PUSHER_APP_CLUSTER || 'mt1',
-            authEndpoint: window.PUSHER_AUTH_ENDPOINT || '/broadcasting/auth',
-            userId: userId,
-            csrfToken: csrf ? 'SET' : 'NOT SET'
-        });
+        //     pusherKey: window.PUSHER_APP_KEY ? window.PUSHER_APP_KEY.substring(0, 10) + '...' : 'NOT SET',
+        //     cluster: window.PUSHER_APP_CLUSTER || 'mt1',
+        //     authEndpoint: window.PUSHER_AUTH_ENDPOINT || '/broadcasting/auth',
+        //     userId: userId,
+        //     csrfToken: csrf ? 'SET' : 'NOT SET'
+        // });
         pusher = new Pusher(window.PUSHER_APP_KEY, config);
 
         // Connection event handlers
@@ -88,45 +88,45 @@
             // console.log('[Organizer Dashboard] ⚡⚡⚡ RECEIVED sales.report.updated on public channel! ⚡⚡⚡');
             // console.log('[Organizer Dashboard] Full event data:', JSON.stringify(eventData, null, 2));
             // console.log('[Organizer Dashboard] Checking organizer_id match:', {
-                received_organizer_id: eventData.organizer_id,
-                current_userId: userId,
-                match: eventData.organizer_id === userId || eventData.organizer_id === 0
-            });
+            //     received_organizer_id: eventData.organizer_id,
+            //     current_userId: userId,
+            //     match: eventData.organizer_id === userId || eventData.organizer_id === 0
+            // });
             
             // Only update if it's for this organizer's events
             if (eventData.organizer_id === userId || eventData.organizer_id === 0) {
-                console.log('[Organizer Dashboard] ✅ Organizer ID matches, processing update...');
+                // console.log('[Organizer Dashboard] ✅ Organizer ID matches, processing update...');
                 handleSalesUpdate(eventData);
             } else {
-                console.log('[Organizer Dashboard] ❌ Organizer ID does not match, skipping update');
+                // console.log('[Organizer Dashboard] ❌ Organizer ID does not match, skipping update');
             }
         });
 
         // Subscribe to private organizer dashboard channel
         const privateChannelName = 'private-organizer-dashboard.' + userId;
-        console.log('[Organizer Dashboard] Subscribing to private channel:', privateChannelName);
+        // console.log('[Organizer Dashboard] Subscribing to private channel:', privateChannelName);
         
         privateChannel = pusher.subscribe(privateChannelName);
 
         privateChannel.bind('pusher:subscription_succeeded', () => {
-            console.log('[Organizer Dashboard] ✅ Successfully subscribed to', privateChannelName);
+            // console.log('[Organizer Dashboard] ✅ Successfully subscribed to', privateChannelName);
         });
 
         privateChannel.bind('pusher:subscription_error', (status) => {
-            console.error('[Organizer Dashboard] ❌ Subscription error on', privateChannelName + ':', status);
+            // console.error('[Organizer Dashboard] ❌ Subscription error on', privateChannelName + ':', status);
         });
 
         // Listen for sales.report.updated events on private channel
         privateChannel.bind('sales.report.updated', function(eventData) {
-            console.log('[Organizer Dashboard] ⚡⚡⚡ RECEIVED sales.report.updated on private channel! ⚡⚡⚡');
-            console.log('[Organizer Dashboard] Full event data:', JSON.stringify(eventData, null, 2));
-            console.log('[Organizer Dashboard] Processing private channel update...');
+            // console.log('[Organizer Dashboard] ⚡⚡⚡ RECEIVED sales.report.updated on private channel! ⚡⚡⚡');
+            // console.log('[Organizer Dashboard] Full event data:', JSON.stringify(eventData, null, 2));
+            // console.log('[Organizer Dashboard] Processing private channel update...');
             handleSalesUpdate(eventData);
         });
 
         // Listen for dashboard.stats.updated events
         privateChannel.bind('dashboard.stats.updated', function(eventData) {
-            console.log('[Organizer Dashboard] ⚡⚡⚡ RECEIVED dashboard.stats.updated! ⚡⚡⚡', eventData);
+            // console.log('[Organizer Dashboard] ⚡⚡⚡ RECEIVED dashboard.stats.updated! ⚡⚡⚡', eventData);
             handleDashboardStatsUpdate(eventData);
         });
     }
@@ -134,37 +134,37 @@
     // Handle sales update event
     function handleSalesUpdate(eventData) {
         if (!eventData) {
-            console.log('[Organizer Dashboard] ❌ Invalid event data - eventData is null/undefined');
+            // console.log('[Organizer Dashboard] ❌ Invalid event data - eventData is null/undefined');
             return;
         }
 
-        console.log('[Organizer Dashboard] 🔄 Processing sales update...');
-        console.log('[Organizer Dashboard] Event data structure:', {
-            has_event_stats: !!eventData.event_stats,
-            has_sales_data: !!eventData.sales_data,
-            event_id: eventData.event_id,
-            organizer_id: eventData.organizer_id,
-            event_stats_keys: eventData.event_stats ? Object.keys(eventData.event_stats) : [],
-            sales_data_keys: eventData.sales_data ? Object.keys(eventData.sales_data) : []
-        });
+        // console.log('[Organizer Dashboard] 🔄 Processing sales update...');
+        // console.log('[Organizer Dashboard] Event data structure:', {
+        //     has_event_stats: !!eventData.event_stats,
+        //     has_sales_data: !!eventData.sales_data,
+        //     event_id: eventData.event_id,
+        //     organizer_id: eventData.organizer_id,
+        //     event_stats_keys: eventData.event_stats ? Object.keys(eventData.event_stats) : [],
+        //     sales_data_keys: eventData.sales_data ? Object.keys(eventData.sales_data) : []
+        // });
 
         // Update metrics from event stats
         if (eventData.event_stats) {
-            console.log('[Organizer Dashboard] 📊 Updating metrics from event_stats:', eventData.event_stats);
+            // console.log('[Organizer Dashboard] 📊 Updating metrics from event_stats:', eventData.event_stats);
             updateMetricsFromEventStats(eventData.event_stats);
         } else {
-            console.log('[Organizer Dashboard] ⚠️ No event_stats in event data');
+            // console.log('[Organizer Dashboard] ⚠️ No event_stats in event data');
         }
 
         // Update event-specific revenue
         if (eventData.event_id && eventData.sales_data) {
-            console.log('[Organizer Dashboard] 💰 Updating event-specific revenue for event:', eventData.event_id);
+            // console.log('[Organizer Dashboard] 💰 Updating event-specific revenue for event:', eventData.event_id);
             updateEventRevenue(eventData.event_id, eventData.sales_data);
         } else {
-            console.log('[Organizer Dashboard] ⚠️ Missing event_id or sales_data:', {
-                has_event_id: !!eventData.event_id,
-                has_sales_data: !!eventData.sales_data
-            });
+            // console.log('[Organizer Dashboard] ⚠️ Missing event_id or sales_data:', {
+            //     has_event_id: !!eventData.event_id,
+            //     has_sales_data: !!eventData.sales_data
+            // });
         }
 
         // Update charts if they exist
@@ -180,11 +180,11 @@
     // Handle dashboard stats update
     function handleDashboardStatsUpdate(eventData) {
         if (!eventData || !eventData.stats) {
-            console.log('[Organizer Dashboard] Invalid dashboard stats data');
+            // console.log('[Organizer Dashboard] Invalid dashboard stats data');
             return;
         }
 
-        console.log('[Organizer Dashboard] Processing dashboard stats update:', eventData.stats);
+        // console.log('[Organizer Dashboard] Processing dashboard stats update:', eventData.stats);
 
         // Update metrics from stats
         if (eventData.stats.totalRevenue !== undefined) {
@@ -208,28 +208,28 @@
 
     function updateMetricsFromEventStats(eventStats) {
         if (!eventStats) {
-            console.log('[Organizer Dashboard] ❌ updateMetricsFromEventStats: eventStats is null/undefined');
+            // console.log('[Organizer Dashboard] ❌ updateMetricsFromEventStats: eventStats is null/undefined');
             return;
         }
 
-        console.log('[Organizer Dashboard] 📈 Updating metrics from event stats:', eventStats);
+        // console.log('[Organizer Dashboard] 📈 Updating metrics from event stats:', eventStats);
 
         // Update total tickets sold
         if (eventStats.total_tickets_sold !== undefined) {
             const newValue = eventStats.total_tickets_sold.toLocaleString();
-            console.log('[Organizer Dashboard] 🎫 Updating totalTicketsSold to:', newValue);
+            // console.log('[Organizer Dashboard] 🎫 Updating totalTicketsSold to:', newValue);
             updateElement('totalTicketsSold', newValue);
         } else {
-            console.log('[Organizer Dashboard] ⚠️ total_tickets_sold not in event_stats');
+            // console.log('[Organizer Dashboard] ⚠️ total_tickets_sold not in event_stats');
         }
 
         // Update total revenue
         if (eventStats.total_revenue !== undefined) {
             const newValue = '₱' + parseFloat(eventStats.total_revenue).toLocaleString('en-US', {minimumFractionDigits: 2});
-            console.log('[Organizer Dashboard] 💵 Updating totalRevenue to:', newValue);
+            // console.log('[Organizer Dashboard] 💵 Updating totalRevenue to:', newValue);
             updateElement('totalRevenue', newValue);
         } else {
-            console.log('[Organizer Dashboard] ⚠️ total_revenue not in event_stats');
+            // console.log('[Organizer Dashboard] ⚠️ total_revenue not in event_stats');
         }
     }
 
@@ -259,19 +259,19 @@
         const element = document.querySelector(`[data-stat="${selector}"]`);
         if (element) {
             const oldValue = element.textContent;
-            console.log('[Organizer Dashboard] ✏️ Updating element:', {
-                selector: selector,
-                oldValue: oldValue,
-                newValue: newValue
-            });
+            // console.log('[Organizer Dashboard] ✏️ Updating element:', {
+            //     selector: selector,
+            //     oldValue: oldValue,
+            //     newValue: newValue
+            // });
             animateCounter(element);
             element.textContent = newValue;
-            console.log('[Organizer Dashboard] ✅ Element updated successfully');
+            // console.log('[Organizer Dashboard] ✅ Element updated successfully');
         } else {
-            console.warn('[Organizer Dashboard] ❌ Element not found for selector:', selector);
-            console.warn('[Organizer Dashboard] Available data-stat elements:', 
-                Array.from(document.querySelectorAll('[data-stat]')).map(el => el.getAttribute('data-stat'))
-            );
+            // console.warn('[Organizer Dashboard] ❌ Element not found for selector:', selector);
+            // console.warn('[Organizer Dashboard] Available data-stat elements:', 
+            //     Array.from(document.querySelectorAll('[data-stat]')).map(el => el.getAttribute('data-stat'))
+            // );
         }
     }
 
@@ -296,7 +296,7 @@
     // Cleanup on page unload
     window.addEventListener('beforeunload', function() {
         if (pusher) {
-            console.log('[Organizer Dashboard] Disconnecting Pusher...');
+            // console.log('[Organizer Dashboard] Disconnecting Pusher...');
             pusher.disconnect();
         }
     });

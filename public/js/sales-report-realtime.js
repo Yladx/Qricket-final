@@ -13,7 +13,7 @@
     const isAdmin = window.location.pathname.includes('/admin/');
 
     if (!eventId) {
-        console.error('[Sales Report] ❌ Event ID not found');
+        // console.error('[Sales Report] ❌ Event ID not found');
         return;
     }
 
@@ -21,13 +21,13 @@
     function initRealtimeUpdates() {
         // Check Pusher availability
         if (typeof Pusher === 'undefined') {
-            console.error('[Sales Report] ❌ Pusher library not loaded');
+            // console.error('[Sales Report] ❌ Pusher library not loaded');
             return;
         }
 
         // Check Pusher key
         if (!window.PUSHER_APP_KEY || window.PUSHER_APP_KEY === '' || window.PUSHER_APP_KEY === 'undefined') {
-            console.error('[Sales Report] ❌ PUSHER_APP_KEY not configured');
+            // console.error('[Sales Report] ❌ PUSHER_APP_KEY not configured');
             return;
         }
 
@@ -49,61 +49,61 @@
             }
         };
 
-        console.log('[Sales Report] Creating Pusher instance...', {
-            pusherKey: window.PUSHER_APP_KEY ? window.PUSHER_APP_KEY.substring(0, 10) + '...' : 'NOT SET',
-            cluster: window.PUSHER_APP_CLUSTER || 'mt1',
-            authEndpoint: authEndpoint,
-            eventId: eventId,
-            userId: userId,
-            isAdmin: isAdmin,
-            csrfToken: csrf ? 'SET' : 'NOT SET'
-        });
+        // console.log('[Sales Report] Creating Pusher instance...', {
+        //     pusherKey: window.PUSHER_APP_KEY ? window.PUSHER_APP_KEY.substring(0, 10) + '...' : 'NOT SET',
+        //     cluster: window.PUSHER_APP_CLUSTER || 'mt1',
+        //     authEndpoint: authEndpoint,
+        //     eventId: eventId,
+        //     userId: userId,
+        //     isAdmin: isAdmin,
+        //     csrfToken: csrf ? 'SET' : 'NOT SET'
+        // });
         
         pusher = new Pusher(window.PUSHER_APP_KEY, config);
 
         // Connection event handlers
         pusher.connection.bind('connecting', () => {
-            console.log('[Sales Report] 🔌 Pusher connecting...');
+            // console.log('[Sales Report] 🔌 Pusher connecting...');
         });
 
         pusher.connection.bind('connected', () => {
-            console.log('[Sales Report] ✅ Pusher connected successfully');
+            // console.log('[Sales Report] ✅ Pusher connected successfully');
             isConnected = true;
             updateConnectionStatus(true);
         });
 
         pusher.connection.bind('disconnected', () => {
-            console.warn('[Sales Report] ⚠️ Pusher disconnected');
+            // console.warn('[Sales Report] ⚠️ Pusher disconnected');
             isConnected = false;
             updateConnectionStatus(false);
         });
 
         pusher.connection.bind('error', (error) => {
-            console.error('[Sales Report] ❌ Pusher error:', error);
+            // console.error('[Sales Report] ❌ Pusher error:', error);
             isConnected = false;
             updateConnectionStatus(false);
         });
 
         // Subscribe to public sales-updates channel
-        console.log('[Sales Report] Subscribing to public channel: sales-updates');
+        // console.log('[Sales Report] Subscribing to public channel: sales-updates');
         publicChannel = pusher.subscribe('sales-updates');
 
         publicChannel.bind('pusher:subscription_succeeded', () => {
-            console.log('[Sales Report] ✅ Successfully subscribed to sales-updates');
+            // console.log('[Sales Report] ✅ Successfully subscribed to sales-updates');
         });
 
         publicChannel.bind('pusher:subscription_error', (status) => {
-            console.error('[Sales Report] ❌ Subscription error on sales-updates:', status);
+            // console.error('[Sales Report] ❌ Subscription error on sales-updates:', status);
         });
 
         // Listen for sales.report.updated events
         publicChannel.bind('sales.report.updated', function(eventData) {
-            console.log('[Sales Report] ⚡⚡⚡ RECEIVED sales.report.updated! ⚡⚡⚡');
-            console.log('[Sales Report] Full event data:', JSON.stringify(eventData, null, 2));
+            // console.log('[Sales Report] ⚡⚡⚡ RECEIVED sales.report.updated! ⚡⚡⚡');
+            // console.log('[Sales Report] Full event data:', JSON.stringify(eventData, null, 2));
             
             // Only process if it's for this event
             if (eventData.event_id && String(eventData.event_id) !== String(eventId)) {
-                console.log('[Sales Report] ⏭️ Skipping update - different event ID:', eventData.event_id, 'vs', eventId);
+                // console.log('[Sales Report] ⏭️ Skipping update - different event ID:', eventData.event_id, 'vs', eventId);
                 return;
             }
 
@@ -112,21 +112,21 @@
 
         // Subscribe to event-specific channel
         const eventChannelName = `event.${eventId}`;
-        console.log('[Sales Report] Subscribing to event channel:', eventChannelName);
+        // console.log('[Sales Report] Subscribing to event channel:', eventChannelName);
         eventChannel = pusher.subscribe(eventChannelName);
 
         eventChannel.bind('pusher:subscription_succeeded', () => {
-            console.log('[Sales Report] ✅ Successfully subscribed to', eventChannelName);
+            // console.log('[Sales Report] ✅ Successfully subscribed to', eventChannelName);
         });
 
         eventChannel.bind('pusher:subscription_error', (status) => {
-            console.error('[Sales Report] ❌ Subscription error on', eventChannelName + ':', status);
+            // console.error('[Sales Report] ❌ Subscription error on', eventChannelName + ':', status);
         });
 
         // Listen for event.stats.updated events
         eventChannel.bind('event.stats.updated', function(eventData) {
-            console.log('[Sales Report] ⚡⚡⚡ RECEIVED event.stats.updated! ⚡⚡⚡');
-            console.log('[Sales Report] Event stats data:', JSON.stringify(eventData, null, 2));
+            // console.log('[Sales Report] ⚡⚡⚡ RECEIVED event.stats.updated! ⚡⚡⚡');
+            // console.log('[Sales Report] Event stats data:', JSON.stringify(eventData, null, 2));
             handleEventStatsUpdate(eventData);
         });
 
@@ -135,21 +135,21 @@
             const privateChannelName = isAdmin 
                 ? `private-admin-dashboard.${userId}` 
                 : `private-organizer-dashboard.${userId}`;
-            console.log('[Sales Report] Subscribing to private channel:', privateChannelName);
+            // console.log('[Sales Report] Subscribing to private channel:', privateChannelName);
             
             privateChannel = pusher.subscribe(privateChannelName);
 
             privateChannel.bind('pusher:subscription_succeeded', () => {
-                console.log('[Sales Report] ✅ Successfully subscribed to', privateChannelName);
+                // console.log('[Sales Report] ✅ Successfully subscribed to', privateChannelName);
             });
 
             privateChannel.bind('pusher:subscription_error', (status) => {
-                console.error('[Sales Report] ❌ Subscription error on', privateChannelName + ':', status);
+                // console.error('[Sales Report] ❌ Subscription error on', privateChannelName + ':', status);
             });
 
             // Listen for dashboard updates on private channel
             privateChannel.bind('dashboard.stats.updated', function(eventData) {
-                console.log('[Sales Report] ⚡⚡⚡ RECEIVED dashboard.stats.updated on private channel! ⚡⚡⚡');
+                // console.log('[Sales Report] ⚡⚡⚡ RECEIVED dashboard.stats.updated on private channel! ⚡⚡⚡');
                 handleDashboardUpdate(eventData);
             });
         }
@@ -158,17 +158,17 @@
     // Handle sales update event
     function handleSalesUpdate(eventData) {
         if (!eventData) {
-            console.log('[Sales Report] ❌ Invalid event data');
+            // console.log('[Sales Report] ❌ Invalid event data');
             return;
         }
 
-        console.log('[Sales Report] 🔄 Processing sales update...');
-        console.log('[Sales Report] Event data structure:', {
-            has_event_stats: !!eventData.event_stats,
-            has_sales_data: !!eventData.sales_data,
-            event_id: eventData.event_id,
-            organizer_id: eventData.organizer_id
-        });
+        // console.log('[Sales Report] 🔄 Processing sales update...');
+        // console.log('[Sales Report] Event data structure:', {
+        //     has_event_stats: !!eventData.event_stats,
+        //     has_sales_data: !!eventData.sales_data,
+        //     event_id: eventData.event_id,
+        //     organizer_id: eventData.organizer_id
+        // });
 
         // Update totals if event_stats is available
         if (eventData.event_stats) {
@@ -177,7 +177,7 @@
 
         // Refresh the sales table if new sale is detected
         if (eventData.sales_data) {
-            console.log('[Sales Report] 💰 New sale detected, refreshing table...');
+            // console.log('[Sales Report] 💰 New sale detected, refreshing table...');
             refreshSalesTable();
         }
 
@@ -188,11 +188,11 @@
     // Handle event stats update
     function handleEventStatsUpdate(eventData) {
         if (!eventData || !eventData.stats) {
-            console.log('[Sales Report] ❌ Invalid event stats data');
+            // console.log('[Sales Report] ❌ Invalid event stats data');
             return;
         }
 
-        console.log('[Sales Report] 📊 Updating from event stats:', eventData.stats);
+        // console.log('[Sales Report] 📊 Updating from event stats:', eventData.stats);
         updateSalesTotals(eventData.stats);
     }
 
@@ -202,14 +202,14 @@
             return;
         }
 
-        console.log('[Sales Report] 📊 Dashboard stats update received');
+        // console.log('[Sales Report] 📊 Dashboard stats update received');
         // Refresh totals to get latest data
         refreshSalesTotals();
     }
 
     // Update sales totals in the UI
     function updateSalesTotals(stats) {
-        console.log('[Sales Report] 📊 Updating sales totals with stats:', stats);
+        // console.log('[Sales Report] 📊 Updating sales totals with stats:', stats);
 
         if (stats.total_revenue !== undefined) {
             updateElement('total-revenue', '₱' + parseFloat(stats.total_revenue).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
@@ -221,7 +221,7 @@
 
     // Refresh sales totals from API
     function refreshSalesTotals() {
-        console.log('[Sales Report] 🔄 Refreshing sales totals from API...');
+        // console.log('[Sales Report] 🔄 Refreshing sales totals from API...');
         
         // Use the current page URL with a refresh parameter
         const url = new URL(window.location.href);
@@ -277,16 +277,16 @@
                 if (earningsEl) earningsEl.textContent = '₱' + earningsMatch[1];
             }
 
-            console.log('[Sales Report] ✅ Sales totals refreshed');
+            // console.log('[Sales Report] ✅ Sales totals refreshed');
         })
         .catch(error => {
-            console.error('[Sales Report] ❌ Failed to refresh sales totals:', error);
+            // console.error('[Sales Report] ❌ Failed to refresh sales totals:', error);
         });
     }
 
     // Refresh sales table (add new row at top if new sale)
     function refreshSalesTable() {
-        console.log('[Sales Report] 🔄 Refreshing sales table...');
+        // console.log('[Sales Report] 🔄 Refreshing sales table...');
         
         // Reload the page after a short delay to show new sales
         // This ensures we get the latest filtered and sorted data
@@ -294,10 +294,10 @@
             // Only reload if we're not currently filtering/searching
             const hasFilters = window.location.search && !window.location.search.includes('_refresh');
             if (!hasFilters) {
-                console.log('[Sales Report] 🔄 Reloading page to show new sales...');
+                // console.log('[Sales Report] 🔄 Reloading page to show new sales...');
                 window.location.reload();
             } else {
-                console.log('[Sales Report] ⏭️ Skipping reload - filters active');
+                // console.log('[Sales Report] ⏭️ Skipping reload - filters active');
             }
         }, 2000); // Wait 2 seconds before reload to allow for batch updates
     }
@@ -307,11 +307,11 @@
         const element = document.querySelector(`[data-stat="${selector}"]`);
         if (element) {
             const oldValue = element.textContent;
-            console.log('[Sales Report] ✏️ Updating element:', {
-                selector: selector,
-                oldValue: oldValue.trim(),
-                newValue: newValue
-            });
+            // console.log('[Sales Report] ✏️ Updating element:', {
+            //     selector: selector,
+            //     oldValue: oldValue.trim(),
+            //     newValue: newValue
+            // });
             
             // Animate the update
             element.style.transform = 'scale(1.1)';
@@ -322,13 +322,13 @@
                 element.textContent = newValue;
                 element.style.transform = 'scale(1)';
                 element.style.color = '';
-                console.log('[Sales Report] ✅ Element updated successfully');
+                // console.log('[Sales Report] ✅ Element updated successfully');
             }, 150);
         } else {
-            console.warn('[Sales Report] ❌ Element not found for selector:', selector);
-            console.warn('[Sales Report] Available data-stat elements:', 
-                Array.from(document.querySelectorAll('[data-stat]')).map(el => el.getAttribute('data-stat'))
-            );
+            // console.warn('[Sales Report] ❌ Element not found for selector:', selector);
+            // console.warn('[Sales Report] Available data-stat elements:', 
+            //     Array.from(document.querySelectorAll('[data-stat]')).map(el => el.getAttribute('data-stat'))
+            // );
         }
     }
 
@@ -355,7 +355,7 @@
     // Cleanup on page unload
     window.addEventListener('beforeunload', function() {
         if (pusher) {
-            console.log('[Sales Report] Disconnecting Pusher...');
+            // console.log('[Sales Report] Disconnecting Pusher...');
             pusher.disconnect();
         }
     });

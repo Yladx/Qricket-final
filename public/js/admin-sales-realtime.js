@@ -10,13 +10,13 @@
     function initRealtimeUpdates() {
         // Check Pusher availability
         if (typeof Pusher === 'undefined') {
-            console.error('[Admin Sales] ❌ Pusher library not loaded');
+            // console.error('[Admin Sales] ❌ Pusher library not loaded');
             return;
         }
 
         // Check Pusher key
         if (!window.PUSHER_APP_KEY || window.PUSHER_APP_KEY === '' || window.PUSHER_APP_KEY === 'undefined') {
-            console.error('[Admin Sales] ❌ PUSHER_APP_KEY not configured');
+            // console.error('[Admin Sales] ❌ PUSHER_APP_KEY not configured');
             return;
         }
 
@@ -34,51 +34,51 @@
             }
         };
 
-        console.log('[Admin Sales] Creating Pusher instance...');
+        // console.log('[Admin Sales] Creating Pusher instance...');
         pusher = new Pusher(window.PUSHER_APP_KEY, config);
 
         // Connection event handlers
         pusher.connection.bind('connecting', () => {
-            console.log('[Admin Sales] 🔌 Pusher connecting...');
+            // console.log('[Admin Sales] 🔌 Pusher connecting...');
         });
 
         pusher.connection.bind('connected', () => {
-            console.log('[Admin Sales] ✅ Pusher connected successfully');
+            // console.log('[Admin Sales] ✅ Pusher connected successfully');
             isConnected = true;
             updateConnectionStatus(true);
         });
 
         pusher.connection.bind('disconnected', () => {
-            console.warn('[Admin Sales] ⚠️ Pusher disconnected');
+            // console.warn('[Admin Sales] ⚠️ Pusher disconnected');
             isConnected = false;
             updateConnectionStatus(false);
         });
 
         pusher.connection.bind('error', (error) => {
-            console.error('[Admin Sales] ❌ Pusher error:', error);
+            // console.error('[Admin Sales] ❌ Pusher error:', error);
             isConnected = false;
             updateConnectionStatus(false);
         });
 
         pusher.connection.bind('state_change', (states) => {
-            console.log('[Admin Sales] State changed:', states.previous, '->', states.current);
+            // console.log('[Admin Sales] State changed:', states.previous, '->', states.current);
         });
 
         // Subscribe to public admin-dashboard channel (for 'all' broadcasts)
-        console.log('[Admin Sales] Subscribing to public channel: admin-dashboard');
+        // console.log('[Admin Sales] Subscribing to public channel: admin-dashboard');
         adminPublicChannel = pusher.subscribe('admin-dashboard');
 
         adminPublicChannel.bind('pusher:subscription_succeeded', () => {
-            console.log('[Admin Sales] ✅ Successfully subscribed to admin-dashboard');
+            // console.log('[Admin Sales] ✅ Successfully subscribed to admin-dashboard');
         });
 
         adminPublicChannel.bind('pusher:subscription_error', (status) => {
-            console.error('[Admin Sales] ❌ Subscription error on admin-dashboard:', status);
+            // console.error('[Admin Sales] ❌ Subscription error on admin-dashboard:', status);
         });
 
         // Listen for dashboard.updated events on public channel
         adminPublicChannel.bind('dashboard.updated', function(eventData) {
-            console.log('[Admin Sales] ⚡⚡⚡ RECEIVED dashboard.updated on public channel! ⚡⚡⚡', eventData);
+            // console.log('[Admin Sales] ⚡⚡⚡ RECEIVED dashboard.updated on public channel! ⚡⚡⚡', eventData);
             handleDashboardUpdate(eventData);
         });
 
@@ -87,21 +87,21 @@
         const adminId = window.ADMIN_ID;
         if (adminId) {
             const privateChannelName = 'private-admin-dashboard.' + adminId;
-            console.log('[Admin Sales] Subscribing to private channel:', privateChannelName);
+            // console.log('[Admin Sales] Subscribing to private channel:', privateChannelName);
             
             adminPrivateChannel = pusher.subscribe(privateChannelName);
 
             adminPrivateChannel.bind('pusher:subscription_succeeded', () => {
-                console.log('[Admin Sales] ✅ Successfully subscribed to', privateChannelName);
+                // console.log('[Admin Sales] ✅ Successfully subscribed to', privateChannelName);
             });
 
             adminPrivateChannel.bind('pusher:subscription_error', (status) => {
-                console.error('[Admin Sales] ❌ Subscription error on', privateChannelName + ':', status);
+                // console.error('[Admin Sales] ❌ Subscription error on', privateChannelName + ':', status);
             });
 
             // Listen for dashboard.updated events on private channel
             adminPrivateChannel.bind('dashboard.updated', function(eventData) {
-                console.log('[Admin Sales] ⚡⚡⚡ RECEIVED dashboard.updated on private channel! ⚡⚡⚡', eventData);
+                // console.log('[Admin Sales] ⚡⚡⚡ RECEIVED dashboard.updated on private channel! ⚡⚡⚡', eventData);
                 handleDashboardUpdate(eventData);
             });
         }
@@ -110,7 +110,7 @@
     // Handle dashboard update event
     function handleDashboardUpdate(eventData) {
         if (!eventData) {
-            console.log('[Admin Sales] Invalid event data');
+            // console.log('[Admin Sales] Invalid event data');
             return;
         }
 
@@ -132,20 +132,20 @@
         // Only process if type is sales_update
         const eventType = eventData.type || eventData.data?.type;
         if (eventType === 'sales_update' && metrics) {
-            console.log('[Admin Sales] Processing sales update with metrics:', metrics);
+            // console.log('[Admin Sales] Processing sales update with metrics:', metrics);
             updateAdminSalesReport(metrics);
             } else {
-            console.log('[Admin Sales] Event type not sales_update or no metrics found. Type:', eventType);
+            // console.log('[Admin Sales] Event type not sales_update or no metrics found. Type:', eventType);
         }
     }
 
     function updateAdminSalesReport(metrics) {
         if (!metrics) {
-            console.log('[Admin Sales] No metrics provided');
+            // console.log('[Admin Sales] No metrics provided');
             return;
         }
 
-        console.log('[Admin Sales] Updating sales report with metrics:', metrics);
+        // console.log('[Admin Sales] Updating sales report with metrics:', metrics);
 
         // Update total revenue banner
         if (metrics.grandRevenue !== undefined) {
@@ -216,12 +216,12 @@
 
         // Update top events table from metrics if available
         if (metrics.topEvents && Array.isArray(metrics.topEvents)) {
-            console.log('[Admin Sales] 📊 Updating top events table from metrics:', metrics.topEvents.length, 'events');
+            // console.log('[Admin Sales] 📊 Updating top events table from metrics:', metrics.topEvents.length, 'events');
             updateTopEventsTable(metrics.topEvents);
         }
 
         // Always refresh all tables to ensure they're up to date with latest data
-        console.log('[Admin Sales] 🔄 Refreshing all tables and charts...');
+        // console.log('[Admin Sales] 🔄 Refreshing all tables and charts...');
         
         // Refresh event revenue table (also updates top events)
         refreshEventRevenueTable();
@@ -254,7 +254,7 @@
         if (element) {
             animateCounter(element, newValue);
         } else {
-            console.warn('[Admin Sales] Element not found for selector:', selector);
+            // console.warn('[Admin Sales] Element not found for selector:', selector);
         }
     }
 
@@ -347,7 +347,7 @@
 
     // Refresh Event Revenue Table
     function refreshEventRevenueTable() {
-        console.log('[Admin Sales] 📊 Refreshing event revenue table...');
+        // console.log('[Admin Sales] 📊 Refreshing event revenue table...');
         
         const url = new URL('/realtime/metrics', window.location.origin);
         url.searchParams.set('scope', 'admin_sales');
@@ -360,26 +360,26 @@
         })
         .then(response => response.json())
         .then(data => {
-            console.log('[Admin Sales] 📥 Full API response received:', data);
+            // console.log('[Admin Sales] 📥 Full API response received:', data);
             
             // Update top events table if available
             if (data && data.topEvents && Array.isArray(data.topEvents)) {
-                console.log('[Admin Sales] ✅ Top events data received:', data.topEvents.length, 'events');
+                // console.log('[Admin Sales] ✅ Top events data received:', data.topEvents.length, 'events');
                 updateTopEventsTable(data.topEvents);
             }
             
             // Update event revenue table if available
             if (data && data.allEventsRevenue && Array.isArray(data.allEventsRevenue)) {
-                console.log('[Admin Sales] ✅ Event revenue data received:', data.allEventsRevenue.length, 'events');
+                // console.log('[Admin Sales] ✅ Event revenue data received:', data.allEventsRevenue.length, 'events');
                 updateEventRevenueTable(data.allEventsRevenue);
             } else {
                 // Fallback: trigger full page refresh of the table section
-                console.log('[Admin Sales] ⚠️ Full event revenue data not available, using fallback refresh');
+                // console.log('[Admin Sales] ⚠️ Full event revenue data not available, using fallback refresh');
                 refreshEventRevenueTableFallback();
             }
         })
         .catch(error => {
-            console.error('[Admin Sales] ❌ Failed to fetch event revenue data:', error);
+            // console.error('[Admin Sales] ❌ Failed to fetch event revenue data:', error);
             refreshEventRevenueTableFallback();
         });
     }
@@ -387,11 +387,11 @@
     function updateEventRevenueTable(events) {
         const tableBody = document.querySelector('#eventRevenueTable tbody');
         if (!tableBody) {
-            console.warn('[Admin Sales] ⚠️ Event revenue table tbody not found');
+            // console.warn('[Admin Sales] ⚠️ Event revenue table tbody not found');
             return;
         }
 
-        console.log('[Admin Sales] 📝 Updating event revenue table with', events.length, 'events');
+        // console.log('[Admin Sales] 📝 Updating event revenue table with', events.length, 'events');
 
         // Clear existing rows
         tableBody.innerHTML = '';
@@ -449,13 +449,13 @@
             }, index * 30);
         });
 
-        console.log('[Admin Sales] ✅ Event revenue table updated successfully');
+        // console.log('[Admin Sales] ✅ Event revenue table updated successfully');
     }
 
     function refreshEventRevenueTableFallback() {
         // If API doesn't return full event list, reload the table section via AJAX
         // This is a fallback method
-        console.log('[Admin Sales] 🔄 Using fallback method to refresh event revenue table');
+        // console.log('[Admin Sales] 🔄 Using fallback method to refresh event revenue table');
         if (typeof window.refreshSales === 'function') {
             window.refreshSales();
         }
@@ -463,7 +463,7 @@
 
     // Refresh Subscription Users Table
     function refreshSubscriptionUsersTable() {
-        console.log('[Admin Sales] 👥 Refreshing subscription users table...');
+        // console.log('[Admin Sales] 👥 Refreshing subscription users table...');
         
         const url = new URL('/realtime/metrics', window.location.origin);
         url.searchParams.set('scope', 'admin_sales');
@@ -477,25 +477,25 @@
         .then(response => response.json())
         .then(data => {
             if (data && data.subscriptionUsers && Array.isArray(data.subscriptionUsers)) {
-                console.log('[Admin Sales] ✅ Subscription users data received:', data.subscriptionUsers.length, 'users');
+                // console.log('[Admin Sales] ✅ Subscription users data received:', data.subscriptionUsers.length, 'users');
                 updateSubscriptionUsersTable(data.subscriptionUsers);
             } else {
-                console.log('[Admin Sales] ⚠️ Full subscription users data not available in metrics');
+                // console.log('[Admin Sales] ⚠️ Full subscription users data not available in metrics');
             }
         })
         .catch(error => {
-            console.error('[Admin Sales] ❌ Failed to fetch subscription users data:', error);
+            // console.error('[Admin Sales] ❌ Failed to fetch subscription users data:', error);
         });
     }
 
     function updateSubscriptionUsersTable(users) {
         const tableBody = document.querySelector('#subscriptionUsersTable tbody');
         if (!tableBody) {
-            console.warn('[Admin Sales] ⚠️ Subscription users table tbody not found');
+            // console.warn('[Admin Sales] ⚠️ Subscription users table tbody not found');
             return;
         }
 
-        console.log('[Admin Sales] 📝 Updating subscription users table with', users.length, 'users');
+        // console.log('[Admin Sales] 📝 Updating subscription users table with', users.length, 'users');
 
         // Clear existing rows
         tableBody.innerHTML = '';
@@ -549,7 +549,7 @@
             }, index * 30);
         });
 
-        console.log('[Admin Sales] ✅ Subscription users table updated successfully');
+        // console.log('[Admin Sales] ✅ Subscription users table updated successfully');
     }
 
     function escapeHtml(text) {
@@ -569,7 +569,7 @@
     // Cleanup on page unload
     window.addEventListener('beforeunload', function() {
         if (pusher) {
-            console.log('[Admin Sales] Disconnecting Pusher...');
+            // console.log('[Admin Sales] Disconnecting Pusher...');
             pusher.disconnect();
         }
     });

@@ -13,13 +13,13 @@
     function initRealtimeUpdates() {
         // Check Pusher availability
         if (typeof Pusher === 'undefined') {
-            console.error('[Event Overview] ❌ Pusher library not loaded');
+            // // console.error('[Event Overview] ❌ Pusher library not loaded');
             return;
         }
 
         // Check Pusher key
         if (!window.PUSHER_APP_KEY || window.PUSHER_APP_KEY === '' || window.PUSHER_APP_KEY === 'undefined') {
-            console.error('[Event Overview] ❌ PUSHER_APP_KEY not configured');
+            // // console.error('[Event Overview] ❌ PUSHER_APP_KEY not configured');
             return;
         }
 
@@ -28,12 +28,12 @@
         userId = window.USER_ID;
 
         if (!eventId) {
-            console.error('[Event Overview] ❌ EVENT_ID not set');
+            // // console.error('[Event Overview] ❌ EVENT_ID not set');
             return;
         }
 
         if (!userId) {
-            console.error('[Event Overview] ❌ USER_ID not set');
+            // // console.error('[Event Overview] ❌ USER_ID not set');
             return;
         }
 
@@ -51,122 +51,122 @@
             }
         };
 
-        console.log('[Event Overview] Creating Pusher instance...', {
-            eventId: eventId,
-            userId: userId,
-            pusherKey: window.PUSHER_APP_KEY ? window.PUSHER_APP_KEY.substring(0, 10) + '...' : 'NOT SET',
-            cluster: window.PUSHER_APP_CLUSTER || 'mt1',
-            authEndpoint: window.PUSHER_AUTH_ENDPOINT || '/broadcasting/auth',
-            csrfToken: csrf ? 'SET' : 'NOT SET'
-        });
+        // // console.log('[Event Overview] Creating Pusher instance...', {
+        //     eventId: eventId,
+        //     userId: userId,
+        //     pusherKey: window.PUSHER_APP_KEY ? window.PUSHER_APP_KEY.substring(0, 10) + '...' : 'NOT SET',
+        //     cluster: window.PUSHER_APP_CLUSTER || 'mt1',
+        //     authEndpoint: window.PUSHER_AUTH_ENDPOINT || '/broadcasting/auth',
+        //     csrfToken: csrf ? 'SET' : 'NOT SET'
+        // });
         pusher = new Pusher(window.PUSHER_APP_KEY, config);
 
         // Connection event handlers
         pusher.connection.bind('connecting', () => {
-            console.log('[Event Overview] 🔌 Pusher connecting...');
+            // // console.log('[Event Overview] 🔌 Pusher connecting...');
         });
 
         pusher.connection.bind('connected', () => {
-            console.log('[Event Overview] ✅ Pusher connected successfully');
+            // // console.log('[Event Overview] ✅ Pusher connected successfully');
             isConnected = true;
         });
 
         pusher.connection.bind('disconnected', () => {
-            console.warn('[Event Overview] ⚠️ Pusher disconnected');
+            // // console.warn('[Event Overview] ⚠️ Pusher disconnected');
             isConnected = false;
         });
 
         pusher.connection.bind('error', (error) => {
-            console.error('[Event Overview] ❌ Pusher error:', error);
+            // // console.error('[Event Overview] ❌ Pusher error:', error);
             isConnected = false;
         });
 
         // Subscribe to public sales-updates channel
-        console.log('[Event Overview] Subscribing to public channel: sales-updates');
+        // // console.log('[Event Overview] Subscribing to public channel: sales-updates');
         publicChannel = pusher.subscribe('sales-updates');
 
         publicChannel.bind('pusher:subscription_succeeded', () => {
-            console.log('[Event Overview] ✅ Successfully subscribed to sales-updates');
+            // // console.log('[Event Overview] ✅ Successfully subscribed to sales-updates');
         });
 
         publicChannel.bind('pusher:subscription_error', (status) => {
-            console.error('[Event Overview] ❌ Subscription error on sales-updates:', status);
+            // // console.error('[Event Overview] ❌ Subscription error on sales-updates:', status);
         });
 
         // Listen for sales.report.updated events on public channel
         publicChannel.bind('sales.report.updated', function(eventData) {
-            console.log('[Event Overview] ⚡⚡⚡ RECEIVED sales.report.updated on public channel! ⚡⚡⚡');
-            console.log('[Event Overview] Full event data:', JSON.stringify(eventData, null, 2));
-            console.log('[Event Overview] Checking event_id match:', {
-                received_event_id: eventData.event_id,
-                current_eventId: eventId,
-                match: eventData.event_id == eventId,
-                type_match: typeof eventData.event_id === typeof eventId
-            });
+            // // console.log('[Event Overview] ⚡⚡⚡ RECEIVED sales.report.updated on public channel! ⚡⚡⚡');
+            // // console.log('[Event Overview] Full event data:', JSON.stringify(eventData, null, 2));
+            // // console.log('[Event Overview] Checking event_id match:', {
+            //     received_event_id: eventData.event_id,
+            //     current_eventId: eventId,
+            //     match: eventData.event_id == eventId,
+            //     type_match: typeof eventData.event_id === typeof eventId
+            // });
             
             // Only update if it's for this event
             if (eventData.event_id == eventId) {
-                console.log('[Event Overview] ✅ Event ID matches, processing update...');
+                // // console.log('[Event Overview] ✅ Event ID matches, processing update...');
                 handleSalesUpdate(eventData);
             } else {
-                console.log('[Event Overview] ❌ Event ID does not match, skipping update');
+                // // console.log('[Event Overview] ❌ Event ID does not match, skipping update');
             }
         });
 
         // Subscribe to private organizer dashboard channel
         const privateChannelName = 'private-organizer-dashboard.' + userId;
-        console.log('[Event Overview] Subscribing to private channel:', privateChannelName);
+        // // console.log('[Event Overview] Subscribing to private channel:', privateChannelName);
         
         privateChannel = pusher.subscribe(privateChannelName);
 
         privateChannel.bind('pusher:subscription_succeeded', () => {
-            console.log('[Event Overview] ✅ Successfully subscribed to', privateChannelName);
+            // // console.log('[Event Overview] ✅ Successfully subscribed to', privateChannelName);
         });
 
         privateChannel.bind('pusher:subscription_error', (status) => {
-            console.error('[Event Overview] ❌ Subscription error on', privateChannelName + ':', status);
+            // // console.error('[Event Overview] ❌ Subscription error on', privateChannelName + ':', status);
         });
 
         // Listen for sales.report.updated events on private channel
         privateChannel.bind('sales.report.updated', function(eventData) {
-            console.log('[Event Overview] ⚡⚡⚡ RECEIVED sales.report.updated on private channel! ⚡⚡⚡');
-            console.log('[Event Overview] Full event data:', JSON.stringify(eventData, null, 2));
-            console.log('[Event Overview] Checking event_id match:', {
-                received_event_id: eventData.event_id,
-                current_eventId: eventId,
-                match: eventData.event_id == eventId
-            });
+            // // console.log('[Event Overview] ⚡⚡⚡ RECEIVED sales.report.updated on private channel! ⚡⚡⚡');
+            // // console.log('[Event Overview] Full event data:', JSON.stringify(eventData, null, 2));
+            // // console.log('[Event Overview] Checking event_id match:', {
+            //     received_event_id: eventData.event_id,
+            //     current_eventId: eventId,
+            //     match: eventData.event_id == eventId
+            // });
             
             // Only update if it's for this event
             if (eventData.event_id == eventId) {
-                console.log('[Event Overview] ✅ Event ID matches, processing update...');
+                // // console.log('[Event Overview] ✅ Event ID matches, processing update...');
                 handleSalesUpdate(eventData);
             } else {
-                console.log('[Event Overview] ❌ Event ID does not match, skipping update');
+                // // console.log('[Event Overview] ❌ Event ID does not match, skipping update');
             }
         });
 
         // Subscribe to event-specific channel if available
         const eventChannelName = 'private-event.' + eventId;
-        console.log('[Event Overview] Subscribing to event channel:', eventChannelName);
+        // // console.log('[Event Overview] Subscribing to event channel:', eventChannelName);
         
         eventChannel = pusher.subscribe(eventChannelName);
 
         eventChannel.bind('pusher:subscription_succeeded', () => {
-            console.log('[Event Overview] ✅ Successfully subscribed to', eventChannelName);
+            // // console.log('[Event Overview] ✅ Successfully subscribed to', eventChannelName);
         });
 
         eventChannel.bind('pusher:subscription_error', (status) => {
-            console.error('[Event Overview] ❌ Subscription error on', eventChannelName + ':', status);
+            // // console.error('[Event Overview] ❌ Subscription error on', eventChannelName + ':', status);
         });
 
         // Listen for event-specific events (support both names)
         eventChannel.bind('event.stats.updated', function(eventData) {
-            console.log('[Event Overview] ⚡⚡⚡ RECEIVED event.stats.updated! ⚡⚡⚡', eventData);
+            // // console.log('[Event Overview] ⚡⚡⚡ RECEIVED event.stats.updated! ⚡⚡⚡', eventData);
             handleEventStatsUpdate(eventData);
         });
         eventChannel.bind('event.stats.changed', function(eventData) {
-            console.log('[Event Overview] ⚡⚡⚡ RECEIVED event.stats.changed! ⚡⚡⚡', eventData);
+            // // console.log('[Event Overview] ⚡⚡⚡ RECEIVED event.stats.changed! ⚡⚡⚡', eventData);
             handleEventStatsUpdate(eventData);
         });
     }
@@ -174,41 +174,41 @@
     // Handle sales update event
     function handleSalesUpdate(eventData) {
         if (!eventData) {
-            console.log('[Event Overview] ❌ Invalid event data - eventData is null/undefined');
+            // // console.log('[Event Overview] ❌ Invalid event data - eventData is null/undefined');
             return;
         }
 
-        console.log('[Event Overview] 🔄 Processing sales update...');
-        console.log('[Event Overview] Event data structure:', {
-            has_event_stats: !!eventData.event_stats,
-            has_sales_data: !!eventData.sales_data,
-            event_id: eventData.event_id,
-            organizer_id: eventData.organizer_id,
-            event_stats_keys: eventData.event_stats ? Object.keys(eventData.event_stats) : [],
-            sales_data_keys: eventData.sales_data ? Object.keys(eventData.sales_data) : []
-        });
+        // // console.log('[Event Overview] 🔄 Processing sales update...');
+        // // console.log('[Event Overview] Event data structure:', {
+        //     has_event_stats: !!eventData.event_stats,
+        //     has_sales_data: !!eventData.sales_data,
+        //     event_id: eventData.event_id,
+        //     organizer_id: eventData.organizer_id,
+        //     event_stats_keys: eventData.event_stats ? Object.keys(eventData.event_stats) : [],
+        //     sales_data_keys: eventData.sales_data ? Object.keys(eventData.sales_data) : []
+        // });
 
         // Update event metrics
         if (eventData.event_stats) {
-            console.log('[Event Overview] 📊 Updating event metrics from event_stats:', eventData.event_stats);
+            // // console.log('[Event Overview] 📊 Updating event metrics from event_stats:', eventData.event_stats);
             updateEventMetrics(eventData.event_stats);
         } else {
-            console.log('[Event Overview] ⚠️ No event_stats in event data');
+            // // console.log('[Event Overview] ⚠️ No event_stats in event data');
         }
 
         // Update sales data
         if (eventData.sales_data) {
-            console.log('[Event Overview] 💰 Updating sales data:', eventData.sales_data);
+            // // console.log('[Event Overview] 💰 Updating sales data:', eventData.sales_data);
             updateSalesData(eventData.sales_data);
         } else {
-            console.log('[Event Overview] ⚠️ No sales_data in event data');
+            // // console.log('[Event Overview] ⚠️ No sales_data in event data');
         }
 
         // Always refresh charts when sales data is received
-        console.log('[Event Overview] 🔄 Refreshing charts and metrics...');
+        // // console.log('[Event Overview] 🔄 Refreshing charts and metrics...');
         
         // Refresh sales trend chart - try to get trend from sales summary first
-        console.log('[Event Overview] 📈 Refreshing sales trend chart...');
+        // // console.log('[Event Overview] 📈 Refreshing sales trend chart...');
         if (eventId) {
             // Fetch fresh sales summary which includes trend data
             fetch(`/organizer/events/${eventId}/api/sales-summary`, {
@@ -222,7 +222,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.trend && typeof window.updateSalesTrendChart === 'function') {
-                    console.log('[Event Overview] ✅ Sales trend data received, updating chart:', data.trend);
+                    // // console.log('[Event Overview] ✅ Sales trend data received, updating chart:', data.trend);
                     // Transform trend data to match chart expectations
                     const chartData = data.trend.map(day => ({
                         date: day.date,
@@ -233,14 +233,14 @@
                     window.updateSalesTrendChart(chartData);
                 } else if (typeof window.fetchSalesTrendData === 'function') {
                     // Fallback to existing function if available
-                    console.log('[Event Overview] 📈 Calling fetchSalesTrendData() as fallback');
+                    // // console.log('[Event Overview] 📈 Calling fetchSalesTrendData() as fallback');
                     window.fetchSalesTrendData();
                 } else {
-                    console.warn('[Event Overview] ⚠️ No sales trend data available and fetchSalesTrendData not found');
+                    // // console.warn('[Event Overview] ⚠️ No sales trend data available and fetchSalesTrendData not found');
                 }
             })
             .catch(error => {
-                console.error('[Event Overview] ❌ Failed to fetch sales trend:', error);
+                // // console.error('[Event Overview] ❌ Failed to fetch sales trend:', error);
                 // Fallback to existing function if available
                 if (typeof window.fetchSalesTrendData === 'function') {
                     window.fetchSalesTrendData();
@@ -255,7 +255,7 @@
 
         // Refresh activity trend chart
         if (typeof window.fetchActivityTrendData === 'function') {
-            console.log('[Event Overview] 📊 Calling fetchActivityTrendData() to refresh activity trend chart');
+            // // console.log('[Event Overview] 📊 Calling fetchActivityTrendData() to refresh activity trend chart');
             setTimeout(() => window.fetchActivityTrendData(), 300);
         }
 
@@ -267,23 +267,23 @@
 
         // Refresh full metrics (event numbers)
         if (typeof refreshEventNumbers === 'function') {
-            console.log('[Event Overview] 📊 Calling refreshEventNumbers() to update all event metrics');
+            // // console.log('[Event Overview] 📊 Calling refreshEventNumbers() to update all event metrics');
             setTimeout(() => refreshEventNumbers(), 600);
         } else {
-            console.warn('[Event Overview] ⚠️ refreshEventNumbers function not found');
+            // // console.warn('[Event Overview] ⚠️ refreshEventNumbers function not found');
         }
     }
 
     // Handle event stats update
     function handleEventStatsUpdate(eventData) {
         if (!eventData) {
-            console.log('[Event Overview] Invalid event stats data');
+            // // console.log('[Event Overview] Invalid event stats data');
             return;
         }
 
         // Support both schemas: direct fields or nested under `stats`
         const stats = eventData.stats ? eventData.stats : eventData;
-        console.log('[Event Overview] Processing event stats update:', stats);
+        // // console.log('[Event Overview] Processing event stats update:', stats);
 
         // Update event metrics from stats
         if (stats.total_revenue !== undefined) {
@@ -315,28 +315,28 @@
 
     function updateEventMetrics(eventStats) {
         if (!eventStats) {
-            console.log('[Event Overview] ❌ updateEventMetrics: eventStats is null/undefined');
+            // // console.log('[Event Overview] ❌ updateEventMetrics: eventStats is null/undefined');
             return;
         }
 
-        console.log('[Event Overview] 📈 Updating event metrics from stats:', eventStats);
+        // // console.log('[Event Overview] 📈 Updating event metrics from stats:', eventStats);
 
         // Update total revenue
         if (eventStats.total_revenue !== undefined) {
             const newValue = '₱' + parseFloat(eventStats.total_revenue).toLocaleString('en-US', {minimumFractionDigits: 2});
-            console.log('[Event Overview] 💵 Updating event-total-revenue to:', newValue);
+            // // console.log('[Event Overview] 💵 Updating event-total-revenue to:', newValue);
             updateElement('event-total-revenue', newValue);
         } else {
-            console.log('[Event Overview] ⚠️ total_revenue not in event_stats');
+            // // console.log('[Event Overview] ⚠️ total_revenue not in event_stats');
         }
 
         // Update tickets sold
         if (eventStats.total_tickets_sold !== undefined) {
             const newValue = eventStats.total_tickets_sold.toLocaleString();
-            console.log('[Event Overview] 🎫 Updating event-tickets-sold to:', newValue);
+            // // console.log('[Event Overview] 🎫 Updating event-tickets-sold to:', newValue);
             updateElement('event-tickets-sold', newValue);
         } else {
-            console.log('[Event Overview] ⚠️ total_tickets_sold not in event_stats');
+            // // console.log('[Event Overview] ⚠️ total_tickets_sold not in event_stats');
         }
 
         // Update total orders (increment)
@@ -372,7 +372,7 @@
         const monitorContainer = document.querySelector('#ticket-monitor-container, #recent-purchases-container');
         if (!monitorContainer) return;
 
-        console.log('[Event Overview] Updating ticket monitor with', recentPurchases.length, 'purchases');
+        // // console.log('[Event Overview] Updating ticket monitor with', recentPurchases.length, 'purchases');
         
         // Clear existing items (or append new ones based on your UI preference)
         // This is a placeholder - adjust based on your actual ticket monitor structure
@@ -417,19 +417,19 @@
         const element = document.querySelector(`[data-stat="${selector}"]`);
         if (element) {
             const oldValue = element.textContent;
-            console.log('[Event Overview] ✏️ Updating element:', {
-                selector: selector,
-                oldValue: oldValue,
-                newValue: newValue
-            });
+            // console.log('[Event Overview] ✏️ Updating element:', {
+            //  selector: selector,
+           //   oldValue: oldValue,
+           //   newValue: newValue
+         // });
             animateCounter(element);
             element.textContent = newValue;
-            console.log('[Event Overview] ✅ Element updated successfully');
+            // console.log('[Event Overview] ✅ Element updated successfully');
         } else {
-            console.warn('[Event Overview] ❌ Element not found for selector:', selector);
-            console.warn('[Event Overview] Available data-stat elements:', 
-                Array.from(document.querySelectorAll('[data-stat]')).map(el => el.getAttribute('data-stat'))
-            );
+            // console.warn('[Event Overview] ❌ Element not found for selector:', selector);
+            // console.warn('[Event Overview] Available data-stat elements:', 
+            //     Array.from(document.querySelectorAll('[data-stat]')).map(el => el.getAttribute('data-stat'))
+            // );
         }
     }
 
@@ -453,11 +453,11 @@
     // Refresh ticket performance table
     function refreshTicketPerformanceTable() {
         if (!eventId) {
-            console.warn('[Event Overview] ⚠️ Cannot refresh ticket performance - eventId not set');
+            // console.warn('[Event Overview] ⚠️ Cannot refresh ticket performance - eventId not set');
             return;
         }
 
-        console.log('[Event Overview] 🎫 Fetching ticket performance data for event:', eventId);
+        // console.log('[Event Overview] 🎫 Fetching ticket performance data for event:', eventId);
         
         const url = `/organizer/events/${eventId}/api/sales-summary`;
         fetch(url, {
@@ -476,14 +476,14 @@
         })
         .then(data => {
             if (data.success && data.ticket_performance) {
-                console.log('[Event Overview] ✅ Ticket performance data received:', data.ticket_performance);
+                // console.log('[Event Overview] ✅ Ticket performance data received:', data.ticket_performance);
                 updateTicketPerformanceTable(data.ticket_performance);
             } else {
-                console.warn('[Event Overview] ⚠️ Invalid ticket performance data structure');
+                // console.warn('[Event Overview] ⚠️ Invalid ticket performance data structure');
             }
         })
         .catch(error => {
-            console.error('[Event Overview] ❌ Failed to fetch ticket performance:', error);
+            // console.error('[Event Overview] ❌ Failed to fetch ticket performance:', error);
         });
     }
 
@@ -491,11 +491,11 @@
     function updateTicketPerformanceTable(ticketPerformance) {
         const tableBody = document.querySelector('#ticket-performance-table tbody');
         if (!tableBody) {
-            console.warn('[Event Overview] ⚠️ Ticket performance table tbody not found');
+            // console.warn('[Event Overview] ⚠️ Ticket performance table tbody not found');
             return;
         }
 
-        console.log('[Event Overview] 📊 Updating ticket performance table with', ticketPerformance.length, 'tickets');
+        // console.log('[Event Overview] 📊 Updating ticket performance table with', ticketPerformance.length, 'tickets');
 
         // Clear existing rows
         tableBody.innerHTML = '';
@@ -538,17 +538,17 @@
             tableBody.appendChild(row);
         });
 
-        console.log('[Event Overview] ✅ Ticket performance table updated successfully');
+        // console.log('[Event Overview] ✅ Ticket performance table updated successfully');
     }
 
     // Refresh recent sales list
     function refreshRecentSalesList() {
         if (!eventId) {
-            console.warn('[Event Overview] ⚠️ Cannot refresh recent sales - eventId not set');
+            // console.warn('[Event Overview] ⚠️ Cannot refresh recent sales - eventId not set');
             return;
         }
 
-        console.log('[Event Overview] 💰 Fetching recent sales data for event:', eventId);
+        // console.log('[Event Overview] 💰 Fetching recent sales data for event:', eventId);
         
         const url = `/organizer/events/${eventId}/api/recent-sales`;
         fetch(url, {
@@ -567,14 +567,14 @@
         })
         .then(data => {
             if (data.success && data.sales) {
-                console.log('[Event Overview] ✅ Recent sales data received:', data.sales.length, 'sales');
+                // console.log('[Event Overview] ✅ Recent sales data received:', data.sales.length, 'sales');
                 updateRecentSalesList(data.sales);
             } else {
-                console.warn('[Event Overview] ⚠️ Invalid recent sales data structure');
+                // console.warn('[Event Overview] ⚠️ Invalid recent sales data structure');
             }
         })
         .catch(error => {
-            console.error('[Event Overview] ❌ Failed to fetch recent sales:', error);
+       //   // console.error('[Event Overview] ❌ Failed to fetch recent sales:', error);
         });
     }
 
@@ -582,11 +582,11 @@
     function updateRecentSalesList(recentSales) {
         const salesList = document.querySelector('#recent-sales-list');
         if (!salesList) {
-            console.warn('[Event Overview] ⚠️ Recent sales list container not found');
+            // console.warn('[Event Overview] ⚠️ Recent sales list container not found');
             return;
         }
 
-        console.log('[Event Overview] 📋 Updating recent sales list with', recentSales.length, 'sales');
+        // console.log('[Event Overview] 📋 Updating recent sales list with', recentSales.length, 'sales');
 
         // Clear existing items
         salesList.innerHTML = '';
@@ -693,7 +693,7 @@
             }, index * 50);
         });
 
-        console.log('[Event Overview] ✅ Recent sales list updated successfully');
+        // console.log('[Event Overview] ✅ Recent sales list updated successfully');
     }
 
     // Initialize when DOM is ready
@@ -706,7 +706,7 @@
     // Cleanup on page unload
     window.addEventListener('beforeunload', function() {
         if (pusher) {
-            console.log('[Event Overview] Disconnecting Pusher...');
+            // console.log('[Event Overview] Disconnecting Pusher...');
             pusher.disconnect();
         }
     });
