@@ -435,7 +435,7 @@ class TicketsController extends Controller
         ], [
             'ticket_types' => 'required|array|min:1',
             'ticket_types.*.name' => 'required|string|max:255',
-            'ticket_types.*.description' => 'nullable|string|max:70',
+            'ticket_types.*.description' => 'nullable|string|max:200',
             'ticket_types.*.price' => 'required|numeric|min:0',
             'ticket_types.*.quantity' => 'nullable|integer|min:1',
             'ticket_types.*.sale_start' => 'nullable|date',

@@ -69,11 +69,11 @@ Schedule::call(function(){
             $event->forceFill(['feedback_notified_at' => now()])->save();
         } catch (\Throwable $e) { /* continue */ }
     }
-})->hourly();
+})->everyFifteenMinutes();
 
-// Schedule event end notifications to run every hour
+// Schedule event end notifications to run every 15 minutes
 Schedule::command('events:notify-ended')
-    ->hourly()
+    ->everyFifteenMinutes()
     ->withoutOverlapping()
     ->description('Process ended event notifications');
 

@@ -138,24 +138,34 @@ class OrganizerVerification extends Model
      */
     public function getDocumentUrlAttribute(): string
     {
+        if (!$this->document_file_path) {
+            return '#';
+        }
+        
         try {
             $disk = Storage::disk('r2');
             
             // Check if file exists
             if (!$disk->exists($this->document_file_path)) {
-                \Log::warning("Document file not found: {$this->document_file_path}");
+                \Log::warning("Document file not found in R2: " . $this->document_file_path);
                 return '#';
             }
             
-            // Try to get signed URL first (for private files)
+            // Try to generate a signed URL first
             try {
-                return $disk->temporaryUrl($this->document_file_path, now()->addMinutes(60));
+                return $disk->temporaryUrl($this->document_file_path, now()->addHour());
             } catch (\Exception $e) {
-                \Log::info("Signed URL failed for {$this->document_file_path}, trying public URL");
+                \Log::info("Document signed URL failed, using regular URL: " . $e->getMessage());
                 
-                // Fallback to public URL
-                $publicUrl = config('filesystems.disks.r2.url') . '/' . $this->document_file_path;
-                return $publicUrl;
+                // Fallback to regular URL
+                $url = $disk->url($this->document_file_path);
+                
+                // Ensure the URL is properly formatted
+                if (strpos($url, 'http') !== 0) {
+                    $url = 'https://' . ltrim($url, '/');
+                }
+                
+                return $url;
             }
         } catch (\Exception $e) {
             \Log::error("Error generating document URL for {$this->document_file_path}: " . $e->getMessage());
@@ -177,19 +187,25 @@ class OrganizerVerification extends Model
             
             // Check if file exists
             if (!$disk->exists($this->document_front_path)) {
-                \Log::warning("Front document file not found: {$this->document_front_path}");
+                \Log::warning("Front document file not found in R2: " . $this->document_front_path);
                 return '#';
             }
             
-            // Try to get signed URL first (for private files)
+            // Try to generate a signed URL first
             try {
-                return $disk->temporaryUrl($this->document_front_path, now()->addMinutes(60));
+                return $disk->temporaryUrl($this->document_front_path, now()->addHour());
             } catch (\Exception $e) {
-                \Log::info("Signed URL failed for {$this->document_front_path}, trying public URL");
+                \Log::info("Front document signed URL failed, using regular URL: " . $e->getMessage());
                 
-                // Fallback to public URL
-                $publicUrl = config('filesystems.disks.r2.url') . '/' . $this->document_front_path;
-                return $publicUrl;
+                // Fallback to regular URL
+                $url = $disk->url($this->document_front_path);
+                
+                // Ensure the URL is properly formatted
+                if (strpos($url, 'http') !== 0) {
+                    $url = 'https://' . ltrim($url, '/');
+                }
+                
+                return $url;
             }
         } catch (\Exception $e) {
             \Log::error("Error generating front document URL for {$this->document_front_path}: " . $e->getMessage());
@@ -211,19 +227,25 @@ class OrganizerVerification extends Model
             
             // Check if file exists
             if (!$disk->exists($this->document_back_path)) {
-                \Log::warning("Back document file not found: {$this->document_back_path}");
+                \Log::warning("Back document file not found in R2: " . $this->document_back_path);
                 return '#';
             }
             
-            // Try to get signed URL first (for private files)
+            // Try to generate a signed URL first
             try {
-                return $disk->temporaryUrl($this->document_back_path, now()->addMinutes(60));
+                return $disk->temporaryUrl($this->document_back_path, now()->addHour());
             } catch (\Exception $e) {
-                \Log::info("Signed URL failed for {$this->document_back_path}, trying public URL");
+                \Log::info("Back document signed URL failed, using regular URL: " . $e->getMessage());
                 
-                // Fallback to public URL
-                $publicUrl = config('filesystems.disks.r2.url') . '/' . $this->document_back_path;
-                return $publicUrl;
+                // Fallback to regular URL
+                $url = $disk->url($this->document_back_path);
+                
+                // Ensure the URL is properly formatted
+                if (strpos($url, 'http') !== 0) {
+                    $url = 'https://' . ltrim($url, '/');
+                }
+                
+                return $url;
             }
         } catch (\Exception $e) {
             \Log::error("Error generating back document URL for {$this->document_back_path}: " . $e->getMessage());

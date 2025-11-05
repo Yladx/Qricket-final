@@ -408,9 +408,9 @@
           </div>
           <div>
             <label class="block text-xs text-gray-500">Description</label>
-            <textarea data-k="description" data-i="${idx}" rows="2" maxlength="70" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100" oninput="updateDescriptionCounter(this)">${t.description || ''}</textarea>
+            <textarea data-k="description" data-i="${idx}" rows="2" maxlength="200" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100" oninput="updateDescriptionCounter(this)">${t.description || ''}</textarea>
             <div class="flex justify-end mt-0.5">
-              <span class="text-xs text-gray-400 description-counter" data-counter-for="${idx}">${(t.description || '').length}/70</span>
+              <span class="text-xs text-gray-400 description-counter" data-counter-for="${idx}">${(t.description || '').length}/200</span>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -871,8 +871,8 @@
     const counter = document.querySelector(`.description-counter[data-counter-for="${idx}"]`);
     if (counter) {
       const length = textarea.value.length;
-      counter.textContent = `${length}/70`;
-      if (length >= 70) {
+      counter.textContent = `${length}/200`;
+      if (length >= 200) {
         counter.classList.add('text-red-500');
         counter.classList.remove('text-gray-400');
       } else {
