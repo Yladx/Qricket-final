@@ -61,7 +61,7 @@
                     <div id="layout-components-display" class="space-y-8"></div>
 
                     <!-- Event News Section -->
-                    <div id="event-news-section" style="display: {{ $section === 'news' ? 'block' : 'none' }};" class="mt-6 mb-16 md:mb-24">
+                    <div id="event-news-section" style="display: {{ $section === 'news' ? 'block' : 'none' }};" class="mt-6 mb-8">
                         <x-events.news :news="$news" :event="$event" />
                     </div>
                 </div>
@@ -70,7 +70,7 @@
         </div>
         
         <!-- Include Event Footer - At bottom of content -->
-        <div class="relative z-20 mt-auto">
+        <div class="relative z-20 mt-8">
             <x-events.event-footer :event="$event" :fixed="false" />
         </div>
         </div>

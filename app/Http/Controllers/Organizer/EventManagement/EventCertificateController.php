@@ -78,7 +78,13 @@ class EventCertificateController extends Controller
         $ticketId = $request->get('ticket');
         
         if (!$ticketId) {
-            abort(404, 'Ticket not found.');
+            // If user is authenticated, redirect to authenticated certificate page
+            if (Auth::check()) {
+                return redirect()->route('events.certificate.view', $event);
+            }
+            
+            // If not authenticated and no ticket ID, show error with helpful message
+            abort(404, 'Ticket ID is required. Please provide a valid ticket ID in the URL (e.g., ?ticket=XXX).');
         }
 
         // Find the ticket
@@ -90,7 +96,29 @@ class EventCertificateController extends Controller
             ->first();
 
         if (!$ticket) {
-            abort(404, 'Certificate not found or ticket not eligible.');
+            // Provide more helpful error message
+            $reason = 'Certificate not found or ticket not eligible.';
+            
+            // Check if ticket exists but doesn't meet requirements
+            $ticketExists = EventTicketInformation::where('ticket_id', $ticketId)
+                ->where('event_id', $event->id)
+                ->exists();
+                
+            if ($ticketExists) {
+                $checkTicket = EventTicketInformation::where('ticket_id', $ticketId)
+                    ->where('event_id', $event->id)
+                    ->first();
+                    
+                if (!$checkTicket->checked_in_at) {
+                    $reason = 'Ticket is not checked in. Please check in first before viewing certificate.';
+                } elseif (!$checkTicket->certificate_given) {
+                    $reason = 'Certificate has not been generated yet. Please contact the event organizer.';
+                }
+            } else {
+                $reason = 'Ticket not found. Please verify the ticket ID is correct.';
+            }
+            
+            abort(404, $reason);
         }
 
         // Load certificate data
@@ -169,7 +197,7 @@ class EventCertificateController extends Controller
 
         // If only one ticket, redirect straight to the public certificate page
         if ($tickets->count() === 1) {
-            return redirect()->route('events.certificate.public', $event)->withInput(['ticket' => $tickets->first()->ticket_id]);
+            return redirect()->to(route('events.certificate.public', $event) . '?ticket=' . urlencode($tickets->first()->ticket_id));
         }
 
         // Multiple eligible tickets – show selection page

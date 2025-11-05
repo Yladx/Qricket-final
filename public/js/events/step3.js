@@ -43,7 +43,7 @@
   }
 
   // Subscription ticket limit – fetched from meta tags rendered by Blade
-  // If event is free and free-event-ticket-limit is set, cap by that
+  // The tickets-per-event meta tag already includes additional tickets purchased
   function getTicketsPerEventLimit() {
     const planMeta = document.querySelector('meta[name="tickets-per-event"]');
     const freeMeta = document.querySelector('meta[name="free-event-ticket-limit"]');
@@ -53,11 +53,16 @@
     const isFree = (isFreeMeta ? isFreeMeta.getAttribute('content') : '') === '1';
     const planCap = (planVal == null || planVal === '' || planVal === 'null') ? null : (parseInt(planVal, 10) || null);
     const freeCap = (freeVal == null || freeVal === '' || freeVal === 'null') ? null : (parseInt(freeVal, 10) || null);
-    // If event is free, prioritize free cap exclusively
+    // Use tickets-per-event meta tag which already includes additional tickets (for both free and paid events)
+    // This ensures additional tickets purchased are included in the limit
+    if (planCap != null) {
+      return planCap;
+    }
+    // Fallback to free cap if planCap is not available (shouldn't happen but just in case)
     if (isFree && freeCap != null) {
       return freeCap;
     }
-    return planCap;
+    return null;
   }
 
   function isFreeEvent() {

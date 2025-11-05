@@ -35,10 +35,10 @@
                         // Calculate the total maximum tickets allowed
                         $cap = ($baseCap === null) ? null : $baseCap + $additionalTicketsPurchased;
 
-                        // If event is FREE, prioritize free_event_ticket_limit exclusively
+                        // If event is FREE, use free_event_ticket_limit as base and add additional tickets
                         $freeCap = (int)($plan?->free_event_ticket_limit ?? 0);
                         if (($event->is_free ?? false) && $freeCap > 0) {
-                            $cap = $freeCap;
+                            $cap = $freeCap + $additionalTicketsPurchased;
                         }
                     @endphp
                     <meta name="tickets-per-event" content="{{ $cap === null ? 'null' : $cap }}">
@@ -65,8 +65,14 @@
                                     </p>
                                     <p class="text-xs text-blue-700 dark:text-blue-300">
                                         {{ $plan->name ?? 'Current Plan' }} 
-                                        @if(isset($baseMaxTicketsPerEvent) && $baseMaxTicketsPerEvent !== null)
-                                            ({{ $baseMaxTicketsPerEvent }} base)
+                                        @if($event->is_free ?? false)
+                                            @if(($freeCap ?? 0) > 0)
+                                                ({{ $freeCap }} free base)
+                                            @endif
+                                        @else
+                                            @if(isset($baseMaxTicketsPerEvent) && $baseMaxTicketsPerEvent !== null)
+                                                ({{ $baseMaxTicketsPerEvent }} base)
+                                            @endif
                                         @endif
                                         @if(isset($additionalTicketsPurchased) && $additionalTicketsPurchased > 0)
                                             + {{ $additionalTicketsPurchased }} additional

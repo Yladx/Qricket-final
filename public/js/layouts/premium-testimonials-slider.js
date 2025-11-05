@@ -11,8 +11,8 @@ window.addTestimonialRow = function(componentId, quote = '', author = '') {
     if (!c) return;
     const row = document.createElement('div');
     row.className = 'grid grid-cols-5 gap-2';
-    row.innerHTML = `<input type='text' class='col-span-4 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Quote text' value='${(quote||'').replace(/'/g,"&#39;")}' oninput=\"updateLayoutJSON()\">` +
-        `<input type='text' class='col-span-1 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Author' value='${(author||'').replace(/'/g,"&#39;")}' oninput=\"updateLayoutJSON()\">`;
+    row.innerHTML = `<input type='text' class='col-span-4 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Quote text' value='${(quote||'').replace(/'/g,"&#39;")}' oninput=\"updateLayoutJSON()\">` +
+        `<input type='text' class='col-span-1 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Author' value='${(author||'').replace(/'/g,"&#39;")}' oninput=\"updateLayoutJSON()\">`;
     c.appendChild(row);
     try { if (typeof updateLayoutJSON === 'function') updateLayoutJSON(); } catch(_) {}
 };

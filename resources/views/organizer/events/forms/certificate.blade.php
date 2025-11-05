@@ -503,6 +503,63 @@ function renumberSignatories() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Load signatories from JSON first
+    const jsonEl = document.getElementById('certificate_data_json');
+    if (jsonEl && jsonEl.value) {
+        try {
+            const certData = JSON.parse(jsonEl.value);
+            const savedSignatoryCount = certData.signatory_count || 1;
+            
+            // If we have more signatories saved than currently in DOM, add them
+            const existingSignatories = document.querySelectorAll('.signatory-item');
+            const currentCount = existingSignatories.length;
+            
+            if (savedSignatoryCount > currentCount) {
+                // Add missing signatories
+                for (let i = currentCount + 1; i <= savedSignatoryCount && i <= 4; i++) {
+                    addSignatory();
+                    
+                    // Populate the newly added signatory with saved data
+                    const nameInput = document.getElementById(`sig_${i}_name_input`);
+                    const titleInput = document.getElementById(`sig_${i}_title_input`);
+                    const statusEl = document.getElementById(`sig_${i}_status`);
+                    
+                    if (nameInput && certData[`sig_${i}_name`]) {
+                        nameInput.value = certData[`sig_${i}_name`];
+                    }
+                    if (titleInput && certData[`sig_${i}_title`]) {
+                        titleInput.value = certData[`sig_${i}_title`];
+                    }
+                    if (statusEl && certData[`sig_${i}_signature`]) {
+                        statusEl.textContent = 'Uploaded';
+                        statusEl.className = 'text-xs text-green-500 dark:text-green-400';
+                    }
+                }
+            }
+            
+            // Populate existing signatories with saved data
+            existingSignatories.forEach((item, index) => {
+                const signatoryNum = index + 1;
+                const nameInput = item.querySelector(`input[name="sig_${signatoryNum}_name"]`);
+                const titleInput = item.querySelector(`input[name="sig_${signatoryNum}_title"]`);
+                const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
+                
+                if (nameInput && certData[`sig_${signatoryNum}_name`]) {
+                    nameInput.value = certData[`sig_${signatoryNum}_name`];
+                }
+                if (titleInput && certData[`sig_${signatoryNum}_title`]) {
+                    titleInput.value = certData[`sig_${signatoryNum}_title`];
+                }
+                if (statusEl && certData[`sig_${signatoryNum}_signature`]) {
+                    statusEl.textContent = 'Uploaded';
+                    statusEl.className = 'text-xs text-green-500 dark:text-green-400';
+                }
+            });
+        } catch (e) {
+            console.error('Failed to load signatories from JSON:', e);
+        }
+    }
+    
     // Show remove buttons if more than one signatory exists
     const existingSignatories = document.querySelectorAll('.signatory-item');
     if (existingSignatories.length > 1) {
@@ -522,7 +579,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Load theme colors from JSON and apply to color inputs
-    const jsonEl = document.getElementById('certificate_data_json');
     if (jsonEl && jsonEl.value) {
         try {
             const certData = JSON.parse(jsonEl.value);

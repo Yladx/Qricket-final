@@ -165,29 +165,82 @@ function showFallbackNotification(type, title, message) {
     
     // Try to use SweetAlert if available
     if (typeof Swal !== 'undefined') {
-        // Check if dark mode is enabled
-        const isDark = document.documentElement.classList.contains('dark') || 
-                      (localStorage.getItem('darkMode') === 'true') ||
-                      window.matchMedia('(prefers-color-scheme: dark)').matches;
+        // Improved dark mode detection - check multiple sources
+        const htmlHasDark = document.documentElement.classList.contains('dark');
+        const localStorageDark = localStorage.getItem('darkMode') === 'true';
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const isDark = htmlHasDark || localStorageDark || (systemPrefersDark && !localStorageDark);
+        
+        // Determine icon based on notification type
+        let iconType = 'info';
+        if (type === 'success') iconType = 'success';
+        else if (type === 'error' || type === 'danger') iconType = 'error';
+        else if (type === 'warning') iconType = 'warning';
+        else iconType = 'info';
+        
+        // Light mode colors
+        const lightBg = '#ffffff';
+        const lightText = '#111827';
+        const lightTitle = '#374151';
+        const lightContent = '#6b7280';
+        const lightBorder = '#e5e7eb';
+        
+        // Dark mode colors
+        const darkBg = '#1f2937';
+        const darkText = '#e5e7eb';
+        const darkTitle = '#e5e7eb';
+        const darkContent = '#9ca3af';
+        const darkBorder = '#374151';
         
         Swal.fire({
             title: title,
             text: message,
+            icon: iconType,
             timer: 4000,
             showConfirmButton: false,
             toast: true,
             position: 'top-end',
             width: '320px',
             padding: '0.75rem',
-            background: isDark ? '#1f2937' : '#ffffff',
-            color: isDark ? '#e5e7eb' : '#111827',
+            background: isDark ? darkBg : lightBg,
+            color: isDark ? darkText : lightText,
             customClass: {
                 popup: 'notification-toast',
                 title: 'notification-title',
-                content: 'notification-content'
+                content: 'notification-content',
+                icon: 'notification-icon'
+            },
+            didOpen: (popup) => {
+                // Apply theme-specific styles directly to ensure they work
+                const popupEl = popup.querySelector('.swal2-popup');
+                if (popupEl) {
+                    popupEl.style.background = isDark ? darkBg : lightBg;
+                    popupEl.style.color = isDark ? darkText : lightText;
+                    popupEl.style.border = `1px solid ${isDark ? darkBorder : lightBorder}`;
+                    popupEl.style.boxShadow = isDark 
+                        ? '0 4px 12px rgba(0, 0, 0, 0.3)' 
+                        : '0 4px 12px rgba(0, 0, 0, 0.15)';
+                }
+                
+                // Style title
+                const titleEl = popup.querySelector('.swal2-title');
+                if (titleEl) {
+                    titleEl.style.color = isDark ? darkTitle : lightTitle;
+                    titleEl.style.fontSize = '14px';
+                    titleEl.style.fontWeight = '600';
+                    titleEl.style.marginBottom = '4px';
+                }
+                
+                // Style content
+                const contentEl = popup.querySelector('.swal2-html-container');
+                if (contentEl) {
+                    contentEl.style.color = isDark ? darkContent : lightContent;
+                    contentEl.style.fontSize = '13px';
+                    contentEl.style.lineHeight = '1.4';
+                }
             }
         });
-                        } else {
+    } else {
         // Ultimate fallback - use browser notification
         if ('Notification' in window && Notification.permission === 'granted') {
             new Notification(title, {
@@ -197,12 +250,18 @@ function showFallbackNotification(type, title, message) {
         } else {
             // Last resort - SweetAlert or alert
             if (typeof Swal !== 'undefined' && window.Swal) {
+                const isDark = document.documentElement.classList.contains('dark') || 
+                              (localStorage.getItem('darkMode') === 'true') ||
+                              window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
                 Swal.fire({
                     icon: 'info',
                     title: title,
                     text: message,
                     timer: 5000,
-                    showConfirmButton: false
+                    showConfirmButton: false,
+                    background: isDark ? '#1f2937' : '#ffffff',
+                    color: isDark ? '#e5e7eb' : '#111827'
                 });
             } else {
                 alert(`${title}: ${message}`);

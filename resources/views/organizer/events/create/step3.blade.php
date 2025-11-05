@@ -45,10 +45,10 @@
                         // Calculate the total maximum tickets allowed
                         $cap = ($baseCap === null) ? null : $baseCap + $additionalTicketsPurchased;
 
-                        // If the event is FREE, prioritize the plan's free_event_ticket_limit exclusively
+                        // If the event is FREE, use free_event_ticket_limit as base and add additional tickets
                         $freeCap = (int)($plan?->free_event_ticket_limit ?? 0);
                         if (($event?->is_free ?? false) && $freeCap > 0) {
-                            $cap = $freeCap;
+                            $cap = $freeCap + $additionalTicketsPurchased;
                         }
                     @endphp
                     <meta name="tickets-per-event" content="{{ $cap === null ? 'null' : $cap }}">

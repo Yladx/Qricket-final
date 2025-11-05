@@ -298,11 +298,16 @@
         signatories[`sig_${signatoryNum}_name`] = nameInput.value || '';
         signatories[`sig_${signatoryNum}_title`] = titleInput.value || '';
         
-        // Include signature path if uploaded
-        if (statusElement && statusElement.textContent === 'Uploaded') {
+        // Include signature path if uploaded - check both status element and JSON
+        const currentData = JSON.parse(document.getElementById('certificate_data_json')?.value || '{}');
+        if (statusElement && (statusElement.textContent === 'Uploaded' || statusElement.textContent.includes('signature'))) {
           // Get signature path from certificate data if available
-          const currentData = JSON.parse(document.getElementById('certificate_data_json')?.value || '{}');
-          signatories[`sig_${signatoryNum}_signature`] = currentData[`sig_${signatoryNum}_signature`] || '';
+          if (currentData[`sig_${signatoryNum}_signature`]) {
+            signatories[`sig_${signatoryNum}_signature`] = currentData[`sig_${signatoryNum}_signature`];
+          }
+        } else if (currentData[`sig_${signatoryNum}_signature`]) {
+          // Also include signature if it exists in JSON even if status element doesn't show "Uploaded"
+          signatories[`sig_${signatoryNum}_signature`] = currentData[`sig_${signatoryNum}_signature`];
         }
       }
     });
