@@ -48,12 +48,12 @@
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Business Details</h4>
                 <dl class="space-y-3">
                     <div>
-                        <dt class="text-xs text-gray-500 dark:text-gray-400">Business Name</dt>
-                        <dd class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $verification->business_name }}</dd>
+                        <dt class="text-xs text-gray-500 dark:text-gray-400">Organization Name</dt>
+                        <dd class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $verification->organization_name ?? 'N/A' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-xs text-gray-500 dark:text-gray-400">Business Type</dt>
-                        <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $verification->business_type }}</dd>
+                        <dt class="text-xs text-gray-500 dark:text-gray-400">Document Type</dt>
+                        <dd class="text-sm text-gray-900 dark:text-gray-100">{{ ucfirst(str_replace('_',' ', $verification->document_type ?? 'N/A')) }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs text-gray-500 dark:text-gray-400">Tax ID</dt>
@@ -68,15 +68,15 @@
                 <dl class="space-y-3">
                     <div>
                         <dt class="text-xs text-gray-500 dark:text-gray-400">Email</dt>
-                        <dd class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $verification->business_email }}</dd>
+                        <dd class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $verification->user?->email ?? 'N/A' }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs text-gray-500 dark:text-gray-400">Phone</dt>
-                        <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $verification->business_phone }}</dd>
+                        <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $verification->contact_phone ?? 'N/A' }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs text-gray-500 dark:text-gray-400">Address</dt>
-                        <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $verification->business_address }}</dd>
+                        <dd class="text-sm text-gray-900 dark:text-gray-100">{{ $verification->address ?? 'N/A' }}</dd>
                     </div>
                 </dl>
             </div>
@@ -85,41 +85,36 @@
         <!-- Documents -->
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Verification Documents</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                @if($verification->business_license)
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                @if(!empty($verification->document_file_path))
                     <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-100">Business License</span>
-                            </div>
-                            <a href="{{ Storage::disk('r2')->url($verification->business_license) }}" target="_blank" class="text-qricket-600 hover:text-qricket-700">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                            </a>
+                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Primary Document</div>
+                            <a href="{{ Storage::disk('r2')->url($verification->document_file_path) }}" target="_blank" class="text-qricket-600 hover:text-qricket-700">View</a>
                         </div>
                     </div>
                 @endif
-                
-                @if($verification->identity_document)
+
+                @if(!empty($verification->document_front_path))
                     <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
-                                </svg>
-                                <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-100">Identity Document</span>
-                            </div>
-                            <a href="{{ Storage::disk('r2')->url($verification->identity_document) }}" target="_blank" class="text-qricket-600 hover:text-qricket-700">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                            </a>
+                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Front</div>
+                            <a href="{{ Storage::disk('r2')->url($verification->document_front_path) }}" target="_blank" class="text-qricket-600 hover:text-qricket-700">View</a>
+                        </div>
+                        <div class="mt-3">
+                            <img src="{{ Storage::disk('r2')->url($verification->document_front_path) }}" alt="Front" class="rounded-md border border-gray-200 dark:border-gray-700 object-cover max-h-40">
+                        </div>
+                    </div>
+                @endif
+
+                @if(!empty($verification->document_back_path))
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Back</div>
+                            <a href="{{ Storage::disk('r2')->url($verification->document_back_path) }}" target="_blank" class="text-qricket-600 hover:text-qricket-700">View</a>
+                        </div>
+                        <div class="mt-3">
+                            <img src="{{ Storage::disk('r2')->url($verification->document_back_path) }}" alt="Back" class="rounded-md border border-gray-200 dark:border-gray-700 object-cover max-h-40">
                         </div>
                     </div>
                 @endif

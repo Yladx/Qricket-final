@@ -157,21 +157,17 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Star rating functionality
-            document.querySelectorAll('.star-rating').forEach(rating => {
-                const stars = rating.querySelectorAll('.star');
-                const fieldName = rating.dataset.field;
-                
+            document.querySelectorAll('.star-rating').forEach(ratingEl => {
+                const stars = ratingEl.querySelectorAll('.star');
                 stars.forEach((star, index) => {
                     star.addEventListener('click', function() {
-                        const rating = index + 1;
-                        
+                        const selected = index + 1;
                         // Update visual state
-                        stars.forEach((s, i) => {
-                            s.classList.toggle('active', i < rating);
-                        });
-                        
-                        // Store rating value
-                        rating.dataset.value = rating;
+                        stars.forEach((s, i) => s.classList.toggle('active', i < selected));
+                        // Persist on container
+                        ratingEl.dataset.value = selected;
+                        // Remove error ring if present
+                        ratingEl.classList.remove('ring-2','ring-red-500','ring-offset-2','ring-offset-gray-800');
                     });
                 });
             });
@@ -179,17 +175,31 @@
             // Form submission
             document.getElementById('feedbackForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                
                 const formData = new FormData(this);
-                
-                // Collect star ratings
-                document.querySelectorAll('.star-rating').forEach(rating => {
-                    const fieldName = rating.dataset.field;
-                    const value = rating.dataset.value;
-                    if (value) {
-                        formData.append(fieldName, value);
+
+                // Validate: require all 5 ratings
+                const requiredFields = ['navigation_ease','information_found','design_rating','performance_rating','process_satisfaction'];
+                const missing = [];
+                requiredFields.forEach(name => {
+                    const el = document.querySelector('.star-rating[data-field="'+name+'"]');
+                    const value = el?.dataset?.value;
+                    if (!value) {
+                        missing.push(name);
+                        el?.classList.add('ring-2','ring-red-500','ring-offset-2','ring-offset-gray-800');
+                    } else {
+                        formData.append(name, value);
                     }
                 });
+
+                if (missing.length) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Please rate all categories',
+                        text: 'Tap a star for Navigation, Information, Design, Performance, and Process.',
+                        confirmButtonColor: '#10b981'
+                    });
+                    return;
+                }
 
                 // Submit feedback
                 fetch('{{ route("qricket.feedback.store") }}', {
@@ -200,40 +210,23 @@
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     if (data.success) {
                         Swal.fire({
                             title: 'Thank You!',
                             text: data.message,
                             icon: 'success',
-                            confirmButtonText: 'OK'
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#10b981'
                         }).then(() => {
-                            // Close modal or redirect
-                            if (window.opener) {
-                                window.close();
-                            } else {
-                                window.history.back();
-                            }
+                            if (window.opener) { window.close(); } else { window.history.back(); }
                         });
                     } else {
-                        Swal.fire({
-                            title: 'Error',
-                            text: data.message || 'Failed to submit feedback',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
+                        Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Failed to submit feedback' });
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Failed to submit feedback. Please try again.',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                });
+                .catch(() => Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to submit feedback. Please try again.' }));
             });
         });
     </script>

@@ -75,11 +75,16 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
-                                            <div class="h-10 w-10 rounded-full bg-qricket-100 dark:bg-qricket-900 flex items-center justify-center">
-                                                <span class="text-sm font-medium text-qricket-600 dark:text-qricket-400">
-                                                    {{ substr($verification->user->first_name, 0, 1) }}{{ substr($verification->user->last_name, 0, 1) }}
-                                                </span>
-                                            </div>
+                                            @php($avatar = $verification->user?->profile_picture_url)
+                                            @if($avatar)
+                                                <img src="{{ $avatar }}" alt="{{ $verification->user->full_name }}" class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700"/>
+                                            @else
+                                                <div class="h-10 w-10 rounded-full bg-qricket-100 dark:bg-qricket-900 flex items-center justify-center">
+                                                    <span class="text-sm font-medium text-qricket-600 dark:text-qricket-400">
+                                                        {{ substr($verification->user->first_name, 0, 1) }}{{ substr($verification->user->last_name, 0, 1) }}
+                                                    </span>
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
