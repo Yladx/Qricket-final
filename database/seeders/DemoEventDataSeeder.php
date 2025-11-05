@@ -175,7 +175,7 @@ class DemoEventDataSeeder extends Seeder
         foreach ([[$eventPast, $organizer1, $organizer2], [$eventUpcoming1, $organizer1, $organizer2], [$eventUpcoming2, $organizer2, $organizer1]] as $tuple) {
             [$e, $owner, $other] = $tuple;
             EventStaff::firstOrCreate(
-                ['event' => $e->id, 'user_id' => $owner->id],
+                ['event_id' => $e->id, 'user_id' => $owner->id],
                 [
                     'event_id' => $e->id,
                     'user_id' => $owner->id,
@@ -190,7 +190,7 @@ class DemoEventDataSeeder extends Seeder
             );
 
             EventStaff::firstOrCreate(
-                ['event' => $e->id, 'user_id' => $other->id],
+                ['event_id' => $e->id, 'user_id' => $other->id],
                 [
                     'event_id' => $e->id,
                     'user_id' => $other->id,
