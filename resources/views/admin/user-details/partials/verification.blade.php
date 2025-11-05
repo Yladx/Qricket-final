@@ -19,6 +19,12 @@
                             </svg>
                             Approved
                         </span>
+                        <form method="POST" action="{{ route('admin.users.unverify-organizer', $user) }}" class="inline-block ml-3">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-red-50 text-red-700 hover:bg-red-100 border border-red-200">
+                                Unverify
+                            </button>
+                        </form>
                     @elseif($verification->status === 'pending')
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                             <svg class="w-4 h-4 mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">

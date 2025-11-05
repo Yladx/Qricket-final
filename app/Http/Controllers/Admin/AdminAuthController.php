@@ -1039,6 +1039,60 @@ class AdminAuthController extends Controller
     }
 
     /**
+     * Return the Organizer Verification panel (partial) for the Admin user details page.
+     */
+    public function userVerificationPanel(User $user)
+    {
+        return view('admin.user-details.partials.verification', compact('user'));
+    }
+
+    /**
+     * Admin: Unverify a user as organizer (keeps organizer flag unless explicitly toggled elsewhere).
+     */
+    public function unverifyOrganizer(User $user)
+    {
+        $currentAdmin = Auth::guard('admin')->user();
+        if (!$currentAdmin || (!$currentAdmin->isSuperAdmin() && !optional($currentAdmin->access)->can_manage_users)) {
+            abort(403, 'You do not have permission to manage users.');
+        }
+
+        try {
+            $user->unverifyAsOrganizer();
+
+            // Optionally mark the latest verification record as revoked
+            $latest = \App\Models\OrganizerVerification::where('user_id', $user->id)->latest()->first();
+            if ($latest && $latest->status === 'approved') {
+                $latest->status = 'revoked';
+                $latest->reviewed_by = $currentAdmin->id;
+                $latest->reviewed_at = now();
+                $latest->save();
+            }
+
+            // Log admin activity
+            $currentAdmin->logActivity('verification_revoked', [
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+            ], 'Revoked organizer verification');
+
+            // Log user activity
+            $user->logActivity('organizer_verification_revoked', 'Your organizer verification was revoked by an administrator.', [
+                'admin_id' => $currentAdmin->id,
+                'admin_username' => $currentAdmin->username,
+            ]);
+
+            if (request()->ajax()) {
+                return response()->json(['success' => true]);
+            }
+            return back()->with('success', 'Organizer verification revoked.');
+        } catch (\Throwable $e) {
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+            }
+            return back()->with('error', 'Failed to revoke verification.');
+        }
+    }
+
+    /**
      * Delete (soft delete) a user
      */
     public function deleteUser(User $user)

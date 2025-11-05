@@ -28,7 +28,8 @@ class ReportsController extends Controller
         $ticketPurchases = TicketPurchase::where('status','paid')->get();
         $ticketRevenue = (float) $ticketPurchases->sum('total_amount');
         $ticketNetRevenue = (float) $ticketPurchases->sum(function($p) {
-            return $p->net_amount ?? $p->total_amount;
+            $net = $p->net_amount ?? $p->total_amount;
+            return max(0, (float) $net);
         });
         $ticketAdminEarnings = (float) $ticketNetRevenue * ($adminRevenuePercentage / 100);
         $ticketOrders = (int) $ticketPurchases->count();
@@ -113,9 +114,10 @@ class ReportsController extends Controller
                 $event = Event::find($eventId);
                 $totalRevenue = (float) $purchases->sum('total_amount');
                 $netRevenue = (float) $purchases->sum(function($p) {
-                    return $p->net_amount ?? $p->total_amount;
+                    $net = $p->net_amount ?? $p->total_amount;
+                    return max(0, (float) $net);
                 });
-                $adminEarnings = (float) $netRevenue * ($adminRevenuePercentage / 100);
+                $adminEarnings = (float) max(0, $netRevenue) * ($adminRevenuePercentage / 100);
                 
                 return [
                     'event_id' => $eventId,

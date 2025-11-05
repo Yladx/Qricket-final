@@ -390,10 +390,21 @@
             const buttons = document.querySelectorAll('.user-tab-btn');
             const panels = document.querySelectorAll('.user-tab');
             const overview = document.getElementById('overview-card');
-            function setActive(targetId){
+            async function setActive(targetId){
                 panels.forEach(p => p.classList.add('hidden'));
                 const active = document.getElementById(targetId);
-                if(active){ active.classList.remove('hidden'); }
+                if(active){
+                    // Lazy-load verification panel on first open
+                    if (targetId === 'panel-verification' && !active.dataset.loaded) {
+                        try {
+                            const res = await fetch('{{ route('admin.users.verification.panel', $user) }}', { credentials: 'same-origin' });
+                            const html = await res.text();
+                            active.innerHTML = html;
+                            active.dataset.loaded = '1';
+                        } catch(e) { /* noop */ }
+                    }
+                    active.classList.remove('hidden');
+                }
                 // style buttons
                 buttons.forEach(b => {
                     if (b.getAttribute('data-target') === targetId) {

@@ -83,6 +83,9 @@ Route::prefix('admin')->name('admin.')->middleware('prevent.user.admin')->group(
         Route::post('/users/{user}/ban', [AdminAuthController::class, 'banUser'])->middleware('admin.permission:manage_users')->name('users.ban');
         Route::post('/users/{user}/unban', [AdminAuthController::class, 'unbanUser'])->middleware('admin.permission:manage_users')->name('users.unban');
         Route::post('/users/{user}/restore', [AdminAuthController::class, 'restoreUser'])->middleware('admin.permission:manage_users')->name('users.restore');
+        Route::post('/users/{user}/unverify-organizer', [AdminAuthController::class, 'unverifyOrganizer'])->middleware('admin.permission:manage_users')->name('users.unverify-organizer');
+        // Lazy-load organizer verification panel on user details
+        Route::get('/users/{user}/verification-panel', [AdminAuthController::class, 'userVerificationPanel'])->name('users.verification.panel');
         Route::get('/logs', [AdminAuthController::class, 'logs'])->name('logs');
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         
