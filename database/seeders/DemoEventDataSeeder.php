@@ -33,12 +33,16 @@ class DemoEventDataSeeder extends Seeder
         $demoUserEmails = [
             'organizer1@qricket.test',
             'organizer2@qricket.test',
+            'organizer3@qricket.test',
             'user@qricket.test',
+            'user2@qricket.test',
+            'user3@qricket.test',
         ];
         $demoEventTitles = [
             'QRicket Summit 2023 (Past)',
             'QRicket Live: Launch Night',
             'Community Hackday',
+            'Organizer3 Demo Event',
         ];
 
         $existingUsers = \App\Models\User::whereIn('email', $demoUserEmails)->get();
@@ -100,11 +104,47 @@ class DemoEventDataSeeder extends Seeder
             ]
         );
 
+        $organizer3 = User::firstOrCreate(
+            ['email' => 'organizer3@qricket.test'],
+            [
+                'first_name' => 'Casey',
+                'last_name'  => 'Planner',
+                'password'   => Hash::make('password'),
+                'organizer'  => true,
+                'status'     => User::STATUS_ACTIVE,
+                'email_verified_at' => now(),
+            ]
+        );
+
         $attendee = User::firstOrCreate(
             ['email' => 'user@qricket.test'],
             [
                 'first_name' => 'Taylor',
                 'last_name'  => 'Guest',
+                'password'   => Hash::make('password'),
+                'organizer'  => false,
+                'status'     => User::STATUS_ACTIVE,
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $attendee2 = User::firstOrCreate(
+            ['email' => 'user2@qricket.test'],
+            [
+                'first_name' => 'Jordan',
+                'last_name'  => 'Visitor',
+                'password'   => Hash::make('password'),
+                'organizer'  => false,
+                'status'     => User::STATUS_ACTIVE,
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $attendee3 = User::firstOrCreate(
+            ['email' => 'user3@qricket.test'],
+            [
+                'first_name' => 'Riley',
+                'last_name'  => 'Attendee',
                 'password'   => Hash::make('password'),
                 'organizer'  => false,
                 'status'     => User::STATUS_ACTIVE,
@@ -123,6 +163,15 @@ class DemoEventDataSeeder extends Seeder
             ],
             $attendee->id => [
                 ['platform' => 'twitter', 'username' => 'taylor_guest'],
+            ],
+            $attendee2->id => [
+                ['platform' => 'twitter', 'username' => 'jordan_visit'],
+            ],
+            $attendee3->id => [
+                ['platform' => 'twitter', 'username' => 'riley_attends'],
+            ],
+            $organizer3->id => [
+                ['platform' => 'linkedin', 'username' => 'casey-planner'],
             ],
         ];
 
@@ -182,8 +231,22 @@ class DemoEventDataSeeder extends Seeder
             'status' => 'approved',
         ]);
 
+        // Organizer3 event (upcoming)
+        $eventUpcoming3 = Event::create([
+            'user_id' => $organizer3->id,
+            'title' => 'Organizer3 Demo Event',
+            'description' => 'A small workshop hosted by Casey.',
+            'category' => 'Workshop',
+            'is_free' => false,
+            'start_date' => $now->copy()->addDays(12)->setTime(10,0),
+            'end_date' => $now->copy()->addDays(12)->setTime(16,0),
+            'location' => 'Innovation Hub',
+            'location_url' => 'https://maps.example.com/innovation',
+            'status' => 'approved',
+        ]);
+
         // --- Ticket types per event ---
-        $events = collect([$eventPast, $eventUpcoming1, $eventUpcoming2]);
+        $events = collect([$eventPast, $eventUpcoming1, $eventUpcoming2, $eventUpcoming3]);
         $eventTickets = [];
         foreach ($events as $idx => $ev) {
             $basePrice = $ev->is_free ? 0 : 500;
@@ -218,7 +281,13 @@ class DemoEventDataSeeder extends Seeder
         }
 
         // --- Cross-assign organizers as staff on each other's events ---
-        foreach ([[$eventPast, $organizer1, $organizer2], [$eventUpcoming1, $organizer1, $organizer2], [$eventUpcoming2, $organizer2, $organizer1]] as $tuple) {
+        foreach ([
+            [$eventPast, $organizer1, $organizer2],
+            [$eventUpcoming1, $organizer1, $organizer2],
+            [$eventUpcoming2, $organizer2, $organizer1],
+            [$eventUpcoming3, $organizer3, $organizer1],
+            [$eventUpcoming3, $organizer3, $organizer2]
+        ] as $tuple) {
             [$e, $owner, $other] = $tuple;
             EventStaff::firstOrCreate(
                 ['event_id' => $e->id, 'user_id' => $owner->id],
@@ -345,6 +414,78 @@ class DemoEventDataSeeder extends Seeder
                     'notes' => 'Auto‑generated demo payout'
                 ]
             );
+
+            // Extra purchase: attendee2 buys 1 VIP
+            $vipType = $eventTickets[$eventPast->id][1] ?? null;
+            if ($vipType) {
+                $qty2 = 1;
+                $unit2 = (float) $vipType->price;
+                $total2 = round($unit2 * $qty2, 2);
+                $fee2 = round($total2 * 0.025, 2);
+                $net2 = round($total2 - $fee2, 2);
+                $purchase2 = TicketPurchase::create([
+                    'user_id' => $attendee2->id,
+                    'event_id' => $eventPast->id,
+                    'ticket_type_id' => $vipType->id,
+                    'purchase_id' => TicketPurchase::generatePurchaseId(),
+                    'quantity' => $qty2,
+                    'unit_price' => $unit2,
+                    'total_amount' => $total2,
+                    'transaction_fee' => $fee2,
+                    'vat_amount' => 0,
+                    'net_amount' => $net2,
+                    'total_fees' => $fee2,
+                    'currency' => 'PHP',
+                    'payment_method' => 'CREDIT_CARD',
+                    'status' => 'paid',
+                    'paid_at' => now()->subDays(9)->addMinutes(5),
+                    'customer_details' => [
+                        'name' => $attendee2->full_name,
+                        'email' => $attendee2->email,
+                    ],
+                ]);
+                $ti2 = EventTicketInformation::create([
+                    'user_id' => $attendee2->id,
+                    'event_id' => $eventPast->id,
+                    'ticket_type_id' => $vipType->id,
+                    'ticket_purchase_id' => $purchase2->id,
+                    'certificate_given' => true,
+                    'checked_in_at' => $eventPast->start_date->copy()->addHours(2),
+                ]);
+                try { $ti2->qr_code_data = $ti2->generateQRCodeData(); $ti2->save(); } catch (\Throwable $e) {}
+            }
+
+            // Organizer1 participates: buys 1 GA
+            $purchase3 = TicketPurchase::create([
+                'user_id' => $organizer1->id,
+                'event_id' => $eventPast->id,
+                'ticket_type_id' => $gaType->id,
+                'purchase_id' => TicketPurchase::generatePurchaseId(),
+                'quantity' => 1,
+                'unit_price' => (float) $gaType->price,
+                'total_amount' => (float) $gaType->price,
+                'transaction_fee' => round(((float) $gaType->price) * 0.025, 2),
+                'vat_amount' => 0,
+                'net_amount' => (float) $gaType->price - round(((float) $gaType->price) * 0.025, 2),
+                'total_fees' => round(((float) $gaType->price) * 0.025, 2),
+                'currency' => 'PHP',
+                'payment_method' => 'CREDIT_CARD',
+                'status' => 'paid',
+                'paid_at' => now()->subDays(9)->addMinutes(10),
+                'customer_details' => [
+                    'name' => $organizer1->full_name,
+                    'email' => $organizer1->email,
+                ],
+            ]);
+            $ti3 = EventTicketInformation::create([
+                'user_id' => $organizer1->id,
+                'event_id' => $eventPast->id,
+                'ticket_type_id' => $gaType->id,
+                'ticket_purchase_id' => $purchase3->id,
+                'certificate_given' => true,
+                'checked_in_at' => $eventPast->start_date->copy()->addHours(1)->addMinutes(30),
+            ]);
+            try { $ti3->qr_code_data = $ti3->generateQRCodeData(); $ti3->save(); } catch (\Throwable $e) {}
         }
 
         // --- Organizer verification requests (KYC) ---
@@ -378,6 +519,23 @@ class DemoEventDataSeeder extends Seeder
                 'contact_phone' => '+63 900 000 0002',
                 'terms_accepted' => true,
                 'terms_accepted_at' => now()->subDays(2),
+            ]
+        );
+
+        // Organizer3 verification (approved)
+        OrganizerVerification::firstOrCreate(
+            ['user_id' => $organizer3->id],
+            [
+                'user_id' => $organizer3->id,
+                'status' => 'approved',
+                'organization_name' => 'Planner Works',
+                'document_type' => 'business_permit',
+                'document_file_path' => 'verifications/' . $organizer3->id . '/permit.pdf',
+                'contact_phone' => '+63 900 000 0003',
+                'terms_accepted' => true,
+                'terms_accepted_at' => now()->subDays(5),
+                'reviewed_by' => $admin?->id,
+                'reviewed_at' => now()->subDays(4),
             ]
         );
 
@@ -453,6 +611,38 @@ class DemoEventDataSeeder extends Seeder
                     'venue' => 4,
                 ],
                 'submitted_at' => now()->subDays(8),
+            ]
+        );
+
+        \App\Models\EventFeedback::firstOrCreate(
+            ['event_id' => $eventPast->id, 'user_id' => $attendee2->id],
+            [
+                'event_id' => $eventPast->id,
+                'user_id' => $attendee2->id,
+                'rating' => 4,
+                'comments' => 'VIP perks were nice. Queue moved fast.',
+                'responses' => [
+                    'content_quality' => 4,
+                    'organization' => 5,
+                    'venue' => 4,
+                ],
+                'submitted_at' => now()->subDays(8)->addMinutes(15),
+            ]
+        );
+
+        \App\Models\EventFeedback::firstOrCreate(
+            ['event_id' => $eventPast->id, 'user_id' => $organizer1->id],
+            [
+                'event_id' => $eventPast->id,
+                'user_id' => $organizer1->id,
+                'rating' => 5,
+                'comments' => 'Proud of the team and attendees—went smoothly.',
+                'responses' => [
+                    'content_quality' => 5,
+                    'organization' => 5,
+                    'venue' => 5,
+                ],
+                'submitted_at' => now()->subDays(8)->addMinutes(30),
             ]
         );
     }

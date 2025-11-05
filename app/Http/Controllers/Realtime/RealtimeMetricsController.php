@@ -138,10 +138,12 @@ class RealtimeMetricsController extends Controller
         if ($events->isEmpty()) {
             return [ 'net' => 0.0 ];
         }
-        $ticketNet = (float) TicketPurchase::whereIn('event_id', $events)->where('status','paid')->sum(DB::raw('COALESCE(net_amount,total_amount)'));
-        $addlNet = (float) TicketLimitPurchase::whereIn('event_id', $events)->where('status','paid')->sum(DB::raw('COALESCE(net_amount,amount)'));
-        $subsNet = 0.0; // not tied to single organizer in current schema
-        return [ 'net' => $ticketNet + $addlNet + $subsNet ];
+        // Use gross ticket revenue (total_amount) from paid ticket purchases only
+        $ticketGross = (float) TicketPurchase::whereIn('event_id', $events)
+            ->where('status','paid')
+            ->sum('total_amount');
+        // Keep response key 'net' for compatibility with existing front-end mapping
+        return [ 'net' => $ticketGross ];
     }
 
     private function eventSales(int $eventId): array
