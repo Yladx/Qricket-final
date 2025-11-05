@@ -147,7 +147,10 @@
                                 $staffUrl = $route('staff');
                             } catch (\Throwable $e) {
                                 try {
-                                    $staffUrl = $isAdmin ? route('admin.event.staff', $event) : route('organizer.events.staff', $event);
+                                    // Pass explicit param array to avoid ambiguous model binding in some contexts
+                                    $staffUrl = $isAdmin
+                                        ? route('admin.event.staff', ['event' => $event->id])
+                                        : route('organizer.events.staff', ['event' => $event->id]);
                                 } catch (\Throwable $e2) {
                                     $staffUrl = $isAdmin ? url('/admin/events/'.$event->id.'/staff') : url('/organizer/events/'.$event->id.'/staff');
                                 }
