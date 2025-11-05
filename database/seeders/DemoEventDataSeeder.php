@@ -29,6 +29,52 @@ class DemoEventDataSeeder extends Seeder
      */
     public function run(): void
     {
+        // --- Cleanup previous demo seed to avoid duplicates ---
+        $demoUserEmails = [
+            'organizer1@qricket.test',
+            'organizer2@qricket.test',
+            'user@qricket.test',
+        ];
+        $demoEventTitles = [
+            'QRicket Summit 2023 (Past)',
+            'QRicket Live: Launch Night',
+            'Community Hackday',
+        ];
+
+        $existingUsers = \App\Models\User::whereIn('email', $demoUserEmails)->get();
+        $existingUserIds = $existingUsers->pluck('id');
+
+        $existingEvents = \App\Models\Event::whereIn('title', $demoEventTitles)->get();
+        $existingEventIds = $existingEvents->pluck('id');
+
+        if ($existingEventIds->isNotEmpty()) {
+            // Child tables first (respect FKs)
+            \App\Models\EventTicketInformation::whereIn('event_id', $existingEventIds)->delete();
+            \App\Models\TicketPurchase::whereIn('event_id', $existingEventIds)->delete();
+            \App\Models\EventPayoutRequest::whereIn('event_id', $existingEventIds)->delete();
+            \App\Models\TicketLimitPurchase::whereIn('event_id', $existingEventIds)->delete();
+            \App\Models\EventVerificationRequest::whereIn('event_id', $existingEventIds)->delete();
+            \App\Models\EventFeedback::whereIn('event_id', $existingEventIds)->delete();
+            \App\Models\EventStaff::whereIn('event_id', $existingEventIds)->delete();
+            \App\Models\EventTicket::whereIn('event_id', $existingEventIds)->delete();
+            \App\Models\SavedEvent::whereIn('event_id', $existingEventIds)->delete();
+            \App\Models\EventNews::whereIn('event_id', $existingEventIds)->delete();
+            \App\Models\EventActivityLog::whereIn('event_id', $existingEventIds)->delete();
+            // Finally delete the events themselves
+            \App\Models\Event::whereIn('id', $existingEventIds)->delete();
+        }
+
+        if ($existingUserIds->isNotEmpty()) {
+            \App\Models\SocialMediaLink::whereIn('user_id', $existingUserIds)->delete();
+            \App\Models\OrganizerVerification::whereIn('user_id', $existingUserIds)->delete();
+            \App\Models\ActivityLog::whereIn('user_id', $existingUserIds)->delete();
+            // Support tickets created by the demo attendee via known subject
+            \App\Models\SupportReply::whereIn('ticket_id', \App\Models\SupportTicket::where('subject', 'Question about event tickets')->pluck('id'))->delete();
+            \App\Models\SupportTicket::where('subject', 'Question about event tickets')->delete();
+            // Finally delete the users (organizers + attendee)
+            \App\Models\User::whereIn('id', $existingUserIds)->delete();
+        }
+
         // --- Create two organizers and one regular user ---
         $organizer1 = User::firstOrCreate(
             ['email' => 'organizer1@qricket.test'],
@@ -205,8 +251,8 @@ class DemoEventDataSeeder extends Seeder
             );
         }
 
-        // --- Random additional tickets for one event ---
-        $targetEvent = $events->random();
+        // --- Additional tickets: attach to an upcoming event (not the past one) ---
+        $targetEvent = $eventUpcoming2; // keep demo revenue for past event clean
         $type = $targetEvent->is_free ? 'free' : 'paid';
         $pricing = TicketLimitPricing::where('type', $type)->inRandomOrder()->first();
         if ($pricing) {
@@ -310,6 +356,7 @@ class DemoEventDataSeeder extends Seeder
                 'status' => 'approved',
                 'organization_name' => 'Alex Events Co.',
                 'document_type' => 'id_card',
+                'document_file_path' => 'verifications/' . $organizer1->id . '/idcard.png',
                 'document_front_path' => 'verifications/' . $organizer1->id . '/front.png',
                 'document_back_path' => 'verifications/' . $organizer1->id . '/back.png',
                 'contact_phone' => '+63 900 000 0001',
@@ -391,6 +438,23 @@ class DemoEventDataSeeder extends Seeder
                 'is_admin_reply' => true,
             ]);
         }
+
+        // --- Post-event feedback for ended event ---
+        \App\Models\EventFeedback::firstOrCreate(
+            ['event_id' => $eventPast->id, 'user_id' => $attendee->id],
+            [
+                'event_id' => $eventPast->id,
+                'user_id' => $attendee->id,
+                'rating' => 5,
+                'comments' => 'Great sessions and smooth check-in. Looking forward to the next one!',
+                'responses' => [
+                    'content_quality' => 5,
+                    'organization' => 5,
+                    'venue' => 4,
+                ],
+                'submitted_at' => now()->subDays(8),
+            ]
+        );
     }
 }
 

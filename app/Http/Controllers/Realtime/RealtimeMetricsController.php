@@ -149,11 +149,12 @@ class RealtimeMetricsController extends Controller
         $event = Event::find($eventId);
         $ticketRevenue = (float) TicketPurchase::where('event_id',$eventId)->where('status','paid')->sum('total_amount');
         $ticketNet = (float) TicketPurchase::where('event_id',$eventId)->where('status','paid')->sum(DB::raw('COALESCE(net_amount,total_amount)'));
-        $addlNet = (float) TicketLimitPurchase::where('event_id',$eventId)->where('status','paid')->sum(DB::raw('COALESCE(net_amount,amount)'));
+        // Exclude additional ticket-limit purchases from expected revenue; not part of ticket sales
+        $addlNet = 0.0;
         
         // Calculate expected revenue: net minus Qricket platform fee, clamped to 0
         // If event is free or net is zero/non-positive, expected revenue is 0
-        $netAmountTotal = max(0, $ticketNet + $addlNet);
+        $netAmountTotal = max(0, $ticketNet);
         if ($event && ($event->is_free || $netAmountTotal <= 0)) {
             $expectedRevenue = 0;
         } else {
