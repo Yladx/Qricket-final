@@ -141,7 +141,19 @@
                         </div>
                     @endif
                     @if($canManageEvent)
-                        <a href="{{ $route('staff') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.staff') || request()->routeIs('admin.event.staff') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Staff</a>
+                        @php
+                            // Resolve Staff URL robustly with fallbacks to avoid accidental '/' redirects
+                            try {
+                                $staffUrl = $route('staff');
+                            } catch (\Throwable $e) {
+                                try {
+                                    $staffUrl = $isAdmin ? route('admin.event.staff', $event) : route('organizer.events.staff', $event);
+                                } catch (\Throwable $e2) {
+                                    $staffUrl = $isAdmin ? url('/admin/events/'.$event->id.'/staff') : url('/organizer/events/'.$event->id.'/staff');
+                                }
+                            }
+                        @endphp
+                        <a href="{{ $staffUrl }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.staff') || request()->routeIs('admin.event.staff') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Staff</a>
                     @endif
                     @if($canManageEvent || $canManageNews)
                     <!-- Edit Event / Event Info dropdown -->
