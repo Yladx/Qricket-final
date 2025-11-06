@@ -17,7 +17,7 @@ class ProfanityFilterService
         'fuck', 'shit', 'bitch', 'ass', 'damn', 'hell',
         'crap', 'piss', 'cunt', 'retard', 'fag', 'faggot',
         'nigger', 'nigga', 'asshole', 'bastard', 'dick',
-        'cock', 'pussy', 'whore', 'slut', 'tits', 'boobs',
+        'cock', 'pussy', 'whore', 'slut', 'tits', 'boobs', 'breasts', '🖕',
         // Additional offensive terms
         'kys', 'kill yourself', 'die', 'suicide',
         // Common leetspeak variations
