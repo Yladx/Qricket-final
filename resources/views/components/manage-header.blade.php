@@ -56,7 +56,7 @@
                         // Admins have full access to all navigation
                         $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_attendance ?? false) || ($staff?->role === 'organizer');
                         $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_ticket ?? false) || ($staff?->role === 'organizer');
-                        $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
+                        $canManageEvent = $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false);
                         $canManageNews = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_news ?? false) || ($staff?->role === 'organizer');
                         $canManageSales = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_sales ?? false) || ($staff?->role === 'organizer');
                         
@@ -163,7 +163,7 @@
                     <div class="relative">
                         @php
                             // Reuse variables from earlier definition
-                            $canManageEventForUser = $isAdmin || $isOwner || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
+                            $canManageEventForUser = $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false);
                             // Show "Event Info" if event ended, admin, or user can't manage event
                             $dropdownLabel = ($eventEnded || $isAdmin || !$canManageEventForUser) ? 'Event Info' : 'Edit Event';
                             $useInfoRoutes = $eventEnded || !$canManageEvent;
