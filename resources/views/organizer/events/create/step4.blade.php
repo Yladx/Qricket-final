@@ -149,6 +149,153 @@
         // Initial sync
         syncAllSignatories();
         updateSignatoryPreview();
+        
+        // Define addSignatory function for step4
+        let signatoryCount = document.querySelectorAll('.signatory-item').length || 1;
+        
+        window.addSignatory = function addSignatory() {
+            console.log('addSignatory called from step4, current signatoryCount:', signatoryCount);
+            
+            if (signatoryCount >= 4) {
+                if (typeof Swal !== 'undefined' && window.Swal) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Maximum Signatories',
+                        text: 'Maximum of 4 signatories allowed',
+                        confirmButtonColor: '#10b981'
+                    });
+                } else {
+                    alert('Maximum of 4 signatories allowed');
+                }
+                return;
+            }
+            
+            signatoryCount++;
+            console.log('New signatoryCount:', signatoryCount);
+            
+            const container = document.getElementById('signatory-details-container');
+            if (!container) {
+                console.error('Container not found: signatory-details-container');
+                alert('Error: Could not find signatory container');
+                signatoryCount--; // Revert count
+                return;
+            }
+            
+            console.log('Container found, creating new signatory...');
+            const newSignatory = document.createElement('div');
+            newSignatory.className = 'signatory-item border border-gray-200 dark:border-gray-700 rounded-lg p-3';
+            newSignatory.setAttribute('data-signatory', signatoryCount);
+            
+            // Build signatory HTML using string concatenation
+            const sigNum = signatoryCount;
+            newSignatory.innerHTML = 
+                '<div class="flex items-center justify-between mb-2">' +
+                    '<h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory ' + sigNum + '</h4>' +
+                    '<button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" onclick="window.removeSignatory(' + sigNum + ')">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
+                        '</svg>' +
+                    '</button>' +
+                '</div>' +
+                '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">' +
+                    '<div>' +
+                        '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>' +
+                        '<input id="sig_' + sigNum + '_name_input" name="sig_' + sigNum + '_name" type="text" maxlength="36" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 36 characters">' +
+                    '</div>' +
+                    '<div>' +
+                        '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>' +
+                        '<input id="sig_' + sigNum + '_title_input" name="sig_' + sigNum + '_title" type="text" maxlength="28" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 28 characters">' +
+                    '</div>' +
+                '</div>' +
+                '<div class="mt-3">' +
+                    '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>' +
+                    '<label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">' +
+                        '<div class="flex items-center gap-2">' +
+                            '<div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">' +
+                                '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>' +
+                            '</div>' +
+                            '<div>' +
+                                '<div class="text-xs font-medium">Signature ' + sigNum + '</div>' +
+                                '<div class="text-xs text-gray-500 dark:text-gray-400">PNG/JPG/WebP, up to 2MB</div>' +
+                                '<div class="mt-0.5"><span id="sig_' + sigNum + '_status" class="text-xs text-gray-500 dark:text-gray-400">No file</span></div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<input type="file" id="sig_' + sigNum + '_file" accept="image/*" class="hidden" onchange="window.uploadSignature(' + sigNum + ')">' +
+                        '<span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>' +
+                    '</label>' +
+                '</div>';
+            
+            try {
+                container.appendChild(newSignatory);
+                console.log('Successfully appended signatory', sigNum);
+            } catch (e) {
+                console.error('Error appending signatory:', e);
+                alert('Error adding signatory: ' + e.message);
+                signatoryCount--; // Revert count
+                return;
+            }
+            
+            // Update add button state
+            const addBtn = document.getElementById('add-signatory-btn');
+            if (addBtn) {
+                if (signatoryCount >= 4) {
+                    addBtn.disabled = true;
+                    addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }
+            
+            // Show remove buttons for all signatories
+            document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
+                btn.classList.remove('hidden');
+            });
+            
+            // Sync with preview
+            updateSignatoryPreview();
+            
+            // Trigger autosave
+            if (typeof autosaveDebounced === 'function') {
+                autosaveDebounced();
+            }
+            
+            console.log('addSignatory completed successfully');
+        };
+        
+        // Attach event listener to add button
+        document.addEventListener('DOMContentLoaded', function() {
+            const addBtn = document.getElementById('add-signatory-btn');
+            if (addBtn) {
+                addBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Add button clicked from step4');
+                    if (typeof window.addSignatory === 'function') {
+                        window.addSignatory();
+                    } else {
+                        console.error('window.addSignatory is not a function');
+                    }
+                });
+                console.log('Event listener attached to add button in step4');
+            }
+        });
+        
+        // Also try immediately if DOM is ready
+        if (document.readyState !== 'loading') {
+            const addBtn = document.getElementById('add-signatory-btn');
+            if (addBtn) {
+                addBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Add button clicked from step4 (immediate)');
+                    if (typeof window.addSignatory === 'function') {
+                        window.addSignatory();
+                    } else {
+                        console.error('window.addSignatory is not a function');
+                    }
+                });
+                console.log('Event listener attached to add button in step4 (immediate)');
+            }
+        }
+        
         // Apply colors on load
         (function applyInitialColors(){
             const payload = {

@@ -123,7 +123,7 @@
     <div>
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-xs font-semibold text-gray-800 dark:text-gray-100">Signatory Details</h3>
-            <button type="button" id="add-signatory-btn" class="px-3 py-1.5 text-xs bg-qricket-500 text-white rounded-md hover:bg-qricket-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onclick="console.log('Button onclick triggered'); console.log('window.addSignatory type:', typeof window.addSignatory); if(typeof window.addSignatory === 'function') { window.addSignatory(); } else { console.error('window.addSignatory not available, type:', typeof window.addSignatory); alert('Function not ready. Please refresh the page.'); }">
+            <button type="button" id="add-signatory-btn" class="px-3 py-1.5 text-xs bg-qricket-500 text-white rounded-md hover:bg-qricket-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
