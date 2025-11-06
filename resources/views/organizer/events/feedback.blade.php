@@ -165,7 +165,7 @@
             @endif
 
             <!-- Feedback Submissions -->
-            @if($canViewDetailedFeedback && $feedbackSubmissions->count() > 0)
+            @if($feedbackSubmissions->count() > 0)
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
                     <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between">
@@ -281,8 +281,8 @@
                                             </div>
                                             @endif
                                             
-                                            <!-- Comments Section - Facebook Style -->
-                                            @if(isset($responses['comments']))
+                                            <!-- Comments Section - Show when NOT Advanced Analytics -->
+                                            @if(!$canViewDetailedFeedback && isset($responses['comments']))
                                             <div class="mt-3 space-y-3">
                                                 @if(!empty($responses['comments']['liked']))
                                                 <div class="flex items-start space-x-3">
@@ -352,21 +352,13 @@
                         {{ $feedbackSubmissions->links() }}
                     </div>
                 </div>
-            @elseif($canViewDetailedFeedback)
+            @else
                 <div class="text-center py-6">
                     <svg class="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                     <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-1">No feedback submissions yet</h3>
                     <p class="text-xs text-gray-600 dark:text-gray-400">Individual feedback submissions will appear here once attendees start submitting their responses.</p>
-                </div>
-            @else
-                <div class="text-center py-6">
-                    <svg class="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-1">Upgrade Required</h3>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">Individual feedback submissions are only visible to Advanced Analytics subscribers, Pro subscribers, and administrators.</p>
                 </div>
             @endif
         </div>

@@ -158,6 +158,23 @@ class OrganizerDashboardController extends Controller
 
     private function calculateSalesStatsForEvents($eventIds)
     {
+        // Return default values if no events
+        if (empty($eventIds) || count($eventIds) === 0) {
+            return [
+                'totalRevenue' => 0,
+                'netRevenue' => 0,
+                'totalFees' => 0,
+                'transactionFees' => 0,
+                'vatAmount' => 0,
+                'totalTicketsSold' => 0,
+                'averageOrderValue' => 0,
+                'thisMonthRevenue' => 0,
+                'unclaimedPayout' => 0,
+                'totalOrders' => 0,
+                'freeTicketsSold' => 0,
+            ];
+        }
+        
         $paid = TicketPurchase::whereHas('ticketInformation', function($q) use ($eventIds){ $q->whereIn('event_id', $eventIds); })
             ->where('status','paid');
         
