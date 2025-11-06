@@ -182,6 +182,8 @@ let signatoryCount = 1;
 
 // Expose addSignatory globally so it can be called from onclick handlers
 window.addSignatory = function addSignatory() {
+    console.log('addSignatory called, current signatoryCount:', signatoryCount);
+    
     if (signatoryCount >= 4) {
         if (typeof Swal !== 'undefined' && window.Swal) {
             Swal.fire({
@@ -197,7 +199,17 @@ window.addSignatory = function addSignatory() {
     }
     
     signatoryCount++;
+    console.log('New signatoryCount:', signatoryCount);
+    
     const container = document.getElementById('signatory-details-container');
+    if (!container) {
+        console.error('Container not found: signatory-details-container');
+        alert('Error: Could not find signatory container');
+        signatoryCount--; // Revert count
+        return;
+    }
+    
+    console.log('Container found, creating new signatory...');
     const newSignatory = document.createElement('div');
     newSignatory.className = 'signatory-item border border-gray-200 dark:border-gray-700 rounded-lg p-3';
     newSignatory.setAttribute('data-signatory', signatoryCount);
@@ -241,13 +253,23 @@ window.addSignatory = function addSignatory() {
             '</label>' +
         '</div>';
     
-    container.appendChild(newSignatory);
+    try {
+        container.appendChild(newSignatory);
+        console.log('Successfully appended signatory', sigNum);
+    } catch (e) {
+        console.error('Error appending signatory:', e);
+        alert('Error adding signatory: ' + e.message);
+        signatoryCount--; // Revert count
+        return;
+    }
     
     // Update add button state
     const addBtn = document.getElementById('add-signatory-btn');
-    if (signatoryCount >= 4) {
-        addBtn.disabled = true;
-        addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    if (addBtn) {
+        if (signatoryCount >= 4) {
+            addBtn.disabled = true;
+            addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
     }
     
     // Show remove buttons for all signatories
@@ -255,10 +277,17 @@ window.addSignatory = function addSignatory() {
         btn.classList.remove('hidden');
     });
     
+    // Update signatory data in JSON
+    if (typeof window.updateSignatoryDataInJSON === 'function') {
+        window.updateSignatoryDataInJSON();
+    }
+    
     // Sync with preview
     if (typeof window.updateSignatoryPreview === 'function') {
         window.updateSignatoryPreview();
     }
+    
+    console.log('addSignatory completed successfully');
 };
 
 // Expose removeSignatory globally
@@ -593,8 +622,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Update signatory count
-    signatoryCount = existingSignatories.length;
+    // Update signatory count based on existing signatories
+    signatoryCount = existingSignatories.length || 1;
+    console.log('Initial signatoryCount set to:', signatoryCount);
     
     // Update add button state and add event listener
     const addBtn = document.getElementById('add-signatory-btn');
@@ -605,11 +635,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         // Add click handler if not already added
         if (!addBtn.hasAttribute('data-listener-added')) {
-            addBtn.addEventListener('click', function() {
-                window.addSignatory();
+            addBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Add button clicked');
+                if (typeof window.addSignatory === 'function') {
+                    window.addSignatory();
+                } else {
+                    console.error('window.addSignatory is not a function');
+                    alert('Error: Add signatory function not available');
+                }
             });
             addBtn.setAttribute('data-listener-added', 'true');
+            console.log('Event listener added to add button');
         }
+    } else {
+        console.error('Add button not found');
     }
     
     // Load theme colors from JSON and apply to color inputs
