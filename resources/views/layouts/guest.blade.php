@@ -101,7 +101,7 @@
     <script src="{{ asset('js/sweetalert-utils.js') }}"></script>
     
     <!-- Profanity Filter (Real-time) -->
-    <script defer src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
 </head>
 <body class="h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
     <!-- Flash Alerts -->

@@ -50,7 +50,7 @@
     <script src="{{ asset('js/logout-prevention.js') }}?v={{ time() }}"></script>
     
     <!-- Profanity Filter (Real-time) -->
-    <script defer src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
     
     <script>
         // Configure Tailwind for dark mode

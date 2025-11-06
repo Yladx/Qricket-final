@@ -59,7 +59,7 @@
         <script defer src="{{ asset('js/organizer-verification.js') }}?v={{ time() }}"></script>
         <script defer src="{{ asset('js/qricket-scripts.js') }}?v={{ time() }}"></script>
         <script defer src="{{ asset('js/logout-prevention.js') }}?v={{ time() }}"></script>
-        <script defer src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
+        <script src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
         
         <script>
             // Configure Tailwind for better dark mode

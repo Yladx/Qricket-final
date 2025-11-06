@@ -25,66 +25,91 @@
         }
 
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            
             const response = await fetch('/api/profanity/filter', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
                 body: JSON.stringify({ text: text }),
             });
 
             if (!response.ok) {
-                console.warn('Profanity filter API error:', response.status);
+                const errorText = await response.text();
+                console.warn('Profanity filter API error:', response.status, errorText);
                 return text; // Return original text if API fails
             }
 
             const data = await response.json();
             if (data.success && data.filtered !== undefined) {
+                // Debug logging (remove in production)
+                if (data.filtered !== data.original) {
+                    console.log('Profanity filtered:', { original: data.original, filtered: data.filtered });
+                }
                 return data.filtered;
             }
 
             return text;
         } catch (error) {
-            console.warn('Profanity filter error:', error);
+            console.error('Profanity filter error:', error);
             return text; // Return original text on error
         }
     }
 
+    // Track if we're currently filtering to prevent loops
+    let isFiltering = false;
+
     // Process input field
     async function processInputField(input) {
+        // Prevent infinite loops
+        if (isFiltering) {
+            return;
+        }
+
         const originalValue = input.value;
+        if (!originalValue || originalValue.trim().length === 0) {
+            return;
+        }
+
         const cursorPosition = input.selectionStart;
-        const textBeforeCursor = originalValue.substring(0, cursorPosition);
-        const textAfterCursor = originalValue.substring(cursorPosition);
 
-        // Filter the text
-        const filteredValue = await filterProfanity(originalValue);
+        try {
+            isFiltering = true;
 
-        // Only update if the value changed
-        if (filteredValue !== originalValue) {
-            // Calculate new cursor position based on filtered text
-            // Try to maintain cursor position relative to the text before it
-            const filteredBeforeCursor = await filterProfanity(textBeforeCursor);
-            const newCursorPosition = filteredBeforeCursor.length;
+            // Filter the text
+            const filteredValue = await filterProfanity(originalValue);
 
-            // Update the value
-            input.value = filteredValue;
+            // Only update if the value changed
+            if (filteredValue !== originalValue) {
+                // Calculate new cursor position
+                // Filter the text before cursor to see how much was removed
+                const textBeforeCursor = originalValue.substring(0, cursorPosition);
+                const filteredBeforeCursor = await filterProfanity(textBeforeCursor);
+                const newCursorPosition = filteredBeforeCursor.length;
 
-            // Restore cursor position (clamp to valid range)
-            const safePosition = Math.min(newCursorPosition, filteredValue.length);
-            input.setSelectionRange(safePosition, safePosition);
+                // Update the value
+                input.value = filteredValue;
 
-            // Trigger input event to notify other listeners (but mark it as non-trusted to avoid loop)
-            const event = new Event('input', { bubbles: true });
-            Object.defineProperty(event, 'isTrusted', { value: false });
-            input.dispatchEvent(event);
+                // Restore cursor position (clamp to valid range)
+                const safePosition = Math.min(newCursorPosition, filteredValue.length);
+                input.setSelectionRange(safePosition, safePosition);
+
+                // Trigger change event for form validation
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        } catch (error) {
+            console.error('Error filtering profanity:', error);
+        } finally {
+            isFiltering = false;
         }
     }
 
-    // Debounced version of processInputField
-    const debouncedProcessInput = debounce(processInputField, 300);
+    // Debounced version - reduced delay for faster response (100ms for near-instant feel)
+    const debouncedProcessInput = debounce(processInputField, 100);
 
     // Initialize profanity filter on an input/textarea
     function initializeProfanityFilter(element) {
@@ -96,15 +121,32 @@
         // Mark as initialized
         element.dataset.profanityFilterInitialized = 'true';
 
-        // Add input event listener
+        // Add input event listener - use 'input' for real-time detection
         element.addEventListener('input', function(e) {
-            // Skip if the change was made by our filter (to avoid infinite loop)
-            if (e.isTrusted === false) {
+            // Skip if we're currently filtering
+            if (isFiltering) {
                 return;
             }
 
+            // Process immediately for better real-time feel
             debouncedProcessInput(this);
-        });
+        }, { passive: true });
+
+        // Also listen to keyup for immediate detection
+        element.addEventListener('keyup', function(e) {
+            // Skip if we're currently filtering
+            if (isFiltering) {
+                return;
+            }
+
+            // Skip modifier keys
+            if (e.ctrlKey || e.metaKey || e.altKey) {
+                return;
+            }
+
+            // Process immediately
+            debouncedProcessInput(this);
+        }, { passive: true });
 
         // Also check on paste
         element.addEventListener('paste', function(e) {
@@ -119,6 +161,8 @@
         // Find all text inputs and textareas
         const textInputs = document.querySelectorAll('input[type="text"], input[type="email"], textarea');
         
+        console.log('[ProfanityFilter] Initializing on', textInputs.length, 'fields');
+        
         textInputs.forEach(input => {
             // Skip if it's a search field or has a specific class to exclude
             if (input.classList.contains('no-profanity-filter') || 
@@ -129,6 +173,8 @@
 
             initializeProfanityFilter(input);
         });
+        
+        console.log('[ProfanityFilter] Initialization complete');
     }
 
     // Initialize when DOM is ready

@@ -5,6 +5,7 @@ use App\Http\Controllers\Payment\SubscriptionController;
 use App\Http\Controllers\Payment\XenditWebhookController;
 use App\Http\Controllers\User\OrganizerVerificationController;
 use App\Http\Controllers\Support\HelpSupportController;
+use App\Http\Controllers\ProfanityFilterController;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Notifications\NotificationController;
@@ -17,6 +18,9 @@ require __DIR__.'/channels.php';
 
 // Include command routes
 require __DIR__.'/commands.php';
+
+// Profanity filter API (for real-time filtering)
+Route::post('/api/profanity/filter', [\App\Http\Controllers\ProfanityFilterController::class, 'filter']);
 
 // Simple database test
 Route::get('/test-db', function() {
