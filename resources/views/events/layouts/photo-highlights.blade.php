@@ -1,11 +1,11 @@
 <!-- Photo Highlights Layout -->
-<div class="photo-highlights-section py-16">
+<div class="photo-highlights-section py-8 md:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         @if(isset($details['title']) && $details['title'])
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">{{ $details['title'] }}</h2>
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3 md:mb-4">{{ $details['title'] }}</h2>
             @if(isset($details['subtitle']) && $details['subtitle'])
-            <p class="text-lg text-gray-900 dark:text-gray-400">{{ $details['subtitle'] }}</p>
+            <p class="text-base md:text-lg text-gray-900 dark:text-gray-400">{{ $details['subtitle'] }}</p>
             @endif
         </div>
         @endif
@@ -20,43 +20,43 @@
         @if($photoCount > 0)
             @if($photoCount == 1)
                 <!-- Layout 1: Single large horizontal image -->
-                <div class="grid grid-cols-1 gap-6">
+                <div class="grid grid-cols-1 gap-4 md:gap-6">
                     @foreach($photos as $photo)
                         <div class="relative group overflow-hidden rounded-lg shadow-lg">
                             <img src="{{ $photo['url'] }}" 
                                  alt="Event Highlight" 
-                                 class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105">
+                                 class="w-full h-48 md:h-64 object-cover transition-transform duration-300 group-hover:scale-105">
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
                         </div>
                     @endforeach
                 </div>
             @elseif($photoCount == 2)
                 <!-- Layout 2: Two square images side by side -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                     @foreach($photos as $photo)
                         <div class="relative group overflow-hidden rounded-lg shadow-lg">
                             <img src="{{ $photo['url'] }}" 
                                  alt="Event Highlight" 
-                                 class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105">
+                                 class="w-full h-48 md:h-64 object-cover transition-transform duration-300 group-hover:scale-105">
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
                         </div>
                     @endforeach
                 </div>
             @elseif($photoCount == 3)
                 <!-- Layout 3: Large vertical image on left, two smaller horizontal images on right -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                     <div class="lg:col-span-1 relative group overflow-hidden rounded-lg shadow-lg">
                         <img src="{{ $photos[0]['url'] }}" 
                              alt="Event Highlight" 
-                             class="w-full h-80 object-cover transition-transform duration-300 group-hover:scale-105">
+                             class="w-full h-64 md:h-80 object-cover transition-transform duration-300 group-hover:scale-105">
                         <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
                     </div>
-                    <div class="lg:col-span-2 space-y-6">
+                    <div class="lg:col-span-2 space-y-4 md:space-y-6">
                         @foreach($photos->skip(1) as $photo)
                             <div class="relative group overflow-hidden rounded-lg shadow-lg">
                                 <img src="{{ $photo['url'] }}" 
                                      alt="Event Highlight" 
-                                     class="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105">
+                                     class="w-full h-32 md:h-40 object-cover transition-transform duration-300 group-hover:scale-105">
                                 <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
                             </div>
                         @endforeach
@@ -64,12 +64,12 @@
                 </div>
             @else
                 <!-- Layout 4: 2x2 grid for 4+ images -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                     @foreach($photos->take(4) as $photo)
                         <div class="relative group overflow-hidden rounded-lg shadow-lg">
                             <img src="{{ $photo['url'] }}" 
                                  alt="Event Highlight" 
-                                 class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105">
+                                 class="w-full h-48 md:h-64 object-cover transition-transform duration-300 group-hover:scale-105">
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
                         </div>
                     @endforeach
@@ -77,14 +77,14 @@
                 
                 @if($photoCount > 4)
                     <!-- Show remaining images in a secondary grid -->
-                    <div class="mt-6">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Additional Photos</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="mt-4 md:mt-6">
+                        <h3 class="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 md:mb-4">Additional Photos</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                             @foreach($photos->skip(4) as $photo)
                                 <div class="relative group overflow-hidden rounded-lg shadow-lg">
                                     <img src="{{ $photo['url'] }}" 
                                          alt="Event Highlight" 
-                                         class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105">
+                                         class="w-full h-40 md:h-48 object-cover transition-transform duration-300 group-hover:scale-105">
                                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
                                 </div>
                             @endforeach
