@@ -209,11 +209,25 @@
         });
     });
 
+    // Start observing when body is available
+    function startObserving() {
+        if (document.body) {
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+            });
+        } else {
+            // Wait for body to be available
+            setTimeout(startObserving, 100);
+        }
+    }
+    
     // Start observing
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-    });
+    if (document.body) {
+        startObserving();
+    } else {
+        document.addEventListener('DOMContentLoaded', startObserving);
+    }
 
     // Export for manual initialization if needed
     window.ProfanityFilter = {
