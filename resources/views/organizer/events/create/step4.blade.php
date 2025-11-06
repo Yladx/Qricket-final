@@ -260,6 +260,106 @@
             console.log('addSignatory completed successfully');
         };
         
+        // Define removeSignatory function
+        window.removeSignatory = function removeSignatory(signatoryNum) {
+            console.log('removeSignatory called for signatory:', signatoryNum, 'current count:', signatoryCount);
+            
+            if (signatoryCount <= 1) {
+                if (typeof Swal !== 'undefined' && window.Swal) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cannot Remove',
+                        text: 'At least one signatory is required',
+                        confirmButtonColor: '#10b981'
+                    });
+                } else {
+                    alert('At least one signatory is required');
+                }
+                return;
+            }
+            
+            const signatoryItem = document.querySelector(`[data-signatory="${signatoryNum}"]`);
+            if (!signatoryItem) {
+                console.warn('Signatory item not found:', signatoryNum);
+                return;
+            }
+            
+            signatoryItem.remove();
+            signatoryCount--;
+            
+            // Update add button state
+            const addBtn = document.getElementById('add-signatory-btn');
+            if (addBtn) {
+                if (signatoryCount < 4) {
+                    addBtn.disabled = false;
+                    addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+            
+            // Hide remove buttons if only one signatory left
+            if (signatoryCount === 1) {
+                document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
+                    btn.classList.add('hidden');
+                });
+            }
+            
+            // Renumber remaining signatories
+            const remainingSignatories = document.querySelectorAll('.signatory-item');
+            remainingSignatories.forEach((item, index) => {
+                const newNum = index + 1;
+                item.setAttribute('data-signatory', newNum);
+                
+                // Update all input IDs and names
+                const nameInput = item.querySelector('input[name^="sig_"][name$="_name"]');
+                const titleInput = item.querySelector('input[name^="sig_"][name$="_title"]');
+                const fileInput = item.querySelector('input[name^="sig_"][name$="_file"]');
+                const statusEl = item.querySelector('[id^="sig_"][id$="_status"]');
+                const chooseBtn = item.querySelector('button[onclick^="window.uploadSignature"]');
+                
+                if (nameInput) {
+                    nameInput.id = `sig_${newNum}_name_input`;
+                    nameInput.name = `sig_${newNum}_name`;
+                }
+                if (titleInput) {
+                    titleInput.id = `sig_${newNum}_title_input`;
+                    titleInput.name = `sig_${newNum}_title`;
+                }
+                if (fileInput) {
+                    fileInput.id = `sig_${newNum}_file`;
+                    fileInput.name = `sig_${newNum}_file`;
+                    fileInput.setAttribute('onchange', `window.uploadSignature(${newNum})`);
+                }
+                if (statusEl) {
+                    statusEl.id = `sig_${newNum}_status`;
+                }
+                if (chooseBtn) {
+                    chooseBtn.setAttribute('onclick', `window.uploadSignature(${newNum})`);
+                }
+                
+                // Update remove button onclick
+                const removeBtn = item.querySelector('.remove-signatory-btn');
+                if (removeBtn) {
+                    removeBtn.setAttribute('onclick', `window.removeSignatory(${newNum})`);
+                }
+                
+                // Update heading
+                const heading = item.querySelector('h4');
+                if (heading) {
+                    heading.textContent = `Signatory ${newNum}`;
+                }
+            });
+            
+            // Update preview
+            updateSignatoryPreview();
+            
+            // Trigger autosave
+            if (typeof autosaveDebounced === 'function') {
+                autosaveDebounced();
+            }
+            
+            console.log('removeSignatory completed successfully');
+        };
+        
         // Attach event listener to add button
         document.addEventListener('DOMContentLoaded', function() {
             const addBtn = document.getElementById('add-signatory-btn');
