@@ -49,9 +49,9 @@
     <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
         <div class="flex items-center justify-between">
             {{ $pendingEvents->links() }}
-            <a href="{{ route('admin.events.pending') }}" class="ml-4 inline-flex items-center px-3 py-1.5 text-xs font-medium text-qricket-600 dark:text-qricket-400 hover:text-qricket-800 dark:hover:text-qricket-300 border border-qricket-300 dark:border-qricket-600 rounded-md hover:bg-qricket-50 dark:hover:bg-qricket-900/20 transition-colors duration-200">
+            <a href="{{ route('admin.events.pending') }}" class="ml-4 inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-qricket-600 dark:text-qricket-400 hover:text-qricket-800 dark:hover:text-qricket-300 border border-qricket-300 dark:border-qricket-600 rounded-md hover:bg-qricket-50 dark:hover:bg-qricket-900/20 transition-colors duration-200">
                 View More
-                <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </a>
@@ -59,9 +59,9 @@
     </div>
 @elseif($pendingEvents->count() > 0)
     <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-center">
-        <a href="{{ route('admin.events.pending') }}" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-qricket-600 dark:text-qricket-400 hover:text-qricket-800 dark:hover:text-qricket-300 border border-qricket-300 dark:border-qricket-600 rounded-md hover:bg-qricket-50 dark:hover:bg-qricket-900/20 transition-colors duration-200">
+        <a href="{{ route('admin.events.pending') }}" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-qricket-600 dark:text-qricket-400 hover:text-qricket-800 dark:hover:text-qricket-300 border border-qricket-300 dark:border-qricket-600 rounded-md hover:bg-qricket-50 dark:hover:bg-qricket-900/20 transition-colors duration-200">
             View More
-            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
         </a>

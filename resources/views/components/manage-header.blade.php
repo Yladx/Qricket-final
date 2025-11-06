@@ -113,9 +113,9 @@
                     @endif
                     @if($canManageTicket || $canManageSales)
                         <div class="relative">
-                            <button type="button" id="ticketSalesDropdownButton-{{ $event->id }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.tickets') || request()->routeIs('organizer.events.manage') || request()->routeIs('admin.event.tickets') || request()->routeIs('admin.event.manage') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium inline-flex items-center">
+                            <button type="button" id="ticketSalesDropdownButton-{{ $event->id }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.tickets') || request()->routeIs('organizer.events.manage') || request()->routeIs('admin.event.tickets') || request()->routeIs('admin.event.manage') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium inline-flex items-center gap-2">
                                 Ticket & Sales
-                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
@@ -168,9 +168,9 @@
                             $dropdownLabel = ($eventEnded || $isAdmin || !$canManageEventForUser) ? 'Event Info' : 'Edit Event';
                             $useInfoRoutes = $eventEnded || !$canManageEvent;
                         @endphp
-                        <button type="button" id="editEventDropdownButton-{{ $event->id }}" class="whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100 px-1 pb-1 text-sm font-medium inline-flex items-center">
+                        <button type="button" id="editEventDropdownButton-{{ $event->id }}" class="whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100 px-1 pb-1 text-sm font-medium inline-flex items-center gap-2">
                             {{ $dropdownLabel }}
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
