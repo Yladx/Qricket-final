@@ -136,6 +136,13 @@
         syncAllSignatories();
         updateSignatoryPreview();
         
+        // Define autosave functions early so they can be used by addSignatory/removeSignatory
+        const debounce = (fn, d=600)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), d); }; };
+        const statusEl = document.getElementById('cert_autosave_status');
+        
+        // We'll define autosaveCert and autosaveDebounced after collectPayload is defined
+        let autosaveDebounced = null;
+        
         // Define addSignatory function for edit certificate
         const existingCertificateData = @json($certificateData ?? []);
         let signatoryCount = document.querySelectorAll('.signatory-item').length || 1;
@@ -240,7 +247,7 @@
             updateSignatoryPreview();
             
             // Trigger autosave
-            if (typeof autosaveDebounced === 'function') {
+            if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                 autosaveDebounced();
             }
             
@@ -338,7 +345,7 @@
             updateSignatoryPreview();
             
             // Trigger autosave
-            if (typeof autosaveDebounced === 'function') {
+            if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                 autosaveDebounced();
             }
         };
@@ -360,7 +367,9 @@
                     statusEl.textContent = 'Uploaded';
                     statusEl.className = 'text-xs text-green-500 dark:text-green-400';
                 }
-                autosaveDebounced();
+                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
+                    autosaveDebounced();
+                }
             } else if (statusEl) {
                 statusEl.textContent = 'Upload failed';
             }
@@ -582,9 +591,7 @@
                 updateSignatoryPreview();
             }
         });
-        // Autosave helpers (debounced)
-        const debounce = (fn, d=600)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), d); }; };
-        const statusEl = document.getElementById('cert_autosave_status');
+        // Autosave helpers (debounced) - initialize autosaveDebounced now that collectPayload is defined
         async function autosaveCert(){
             try {
                 if (statusEl) statusEl.textContent = 'Saving…';
@@ -600,7 +607,7 @@
                 console.error('Certificate autosave failed', e);
             }
         }
-        const autosaveDebounced = debounce(autosaveCert, 700);
+        autosaveDebounced = debounce(autosaveCert, 700);
 
         async function postJSON(url, payload){
             const resp = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json', 'X-CSRF-TOKEN': csrf }, body: JSON.stringify(payload) });
@@ -629,7 +636,9 @@
                     const st = document.getElementById(`logo_${side}_status`);
                     if (pv) { pv.src = data.url; pv.classList.remove('hidden'); }
                     if (st) { st.textContent = 'Uploaded'; }
-                autosaveDebounced();
+                    if (autosaveDebounced && typeof autosaveDebounced === 'function') {
+                        autosaveDebounced();
+                    }
             }
         }
 

@@ -150,6 +150,13 @@
         syncAllSignatories();
         updateSignatoryPreview();
         
+        // Define autosave functions early so they can be used by addSignatory/removeSignatory
+        const debounce = (fn, d=600)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), d); }; };
+        const statusEl = document.getElementById('cert_autosave_status');
+        
+        // We'll define autosaveCert and autosaveDebounced after collectPayload is defined
+        let autosaveDebounced = null;
+        
         // Define addSignatory function for step4
         let signatoryCount = document.querySelectorAll('.signatory-item').length || 1;
         
