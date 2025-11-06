@@ -160,18 +160,17 @@ class ProfanityFilterService
             // Escape special regex characters
             $escapedProfanity = preg_quote($profanity, '/');
             
-            // Word boundary pattern (for whole words)
-            $wordBoundaryPattern = '/\b' . $escapedProfanity . '\b/iu';
-            $originalText = preg_replace($wordBoundaryPattern, $replacement, $originalText);
-            
-            // Also handle partial matches (without word boundaries) for multi-word phrases
+            // Check if it's a multi-word phrase
             if (strpos($profanity, ' ') !== false) {
-                $partialPattern = '/' . $escapedProfanity . '/iu';
-                $originalText = preg_replace($partialPattern, $replacement, $originalText);
+                // For multi-word phrases, match the exact phrase with word boundaries
+                // This ensures "blue waffle" matches "blue waffle" but not "blueberry waffle"
+                $pattern = '/\b' . $escapedProfanity . '\b/iu';
+                $originalText = preg_replace($pattern, $replacement, $originalText);
             } else {
-                // For single words, also check without word boundaries (to catch words within other words)
-                $partialPattern = '/' . $escapedProfanity . '/iu';
-                $originalText = preg_replace($partialPattern, $replacement, $originalText);
+                // For single words, ONLY use word boundaries to prevent matching words within other words
+                // This ensures "ass" matches "ass" but not "classic" or "pass"
+                $pattern = '/\b' . $escapedProfanity . '\b/iu';
+                $originalText = preg_replace($pattern, $replacement, $originalText);
             }
         }
 
