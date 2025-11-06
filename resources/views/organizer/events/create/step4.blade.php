@@ -324,7 +324,19 @@
                 // Get current count from DOM
                 const currentSignatories = document.querySelectorAll('.signatory-item');
                 const currentCount = currentSignatories.length;
-                const savedSignatoryCount = existingCertificateData.signatory_count || 1;
+                
+                // Calculate signatory_count from data - check for sig_1 through sig_4
+                let calculatedSignatoryCount = 1;
+                for (let i = 1; i <= 4; i++) {
+                    if (existingCertificateData[`sig_${i}_name`] || 
+                        existingCertificateData[`sig_${i}_title`] || 
+                        existingCertificateData[`sig_${i}_signature`]) {
+                        calculatedSignatoryCount = Math.max(calculatedSignatoryCount, i);
+                    }
+                }
+                
+                // Use the calculated count or fallback to signatory_count if available
+                const savedSignatoryCount = existingCertificateData.signatory_count || calculatedSignatoryCount;
                 
                 // Also check if we have data for signatories 2-4 even if count isn't set
                 let maxSignatoryWithData = savedSignatoryCount;
@@ -337,23 +349,27 @@
                 console.log('Loading signatories:', {
                     currentCount: currentCount,
                     savedCount: savedSignatoryCount,
+                    calculatedCount: calculatedSignatoryCount,
                     maxSignatoryWithData: maxSignatoryWithData,
                     existingData: Object.keys(existingCertificateData).filter(k => k.startsWith('sig_'))
                 });
                 
                 // If we need to add more signatories (use maxSignatoryWithData instead of savedSignatoryCount)
                 if (maxSignatoryWithData > currentCount) {
+                    console.log('Adding', maxSignatoryWithData - currentCount, 'missing signatories');
                     // Add missing signatories synchronously
                     for (let i = currentCount + 1; i <= maxSignatoryWithData && i <= 4; i++) {
+                        console.log('Adding signatory', i);
                         window.addSignatory();
                     }
                     
                     // Wait a bit for DOM to update, then populate all values
                     setTimeout(() => {
                         populateSignatoryValues();
-                    }, 100);
+                    }, 150);
                 } else {
                     // Just populate existing signatories immediately
+                    console.log('No need to add signatories, just populating values');
                     populateSignatoryValues();
                 }
             }
@@ -361,9 +377,17 @@
             function populateSignatoryValues() {
                 // Get all signatories after potential additions
                 const allSignatories = document.querySelectorAll('.signatory-item');
-                const savedSignatoryCount = existingCertificateData.signatory_count || 1;
                 
-                // Also check if we have data for signatories 2-4 even if count isn't set
+                // Calculate max signatory with data (same logic as above)
+                let calculatedSignatoryCount = 1;
+                for (let i = 1; i <= 4; i++) {
+                    if (existingCertificateData[`sig_${i}_name`] || 
+                        existingCertificateData[`sig_${i}_title`] || 
+                        existingCertificateData[`sig_${i}_signature`]) {
+                        calculatedSignatoryCount = Math.max(calculatedSignatoryCount, i);
+                    }
+                }
+                const savedSignatoryCount = existingCertificateData.signatory_count || calculatedSignatoryCount;
                 let maxSignatoryWithData = savedSignatoryCount;
                 for (let i = 2; i <= 4; i++) {
                     if (existingCertificateData[`sig_${i}_name`] || existingCertificateData[`sig_${i}_title`] || existingCertificateData[`sig_${i}_signature`]) {
