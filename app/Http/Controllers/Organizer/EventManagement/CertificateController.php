@@ -92,6 +92,7 @@ class CertificateController extends Controller
         $isAdmin = Auth::guard('admin')->check();
         $isOwner = $event && $event->user_id === Auth::id();
         $isAdminEvent = $event && $event->user_id === null && $isAdmin;
+        $isStaff = $event ? $event->staff()->where('user_id', Auth::id())->exists() : false;
         
         if (!$event || !in_array($event->status, ['draft', 'rejected', 'pending_approval']) || (!$isOwner && !$isAdminEvent)) {
             return redirect()->route('organizer.events.index')->with('error', 'Event not found or not authorized.');
@@ -432,7 +433,7 @@ class CertificateController extends Controller
         $isOwner = $event && $event->user_id === Auth::id();
         $isAdminEvent = $event && $event->user_id === null && $isAdmin;
         
-        if (!$event || (!$isOwner && !$isAdminEvent)) {
+        if (!$event || (!$isOwner && !$isAdminEvent && !$isStaff)) {
             return response()->json(['success' => false, 'message' => 'Event not found or not authorized.'], 403);
         }
 
