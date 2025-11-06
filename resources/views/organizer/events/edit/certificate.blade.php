@@ -136,6 +136,262 @@
         syncAllSignatories();
         updateSignatoryPreview();
         
+        // Define addSignatory function for edit certificate
+        const existingCertificateData = @json($certificateData ?? []);
+        let signatoryCount = document.querySelectorAll('.signatory-item').length || 1;
+        
+        window.addSignatory = function addSignatory() {
+            console.log('addSignatory called from edit certificate, current signatoryCount:', signatoryCount);
+            
+            if (signatoryCount >= 4) {
+                if (typeof Swal !== 'undefined' && window.Swal) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Maximum Signatories',
+                        text: 'Maximum of 4 signatories allowed',
+                        confirmButtonColor: '#10b981'
+                    });
+                } else {
+                    alert('Maximum of 4 signatories allowed');
+                }
+                return;
+            }
+            
+            signatoryCount++;
+            console.log('New signatoryCount:', signatoryCount);
+            
+            const container = document.getElementById('signatory-details-container');
+            if (!container) {
+                console.error('Container not found: signatory-details-container');
+                alert('Error: Could not find signatory container');
+                signatoryCount--; // Revert count
+                return;
+            }
+            
+            console.log('Container found, creating new signatory...');
+            const newSignatory = document.createElement('div');
+            newSignatory.className = 'signatory-item border border-gray-200 dark:border-gray-700 rounded-lg p-3';
+            newSignatory.setAttribute('data-signatory', signatoryCount);
+            
+            // Build signatory HTML using string concatenation
+            const sigNum = signatoryCount;
+            newSignatory.innerHTML = 
+                '<div class="flex items-center justify-between mb-2">' +
+                    '<h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory ' + sigNum + '</h4>' +
+                    '<button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" onclick="window.removeSignatory(' + sigNum + ')">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
+                        '</svg>' +
+                    '</button>' +
+                '</div>' +
+                '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">' +
+                    '<div>' +
+                        '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>' +
+                        '<input id="sig_' + sigNum + '_name_input" name="sig_' + sigNum + '_name" type="text" maxlength="36" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 36 characters">' +
+                    '</div>' +
+                    '<div>' +
+                        '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>' +
+                        '<input id="sig_' + sigNum + '_title_input" name="sig_' + sigNum + '_title" type="text" maxlength="28" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 28 characters">' +
+                    '</div>' +
+                '</div>' +
+                '<div class="mt-3">' +
+                    '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>' +
+                    '<label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">' +
+                        '<div class="flex items-center gap-2">' +
+                            '<div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">' +
+                                '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>' +
+                            '</div>' +
+                            '<div>' +
+                                '<div class="text-xs font-medium">Signature ' + sigNum + '</div>' +
+                                '<div class="text-xs text-gray-500 dark:text-gray-400">PNG/JPG/WebP, up to 2MB</div>' +
+                                '<div class="mt-0.5"><span id="sig_' + sigNum + '_status" class="text-xs text-gray-500 dark:text-gray-400">No file</span></div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<input type="file" id="sig_' + sigNum + '_file" accept="image/*" class="hidden" onchange="window.uploadSignature(' + sigNum + ')">' +
+                        '<span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>' +
+                    '</label>' +
+                '</div>';
+            
+            try {
+                container.appendChild(newSignatory);
+                console.log('Successfully appended signatory', sigNum);
+            } catch (e) {
+                console.error('Error appending signatory:', e);
+                alert('Error adding signatory: ' + e.message);
+                signatoryCount--; // Revert count
+                return;
+            }
+            
+            // Update add button state
+            const addBtn = document.getElementById('add-signatory-btn');
+            if (addBtn) {
+                if (signatoryCount >= 4) {
+                    addBtn.disabled = true;
+                    addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }
+            
+            // Show remove buttons for all signatories
+            document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
+                btn.classList.remove('hidden');
+            });
+            
+            // Sync with preview
+            updateSignatoryPreview();
+            
+            // Trigger autosave
+            if (typeof autosaveDebounced === 'function') {
+                autosaveDebounced();
+            }
+            
+            console.log('addSignatory completed successfully');
+        };
+        
+        // Define removeSignatory function
+        window.removeSignatory = function removeSignatory(signatoryNum) {
+            if (signatoryCount <= 1) {
+                if (typeof Swal !== 'undefined' && window.Swal) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cannot Remove',
+                        text: 'At least one signatory is required',
+                        confirmButtonColor: '#10b981'
+                    });
+                } else {
+                    alert('At least one signatory is required');
+                }
+                return;
+            }
+            
+            const signatoryItem = document.querySelector(`[data-signatory="${signatoryNum}"]`);
+            if (!signatoryItem) {
+                console.warn('Signatory item not found:', signatoryNum);
+                return;
+            }
+            
+            signatoryItem.remove();
+            signatoryCount--;
+            
+            // Update add button state
+            const addBtn = document.getElementById('add-signatory-btn');
+            if (addBtn) {
+                if (signatoryCount < 4) {
+                    addBtn.disabled = false;
+                    addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+            
+            // Hide remove buttons if only one signatory left
+            if (signatoryCount === 1) {
+                document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
+                    btn.classList.add('hidden');
+                });
+            }
+            
+            // Update preview
+            updateSignatoryPreview();
+            
+            // Trigger autosave
+            if (typeof autosaveDebounced === 'function') {
+                autosaveDebounced();
+            }
+        };
+        
+        // Update uploadSignature to handle dynamic signatory numbers
+        const originalUploadSignature = window.uploadSignature;
+        window.uploadSignature = async function(signatoryNum){
+            const file = document.getElementById(`sig_${signatoryNum}_file`)?.files?.[0];
+            if (!file) return;
+            const fd = new FormData();
+            fd.append('event_id', eventId);
+            fd.append('signatory_num', String(signatoryNum));
+            fd.append('signature', file);
+            const resp = await fetch('/organizer/events/certificate/upload-signature', { method:'POST', headers:{ 'X-CSRF-TOKEN': csrf }, body: fd });
+            const res = await resp.json();
+            const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
+            if (res && res.success) {
+                if (statusEl) {
+                    statusEl.textContent = 'Uploaded';
+                    statusEl.className = 'text-xs text-green-500 dark:text-green-400';
+                }
+                autosaveDebounced();
+            } else if (statusEl) {
+                statusEl.textContent = 'Upload failed';
+            }
+        };
+        
+        // Attach event listener to add button
+        document.addEventListener('DOMContentLoaded', function() {
+            const addBtn = document.getElementById('add-signatory-btn');
+            if (addBtn) {
+                addBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Add button clicked from edit certificate');
+                    if (typeof window.addSignatory === 'function') {
+                        window.addSignatory();
+                    } else {
+                        console.error('window.addSignatory is not a function');
+                    }
+                });
+                console.log('Event listener attached to add button in edit certificate');
+            }
+        });
+        
+        // Also try immediately if DOM is ready
+        if (document.readyState !== 'loading') {
+            const addBtn = document.getElementById('add-signatory-btn');
+            if (addBtn) {
+                addBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Add button clicked from edit certificate (immediate)');
+                    if (typeof window.addSignatory === 'function') {
+                        window.addSignatory();
+                    } else {
+                        console.error('window.addSignatory is not a function');
+                    }
+                });
+                console.log('Event listener attached to add button in edit certificate (immediate)');
+            }
+        }
+        
+        // Load existing signatories
+        (function loadExistingSignatories(){
+            if (!existingCertificateData || !existingCertificateData.signatory_count) return;
+            
+            const currentSignatories = document.querySelectorAll('.signatory-item');
+            const currentCount = currentSignatories.length;
+            const savedSignatoryCount = existingCertificateData.signatory_count || 1;
+            
+            if (savedSignatoryCount > currentCount && typeof window.addSignatory === 'function') {
+                for (let i = currentCount + 1; i <= savedSignatoryCount && i <= 4; i++) {
+                    window.addSignatory();
+                }
+                
+                setTimeout(() => {
+                    for (let i = 1; i <= savedSignatoryCount && i <= 4; i++) {
+                        const name = existingCertificateData[`sig_${i}_name`];
+                        const title = existingCertificateData[`sig_${i}_title`];
+                        const sigPath = existingCertificateData[`sig_${i}_signature`];
+                        
+                        const nameInput = document.getElementById(`sig_${i}_name_input`) || document.querySelector(`input[name="sig_${i}_name"]`);
+                        const titleInput = document.getElementById(`sig_${i}_title_input`) || document.querySelector(`input[name="sig_${i}_title"]`);
+                        const statusEl = document.getElementById(`sig_${i}_status`);
+                        
+                        if (nameInput && name) nameInput.value = name;
+                        if (titleInput && title) titleInput.value = title;
+                        if (statusEl && sigPath) {
+                            statusEl.textContent = 'Uploaded';
+                            statusEl.className = 'text-xs text-green-500 dark:text-green-400';
+                        }
+                    }
+                    signatoryCount = savedSignatoryCount;
+                    updateSignatoryPreview();
+                }, 50);
+            }
+        })();
+        
         // Re-sync when signatories are added/removed
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
@@ -208,64 +464,124 @@
             }
         }
 
-        window.uploadSignature = async function(which){
-            const file = document.getElementById(`sig_${which}_file`).files[0];
-            if (!file) return;
-            const fd = new FormData();
-            fd.append('id', eventId);
-            fd.append('which', which);
-            fd.append('image', file);
-            const resp = await fetch('/organizer/events/certificate/upload-signature', { method:'POST', headers:{ 'X-CSRF-TOKEN': csrf }, body: fd });
-            const res = await resp.json();
-            if (res && res.success) {
-                const stId = which === 'left' ? 'sig_left_status' : 'sig_right_status';
-                const st = document.getElementById(stId);
-                if (st) st.textContent = 'Uploaded';
-                autosaveDebounced();
-            }
-        }
-
+        // uploadSignature is defined later after addSignatory/removeSignatory
+        
         function collectPayload(){
-            return {
-                org_line1: document.getElementById('org_line1_input')?.value || '',
-                org_line2: document.getElementById('org_line2_input')?.value || '',
-                org_line3: document.getElementById('org_line3_input')?.value || '',
-                org_school: document.getElementById('org_school_input')?.value || '',
-                recipient_name: document.getElementById('recipient_name_input')?.value || '',
-                // event title/when/given are auto
-                sig_left_name: document.getElementById('sig_left_name_input')?.value || '',
-                sig_left_title: document.getElementById('sig_left_title_input')?.value || '',
-                sig_right_name: document.getElementById('sig_right_name_input')?.value || '',
-                sig_right_title: document.getElementById('sig_right_title_input')?.value || '',
-                theme_primary: document.getElementById('theme_primary')?.value || '#0b2f6b',
-                theme_secondary: document.getElementById('theme_secondary')?.value || '#092557',
+            // First, try to get the most up-to-date data from the hidden JSON input
+            let basePayload = {};
+            try {
+                const jsonEl = document.getElementById('certificate_data_json');
+                if (jsonEl && jsonEl.value) {
+                    basePayload = JSON.parse(jsonEl.value);
+                }
+            } catch(e) {
+                console.warn('Failed to parse certificate_data_json:', e);
+            }
+            
+            const payload = {
+                org_line1: document.getElementById('org_line1_input')?.value || basePayload.org_line1 || '',
+                org_line2: document.getElementById('org_line2_input')?.value || basePayload.org_line2 || '',
+                org_line3: document.getElementById('org_line3_input')?.value || basePayload.org_line3 || '',
+                org_school: document.getElementById('org_school_input')?.value || basePayload.org_school || '',
+                recipient_name: document.getElementById('recipient_name_input')?.value || basePayload.recipient_name || '',
+                theme_primary: document.getElementById('theme_primary')?.value || basePayload.theme_primary || '#0b2f6b',
+                theme_secondary: document.getElementById('theme_secondary')?.value || basePayload.theme_secondary || '#092557',
+                theme_border: document.getElementById('theme_border')?.value || basePayload.theme_border || basePayload.theme_primary || '#0b2f6b',
             };
+            
+            // Copy non-signatory fields from JSON (like logos, event details, etc.)
+            Object.keys(basePayload).forEach(key => {
+                if (!key.startsWith('sig_') && !payload.hasOwnProperty(key)) {
+                    payload[key] = basePayload[key];
+                }
+            });
+            
+            // Dynamic signatories - ONLY include signatories that exist in DOM
+            const items = document.querySelectorAll('.signatory-item');
+            payload.signatory_count = items.length;
+            
+            // First, clear any old signatory data from payload (only keep what exists in DOM)
+            for (let i = 1; i <= 10; i++) {
+                delete payload[`sig_${i}_name`];
+                delete payload[`sig_${i}_title`];
+                delete payload[`sig_${i}_signature`];
+            }
+            
+            // Now only add signatories that exist in DOM
+            items.forEach((item, index)=>{
+                const n = index + 1;
+                const nameInput = item.querySelector(`input[name="sig_${n}_name"]`);
+                const titleInput = item.querySelector(`input[name="sig_${n}_title"]`);
+                
+                payload[`sig_${n}_name`] = nameInput?.value || '';
+                payload[`sig_${n}_title`] = titleInput?.value || '';
+                
+                // Get signature path from JSON if it exists for this signatory
+                const statusEl = document.getElementById(`sig_${n}_status`);
+                if (statusEl && (statusEl.textContent === 'Uploaded' || statusEl.textContent.includes('signature'))) {
+                    try {
+                        const jsonEl = document.getElementById('certificate_data_json');
+                        const current = jsonEl?.value ? JSON.parse(jsonEl.value) : {};
+                        if (current[`sig_${n}_signature`]) {
+                            payload[`sig_${n}_signature`] = current[`sig_${n}_signature`];
+                        }
+                    } catch(_) {}
+                } else {
+                    // Also include signature if it exists in JSON even if status element doesn't show "Uploaded"
+                    try {
+                        const jsonEl = document.getElementById('certificate_data_json');
+                        const current = jsonEl?.value ? JSON.parse(jsonEl.value) : {};
+                        if (current[`sig_${n}_signature`]) {
+                            payload[`sig_${n}_signature`] = current[`sig_${n}_signature`];
+                        }
+                    } catch(_) {}
+                }
+            });
+            
+            return payload;
         }
 
         function refreshPreview(payload){
             // Update text fields inline
             const map = {
                 org_line1: 'org_line1', org_line2: 'org_line2', org_line3: 'org_line3',
-                org_school: 'org_school', recipient_name: 'recipient_name',
-                sig_left_name: 'sig_left_name', sig_left_title: 'sig_left_title',
-                sig_right_name: 'sig_right_name', sig_right_title: 'sig_right_title',
-                event_title: 'event_title'
+                org_school: 'org_school', recipient_name: 'recipient_name', event_title: 'event_title'
             };
             Object.keys(map).forEach(k=>{
                 const el = document.getElementById(map[k]);
                 if (el && payload[k] !== undefined) el.textContent = payload[k];
             });
+            // Dynamic signatory names/titles
+            const count = payload.signatory_count || 0;
+            for (let i=1;i<=count;i++){
+                const nEl = document.getElementById(`sig_${i}_name`);
+                const tEl = document.getElementById(`sig_${i}_title`);
+                if (nEl && payload[`sig_${i}_name`] !== undefined) nEl.textContent = payload[`sig_${i}_name`] || `Signatory ${i}`;
+                if (tEl && payload[`sig_${i}_title`] !== undefined) tEl.textContent = payload[`sig_${i}_title`] || 'Signature';
+            }
             // Apply colors
             const primary = payload.theme_primary;
             document.querySelectorAll('#cert_preview_wrapper .text-blue-900, #cert_preview_wrapper .text-violet-900, #cert_preview_wrapper .text-emerald-900')
                 .forEach(el=>{ el.style.color = primary; });
             const bands = document.querySelectorAll('#cert_preview_wrapper .band-top, #cert_preview_wrapper .band-bottom');
             bands.forEach(el=>{ el.style.backgroundImage = `linear-gradient(to right, ${payload.theme_primary}, ${payload.theme_secondary})`; });
+            // Apply border color
+            const borderColor = payload.theme_border || payload.theme_primary || '#0b2f6b';
+            const pageElement = document.querySelector('#cert_preview_wrapper .page');
+            if (pageElement) {
+                pageElement.style.borderColor = borderColor;
+            }
         }
 
         // Wire autosave on inputs
-        ['org_line1_input','org_line2_input','org_school_input','recipient_name_input','sig_left_name_input','sig_left_title_input','sig_right_name_input','sig_right_title_input','theme_primary','theme_secondary']
+        ['org_line1_input','org_line2_input','org_line3_input','org_school_input','recipient_name_input','theme_primary','theme_secondary','theme_border','theme_primary-hex','theme_secondary-hex','theme_border-hex']
             .forEach(id=>{ const el = document.getElementById(id); el && el.addEventListener('input', autosaveDebounced); el && el.addEventListener('change', autosaveDebounced); });
+        // Dynamic signatory inputs also trigger autosave
+        document.addEventListener('input', (e)=>{
+            if (e.target && e.target.matches('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]')) {
+                autosaveDebounced();
+            }
+        });
 
         // Skip certificate toggle: persist a tiny flag in R2 settings
         (function() {
