@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\EventTicketController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\EventTicketShareController;
 use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\ProfanityFilterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +25,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // Discount validation API
 Route::post('/discount/validate', [DiscountController::class, 'validateDiscount']);
+
+// Profanity filter API (public, but rate-limited)
+Route::post('/profanity/filter', [ProfanityFilterController::class, 'filter']);
 
 // Public API routes for events
 Route::get('/events/{event}/ticket-types', [EventTicketController::class, 'getTicketTypes']);
