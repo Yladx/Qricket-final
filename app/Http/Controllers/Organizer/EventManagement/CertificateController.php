@@ -141,6 +141,38 @@ class CertificateController extends Controller
                 $incoming = $decoded;
             }
         }
+        
+        // Validate signatory names and titles for profanity
+        for ($i = 1; $i <= 4; $i++) {
+            $nameKey = "sig_{$i}_name";
+            $titleKey = "sig_{$i}_title";
+            
+            $nameValue = $incoming[$nameKey] ?? $request->input($nameKey);
+            $titleValue = $incoming[$titleKey] ?? $request->input($titleKey);
+            
+            if (!empty($nameValue)) {
+                if (\App\Services\ProfanityFilterService::containsProfanity($nameValue)) {
+                    return back()->withErrors(['certificate_data' => "Signatory {$i} name contains inappropriate language. Please use appropriate language."])->withInput();
+                }
+            }
+            
+            if (!empty($titleValue)) {
+                if (\App\Services\ProfanityFilterService::containsProfanity($titleValue)) {
+                    return back()->withErrors(['certificate_data' => "Signatory {$i} title contains inappropriate language. Please use appropriate language."])->withInput();
+                }
+            }
+        }
+        
+        // Validate organization fields
+        $orgFields = ['org_line1', 'org_line2', 'org_school', 'recipient_name'];
+        foreach ($orgFields as $field) {
+            $value = $incoming[$field] ?? $request->input($field);
+            if (!empty($value)) {
+                if (\App\Services\ProfanityFilterService::containsProfanity($value)) {
+                    return back()->withErrors(['certificate_data' => ucfirst(str_replace('_', ' ', $field)) . " contains inappropriate language. Please use appropriate language."])->withInput();
+                }
+            }
+        }
 
         $incoming = array_merge($incoming, [
             'font_family' => $request->input('font_family', $incoming['font_family'] ?? 'Inter'),
@@ -410,6 +442,56 @@ class CertificateController extends Controller
             : json_decode($request->input('certificate_data_json', '{}'), true);
 
         if (!is_array($incoming)) { $incoming = []; }
+        
+        // Validate signatory names and titles for profanity
+        for ($i = 1; $i <= 4; $i++) {
+            $nameKey = "sig_{$i}_name";
+            $titleKey = "sig_{$i}_title";
+            
+            if (isset($incoming[$nameKey]) && !empty($incoming[$nameKey])) {
+                if (\App\Services\ProfanityFilterService::containsProfanity($incoming[$nameKey])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Signatory {$i} name contains inappropriate language. Please use appropriate language."
+                    ], 422);
+                }
+            }
+            
+            if (isset($incoming[$titleKey]) && !empty($incoming[$titleKey])) {
+                if (\App\Services\ProfanityFilterService::containsProfanity($incoming[$titleKey])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Signatory {$i} title contains inappropriate language. Please use appropriate language."
+                    ], 422);
+                }
+            }
+        }
+        
+        // Also validate legacy signatory fields
+        $legacyFields = ['sig_left_name', 'sig_left_title', 'sig_right_name', 'sig_right_title'];
+        foreach ($legacyFields as $field) {
+            if (isset($incoming[$field]) && !empty($incoming[$field])) {
+                if (\App\Services\ProfanityFilterService::containsProfanity($incoming[$field])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => ucfirst(str_replace('_', ' ', $field)) . " contains inappropriate language. Please use appropriate language."
+                    ], 422);
+                }
+            }
+        }
+        
+        // Validate organization fields
+        $orgFields = ['org_line1', 'org_line2', 'org_school', 'recipient_name', 'event_title'];
+        foreach ($orgFields as $field) {
+            if (isset($incoming[$field]) && !empty($incoming[$field])) {
+                if (\App\Services\ProfanityFilterService::containsProfanity($incoming[$field])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => ucfirst(str_replace('_', ' ', $field)) . " contains inappropriate language. Please use appropriate language."
+                    ], 422);
+                }
+            }
+        }
 
         // Normalize and whitelist keys (base)
         $payload = [

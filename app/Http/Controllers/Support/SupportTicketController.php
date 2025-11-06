@@ -35,7 +35,7 @@ class SupportTicketController extends Controller
     public function userReply(Request $request, $ticketNumber)
     {
         $validated = $request->validate([
-            'message' => 'required|string|max:5000',
+            'message' => ['required', 'string', 'max:5000', new \App\Rules\NoProfanity()],
         ]);
 
         $ticket = \App\Models\SupportTicket::where('ticket_number', $ticketNumber)
@@ -183,7 +183,7 @@ class SupportTicketController extends Controller
     public function reply(Request $request, \App\Models\SupportTicket $ticket)
     {
         $validated = $request->validate([
-            'message' => 'required|string|max:5000',
+            'message' => ['required', 'string', 'max:5000', new \App\Rules\NoProfanity()],
             'status' => 'nullable|in:open,in_progress,resolved,closed',
         ]);
 

@@ -184,13 +184,13 @@ class BasicInfoController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'description' => 'required|string|min:10',
+            'title' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
+            'description' => ['required', 'string', 'min:10', new \App\Rules\NoProfanity()],
             'category' => 'required|string|in:conference,workshop,seminar,meetup,training,networking,social,sports,entertainment,other',
-            'tags' => 'required|string|min:2',
+            'tags' => ['required', 'string', 'min:2', new \App\Rules\NoProfanity()],
             'start_date' => 'required|date|after:now',
             'end_date' => 'nullable|date|after:start_date',
-            'location' => 'required|string|max:500',
+            'location' => ['required', 'string', 'max:500', new \App\Rules\NoProfanity()],
             'location_url' => 'nullable|url|max:1000',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',

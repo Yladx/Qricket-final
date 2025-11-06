@@ -33,9 +33,9 @@ class HelpSupportController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string|max:5000',
-            'name' => 'required|string|max:255',
+            'subject' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
+            'message' => ['required', 'string', 'max:5000', new \App\Rules\NoProfanity()],
+            'name' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
             'email' => 'required|email|max:255',
         ]);
 

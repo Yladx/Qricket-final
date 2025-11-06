@@ -71,7 +71,7 @@ class OrganizerVerificationController extends Controller
 
         $request->validate([
             // Personal Information
-            'full_name' => 'required|string|max:255',
+            'full_name' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
             'birthdate' => 'required|date|before:today|before:-18 years',
             'nationality' => 'required|string|max:100',
             'address' => 'required|string|max:500',
@@ -79,13 +79,13 @@ class OrganizerVerificationController extends Controller
             'state_province' => 'required|string|max:100',
             'postal_code' => 'required|string|max:20',
             'country' => 'required|string|max:100',
-            'father_name' => 'required|string|max:255',
-            'mother_name' => 'required|string|max:255',
-            'occupation' => 'required|string|max:255',
-            'employer' => 'nullable|string|max:255',
-            'professional_experience' => 'nullable|string|max:1000',
+            'father_name' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
+            'mother_name' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
+            'occupation' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
+            'employer' => ['nullable', 'string', 'max:255', new \App\Rules\NoProfanity()],
+            'professional_experience' => ['nullable', 'string', 'max:1000', new \App\Rules\NoProfanity()],
             'alternate_email' => 'nullable|email|max:255',
-            'emergency_contact_name' => 'required|string|max:255',
+            'emergency_contact_name' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
             'emergency_contact_phone' => 'required|string|max:20',
             'emergency_contact_relationship' => 'required|string|in:spouse,parent,sibling,child,friend,other',
             
@@ -95,8 +95,8 @@ class OrganizerVerificationController extends Controller
             'document_back' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // Optional for some document types
             
             // Organization Information
-            'organization_name' => 'required|string|max:255',
-            'organization_description' => 'required|string|max:1000',
+            'organization_name' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
+            'organization_description' => ['required', 'string', 'max:1000', new \App\Rules\NoProfanity()],
             'contact_phone' => 'required|string|max:20',
             'website' => 'nullable|url|max:255',
             'terms_accepted' => 'required|accepted',

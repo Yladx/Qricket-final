@@ -33,7 +33,11 @@ class EventFeedbackController extends Controller
     {
         if (!Auth::check()) { return redirect()->route('login'); }
         if ($event->end_date && now()->lt($event->end_date)) { abort(403); }
-        $request->validate([ 'responses' => 'required|array' ]);
+        $request->validate([
+            'responses' => 'required|array',
+            'responses.comments.liked' => ['nullable', 'string', new \App\Rules\NoProfanity()],
+            'responses.comments.improvements' => ['nullable', 'string', new \App\Rules\NoProfanity()],
+        ]);
 
         EventFeedback::updateOrCreate(
             [ 'event_id' => $event->id, 'user_id' => Auth::id() ],

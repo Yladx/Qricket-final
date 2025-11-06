@@ -16,8 +16,8 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
+            'last_name' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
             'email' => [
                 'required',
                 'string',
