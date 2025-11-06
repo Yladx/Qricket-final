@@ -292,6 +292,11 @@ let signatoryCount = 1;
             window.updateSignatoryPreview();
         }
         
+        // Trigger autosave if available (for step4)
+        if (typeof autosaveDebounced === 'function') {
+            autosaveDebounced();
+        }
+        
         console.log('addSignatory completed successfully');
     };
     
