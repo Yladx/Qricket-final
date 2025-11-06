@@ -379,19 +379,53 @@
                     const title = existingCertificateData[`sig_${i}_title`];
                     const sigPath = existingCertificateData[`sig_${i}_signature`];
                     
-                    // Try multiple selectors to find inputs
-                    const nameInput = document.getElementById(`sig_${i}_name_input`) || document.querySelector(`input[name="sig_${i}_name"]`);
-                    const titleInput = document.getElementById(`sig_${i}_title_input`) || document.querySelector(`input[name="sig_${i}_title"]`);
-                    const statusEl = document.getElementById(`sig_${i}_status`);
+                    // Find the signatory item by data attribute
+                    const signatoryItem = document.querySelector(`[data-signatory="${i}"]`);
                     
-                    if (nameInput && name !== undefined && name !== null && name !== '') {
-                        nameInput.value = name;
-                        console.log('Populated sig_' + i + '_name:', name);
+                    if (!signatoryItem) {
+                        console.warn('Signatory item not found for index:', i);
+                        continue;
                     }
-                    if (titleInput && title !== undefined && title !== null && title !== '') {
-                        titleInput.value = title;
-                        console.log('Populated sig_' + i + '_title:', title);
+                    
+                    // Try multiple selectors to find inputs - search within the signatory item
+                    const nameInput = signatoryItem.querySelector(`input[name="sig_${i}_name"]`) || 
+                                     signatoryItem.querySelector(`#sig_${i}_name_input`) ||
+                                     document.getElementById(`sig_${i}_name_input`) || 
+                                     document.querySelector(`input[name="sig_${i}_name"]`);
+                    const titleInput = signatoryItem.querySelector(`input[name="sig_${i}_title"]`) || 
+                                      signatoryItem.querySelector(`#sig_${i}_title_input`) ||
+                                      document.getElementById(`sig_${i}_title_input`) || 
+                                      document.querySelector(`input[name="sig_${i}_title"]`);
+                    const statusEl = signatoryItem.querySelector(`#sig_${i}_status`) || 
+                                    document.getElementById(`sig_${i}_status`);
+                    
+                    console.log('Signatory', i, 'inputs found:', {
+                        nameInput: !!nameInput,
+                        titleInput: !!titleInput,
+                        statusEl: !!statusEl,
+                        name: name,
+                        title: title,
+                        sigPath: sigPath
+                    });
+                    
+                    if (nameInput) {
+                        if (name !== undefined && name !== null) {
+                            nameInput.value = name || '';
+                            console.log('Populated sig_' + i + '_name:', name || '(empty)');
+                        }
+                    } else {
+                        console.warn('Name input not found for signatory', i);
                     }
+                    
+                    if (titleInput) {
+                        if (title !== undefined && title !== null) {
+                            titleInput.value = title || '';
+                            console.log('Populated sig_' + i + '_title:', title || '(empty)');
+                        }
+                    } else {
+                        console.warn('Title input not found for signatory', i);
+                    }
+                    
                     if (statusEl && sigPath) {
                         statusEl.textContent = 'Uploaded';
                         statusEl.className = 'text-xs text-green-500 dark:text-green-400';
