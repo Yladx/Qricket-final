@@ -123,7 +123,7 @@
     <div>
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-xs font-semibold text-gray-800 dark:text-gray-100">Signatory Details</h3>
-            <button type="button" id="add-signatory-btn" class="px-3 py-1.5 text-xs bg-qricket-500 text-white rounded-md hover:bg-qricket-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onclick="addSignatory()">
+            <button type="button" id="add-signatory-btn" class="px-3 py-1.5 text-xs bg-qricket-500 text-white rounded-md hover:bg-qricket-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onclick="window.addSignatory()">
                 <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
@@ -135,7 +135,7 @@
             <div class="signatory-item border border-gray-200 dark:border-gray-700 rounded-lg p-3" data-signatory="1">
                 <div class="flex items-center justify-between mb-2">
                     <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory 1</h4>
-                    <button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs hidden" onclick="removeSignatory(1)">
+                    <button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs hidden" onclick="window.removeSignatory(1)">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
@@ -164,7 +164,7 @@
                                 <div class="mt-0.5"><span id="sig_1_status" class="text-xs text-gray-500 dark:text-gray-400">{{ !empty($cd['sig_1_signature']) ? 'Uploaded' : 'No file' }}</span></div>
                     </div>
                 </div>
-                        <input type="file" id="sig_1_file" accept="image/*" class="hidden" onchange="uploadSignature(1)">
+                        <input type="file" id="sig_1_file" accept="image/*" class="hidden" onchange="window.uploadSignature(1)">
                 <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>
             </label>
                 </div>
@@ -494,7 +494,7 @@ function renumberSignatories() {
         
         if (fileInput) {
             fileInput.id = `sig_${newNum}_file`;
-            fileInput.setAttribute('onchange', `uploadSignature(${newNum})`);
+            fileInput.setAttribute('onchange', `window.uploadSignature(${newNum})`);
         }
         
         if (statusEl) {
@@ -509,7 +509,7 @@ function renumberSignatories() {
         // Update remove button onclick
         const removeBtn = item.querySelector('.remove-signatory-btn');
         if (removeBtn) {
-            removeBtn.setAttribute('onclick', `removeSignatory(${newNum})`);
+            removeBtn.setAttribute('onclick', `window.removeSignatory(${newNum})`);
         }
     });
     
