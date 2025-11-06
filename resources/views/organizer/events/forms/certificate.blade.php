@@ -123,7 +123,7 @@
     <div>
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-xs font-semibold text-gray-800 dark:text-gray-100">Signatory Details</h3>
-            <button type="button" id="add-signatory-btn" class="px-3 py-1.5 text-xs bg-qricket-500 text-white rounded-md hover:bg-qricket-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onclick="window.addSignatory()">
+            <button type="button" id="add-signatory-btn" class="px-3 py-1.5 text-xs bg-qricket-500 text-white rounded-md hover:bg-qricket-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
@@ -544,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (savedSignatoryCount > currentCount) {
                 // Add missing signatories
                 for (let i = currentCount + 1; i <= savedSignatoryCount && i <= 4; i++) {
-                    addSignatory();
+                    window.addSignatory();
                 }
                 
                 // Update signatory count after adding
@@ -596,11 +596,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update signatory count
     signatoryCount = existingSignatories.length;
     
-    // Update add button state
+    // Update add button state and add event listener
     const addBtn = document.getElementById('add-signatory-btn');
-    if (signatoryCount >= 4) {
-        addBtn.disabled = true;
-        addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    if (addBtn) {
+        if (signatoryCount >= 4) {
+            addBtn.disabled = true;
+            addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        // Add click handler if not already added
+        if (!addBtn.hasAttribute('data-listener-added')) {
+            addBtn.addEventListener('click', function() {
+                window.addSignatory();
+            });
+            addBtn.setAttribute('data-listener-added', 'true');
+        }
     }
     
     // Load theme colors from JSON and apply to color inputs
