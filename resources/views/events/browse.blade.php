@@ -17,15 +17,22 @@
                     </div>
                         
                         <!-- Category -->
-                        <select name="category" class="order-2 px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300">
-                            @php $currentCategory = request('category'); @endphp
-                            <option value="">All Categories</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category }}" {{ $currentCategory === $category ? 'selected' : '' }}>
-                                    {{ ucfirst($category) }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div class="order-2 relative">
+                            <select name="category" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none">
+                                @php $currentCategory = request('category'); @endphp
+                                <option value="">All Categories</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category }}" {{ $currentCategory === $category ? 'selected' : '' }}>
+                                        {{ ucfirst($category) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
                         
                         <!-- Sort & Order moved to Advanced Filters -->
                         
@@ -41,9 +48,9 @@
                 <!-- Advanced Filters (Collapsible) -->
                 <div class="mt-4">
                 <details class="group">
-                        <summary class="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-qricket-600 dark:hover:text-qricket-400 flex items-center">
+                        <summary class="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-qricket-600 dark:hover:text-qricket-400 flex items-center gap-2">
                         Advanced Filters
-                            <svg class="w-4 h-4 ml-2 transform group-open:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 flex-shrink-0 transform group-open:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </summary>
@@ -113,21 +120,35 @@
                         
                                 <!-- Sort -->
                         <div>
-                                    <label for="sort" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort By</label>
-                                    <select name="sort" id="sort" class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300">
-                                        <option value="date" {{ request('sort', 'date') == 'date' ? 'selected' : '' }}>Date</option>
-                                        <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Name</option>
-                                        <option value="created" {{ request('sort') == 'created' ? 'selected' : '' }}>Created</option>
-                                    </select>
+                            <label for="sort" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort By</label>
+                            <div class="relative">
+                                <select name="sort" id="sort" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none">
+                                    <option value="date" {{ request('sort', 'date') == 'date' ? 'selected' : '' }}>Date</option>
+                                    <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Name</option>
+                                    <option value="created" {{ request('sort') == 'created' ? 'selected' : '' }}>Created</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
                         
                                 <!-- Order -->
                                 <div>
                                     <label for="order" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Order</label>
-                                    <select name="order" id="order" class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300">
-                                        <option value="asc" {{ request('order', 'asc') == 'asc' ? 'selected' : '' }}>Ascending</option>
+                                    <div class="relative">
+                                        <select name="order" id="order" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none">
+                                            <option value="asc" {{ request('order', 'asc') == 'asc' ? 'selected' : '' }}>Ascending</option>
                             <option value="desc" {{ request('order') == 'desc' ? 'selected' : '' }}>Descending</option>
                         </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                                 <!-- Show Past Events -->
