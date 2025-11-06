@@ -363,10 +363,18 @@
                         window.addSignatory();
                     }
                     
-                    // Wait a bit for DOM to update, then populate all values
+                    // Wait longer for DOM to fully update, then populate all values
+                    // Use multiple attempts to ensure DOM is ready
                     setTimeout(() => {
+                        console.log('First populate attempt after', 200, 'ms');
                         populateSignatoryValues();
-                    }, 150);
+                    }, 200);
+                    
+                    // Also try again after a longer delay in case first attempt fails
+                    setTimeout(() => {
+                        console.log('Second populate attempt after', 500, 'ms');
+                        populateSignatoryValues();
+                    }, 500);
                 } else {
                     // Just populate existing signatories immediately
                     console.log('No need to add signatories, just populating values');
@@ -403,6 +411,12 @@
                     const title = existingCertificateData[`sig_${i}_title`];
                     const sigPath = existingCertificateData[`sig_${i}_signature`];
                     
+                    console.log(`Processing signatory ${i}:`, {
+                        name: name,
+                        title: title,
+                        sigPath: sigPath
+                    });
+                    
                     // Find the signatory item by data attribute
                     const signatoryItem = document.querySelector(`[data-signatory="${i}"]`);
                     
@@ -435,25 +449,33 @@
                     if (nameInput) {
                         if (name !== undefined && name !== null) {
                             nameInput.value = name || '';
-                            console.log('Populated sig_' + i + '_name:', name || '(empty)');
+                            nameInput.dispatchEvent(new Event('input', { bubbles: true })); // Trigger input event
+                            console.log('✓ Populated sig_' + i + '_name:', name || '(empty)');
+                        } else {
+                            console.log('Skipping sig_' + i + '_name - value is undefined/null');
                         }
                     } else {
-                        console.warn('Name input not found for signatory', i);
+                        console.warn('❌ Name input not found for signatory', i);
                     }
                     
                     if (titleInput) {
                         if (title !== undefined && title !== null) {
                             titleInput.value = title || '';
-                            console.log('Populated sig_' + i + '_title:', title || '(empty)');
+                            titleInput.dispatchEvent(new Event('input', { bubbles: true })); // Trigger input event
+                            console.log('✓ Populated sig_' + i + '_title:', title || '(empty)');
+                        } else {
+                            console.log('Skipping sig_' + i + '_title - value is undefined/null');
                         }
                     } else {
-                        console.warn('Title input not found for signatory', i);
+                        console.warn('❌ Title input not found for signatory', i);
                     }
                     
                     if (statusEl && sigPath) {
                         statusEl.textContent = 'Uploaded';
                         statusEl.className = 'text-xs text-green-500 dark:text-green-400';
-                        console.log('Set sig_' + i + ' status to Uploaded');
+                        console.log('✓ Set sig_' + i + ' status to Uploaded');
+                    } else if (sigPath) {
+                        console.warn('Signature path exists but status element not found for signatory', i);
                     }
                 }
                 
