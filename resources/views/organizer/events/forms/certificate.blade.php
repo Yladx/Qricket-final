@@ -123,7 +123,7 @@
     <div>
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-xs font-semibold text-gray-800 dark:text-gray-100">Signatory Details</h3>
-            <button type="button" id="add-signatory-btn" class="px-3 py-1.5 text-xs bg-qricket-500 text-white rounded-md hover:bg-qricket-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="button" id="add-signatory-btn" class="px-3 py-1.5 text-xs bg-qricket-500 text-white rounded-md hover:bg-qricket-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onclick="console.log('Button onclick triggered'); if(typeof window.addSignatory === 'function') { window.addSignatory(); } else { console.error('window.addSignatory not available'); alert('Function not ready. Please refresh the page.'); }">
                 <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
@@ -178,6 +178,7 @@
 </div>
 
 <script>
+console.log('Certificate form script loading...');
 let signatoryCount = 1;
 
 // Expose addSignatory globally so it can be called from onclick handlers
@@ -292,8 +293,11 @@ window.addSignatory = function addSignatory() {
 
 // Immediately attach event listener to add button (works even if DOM not ready yet)
 (function attachAddButtonListener() {
+    console.log('attachAddButtonListener IIFE executing...');
     function attachListener() {
+        console.log('attachListener called, document.readyState:', document.readyState);
         const addBtn = document.getElementById('add-signatory-btn');
+        console.log('add-signatory-btn found:', !!addBtn);
         if (addBtn && !addBtn.hasAttribute('data-listener-added')) {
             addBtn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -308,18 +312,31 @@ window.addSignatory = function addSignatory() {
             });
             addBtn.setAttribute('data-listener-added', 'true');
             console.log('Event listener attached to add button');
+        } else if (addBtn) {
+            console.log('Button already has listener or listener already added');
+        } else {
+            console.warn('Add button not found yet');
         }
     }
     
     // Try immediately
+    console.log('Trying to attach listener immediately...');
     attachListener();
     
     // Also try when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', attachListener);
+        console.log('DOM still loading, waiting for DOMContentLoaded...');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded fired, attaching listener...');
+            attachListener();
+        });
     } else {
         // DOM already ready, try again
-        setTimeout(attachListener, 100);
+        console.log('DOM already ready, retrying attachment in 100ms...');
+        setTimeout(function() {
+            console.log('Timeout fired, attaching listener...');
+            attachListener();
+        }, 100);
     }
 })();
 
@@ -992,4 +1009,21 @@ window.uploadSignature = function uploadSignature(signatoryNum) {
         });
     }
 }
+
+// Test if functions are defined
+console.log('Script loaded. Functions available:', {
+    addSignatory: typeof window.addSignatory,
+    removeSignatory: typeof window.removeSignatory,
+    uploadSignature: typeof window.uploadSignature
+});
+
+// Test button availability after a delay
+setTimeout(function() {
+    const testBtn = document.getElementById('add-signatory-btn');
+    console.log('Button test after delay:', {
+        exists: !!testBtn,
+        hasOnclick: testBtn ? !!testBtn.getAttribute('onclick') : false,
+        hasListener: testBtn ? testBtn.hasAttribute('data-listener-added') : false
+    });
+}, 500);
 </script>
