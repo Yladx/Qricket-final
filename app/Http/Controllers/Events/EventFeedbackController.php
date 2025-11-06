@@ -227,9 +227,11 @@ class EventFeedbackController extends Controller
         if (!$plan) {
             $plan = \App\Models\SubscriptionPlan::where('slug', 'free')->first();
         }
-        $hasProSubscription = $plan && in_array($plan->slug, ['professional', 'enterprise', 'starter']);
-        $canViewDetailedRatings = $hasProSubscription || $isAdmin;
-        $canViewDetailedFeedback = $hasProSubscription || $isAdmin;
+        // Check if plan has advanced_analytics feature OR is in the legacy pro tier list
+        $hasAdvancedAnalytics = $plan && ($plan->advanced_analytics === true);
+        $hasProSubscription = $plan && in_array($plan->slug, ['professional', 'enterprise', 'starter', 'pro', 'intermediate']);
+        $canViewDetailedRatings = $hasAdvancedAnalytics || $hasProSubscription || $isAdmin;
+        $canViewDetailedFeedback = $hasAdvancedAnalytics || $hasProSubscription || $isAdmin;
 
         // If AJAX request, return only the feedback list section
         if ($request->ajax()) {

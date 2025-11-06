@@ -2,7 +2,7 @@
 
 <!-- Event News Section - Facebook Style -->
 @if($news && $news->count() > 0)
-<div id="event-news-section" class="space-y-4 mt-6">
+<div id="event-news-section" class="space-y-4 mt-6 pb-8">
         @foreach($news as $newsItem)
             <!-- Facebook Post -->
             <div class="w-full max-w-2xl mx-auto relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -260,6 +260,12 @@ function toggleNewsBody(newsId) {
         shortDiv.classList.remove('hidden');
         fullDiv.classList.add('hidden');
     }
+    
+    // Force layout recalculation to ensure footer stays at bottom
+    // This ensures the page properly adjusts when content expands/collapses
+    setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+    }, 100);
 }
 
 // Open modal from all images (new function that uses allNewsImages)

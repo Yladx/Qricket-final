@@ -366,7 +366,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-1">Upgrade Required</h3>
-                    <p class="text-xs text-gray-600 dark:text-gray-400">Individual feedback submissions are only visible to Pro subscribers and administrators.</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Individual feedback submissions are only visible to Advanced Analytics subscribers, Pro subscribers, and administrators.</p>
                 </div>
             @endif
         </div>
