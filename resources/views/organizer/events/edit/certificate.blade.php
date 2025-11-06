@@ -358,38 +358,102 @@
         
         // Load existing signatories
         (function loadExistingSignatories(){
-            if (!existingCertificateData || !existingCertificateData.signatory_count) return;
+            if (!existingCertificateData) return;
             
-            const currentSignatories = document.querySelectorAll('.signatory-item');
-            const currentCount = currentSignatories.length;
-            const savedSignatoryCount = existingCertificateData.signatory_count || 1;
-            
-            if (savedSignatoryCount > currentCount && typeof window.addSignatory === 'function') {
-                for (let i = currentCount + 1; i <= savedSignatoryCount && i <= 4; i++) {
-                    window.addSignatory();
+            // Wait for window.addSignatory to be available
+            function tryLoad() {
+                if (typeof window.addSignatory !== 'function') {
+                    setTimeout(tryLoad, 100);
+                    return;
                 }
                 
-                setTimeout(() => {
-                    for (let i = 1; i <= savedSignatoryCount && i <= 4; i++) {
-                        const name = existingCertificateData[`sig_${i}_name`];
-                        const title = existingCertificateData[`sig_${i}_title`];
-                        const sigPath = existingCertificateData[`sig_${i}_signature`];
-                        
-                        const nameInput = document.getElementById(`sig_${i}_name_input`) || document.querySelector(`input[name="sig_${i}_name"]`);
-                        const titleInput = document.getElementById(`sig_${i}_title_input`) || document.querySelector(`input[name="sig_${i}_title"]`);
-                        const statusEl = document.getElementById(`sig_${i}_status`);
-                        
-                        if (nameInput && name) nameInput.value = name;
-                        if (titleInput && title) titleInput.value = title;
-                        if (statusEl && sigPath) {
-                            statusEl.textContent = 'Uploaded';
-                            statusEl.className = 'text-xs text-green-500 dark:text-green-400';
-                        }
+                const currentSignatories = document.querySelectorAll('.signatory-item');
+                const currentCount = currentSignatories.length;
+                const savedSignatoryCount = existingCertificateData.signatory_count || 1;
+                
+                // Also check if we have data for signatories 2-4 even if count isn't set
+                let maxSignatoryWithData = savedSignatoryCount;
+                for (let i = 2; i <= 4; i++) {
+                    if (existingCertificateData[`sig_${i}_name`] || existingCertificateData[`sig_${i}_title`] || existingCertificateData[`sig_${i}_signature`]) {
+                        maxSignatoryWithData = Math.max(maxSignatoryWithData, i);
                     }
-                    signatoryCount = savedSignatoryCount;
-                    updateSignatoryPreview();
-                }, 50);
+                }
+                
+                console.log('Loading signatories (edit):', {
+                    currentCount: currentCount,
+                    savedCount: savedSignatoryCount,
+                    maxSignatoryWithData: maxSignatoryWithData,
+                    existingData: Object.keys(existingCertificateData).filter(k => k.startsWith('sig_'))
+                });
+                
+                // If we need to add more signatories (use maxSignatoryWithData instead of savedSignatoryCount)
+                if (maxSignatoryWithData > currentCount) {
+                    for (let i = currentCount + 1; i <= maxSignatoryWithData && i <= 4; i++) {
+                        window.addSignatory();
+                    }
+                    
+                    setTimeout(() => {
+                        populateAllValues();
+                    }, 100);
+                } else {
+                    // Populate existing signatories even if count matches
+                    populateAllValues();
+                }
             }
+            
+            function populateAllValues() {
+                const allSignatories = document.querySelectorAll('.signatory-item');
+                const savedSignatoryCount = existingCertificateData.signatory_count || 1;
+                
+                // Also check if we have data for signatories 2-4 even if count isn't set
+                let maxSignatoryWithData = savedSignatoryCount;
+                for (let i = 2; i <= 4; i++) {
+                    if (existingCertificateData[`sig_${i}_name`] || existingCertificateData[`sig_${i}_title`] || existingCertificateData[`sig_${i}_signature`]) {
+                        maxSignatoryWithData = Math.max(maxSignatoryWithData, i);
+                    }
+                }
+                
+                console.log('Populating values for', allSignatories.length, 'signatories (edit). Max signatory with data:', maxSignatoryWithData);
+                
+                for (let i = 1; i <= maxSignatoryWithData && i <= 4; i++) {
+                    const name = existingCertificateData[`sig_${i}_name`];
+                    const title = existingCertificateData[`sig_${i}_title`];
+                    const sigPath = existingCertificateData[`sig_${i}_signature`];
+                    
+                    const nameInput = document.getElementById(`sig_${i}_name_input`) || document.querySelector(`input[name="sig_${i}_name"]`);
+                    const titleInput = document.getElementById(`sig_${i}_title_input`) || document.querySelector(`input[name="sig_${i}_title"]`);
+                    const statusEl = document.getElementById(`sig_${i}_status`);
+                    
+                    if (nameInput && name !== undefined && name !== null && name !== '') {
+                        nameInput.value = name;
+                        console.log('Populated sig_' + i + '_name:', name);
+                    }
+                    if (titleInput && title !== undefined && title !== null && title !== '') {
+                        titleInput.value = title;
+                        console.log('Populated sig_' + i + '_title:', title);
+                    }
+                    if (statusEl && sigPath) {
+                        statusEl.textContent = 'Uploaded';
+                        statusEl.className = 'text-xs text-green-500 dark:text-green-400';
+                        console.log('Set sig_' + i + ' status to Uploaded');
+                    }
+                }
+                
+                signatoryCount = allSignatories.length;
+                
+                // Show remove buttons if more than one signatory
+                if (allSignatories.length > 1) {
+                    document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
+                        btn.classList.remove('hidden');
+                    });
+                }
+                
+                updateSignatoryPreview();
+                console.log('Finished populating signatory values (edit)');
+            }
+            
+            // Start loading process
+            tryLoad();
         })();
         
         // Re-sync when signatories are added/removed

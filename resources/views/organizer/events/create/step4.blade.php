@@ -314,46 +314,67 @@
         (function inflateSignatoriesFromExisting(){
             if (!existingCertificateData) return;
             
-            // Get current count from DOM
-            const currentSignatories = document.querySelectorAll('.signatory-item');
-            const currentCount = currentSignatories.length;
-            const savedSignatoryCount = existingCertificateData.signatory_count || 1;
-            
-            console.log('Loading signatories:', {
-                currentCount: currentCount,
-                savedCount: savedSignatoryCount,
-                existingData: Object.keys(existingCertificateData).filter(k => k.startsWith('sig_'))
-            });
-            
-            // If we need to add more signatories
-            if (savedSignatoryCount > currentCount && typeof window.addSignatory === 'function') {
-                // Add missing signatories synchronously
-                for (let i = currentCount + 1; i <= savedSignatoryCount && i <= 4; i++) {
-                    window.addSignatory();
-                }
-                
-                // Wait a bit for DOM to update, then populate all values
-                setTimeout(() => {
-                    populateSignatoryValues();
-                }, 50);
-            } else {
-                // Just populate existing signatories
-                populateSignatoryValues();
-            }
-            
-            function populateSignatoryValues() {
-                // Wait for window.addSignatory if not ready
+            // Wait for window.addSignatory to be available
+            function tryLoad() {
                 if (typeof window.addSignatory !== 'function') {
-                    setTimeout(() => populateSignatoryValues(), 100);
+                    setTimeout(tryLoad, 100);
                     return;
                 }
                 
+                // Get current count from DOM
+                const currentSignatories = document.querySelectorAll('.signatory-item');
+                const currentCount = currentSignatories.length;
+                const savedSignatoryCount = existingCertificateData.signatory_count || 1;
+                
+                // Also check if we have data for signatories 2-4 even if count isn't set
+                let maxSignatoryWithData = savedSignatoryCount;
+                for (let i = 2; i <= 4; i++) {
+                    if (existingCertificateData[`sig_${i}_name`] || existingCertificateData[`sig_${i}_title`] || existingCertificateData[`sig_${i}_signature`]) {
+                        maxSignatoryWithData = Math.max(maxSignatoryWithData, i);
+                    }
+                }
+                
+                console.log('Loading signatories:', {
+                    currentCount: currentCount,
+                    savedCount: savedSignatoryCount,
+                    maxSignatoryWithData: maxSignatoryWithData,
+                    existingData: Object.keys(existingCertificateData).filter(k => k.startsWith('sig_'))
+                });
+                
+                // If we need to add more signatories (use maxSignatoryWithData instead of savedSignatoryCount)
+                if (maxSignatoryWithData > currentCount) {
+                    // Add missing signatories synchronously
+                    for (let i = currentCount + 1; i <= maxSignatoryWithData && i <= 4; i++) {
+                        window.addSignatory();
+                    }
+                    
+                    // Wait a bit for DOM to update, then populate all values
+                    setTimeout(() => {
+                        populateSignatoryValues();
+                    }, 100);
+                } else {
+                    // Just populate existing signatories immediately
+                    populateSignatoryValues();
+                }
+            }
+            
+            function populateSignatoryValues() {
                 // Get all signatories after potential additions
                 const allSignatories = document.querySelectorAll('.signatory-item');
-                console.log('Populating values for', allSignatories.length, 'signatories');
+                const savedSignatoryCount = existingCertificateData.signatory_count || 1;
                 
-                // Populate values for all signatories
-                for (let i = 1; i <= allSignatories.length && i <= 4; i++) {
+                // Also check if we have data for signatories 2-4 even if count isn't set
+                let maxSignatoryWithData = savedSignatoryCount;
+                for (let i = 2; i <= 4; i++) {
+                    if (existingCertificateData[`sig_${i}_name`] || existingCertificateData[`sig_${i}_title`] || existingCertificateData[`sig_${i}_signature`]) {
+                        maxSignatoryWithData = Math.max(maxSignatoryWithData, i);
+                    }
+                }
+                
+                console.log('Populating values for', allSignatories.length, 'signatories. Max signatory with data:', maxSignatoryWithData);
+                
+                // Populate values for all signatories - use maxSignatoryWithData to ensure we check all
+                for (let i = 1; i <= maxSignatoryWithData && i <= 4; i++) {
                     const name = existingCertificateData[`sig_${i}_name`];
                     const title = existingCertificateData[`sig_${i}_title`];
                     const sigPath = existingCertificateData[`sig_${i}_signature`];
@@ -363,11 +384,11 @@
                     const titleInput = document.getElementById(`sig_${i}_title_input`) || document.querySelector(`input[name="sig_${i}_title"]`);
                     const statusEl = document.getElementById(`sig_${i}_status`);
                     
-                    if (nameInput && name !== undefined && name !== '') {
+                    if (nameInput && name !== undefined && name !== null && name !== '') {
                         nameInput.value = name;
                         console.log('Populated sig_' + i + '_name:', name);
                     }
-                    if (titleInput && title !== undefined && title !== '') {
+                    if (titleInput && title !== undefined && title !== null && title !== '') {
                         titleInput.value = title;
                         console.log('Populated sig_' + i + '_title:', title);
                     }
@@ -378,7 +399,7 @@
                     }
                 }
                 
-                // Update signatory count
+                // Update signatory count based on actual DOM elements
                 signatoryCount = allSignatories.length;
                 
                 // Show remove buttons if more than one signatory
@@ -393,6 +414,9 @@
                 
                 console.log('Finished populating signatory values');
             }
+            
+            // Start loading process
+            tryLoad();
         })();
         
         // Re-sync when signatories are added/removed
