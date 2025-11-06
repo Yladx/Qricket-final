@@ -844,22 +844,27 @@
                     hiddenField.value = box.checked ? '1' : '0';
                 }
                 
-                
                 if (box.checked) {
                     // Hide form and preview if checkbox is checked
                     if (formContainer) {
                         formContainer.style.display = 'none';
+                        formContainer.hidden = true;
                     }
                     if (previewSection) {
                         previewSection.style.display = 'none';
+                        previewSection.hidden = true;
+                        previewSection.removeAttribute('open');
                     }
                 } else {
                     // Show form and preview if checkbox is not checked
                     if (formContainer) {
                         formContainer.style.display = 'block';
+                        formContainer.hidden = false;
                     }
                     if (previewSection) {
                         previewSection.style.display = 'block';
+                        previewSection.hidden = false;
+                        previewSection.setAttribute('open', 'open');
                     }
                 }
             }
@@ -953,28 +958,18 @@
                 const formContainer = document.getElementById('certificate-form-container');
                 const previewSection = document.getElementById('cert_section');
                 
-                if (box.checked) {
-                    // Hide form and preview when skipping
-                    if (formContainer) {
-                        formContainer.style.display = 'none';
-                    }
-                    if (previewSection) {
-                        previewSection.style.display = 'none';
-                    }
-                } else {
-                    // Show form and preview when not skipping
-                    if (formContainer) {
-                        formContainer.style.display = 'block';
-                    }
-                    if (previewSection) {
-                        previewSection.style.display = 'block';
-                        previewSection.setAttribute('open', 'open');
-                    }
-                }
+                // Use updateVisibility function for consistency
+                updateVisibility();
             });
             
-            // Update visibility after loading the setting
+            // Initialize visibility on page load
+            updateVisibility();
+            
+            // Update visibility after loading the setting (if async finishes)
             loadCertificateSetting().then(() => {
+                updateVisibility();
+            }).catch(() => {
+                // If loading fails, still ensure visibility is set correctly
                 updateVisibility();
             });
         })();

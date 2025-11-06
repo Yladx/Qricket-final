@@ -288,6 +288,52 @@
                 });
             }
             
+            // Renumber remaining signatories
+            const remainingSignatories = document.querySelectorAll('.signatory-item');
+            remainingSignatories.forEach((item, index) => {
+                const newNum = index + 1;
+                item.setAttribute('data-signatory', newNum);
+                
+                // Update all input IDs and names
+                const nameInput = item.querySelector('input[name^="sig_"][name$="_name"]');
+                const titleInput = item.querySelector('input[name^="sig_"][name$="_title"]');
+                const fileInput = item.querySelector('input[name^="sig_"][name$="_file"]');
+                const statusEl = item.querySelector('[id^="sig_"][id$="_status"]');
+                const chooseBtn = item.querySelector('button[onclick^="window.uploadSignature"]');
+                
+                if (nameInput) {
+                    nameInput.id = `sig_${newNum}_name_input`;
+                    nameInput.name = `sig_${newNum}_name`;
+                }
+                if (titleInput) {
+                    titleInput.id = `sig_${newNum}_title_input`;
+                    titleInput.name = `sig_${newNum}_title`;
+                }
+                if (fileInput) {
+                    fileInput.id = `sig_${newNum}_file`;
+                    fileInput.name = `sig_${newNum}_file`;
+                    fileInput.setAttribute('onchange', `window.uploadSignature(${newNum})`);
+                }
+                if (statusEl) {
+                    statusEl.id = `sig_${newNum}_status`;
+                }
+                if (chooseBtn) {
+                    chooseBtn.setAttribute('onclick', `window.uploadSignature(${newNum})`);
+                }
+                
+                // Update remove button onclick
+                const removeBtn = item.querySelector('.remove-signatory-btn');
+                if (removeBtn) {
+                    removeBtn.setAttribute('onclick', `window.removeSignatory(${newNum})`);
+                }
+                
+                // Update heading
+                const heading = item.querySelector('h4');
+                if (heading) {
+                    heading.textContent = `Signatory ${newNum}`;
+                }
+            });
+            
             // Update preview
             updateSignatoryPreview();
             
@@ -723,22 +769,27 @@
                     hiddenField.value = box.checked ? '1' : '0';
                 }
                 
-                
                 if (box.checked) {
                     // Hide form and preview if checkbox is checked
                     if (formContainer) {
                         formContainer.style.display = 'none';
+                        formContainer.hidden = true;
                     }
                     if (previewSection) {
                         previewSection.style.display = 'none';
+                        previewSection.hidden = true;
+                        previewSection.removeAttribute('open');
                     }
                 } else {
                     // Show form and preview if checkbox is not checked
                     if (formContainer) {
                         formContainer.style.display = 'block';
+                        formContainer.hidden = false;
                     }
                     if (previewSection) {
                         previewSection.style.display = 'block';
+                        previewSection.hidden = false;
+                        previewSection.setAttribute('open', 'open');
                     }
                 }
             }
@@ -832,28 +883,18 @@
                 const formContainer = document.getElementById('certificate-form-container');
                 const previewSection = document.getElementById('cert_section');
                 
-                if (box.checked) {
-                    // Hide form and preview when skipping
-                    if (formContainer) {
-                        formContainer.style.display = 'none';
-                    }
-                    if (previewSection) {
-                        previewSection.style.display = 'none';
-                    }
-                } else {
-                    // Show form and preview when not skipping
-                    if (formContainer) {
-                        formContainer.style.display = 'block';
-                    }
-                    if (previewSection) {
-                        previewSection.style.display = 'block';
-                        previewSection.setAttribute('open', 'open');
-                    }
-                }
+                // Use updateVisibility function for consistency
+                updateVisibility();
             });
             
-            // Update visibility after loading the setting
+            // Initialize visibility on page load
+            updateVisibility();
+            
+            // Update visibility after loading the setting (if async finishes)
             loadCertificateSetting().then(() => {
+                updateVisibility();
+            }).catch(() => {
+                // If loading fails, still ensure visibility is set correctly
                 updateVisibility();
             });
         })();
