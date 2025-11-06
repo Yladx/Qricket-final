@@ -1,6 +1,6 @@
 <!-- Payout Request Modal -->
-<div id="payoutRequestModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+<div id="payoutRequestModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-70 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative top-20 mx-auto p-5 border border-gray-200 dark:border-gray-700 w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
         <div class="mt-3">
             <!-- Modal Header -->
             <div class="flex items-center justify-between mb-4">
@@ -29,12 +29,12 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-sm text-gray-600 dark:text-gray-400">Qricket Fee (<span id="feePercentage">5</span>%):</span>
-                            <span class="text-sm font-semibold text-red-600" id="qricketFee">₱0.00</span>
+                            <span class="text-sm font-semibold text-red-600 dark:text-red-400" id="qricketFee">₱0.00</span>
                         </div>
                         <div class="border-t border-gray-200 dark:border-gray-600 pt-3">
                             <div class="flex justify-between">
                                 <span class="text-base font-medium text-gray-700 dark:text-gray-300">Net Amount:</span>
-                                <span class="text-lg font-bold text-green-600" id="netAmount">₱0.00</span>
+                                <span class="text-lg font-bold text-green-600 dark:text-green-400" id="netAmount">₱0.00</span>
                             </div>
                         </div>
                     </div>
@@ -43,7 +43,7 @@
                 <!-- Notes -->
                 <div class="mb-4">
                     <label for="payoutNotes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes (Optional)</label>
-                    <textarea id="payoutNotes" rows="3" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:ring-qricket-500 focus:border-qricket-500" placeholder="Add any notes for this payout request..."></textarea>
+                    <textarea id="payoutNotes" rows="3" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:ring-qricket-500 focus:border-qricket-500" placeholder="Add any notes for this payout request..."></textarea>
                 </div>
 
                 <!-- Action Buttons -->
@@ -69,8 +69,8 @@
 </div>
 
 <!-- Collect Payout Modal -->
-<div id="collectPayoutModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+<div id="collectPayoutModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-70 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative top-20 mx-auto p-5 border border-gray-200 dark:border-gray-700 w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
         <div class="mt-3">
             <!-- Modal Header -->
             <div class="flex items-center justify-between mb-4">
@@ -88,7 +88,7 @@
                     <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
                         <div class="flex justify-between">
                             <span class="text-sm text-gray-600 dark:text-gray-400">Amount to Collect:</span>
-                            <span class="text-lg font-bold text-green-600" id="collectAmount">₱0.00</span>
+                            <span class="text-lg font-bold text-green-600 dark:text-green-400" id="collectAmount">₱0.00</span>
                         </div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">Transfer will be processed within 1-2 business days via Xendit</div>
                     </div>
@@ -98,7 +98,7 @@
                 <form id="collectPayoutForm" data-cache-bust="{{ time() }}">
                     <div class="mb-4">
                         <label for="bankCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bank</label>
-                        <select id="bankCode" name="bank_code" required class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:ring-qricket-500 focus:border-qricket-500">
+                        <select id="bankCode" name="bank_code" required class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:ring-qricket-500 focus:border-qricket-500">
                             <option value="">Select Bank</option>
                             <option value="BANK_TRANSFER">Bank Transfer (Generic)</option>
                             <option value="BDO_ONLINE_BANKING">BDO Bank Transfer</option>
@@ -121,12 +121,12 @@
 
                     <div class="mb-4">
                         <label for="accountNumber" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Account Number</label>
-                        <input type="text" id="accountNumber" name="account_number" required class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:ring-qricket-500 focus:border-qricket-500" placeholder="Enter your account number">
+                        <input type="text" id="accountNumber" name="account_number" required class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:ring-qricket-500 focus:border-qricket-500" placeholder="Enter your account number">
                     </div>
 
                     <div class="mb-6">
                         <label for="accountName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Account Name</label>
-                        <input type="text" id="accountName" name="account_name" required class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 focus:ring-qricket-500 focus:border-qricket-500" placeholder="Enter account holder name">
+                        <input type="text" id="accountName" name="account_name" required class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:ring-qricket-500 focus:border-qricket-500" placeholder="Enter account holder name">
                     </div>
 
                     <!-- Processing Notice -->

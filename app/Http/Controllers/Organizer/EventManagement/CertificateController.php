@@ -661,7 +661,9 @@ class CertificateController extends Controller
     public function serveAsset(Request $request, string $file)
     {
         $eventId = (int) $request->get('id');
-        if (!$eventId) { abort(400, 'Event ID is required.'); }
+        if (!$eventId) { 
+            return response()->json(['error' => 'Event ID is required'], 400);
+        }
         
         // Allow specific files and dynamic signature files (signature_1.enc through signature_4.enc)
         $allowed = ['logo_left.png','logo_right.png','template.pdf','signature_left.enc','signature_right.enc'];
@@ -672,7 +674,16 @@ class CertificateController extends Controller
         }
         
         $path = "events/{$eventId}/certificate/{$file}";
-        if (!Storage::disk('r2')->exists($path)) { 
+        if (!Storage::disk('r2')->exists($path)) {
+            // For images, return a transparent 1x1 PNG instead of 404
+            if (in_array($file, ['logo_left.png', 'logo_right.png']) || preg_match('/^signature_\d+\.enc$/', $file)) {
+                // Return a transparent 1x1 PNG for missing images
+                $transparentPng = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+                return response($transparentPng, 200, [
+                    'Content-Type' => 'image/png',
+                    'Cache-Control' => 'no-cache, no-store, must-revalidate'
+                ]);
+            }
             abort(404, 'File not found'); 
         }
 

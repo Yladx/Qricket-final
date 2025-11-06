@@ -180,7 +180,8 @@
 <script>
 let signatoryCount = 1;
 
-function addSignatory() {
+// Expose addSignatory globally so it can be called from onclick handlers
+window.addSignatory = function addSignatory() {
     if (signatoryCount >= 4) {
         if (typeof Swal !== 'undefined' && window.Swal) {
             Swal.fire({
@@ -201,43 +202,44 @@ function addSignatory() {
     newSignatory.className = 'signatory-item border border-gray-200 dark:border-gray-700 rounded-lg p-3';
     newSignatory.setAttribute('data-signatory', signatoryCount);
     
-    newSignatory.innerHTML = `
-        <div class="flex items-center justify-between mb-2">
-            <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory ${signatoryCount}</h4>
-            <button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" onclick="removeSignatory(${signatoryCount})">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-            </button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-                <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>
-                <input id="sig_${signatoryCount}_name_input" name="sig_${signatoryCount}_name" type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2">
-        </div>
-        <div>
-                <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>
-                <input id="sig_${signatoryCount}_title_input" name="sig_${signatoryCount}_title" type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2">
-            </div>
-        </div>
-        <div class="mt-3">
-            <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>
-            <label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
-                    </div>
-                    <div>
-                        <div class="text-xs font-medium">Signature ${signatoryCount}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">PNG/JPG/WebP, up to 2MB</div>
-                        <div class="mt-0.5"><span id="sig_${signatoryCount}_status" class="text-xs text-gray-500 dark:text-gray-400">No file</span></div>
-                    </div>
-                </div>
-                <input type="file" id="sig_${signatoryCount}_file" accept="image/*" class="hidden" onchange="uploadSignature(${signatoryCount})">
-                <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>
-            </label>
-        </div>
-    `;
+    // Build signatory HTML using string concatenation to avoid template literal issues
+    const sigNum = signatoryCount;
+    newSignatory.innerHTML = 
+        '<div class="flex items-center justify-between mb-2">' +
+            '<h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory ' + sigNum + '</h4>' +
+            '<button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" onclick="window.removeSignatory(' + sigNum + ')">' +
+                '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
+                '</svg>' +
+            '</button>' +
+        '</div>' +
+        '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">' +
+            '<div>' +
+                '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>' +
+                '<input id="sig_' + sigNum + '_name_input" name="sig_' + sigNum + '_name" type="text" maxlength="36" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 36 characters">' +
+            '</div>' +
+            '<div>' +
+                '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>' +
+                '<input id="sig_' + sigNum + '_title_input" name="sig_' + sigNum + '_title" type="text" maxlength="28" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 28 characters">' +
+            '</div>' +
+        '</div>' +
+        '<div class="mt-3">' +
+            '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>' +
+            '<label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">' +
+                '<div class="flex items-center gap-2">' +
+                    '<div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>' +
+                    '</div>' +
+                    '<div>' +
+                        '<div class="text-xs font-medium">Signature ' + sigNum + '</div>' +
+                        '<div class="text-xs text-gray-500 dark:text-gray-400">PNG/JPG/WebP, up to 2MB</div>' +
+                        '<div class="mt-0.5"><span id="sig_' + sigNum + '_status" class="text-xs text-gray-500 dark:text-gray-400">No file</span></div>' +
+                    '</div>' +
+                '</div>' +
+                '<input type="file" id="sig_' + sigNum + '_file" accept="image/*" class="hidden" onchange="window.uploadSignature(' + sigNum + ')">' +
+                '<span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>' +
+            '</label>' +
+        '</div>';
     
     container.appendChild(newSignatory);
     
@@ -257,9 +259,10 @@ function addSignatory() {
     if (typeof window.updateSignatoryPreview === 'function') {
         window.updateSignatoryPreview();
     }
-}
+};
 
-function removeSignatory(signatoryNum) {
+// Expose removeSignatory globally
+window.removeSignatory = function removeSignatory(signatoryNum) {
     if (signatoryCount <= 1) {
         if (typeof Swal !== 'undefined' && window.Swal) {
             Swal.fire({
@@ -799,8 +802,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.updateSignatoryDataInJSON = updateSignatoryDataInJSON;
 });
 
-// Signature upload function
-function uploadSignature(signatoryNum) {
+// Signature upload function - expose globally
+window.uploadSignature = function uploadSignature(signatoryNum) {
     const fileInput = document.getElementById(`sig_${signatoryNum}_file`);
     const statusElement = document.getElementById(`sig_${signatoryNum}_status`);
     

@@ -62,7 +62,9 @@
     <div class="px-10 pt-16 pb-8 relative z-10">
             <div class="grid grid-cols-3 items-center">
             <div class="justify-self-start">
-                <img id="logo_left_img" src="{{ $leftLogo }}" alt="" class="w-20 h-20 object-contain certificate-image" onerror="this.style.display='none'">
+                @if($leftLogo)
+                <img id="logo_left_img" src="{{ $leftLogo }}" alt="" class="w-20 h-20 object-contain certificate-image" onerror="this.style.display='none'" style="display: none;">
+                @endif
             </div>
             <div class="text-center">
                 <div id="org_line1" class="text-sm font-semibold uppercase text-gray-700">{{ $certificateData['org_line1'] ?? 'Organization Name' }}</div>
@@ -73,7 +75,9 @@
                 <div class="text-sm text-gray-600">Ticket ID: <span id="ticket_id_preview">{{ $certificateData['ticket_id_preview'] ?? '—' }}</span></div>
             </div>
             <div class="justify-self-end">
-                <img id="logo_right_img" src="{{ $rightLogo }}" alt="" class="w-20 h-20 object-contain certificate-image" onerror="this.style.display='none'">
+                @if($rightLogo)
+                <img id="logo_right_img" src="{{ $rightLogo }}" alt="" class="w-20 h-20 object-contain certificate-image" onerror="this.style.display='none'" style="display: none;">
+                @endif
             </div>
         </div>
 
@@ -134,7 +138,7 @@
                         <div class="relative mx-auto w-4/5 h-16">
                             <div class="absolute inset-x-0 bottom-0 h-0.5" style="background-color: {{ $p ?? '#10b981' }};"></div>                                                             
                             @if((!empty($certificateData['signature_left_path']) || !empty($certificateData['sig_left_name'])) && $signatureLeftUrl)
-                                <img src="{{ $signatureLeftUrl }}" alt="Left Signature" class="absolute left-1/2 -translate-x-1/2 h-10 object-contain select-none pointer-events-none certificate-image" style="bottom: 2px;" onerror="this.style.display='none'" onload="this.style.display='block'">                                                                                 
+                                <img src="{{ $signatureLeftUrl }}" alt="Left Signature" class="absolute left-1/2 -translate-x-1/2 h-10 object-contain select-none pointer-events-none certificate-image" style="bottom: 2px; display: none;" onerror="this.style.display='none'" onload="this.style.display='block'">                                                                                 
                             @endif
                         </div>
                         <div id="sig_left_name" class="mt-2 font-semibold" style="color: {{ $p ?? '#10b981' }};">{{ $certificateData['sig_left_name'] ?? 'Event Coordinator' }}</div>          
@@ -144,7 +148,7 @@
                         <div class="relative mx-auto w-4/5 h-16">
                             <div class="absolute inset-x-0 bottom-0 h-0.5" style="background-color: {{ $p ?? '#10b981' }};"></div>                                                             
                             @if((!empty($certificateData['signature_right_path']) || !empty($certificateData['sig_right_name'])) && $signatureRightUrl)
-                                <img src="{{ $signatureRightUrl }}" alt="Right Signature" class="absolute left-1/2 -translate-x-1/2 h-10 object-contain select-none pointer-events-none certificate-image" style="bottom: 2px;" onerror="this.style.display='none'" onload="this.style.display='block'">                                                                               
+                                <img src="{{ $signatureRightUrl }}" alt="Right Signature" class="absolute left-1/2 -translate-x-1/2 h-10 object-contain select-none pointer-events-none certificate-image" style="bottom: 2px; display: none;" onerror="this.style.display='none'" onload="this.style.display='block'">                                                                               
                             @endif
                         </div>
                         <div id="sig_right_name" class="mt-2 font-semibold sig-line" style="color: {{ $p ?? '#10b981' }};">{{ $certificateData['sig_right_name'] ?? 'Event Director' }}</div>           
@@ -158,7 +162,7 @@
                                 <div class="relative mx-auto w-4/5 h-16">
                                     <div class="absolute inset-x-0 bottom-0 h-0.5" style="background-color: {{ $p ?? '#10b981' }};"></div>                                                             
                                     @if((!empty($certificateData["sig_{$i}_signature"]) || !empty($certificateData["sig_{$i}_name"])) && isset($signatureUrls[$i]))
-                                        <img src="{{ $signatureUrls[$i] }}" alt="Signature {{ $i }}" class="absolute left-1/2 -translate-x-1/2 h-10 object-contain select-none pointer-events-none certificate-image" style="bottom: 2px;" onerror="this.style.display='none'" onload="this.style.display='block'">                                                                                 
+                                        <img src="{{ $signatureUrls[$i] }}" alt="Signature {{ $i }}" class="absolute left-1/2 -translate-x-1/2 h-10 object-contain select-none pointer-events-none certificate-image" style="bottom: 2px; display: none;" onerror="this.style.display='none'" onload="this.style.display='block'">                                                                                 
                                     @endif
                                 </div>
                                 <div id="sig_{{$i}}_name" class="mt-2 font-semibold sig-line" style="color: {{ $p ?? '#10b981' }};">{{ $certificateData["sig_{$i}_name"] ?? 'Signatory ' . $i }}</div>          
