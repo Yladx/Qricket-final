@@ -2,7 +2,7 @@
 
 <!-- Event News Section - Facebook Style -->
 @if($news && $news->count() > 0)
-<div id="event-news-section" class="space-y-4 mt-6 pb-8">
+<div id="event-news-section-wrapper" class="space-y-4 mt-6">
         @foreach($news as $newsItem)
             <!-- Facebook Post -->
             <div class="w-full max-w-2xl mx-auto relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -83,7 +83,7 @@
 </div>
 @else
 <!-- No News State -->
-<div id="event-news-section" class="w-full max-w-2xl mx-auto">
+<div id="event-news-section-wrapper" class="w-full max-w-2xl mx-auto">
     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
         <svg class="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
@@ -134,8 +134,32 @@ window.currentImages = window.currentImages || [];
 window.currentImageIndex = window.currentImageIndex || 0;
 window.allNewsImages = window.allNewsImages || []; // Store all images from all news items
 
+// Watch for content changes and ensure footer stays at bottom
+function ensureFooterPositioning() {
+    // Force layout recalculation
+    requestAnimationFrame(() => {
+        document.body.offsetHeight; // Trigger reflow
+        window.dispatchEvent(new Event('resize'));
+    });
+}
+
 // Initialize image grids for each news item
 document.addEventListener('DOMContentLoaded', function() {
+    // Watch for content changes in news section
+    const newsSection = document.getElementById('event-news-section');
+    if (newsSection) {
+        const observer = new MutationObserver(() => {
+            ensureFooterPositioning();
+        });
+        
+        observer.observe(newsSection, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class', 'style']
+        });
+    }
+    
     @if($news && $news->count() > 0)
         // Collect all images from all news items
         @foreach($news as $newsItem)
@@ -262,10 +286,12 @@ function toggleNewsBody(newsId) {
     }
     
     // Force layout recalculation to ensure footer stays at bottom
-    // This ensures the page properly adjusts when content expands/collapses
+    ensureFooterPositioning();
+    
+    // Additional delay to ensure browser has processed the DOM changes
     setTimeout(() => {
-        window.dispatchEvent(new Event('resize'));
-    }, 100);
+        ensureFooterPositioning();
+    }, 50);
 }
 
 // Open modal from all images (new function that uses allNewsImages)

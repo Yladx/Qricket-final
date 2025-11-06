@@ -43,15 +43,15 @@
     
     <div class="py-0 min-h-screen relative z-10 flex flex-col">
         <!-- Content with proper z-index to appear above background -->
-        <div class="relative z-10 flex-1">
-            <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
+        <div class="relative z-10 flex-1 flex flex-col">
+            <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 flex-1 flex flex-col">
             
             <!-- Event Header Component -->
             <x-events.event-header :event="$event" :section="$section" />
 
-            <div class="{{ $section === 'news' ? 'w-full' : 'w-full' }}">
+            <div class="{{ $section === 'news' ? 'w-full' : 'w-full' }} flex-1 flex flex-col">
                 <!-- Main Content -->
-                <div class="{{ $section === 'news' ? 'w-full' : 'w-full' }} space-y-6">
+                <div class="{{ $section === 'news' ? 'w-full' : 'w-full' }} space-y-6 flex-1">
                     <!-- Event Info Section -->
                     <div id="event-info-section">
                         <x-events.event-info :section="$section" :event="$event" />
@@ -61,7 +61,7 @@
                     <div id="layout-components-display" class="space-y-8"></div>
 
                     <!-- Event News Section -->
-                    <div id="event-news-section" style="display: {{ $section === 'news' ? 'block' : 'none' }};" class="mt-6 mb-12">
+                    <div id="event-news-section" style="display: {{ $section === 'news' ? 'block' : 'none' }};" class="mt-6 pb-12">
                         <x-events.news :news="$news" :event="$event" />
                     </div>
                 </div>
@@ -70,7 +70,7 @@
         </div>
         
         <!-- Include Event Footer - At bottom of content -->
-        <div class="relative z-20 mt-auto pt-8">
+        <div class="relative z-20 w-full mt-auto">
             <x-events.event-footer :event="$event" :fixed="false" />
         </div>
         </div>

@@ -118,14 +118,29 @@ document.addEventListener('DOMContentLoaded', function() {
         const tiktokEl = document.getElementById('footer_tiktok');
         const statusEl = document.getElementById('save_footer_status');
         
-        const footerElements = [titleEl, emailEl, descEl, facebookEl, twitterEl, instagramEl, youtubeEl, tiktokEl];
-        if (!footerElements.some(el => el)) return;
+        // Filter out null elements and only keep existing ones
+        const footerElements = [titleEl, emailEl, descEl, facebookEl, twitterEl, instagramEl, youtubeEl, tiktokEl].filter(el => el !== null);
+        
+        // If no footer elements exist, exit early
+        if (footerElements.length === 0) return;
         
         const debounce = (fn, d=600)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), d); }; };
         const doSave = debounce(async () => {
             try {
                 if (statusEl) statusEl.textContent = 'Saving…';
-                const eventId = (new URLSearchParams(location.search)).get('id') || window.eventId || '';
+                // Try multiple sources for event ID
+                const eventId = (new URLSearchParams(location.search)).get('id') || window.currentEventId || window.eventId || '';
+                
+                if (!eventId) {
+                    console.warn('Footer autosave: No event ID found', {
+                        urlParams: (new URLSearchParams(location.search)).get('id'),
+                        currentEventId: window.currentEventId,
+                        eventId: window.eventId
+                    });
+                    if (statusEl) statusEl.textContent = 'Save failed: No event ID';
+                    return;
+                }
+                
                 const footer = {
                     title: titleEl?.value || '',
                     email: emailEl?.value || '',
@@ -136,18 +151,49 @@ document.addEventListener('DOMContentLoaded', function() {
                     youtube: youtubeEl?.value || '',
                     tiktok: tiktokEl?.value || ''
                 };
+                
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                if (!csrfToken) {
+                    console.error('Footer autosave: CSRF token not found');
+                    if (statusEl) statusEl.textContent = 'Save failed: CSRF token missing';
+                    return;
+                }
+                
                 const resp = await fetch('/organizer/events/update-session-layout', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
                     body: JSON.stringify({ footer_data: footer, id: eventId })
                 });
+                
+                if (!resp.ok) {
+                    throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+                }
+                
                 const data = await resp.json();
-                if (statusEl) statusEl.textContent = data && data.success ? 'Saved' : 'Save failed';
+                if (statusEl) {
+                    statusEl.textContent = data && data.success ? 'Saved' : 'Save failed';
+                    setTimeout(()=>{ if (statusEl) statusEl.textContent=''; }, 1500);
+                }
+            } catch(error) { 
+                console.error('Footer autosave error:', error);
+                if (statusEl) statusEl.textContent = 'Save failed';
                 setTimeout(()=>{ if (statusEl) statusEl.textContent=''; }, 1500);
-            } catch(_) { if (statusEl) statusEl.textContent = 'Save failed'; }
+            }
         }, 700);
+        
+        // Add event listeners to all existing footer elements
         ['input','change'].forEach(evt => {
-            footerElements.forEach(el => el && el.addEventListener(evt, doSave));
+            footerElements.forEach(el => {
+                if (el) {
+                    el.addEventListener(evt, doSave);
+                }
+            });
         });
+        
+        console.log('Footer autosave initialized for', footerElements.length, 'elements');
     })();
 });
