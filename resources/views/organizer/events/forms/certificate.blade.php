@@ -290,6 +290,39 @@ window.addSignatory = function addSignatory() {
     console.log('addSignatory completed successfully');
 };
 
+// Immediately attach event listener to add button (works even if DOM not ready yet)
+(function attachAddButtonListener() {
+    function attachListener() {
+        const addBtn = document.getElementById('add-signatory-btn');
+        if (addBtn && !addBtn.hasAttribute('data-listener-added')) {
+            addBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Add button clicked - event listener triggered');
+                if (typeof window.addSignatory === 'function') {
+                    window.addSignatory();
+                } else {
+                    console.error('window.addSignatory is not a function');
+                    alert('Error: Add signatory function not available');
+                }
+            });
+            addBtn.setAttribute('data-listener-added', 'true');
+            console.log('Event listener attached to add button');
+        }
+    }
+    
+    // Try immediately
+    attachListener();
+    
+    // Also try when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachListener);
+    } else {
+        // DOM already ready, try again
+        setTimeout(attachListener, 100);
+    }
+})();
+
 // Expose removeSignatory globally
 window.removeSignatory = function removeSignatory(signatoryNum) {
     if (signatoryCount <= 1) {
@@ -626,19 +659,23 @@ document.addEventListener('DOMContentLoaded', function() {
     signatoryCount = existingSignatories.length || 1;
     console.log('Initial signatoryCount set to:', signatoryCount);
     
-    // Update add button state and add event listener
+    // Update add button state
     const addBtn = document.getElementById('add-signatory-btn');
     if (addBtn) {
         if (signatoryCount >= 4) {
             addBtn.disabled = true;
             addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            addBtn.disabled = false;
+            addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
-        // Add click handler if not already added
+        
+        // Ensure event listener is attached (check if already added by earlier code)
         if (!addBtn.hasAttribute('data-listener-added')) {
             addBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Add button clicked');
+                console.log('Add button clicked from DOMContentLoaded');
                 if (typeof window.addSignatory === 'function') {
                     window.addSignatory();
                 } else {
@@ -647,10 +684,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             addBtn.setAttribute('data-listener-added', 'true');
-            console.log('Event listener added to add button');
+            console.log('Event listener added to add button in DOMContentLoaded');
         }
     } else {
-        console.error('Add button not found');
+        console.error('Add button not found in DOMContentLoaded');
     }
     
     // Load theme colors from JSON and apply to color inputs

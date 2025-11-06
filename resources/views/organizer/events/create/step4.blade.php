@@ -172,7 +172,27 @@
                     toCreate.push(i);
                 }
             }
-            toCreate.forEach(()=> addSignatory());
+            // Wait for window.addSignatory to be available
+            if (typeof window.addSignatory === 'function') {
+                toCreate.forEach(()=> window.addSignatory());
+            } else {
+                // If function not ready yet, wait for it
+                setTimeout(() => {
+                    if (typeof window.addSignatory === 'function') {
+                        toCreate.forEach(()=> window.addSignatory());
+                        // Fill values after adding
+                        for (let i=1;i<=4;i++){
+                            const name = existingCertificateData[`sig_${i}_name`];
+                            const title = existingCertificateData[`sig_${i}_title`];
+                            if (name !== undefined){ const el = document.getElementById(`sig_${i}_name_input`); if (el) el.value = name; }
+                            if (title !== undefined){ const el = document.getElementById(`sig_${i}_title_input`); if (el) el.value = title; }
+                            const sigPath = existingCertificateData[`sig_${i}_signature`];
+                            if (sigPath){ const st = document.getElementById(`sig_${i}_status`); if (st) st.textContent = 'Uploaded'; }
+                        }
+                        updateSignatoryPreview();
+                    }
+                }, 100);
+            }
             // Fill values
             for (let i=1;i<=4;i++){
                 const name = existingCertificateData[`sig_${i}_name`];
