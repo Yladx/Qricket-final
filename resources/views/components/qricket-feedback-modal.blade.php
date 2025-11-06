@@ -15,50 +15,20 @@
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Help us improve your experience</p>
             </div>
 
-            <!-- Modal Body -->
-            <div class="p-6">
-                <div class="space-y-4">
-                    <!-- Quick Rating -->
-                    <div>
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">How would you rate your overall experience?</p>
-                        <div class="flex space-x-1">
-                            <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 transition-colors" data-rating="1">★</button>
-                            <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 transition-colors" data-rating="2">★</button>
-                            <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 transition-colors" data-rating="3">★</button>
-                            <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 transition-colors" data-rating="4">★</button>
-                            <button type="button" class="star-btn text-2xl text-gray-300 hover:text-yellow-400 transition-colors" data-rating="5">★</button>
-                        </div>
-                    </div>
-
-                    <!-- Quick Comment -->
-                    <div>
-                        <label for="quickComment" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Any quick feedback? (Optional)</label>
-                        <textarea id="quickComment" rows="3" class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Share your thoughts..."></textarea>
-                    </div>
-                </div>
-            </div>
-
             <!-- Modal Footer -->
             <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-between">
                 <button onclick="dismissFeedbackModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors">
                     Maybe Later
                 </button>
-                <div class="space-x-2">
-                    <button onclick="openFullFeedback()" class="px-4 py-2 text-sm font-medium text-qricket-600 dark:text-qricket-400 hover:text-qricket-700 dark:hover:text-qricket-300 transition-colors">
-                        Give Detailed Feedback
-                    </button>
-                    <button onclick="submitQuickFeedback()" class="px-4 py-2 text-sm font-medium text-white bg-qricket-500 hover:bg-qricket-600 rounded-md transition-colors">
-                        Submit Rating
-                    </button>
-                </div>
+                <button onclick="openFullFeedback()" class="px-4 py-2 text-sm font-medium text-qricket-600 dark:text-qricket-400 hover:text-qricket-700 dark:hover:text-qricket-300 transition-colors">
+                    Give Detailed Feedback
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-let selectedRating = 0;
-
 // Check if feedback modal should be shown
 function checkFeedbackModal() {
     // Don't show if already dismissed today
@@ -94,47 +64,7 @@ function checkFeedbackModal() {
     });
 }
 
-// Star rating functionality
 document.addEventListener('DOMContentLoaded', function() {
-    const starButtons = document.querySelectorAll('.star-btn');
-    
-    starButtons.forEach((button, index) => {
-        button.addEventListener('click', function() {
-            selectedRating = index + 1;
-            
-            // Update visual state
-            starButtons.forEach((btn, i) => {
-                if (i < selectedRating) {
-                    btn.classList.add('text-yellow-400');
-                    btn.classList.remove('text-gray-300');
-                } else {
-                    btn.classList.remove('text-yellow-400');
-                    btn.classList.add('text-gray-300');
-                }
-            });
-        });
-
-        button.addEventListener('mouseenter', function() {
-            const rating = index + 1;
-            starButtons.forEach((btn, i) => {
-                if (i < rating) {
-                    btn.classList.add('text-yellow-400');
-                    btn.classList.remove('text-gray-300');
-                }
-            });
-        });
-    });
-
-    // Reset stars on mouse leave
-    document.querySelector('.flex.space-x-1').addEventListener('mouseleave', function() {
-        if (selectedRating === 0) {
-            starButtons.forEach(btn => {
-                btn.classList.remove('text-yellow-400');
-                btn.classList.add('text-gray-300');
-            });
-        }
-    });
-
     // Check if modal should be shown
     checkFeedbackModal();
 });
@@ -151,78 +81,5 @@ function dismissFeedbackModal() {
 function openFullFeedback() {
     window.open('/feedback/qricket', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
     closeFeedbackModal();
-}
-
-function submitQuickFeedback() {
-    if (selectedRating === 0) {
-        if (typeof Swal !== 'undefined' && window.Swal) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Select Rating',
-                text: 'Please select a rating before submitting.',
-                confirmButtonColor: '#10b981'
-            });
-        } else {
-            alert('Please select a rating');
-        }
-        return;
-    }
-
-    const comment = document.getElementById('quickComment').value;
-    
-    const formData = new FormData();
-    formData.append('process_satisfaction', selectedRating);
-    if (comment.trim()) {
-        formData.append('additional_comments', comment);
-    }
-
-    fetch('/feedback/qricket', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            localStorage.setItem('qricket_feedback_given_date', new Date().toDateString());
-            closeFeedbackModal();
-            
-            // Show success message
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Thank You!',
-                    text: 'Your feedback has been submitted.',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            }
-        } else {
-            if (typeof Swal !== 'undefined' && window.Swal) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Submission Failed',
-                    text: 'Failed to submit feedback. Please try again.',
-                });
-            } else {
-                alert('Failed to submit feedback. Please try again.');
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        if (typeof Swal !== 'undefined' && window.Swal) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to submit feedback. Please try again.',
-            });
-        } else {
-            alert('Failed to submit feedback. Please try again.');
-        }
-    });
 }
 </script>

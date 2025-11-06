@@ -422,12 +422,20 @@ function renumberSignatories() {
     const certDataEl = document.getElementById('certificate_data_json');
     let certData = {};
     
-    // Load existing certificate data if available
+    // Load existing certificate data if available (to preserve signatures)
     if (certDataEl) {
         try {
             certData = JSON.parse(certDataEl.value || '{}');
         } catch (e) {
             console.error('Failed to parse certificate data:', e);
+        }
+    }
+    
+    // Create a map of old signature paths before clearing
+    const signatureMap = {};
+    for (let i = 1; i <= 4; i++) {
+        if (certData[`sig_${i}_signature`]) {
+            signatureMap[i] = certData[`sig_${i}_signature`];
         }
     }
     
@@ -438,6 +446,7 @@ function renumberSignatories() {
         delete certData[`sig_${i}_signature`];
     }
     
+    // Renumber and collect CURRENT values from all signatories
     signatories.forEach((item, index) => {
         const newNum = index + 1;
         item.setAttribute('data-signatory', newNum);
@@ -446,46 +455,52 @@ function renumberSignatories() {
             title.textContent = `Signatory ${newNum}`;
         }
         
-        // Update input names and IDs
-        const nameInput = item.querySelector('input[name^="sig_"][name$="_name"]');
-        const titleInput = item.querySelector('input[name^="sig_"][name$="_title"]');
+        // Find inputs - try multiple selectors
+        const nameInput = item.querySelector('input[name^="sig_"][name$="_name"]') || document.getElementById(`sig_${index + 1}_name_input`);
+        const titleInput = item.querySelector('input[name^="sig_"][name$="_title"]`) || document.getElementById(`sig_${index + 1}_title_input`);
         const fileInput = item.querySelector('input[type="file"]');
-        const statusEl = item.querySelector('[id^="sig_"][id$="_status"]');
+        const statusEl = item.querySelector('[id^="sig_"][id$="_status"]`) || document.getElementById(`sig_${index + 1}_status`);
         
+        // Update input names and IDs
         if (nameInput) {
             const oldName = nameInput.name;
-            const oldNum = oldName.match(/sig_(\d+)_name/)?.[1];
+            const oldNum = oldName ? oldName.match(/sig_(\d+)_name/)?.[1] : null;
             nameInput.name = `sig_${newNum}_name`;
             nameInput.id = `sig_${newNum}_name_input`;
-            // Preserve data in JSON with new number
-            if (oldNum && certData[`sig_${oldNum}_name`]) {
-                certData[`sig_${newNum}_name`] = certData[`sig_${oldNum}_name`];
-                // Also preserve signature path if it exists
-                if (certData[`sig_${oldNum}_signature`]) {
-                    certData[`sig_${newNum}_signature`] = certData[`sig_${oldNum}_signature`];
+            // Use CURRENT value, not old value
+            certData[`sig_${newNum}_name`] = nameInput.value || '';
+            // Preserve signature path if it exists
+            if (oldNum && signatureMap[oldNum]) {
+                certData[`sig_${newNum}_signature`] = signatureMap[oldNum];
+            } else if (statusEl && (statusEl.textContent === 'Uploaded' || statusEl.textContent.includes('signature'))) {
+                // Try to get signature from current data
+                const currentData = JSON.parse(certDataEl?.value || '{}');
+                if (currentData[`sig_${oldNum || newNum}_signature`]) {
+                    certData[`sig_${newNum}_signature`] = currentData[`sig_${oldNum || newNum}_signature`];
                 }
-            } else if (nameInput.value) {
-                certData[`sig_${newNum}_name`] = nameInput.value;
             }
         }
+        
         if (titleInput) {
             const oldTitle = titleInput.name;
-            const oldNum = oldTitle.match(/sig_(\d+)_title/)?.[1];
             titleInput.name = `sig_${newNum}_title`;
             titleInput.id = `sig_${newNum}_title_input`;
-            // Preserve data in JSON with new number
-            if (oldNum && certData[`sig_${oldNum}_title`]) {
-                certData[`sig_${newNum}_title`] = certData[`sig_${oldNum}_title`];
-            } else if (titleInput.value) {
-                certData[`sig_${newNum}_title`] = titleInput.value;
-            }
+            // Use CURRENT value, not old value
+            certData[`sig_${newNum}_title`] = titleInput.value || '';
         }
+        
         if (fileInput) {
             fileInput.id = `sig_${newNum}_file`;
             fileInput.setAttribute('onchange', `uploadSignature(${newNum})`);
         }
+        
         if (statusEl) {
             statusEl.id = `sig_${newNum}_status`;
+            // Update signature label
+            const sigLabel = statusEl.closest('.signatory-item')?.querySelector('.text-xs.font-medium');
+            if (sigLabel && sigLabel.textContent.includes('Signature')) {
+                sigLabel.textContent = `Signature ${newNum}`;
+            }
         }
         
         // Update remove button onclick
@@ -495,10 +510,18 @@ function renumberSignatories() {
         }
     });
     
+    // Update signatory count
+    certData.signatory_count = signatories.length;
+    
     // Save updated certificate data back to hidden input
     if (certDataEl) {
         certDataEl.value = JSON.stringify(certData);
     }
+    
+    console.log('Renumbered signatories:', {
+        count: signatories.length,
+        data: Object.keys(certData).filter(k => k.startsWith('sig_'))
+    });
 }
 
 // Initialize on page load
@@ -510,38 +533,31 @@ document.addEventListener('DOMContentLoaded', function() {
             const certData = JSON.parse(jsonEl.value);
             const savedSignatoryCount = certData.signatory_count || 1;
             
-            // If we have more signatories saved than currently in DOM, add them
-            const existingSignatories = document.querySelectorAll('.signatory-item');
+            // Get current count BEFORE adding any new signatories
+            let existingSignatories = document.querySelectorAll('.signatory-item');
             const currentCount = existingSignatories.length;
             
+            // If we have more signatories saved than currently in DOM, add them
             if (savedSignatoryCount > currentCount) {
                 // Add missing signatories
                 for (let i = currentCount + 1; i <= savedSignatoryCount && i <= 4; i++) {
                     addSignatory();
-                    
-                    // Populate the newly added signatory with saved data
-                    const nameInput = document.getElementById(`sig_${i}_name_input`);
-                    const titleInput = document.getElementById(`sig_${i}_title_input`);
-                    const statusEl = document.getElementById(`sig_${i}_status`);
-                    
-                    if (nameInput && certData[`sig_${i}_name`]) {
-                        nameInput.value = certData[`sig_${i}_name`];
-                    }
-                    if (titleInput && certData[`sig_${i}_title`]) {
-                        titleInput.value = certData[`sig_${i}_title`];
-                    }
-                    if (statusEl && certData[`sig_${i}_signature`]) {
-                        statusEl.textContent = 'Uploaded';
-                        statusEl.className = 'text-xs text-green-500 dark:text-green-400';
-                    }
                 }
+                
+                // Update signatory count after adding
+                signatoryCount = savedSignatoryCount;
             }
             
-            // Populate existing signatories with saved data
+            // Re-query ALL signatories after adding missing ones
+            existingSignatories = document.querySelectorAll('.signatory-item');
+            
+            // Populate ALL signatories with saved data (including newly added ones)
             existingSignatories.forEach((item, index) => {
                 const signatoryNum = index + 1;
-                const nameInput = item.querySelector(`input[name="sig_${signatoryNum}_name"]`);
-                const titleInput = item.querySelector(`input[name="sig_${signatoryNum}_title"]`);
+                
+                // Try multiple selectors to find the inputs
+                const nameInput = item.querySelector(`input[name="sig_${signatoryNum}_name"]`) || document.getElementById(`sig_${signatoryNum}_name_input`);
+                const titleInput = item.querySelector(`input[name="sig_${signatoryNum}_title"]`) || document.getElementById(`sig_${signatoryNum}_title_input`);
                 const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
                 
                 if (nameInput && certData[`sig_${signatoryNum}_name`]) {
@@ -554,6 +570,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     statusEl.textContent = 'Uploaded';
                     statusEl.className = 'text-xs text-green-500 dark:text-green-400';
                 }
+            });
+            
+            console.log('Loaded signatories:', {
+                savedCount: savedSignatoryCount,
+                loadedCount: existingSignatories.length,
+                signatoryData: Object.keys(certData).filter(k => k.startsWith('sig_'))
             });
         } catch (e) {
             console.error('Failed to load signatories from JSON:', e);
@@ -704,11 +726,77 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners for signatory input changes
     document.addEventListener('input', function(event) {
         if (event.target.matches('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]')) {
+            // Update certificate data JSON with current values
+            updateSignatoryDataInJSON();
+            
+            // Update preview if function exists
             if (typeof window.updateSignatoryPreview === 'function') {
                 window.updateSignatoryPreview();
             }
+            
+            // Trigger autosave
+            if (typeof window.autosaveDebounced === 'function') {
+                window.autosaveDebounced();
+            }
         }
     });
+    
+    // Function to update signatory data in JSON
+    function updateSignatoryDataInJSON() {
+        const certDataEl = document.getElementById('certificate_data_json');
+        if (!certDataEl) return;
+        
+        try {
+            const certData = JSON.parse(certDataEl.value || '{}');
+            const signatories = document.querySelectorAll('.signatory-item');
+            
+            // Clear old signatory data
+            for (let i = 1; i <= 4; i++) {
+                delete certData[`sig_${i}_name`];
+                delete certData[`sig_${i}_title`];
+                // Don't delete signatures - preserve them
+            }
+            
+            // Collect current values from all signatories
+            signatories.forEach((item, index) => {
+                const signatoryNum = index + 1;
+                const nameInput = item.querySelector(`input[name="sig_${signatoryNum}_name"]`) || document.getElementById(`sig_${signatoryNum}_name_input`);
+                const titleInput = item.querySelector(`input[name="sig_${signatoryNum}_title"]`) || document.getElementById(`sig_${signatoryNum}_title_input`);
+                const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
+                
+                if (nameInput) {
+                    certData[`sig_${signatoryNum}_name`] = nameInput.value || '';
+                }
+                if (titleInput) {
+                    certData[`sig_${signatoryNum}_title`] = titleInput.value || '';
+                }
+                
+                // Preserve signature if it exists (don't overwrite)
+                if (statusEl && (statusEl.textContent === 'Uploaded' || statusEl.textContent.includes('signature'))) {
+                    const currentData = JSON.parse(certDataEl.value || '{}');
+                    if (currentData[`sig_${signatoryNum}_signature`]) {
+                        certData[`sig_${signatoryNum}_signature`] = currentData[`sig_${signatoryNum}_signature`];
+                    }
+                }
+            });
+            
+            // Update signatory count
+            certData.signatory_count = signatories.length;
+            
+            // Save back to hidden input
+            certDataEl.value = JSON.stringify(certData);
+            
+            console.log('Updated signatory data:', {
+                count: signatories.length,
+                signatories: Object.keys(certData).filter(k => k.startsWith('sig_'))
+            });
+        } catch (e) {
+            console.error('Failed to update signatory data in JSON:', e);
+        }
+    }
+    
+    // Expose function globally for use by other scripts
+    window.updateSignatoryDataInJSON = updateSignatoryDataInJSON;
 });
 
 // Signature upload function
