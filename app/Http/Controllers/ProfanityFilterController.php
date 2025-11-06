@@ -25,18 +25,22 @@ class ProfanityFilterController extends Controller
         // Remove profanity completely (empty replacement)
         $filteredText = ProfanityFilterService::filterProfanity($text, '');
         
-        // Clean up spaces intelligently:
-        // 1. Remove multiple consecutive spaces (2+) and replace with single space
-        // 2. Remove spaces around removed words (space-word-space becomes nothing, space-word becomes nothing, word-space becomes nothing)
-        // 3. But preserve the overall text structure - don't trim leading/trailing spaces if they were intentional
-        
-        // Remove multiple consecutive spaces (2 or more)
-        $filteredText = preg_replace('/\s{2,}/', ' ', $filteredText);
-        
-        // Remove orphaned spaces (space-punctuation or punctuation-space patterns that don't make sense)
-        // This handles cases like "word ! word" or "word, word" after word removal
-        $filteredText = preg_replace('/\s+([.,!?;:])/', '$1', $filteredText); // Remove space before punctuation
-        $filteredText = preg_replace('/([.,!?;:])\s+/', '$1 ', $filteredText); // Normalize space after punctuation
+        // Only clean up spaces if text was actually filtered (to avoid unnecessary processing)
+        if ($filteredText !== $text) {
+            // Clean up spaces intelligently:
+            // 1. Remove multiple consecutive spaces (3+) but allow double spaces
+            // 2. Only remove spaces that are clearly orphaned
+            
+            // Remove multiple consecutive spaces (3 or more) - be more conservative
+            $filteredText = preg_replace('/\s{3,}/', '  ', $filteredText);
+            
+            // Remove orphaned spaces before punctuation (but preserve structure)
+            // Only remove if there are multiple spaces before punctuation
+            $filteredText = preg_replace('/\s{2,}([.,!?;:])/', '$1', $filteredText);
+            
+            // Normalize spaces after punctuation (ensure single space)
+            $filteredText = preg_replace('/([.,!?;:])\s{2,}/', '$1 ', $filteredText);
+        }
         
         return response()->json([
             'success' => true,

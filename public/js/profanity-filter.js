@@ -62,6 +62,9 @@
 
     // Track if we're currently filtering to prevent loops
     let isFiltering = false;
+    
+    // Track last value to detect space-only changes
+    const lastValues = new WeakMap();
 
     // Process input field
     async function processInputField(input) {
@@ -72,10 +75,23 @@
 
         const originalValue = input.value;
         if (!originalValue || originalValue.trim().length === 0) {
+            lastValues.set(input, originalValue);
             return;
         }
 
         const cursorPosition = input.selectionStart;
+        const lastValue = lastValues.get(input) || '';
+        
+        // Check if the only change is adding a space at the end
+        // If so, skip filtering to allow smooth typing
+        if (originalValue.length > lastValue.length) {
+            const addedText = originalValue.slice(lastValue.length);
+            // If only spaces were added, skip filtering for smoother experience
+            if (addedText.trim().length === 0 && addedText.length > 0) {
+                lastValues.set(input, originalValue);
+                return;
+            }
+        }
 
         try {
             isFiltering = true;
@@ -85,22 +101,29 @@
 
             // Only update if the value changed
             if (filteredValue !== originalValue) {
-                // Calculate new cursor position
-                // Filter the text before cursor to see how much was removed
+                // Calculate new cursor position more accurately
                 const textBeforeCursor = originalValue.substring(0, cursorPosition);
                 const filteredBeforeCursor = await filterProfanity(textBeforeCursor);
-                const newCursorPosition = filteredBeforeCursor.length;
+                
+                // Calculate how many characters were removed before the cursor
+                const charsRemovedBefore = textBeforeCursor.length - filteredBeforeCursor.length;
+                const newCursorPosition = cursorPosition - charsRemovedBefore;
 
                 // Update the value
                 input.value = filteredValue;
 
                 // Restore cursor position (clamp to valid range)
-                const safePosition = Math.min(newCursorPosition, filteredValue.length);
+                const safePosition = Math.max(0, Math.min(newCursorPosition, filteredValue.length));
                 input.setSelectionRange(safePosition, safePosition);
 
-                // Trigger change event for form validation
-                input.dispatchEvent(new Event('change', { bubbles: true }));
+                // Trigger input event for form validation (but mark as filtered to avoid loop)
+                const inputEvent = new Event('input', { bubbles: true });
+                Object.defineProperty(inputEvent, 'filteredByProfanityFilter', { value: true, writable: false });
+                input.dispatchEvent(inputEvent);
             }
+            
+            // Update last value
+            lastValues.set(input, input.value);
         } catch (error) {
             console.error('Error filtering profanity:', error);
         } finally {
@@ -108,8 +131,8 @@
         }
     }
 
-    // Debounced version - reduced delay for faster response (100ms for near-instant feel)
-    const debouncedProcessInput = debounce(processInputField, 100);
+    // Debounced version - slightly longer delay for smoother experience (250ms)
+    const debouncedProcessInput = debounce(processInputField, 250);
 
     // Initialize profanity filter on an input/textarea
     function initializeProfanityFilter(element) {
@@ -123,36 +146,46 @@
 
         // Add input event listener - use 'input' for real-time detection
         element.addEventListener('input', function(e) {
+            // Skip if this event was triggered by our filter (to avoid loops)
+            if (e.filteredByProfanityFilter) {
+                return;
+            }
+            
             // Skip if we're currently filtering
             if (isFiltering) {
                 return;
             }
 
-            // Process immediately for better real-time feel
+            // Check if user just typed a space - if so, delay filtering slightly
+            const currentValue = this.value;
+            const lastValue = lastValues.get(this) || '';
+            
+            // If the change is just adding a space or spaces at the end, be more lenient
+            if (currentValue.length > lastValue.length) {
+                const addedText = currentValue.slice(lastValue.length);
+                // If only spaces were added, wait a bit longer before filtering
+                if (addedText.trim().length === 0) {
+                    // Longer delay for space-only additions
+                    setTimeout(() => {
+                        if (!isFiltering) {
+                            debouncedProcessInput(this);
+                        }
+                    }, 300);
+                    return;
+                }
+            }
+
+            // Process normally for other changes
             debouncedProcessInput(this);
         }, { passive: true });
 
-        // Also listen to keyup for immediate detection
-        element.addEventListener('keyup', function(e) {
-            // Skip if we're currently filtering
-            if (isFiltering) {
-                return;
-            }
-
-            // Skip modifier keys
-            if (e.ctrlKey || e.metaKey || e.altKey) {
-                return;
-            }
-
-            // Process immediately
-            debouncedProcessInput(this);
-        }, { passive: true });
-
-        // Also check on paste
+        // Also check on paste (with longer delay to allow paste to complete)
         element.addEventListener('paste', function(e) {
             setTimeout(() => {
-                debouncedProcessInput(this);
-            }, 10);
+                if (!isFiltering) {
+                    debouncedProcessInput(this);
+                }
+            }, 100);
         });
     }
 
