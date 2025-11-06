@@ -462,9 +462,17 @@
                         window.addSignatory();
                     }
                     
+                    // Wait longer for DOM to fully update, then populate all values
                     setTimeout(() => {
+                        console.log('First populate attempt after', 200, 'ms (edit)');
                         populateAllValues();
-                    }, 150);
+                    }, 200);
+                    
+                    // Also try again after a longer delay in case first attempt fails
+                    setTimeout(() => {
+                        console.log('Second populate attempt after', 500, 'ms (edit)');
+                        populateAllValues();
+                    }, 500);
                 } else {
                     // Populate existing signatories even if count matches
                     console.log('No need to add signatories, just populating values (edit)');
@@ -531,19 +539,21 @@
                     if (nameInput) {
                         if (name !== undefined && name !== null) {
                             nameInput.value = name || '';
-                            console.log('Populated sig_' + i + '_name:', name || '(empty)');
+                            nameInput.dispatchEvent(new Event('input', { bubbles: true })); // Trigger input event for autosave
+                            console.log('✓ Populated sig_' + i + '_name:', name || '(empty)');
                         }
                     } else {
-                        console.warn('Name input not found for signatory (edit)', i);
+                        console.warn('❌ Name input not found for signatory (edit)', i);
                     }
                     
                     if (titleInput) {
                         if (title !== undefined && title !== null) {
                             titleInput.value = title || '';
-                            console.log('Populated sig_' + i + '_title:', title || '(empty)');
+                            titleInput.dispatchEvent(new Event('input', { bubbles: true })); // Trigger input event for autosave
+                            console.log('✓ Populated sig_' + i + '_title:', title || '(empty)');
                         }
                     } else {
-                        console.warn('Title input not found for signatory (edit)', i);
+                        console.warn('❌ Title input not found for signatory (edit)', i);
                     }
                     
                     if (statusEl && sigPath) {
@@ -563,6 +573,13 @@
                 }
                 
                 updateSignatoryPreview();
+                
+                // Trigger autosave after populating all values
+                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
+                    console.log('Triggering autosave after populating signatories (edit)');
+                    autosaveDebounced();
+                }
+                
                 console.log('Finished populating signatory values (edit)');
             }
             

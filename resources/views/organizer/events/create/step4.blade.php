@@ -473,15 +473,21 @@
                     // Wait longer for DOM to fully update, then populate all values
                     // Use multiple attempts to ensure DOM is ready
                     setTimeout(() => {
-                        console.log('First populate attempt after', 200, 'ms');
+                        console.log('First populate attempt after', 300, 'ms');
                         populateSignatoryValues();
-                    }, 200);
+                    }, 300);
                     
                     // Also try again after a longer delay in case first attempt fails
                     setTimeout(() => {
-                        console.log('Second populate attempt after', 500, 'ms');
+                        console.log('Second populate attempt after', 600, 'ms');
                         populateSignatoryValues();
-                    }, 500);
+                    }, 600);
+                    
+                    // Third attempt as backup
+                    setTimeout(() => {
+                        console.log('Third populate attempt after', 1000, 'ms');
+                        populateSignatoryValues();
+                    }, 1000);
                 } else {
                     // Just populate existing signatories immediately
                     console.log('No need to add signatories, just populating values');
@@ -598,6 +604,12 @@
                 
                 // Update preview
                 updateSignatoryPreview();
+                
+                // Trigger autosave after populating all values
+                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
+                    console.log('Triggering autosave after populating signatories');
+                    autosaveDebounced();
+                }
                 
                 console.log('Finished populating signatory values');
             }
