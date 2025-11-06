@@ -260,7 +260,7 @@
             updateSignatoryPreview();
             
             // Trigger autosave
-            if (typeof autosaveDebounced === 'function') {
+            if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                 autosaveDebounced();
             }
             
@@ -360,7 +360,7 @@
             updateSignatoryPreview();
             
             // Trigger autosave
-            if (typeof autosaveDebounced === 'function') {
+            if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                 autosaveDebounced();
             }
             
@@ -627,9 +627,7 @@
                 updateSignatoryPreview();
             }
         });
-        // Autosave helpers (debounced)
-        const debounce = (fn, d=600)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), d); }; };
-        const statusEl = document.getElementById('cert_autosave_status');
+        // Autosave helpers (debounced) - initialize autosaveDebounced now that collectPayload is defined
         async function autosaveCert(){
             try {
                 if (statusEl) statusEl.textContent = 'Saving…';
@@ -653,7 +651,7 @@
                 console.error('Certificate autosave failed', e);
             }
         }
-        const autosaveDebounced = debounce(autosaveCert, 700);
+        autosaveDebounced = debounce(autosaveCert, 700);
 
         async function postJSON(url, payload){
             const resp = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json', 'X-CSRF-TOKEN': csrf }, body: JSON.stringify(payload) });
@@ -689,7 +687,9 @@
                         current[`logo_${side}_url`] = data.url;
                         if (jsonEl) jsonEl.value = JSON.stringify(current);
                     } catch(_) {}
-                autosaveDebounced();
+                    if (autosaveDebounced && typeof autosaveDebounced === 'function') {
+                        autosaveDebounced();
+                    }
             }
         }
 
@@ -713,7 +713,9 @@
                     current[`sig_${signatoryNum}_signature`] = res.signature_path || `events/${eventId}/certificate/signature_${signatoryNum}.enc`;
                     if (jsonEl) jsonEl.value = JSON.stringify(current);
                 } catch(_) {}
-                autosaveDebounced();
+                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
+                    autosaveDebounced();
+                }
                 // Update inline preview image if present
                 const img = document.querySelector(`#cert_preview_wrapper img[src*="signature_${signatoryNum}.enc"]`);
                 if (img) {
