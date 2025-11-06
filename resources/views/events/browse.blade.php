@@ -383,6 +383,23 @@
         /* Hide horizontal scrollbar for cleaner UI */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Hide native select arrows completely */
+        select.appearance-none {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        /* For Firefox */
+        select.appearance-none::-ms-expand {
+            display: none;
+        }
+        
+        /* For IE */
+        select.appearance-none::-ms-value {
+            background: transparent;
+        }
     </style>
 
     <script>
