@@ -9,10 +9,10 @@
         <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('{{ $bgUrl }}')"></div>
         <div class="absolute inset-0 bg-black/50"></div>
     @endif
-    <div class="relative p-10 text-white">
-        <h2 class="text-3xl font-bold mb-2">{{ $headline ?: 'Spotlight' }}</h2>
+    <div class="relative p-6 md:p-10 text-white">
+        <h2 class="text-2xl md:text-3xl font-bold mb-2">{{ $headline ?: 'Spotlight' }}</h2>
         @if($sub)
-            <p class="text-lg opacity-90">{{ $sub }}</p>
+            <p class="text-base md:text-lg opacity-90">{{ $sub }}</p>
         @endif
     </div>
 </section>

@@ -62,7 +62,7 @@
         <!-- Event Info Section (if enabled) -->
         @if(isset($details['show_event_info']) && $details['show_event_info'])
         <div class="mt-16">
-            <div class="grid grid-cols-2 gap-6 max-w-md mx-auto">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-md mx-auto">
                 <div class="text-center">
                     <div class="text-2xl font-bold text-qricket-600 dark:text-qricket-400">
                         {{ $event->start_date->format('j') }}

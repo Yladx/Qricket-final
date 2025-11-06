@@ -12,13 +12,13 @@
     };
 @endphp
 
-<div class="p-4">
-    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+<div class="p-4 md:p-6">
+    <h3 class="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 md:mb-6 flex items-center gap-2">
       
         {{ $title }}
     </h3>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 place-items-center">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6 place-items-center">
         @forelse($sponsors as $s)
             @php
                 // Support both legacy string entries and new object entries { logo: path }
