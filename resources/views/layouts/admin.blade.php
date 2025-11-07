@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Qricket Admin' }}</title>
     <meta name="description" content="{{ $metaDescription ?? 'Qricket Admin Dashboard - Manage events, users, and platform settings.' }}">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <script src="https://cdn.tailwindcss.com" defer></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
@@ -12,7 +15,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- Pusher.js for Laravel Reverb (deferred to prevent blocking) -->
     <script defer src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
@@ -39,19 +42,19 @@
     </script>
     
     <!-- Global Notification Handler -->
-    <script src="{{ asset('js/notifications.js') }}"></script>
+    <script defer src="{{ asset('js/notifications.js') }}"></script>
     
     <!-- Admin Notifications Handler (real-time Pusher + badge updates) -->
-    <script src="{{ asset('js/admin-notifications.js') }}?v={{ time() }}"></script>
+    <script defer src="{{ asset('js/admin-notifications.js') }}?v={{ time() }}"></script>
     
     <!-- Qricket General Scripts -->
-    <script src="{{ asset('js/qricket-scripts.js') }}?v={{ time() }}"></script>
+    <script defer src="{{ asset('js/qricket-scripts.js') }}?v={{ time() }}"></script>
     
     <!-- Logout Prevention Script -->
-    <script src="{{ asset('js/logout-prevention.js') }}?v={{ time() }}"></script>
+    <script defer src="{{ asset('js/logout-prevention.js') }}?v={{ time() }}"></script>
     
     <!-- Profanity Filter (Real-time) -->
-    <script src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
+    <script defer src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
     
     <script>
         // Wait for Tailwind to load before configuring it
@@ -116,7 +119,6 @@
         
         // Fallback: try again after a short delay
         setTimeout(configureTailwind, 100);
-        setTimeout(configureTailwind, 500);
     </script>
     
     @yield('styles')

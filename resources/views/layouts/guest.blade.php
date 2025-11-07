@@ -18,6 +18,8 @@
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preload" href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet"></noscript>
 
@@ -106,39 +108,19 @@
     <script src="{{ asset('js/dark-mode.js') }}"></script>
 
     <!-- Include reusable password toggle script -->
-    <script src="{{ asset('js/qricket-scripts.js') }}?v={{ time() }}"></script>
+    <script defer src="{{ asset('js/qricket-scripts.js') }}?v={{ time() }}"></script>
     
     <!-- Global Notification Handler -->
-    <script src="{{ asset('js/notifications.js') }}"></script>
+    <script defer src="{{ asset('js/notifications.js') }}"></script>
     
     <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- SweetAlert Utilities -->
-    <script src="{{ asset('js/sweetalert-utils.js') }}"></script>
+    <script defer src="{{ asset('js/sweetalert-utils.js') }}"></script>
     
     <!-- Profanity Filter (Real-time) -->
-    <script src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
-</head>
-<body class="h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-    <!-- Flash Alerts -->
-    {{-- <x-flash-alerts /> --}}
-    
-    <!-- Main Content -->
-    <main class="h-full">
-        {{ $slot }}
-    </main>
-
-    <!-- Scripts -->
-    @isset($scripts)
-        {{ $scripts }}
-    @endisset
-</body>
-</html>
-
-    
-    <!-- Profanity Filter (Real-time) -->
-    <script src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
+    <script defer src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
 </head>
 <body class="h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
     <!-- Flash Alerts -->
