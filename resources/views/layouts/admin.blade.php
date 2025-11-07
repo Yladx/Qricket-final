@@ -180,64 +180,72 @@
                 const channel = pusher.subscribe('admin-session.' + adminId);
                 
                 channel.bind('admin.logged.out', function(data) {
-            
-            // Get current session ID to compare with the conflicting session
-            const currentSessionId = '{{ session()->getId() }}';
-            
-            // Only show conflict message if reason is 'session_conflict'
-            // AND this is the OLD session (conflicting_session_id matches current session)
-            // This prevents the NEW device from showing its own logout notification
-            if (data.reason === 'session_conflict') {
-                // Check if this notification is for THIS session (the old one being logged out)
-                // If conflicting_session_id matches current session, this device is being logged out
-                const isThisSession = data.metadata && data.metadata.conflicting_session_id === currentSessionId;
-                const isThisSessionAlt = data.conflicting_session_id === currentSessionId;
-                
-                if (isThisSession || isThisSessionAlt) {
-                    // This is the OLD session - show logout message
-                    // Prevent duplicate notifications by checking if already shown
-                    if (window.adminLogoutNotificationShown) {
-                        console.log('Admin logout notification already shown, ignoring duplicate');
-                        return;
-                    }
-                    window.adminLogoutNotificationShown = true;
+                    // Get current session ID to compare with the conflicting session
+                    const currentSessionId = '{{ session()->getId() }}';
                     
-                    Swal.fire({
-                        title: 'Logged Out',
-                        text: 'You have been logged out because you logged in from another device. This session is no longer valid.',
-                        icon: 'warning',
-                        showCancelButton: false,
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#ef4444',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        customClass: {
-                            popup: 'rounded-2xl shadow-2xl',
-                            title: 'text-xl font-semibold',
-                            htmlContainer: 'text-gray-600',
-                            confirmButton: 'bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
-                        },
-                        buttonsStyling: false
-                    }).then(() => {
-                        // Clear any remaining session data and redirect
-                        window.adminLogoutNotificationShown = false;
-                        window.location.href = '{{ route('admin.login') }}';
-                    });
-                } else {
-                    // This is the NEW session - ignore the notification
-                    // The new device should not see this message
-                    console.log('Admin logout notification received but ignored (this is the new session)');
-                }
-            } else {
-                // For manual logout, only redirect if this session matches
-                // Check if we should redirect (usually manual logout affects all sessions)
-                if (data.metadata && data.metadata.logout_type === 'manual') {
-                    // Manual logout from another device - silently redirect
-                    window.location.href = '{{ route('admin.login') }}';
-                }
+                    // Only show conflict message if reason is 'session_conflict'
+                    // AND this is the OLD session (conflicting_session_id matches current session)
+                    // This prevents the NEW device from showing its own logout notification
+                    if (data.reason === 'session_conflict') {
+                        // Check if this notification is for THIS session (the old one being logged out)
+                        // If conflicting_session_id matches current session, this device is being logged out
+                        const isThisSession = data.metadata && data.metadata.conflicting_session_id === currentSessionId;
+                        const isThisSessionAlt = data.conflicting_session_id === currentSessionId;
+                        
+                        if (isThisSession || isThisSessionAlt) {
+                            // This is the OLD session - show logout message
+                            // Prevent duplicate notifications by checking if already shown
+                            if (window.adminLogoutNotificationShown) {
+                                return;
+                            }
+                            window.adminLogoutNotificationShown = true;
+                            
+                            // Check if Swal is available
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    title: 'Logged Out',
+                                    text: 'You have been logged out because you logged in from another device. This session is no longer valid.',
+                                    icon: 'warning',
+                                    showCancelButton: false,
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#ef4444',
+                                    allowOutsideClick: false,
+                                    allowEscapeKey: false,
+                                    customClass: {
+                                        popup: 'rounded-2xl shadow-2xl',
+                                        title: 'text-xl font-semibold',
+                                        htmlContainer: 'text-gray-600',
+                                        confirmButton: 'bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
+                                    },
+                                    buttonsStyling: false
+                                }).then(() => {
+                                    // Clear any remaining session data and redirect
+                                    window.adminLogoutNotificationShown = false;
+                                    window.location.href = '{{ route('admin.login') }}';
+                                });
+                            } else {
+                                // Fallback if Swal not loaded
+                                alert('You have been logged out because you logged in from another device.');
+                                window.location.href = '{{ route('admin.login') }}';
+                            }
+                        }
+                    } else {
+                        // For manual logout, only redirect if this session matches
+                        // Check if we should redirect (usually manual logout affects all sessions)
+                        if (data.metadata && data.metadata.logout_type === 'manual') {
+                            // Manual logout from another device - silently redirect
+                            window.location.href = '{{ route('admin.login') }}';
+                        }
+                    }
+                });
+                @endauth
+            } catch (error) {
+                // Silently handle Pusher initialization errors
             }
-        });
-        @endauth
+        }
+        
+        // Start trying to initialize Pusher
+        initializePusher();
     </script>
     
     <!-- Debug Mode Toggle Script -->
