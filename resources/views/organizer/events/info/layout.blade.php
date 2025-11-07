@@ -23,8 +23,7 @@
                             <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                                 <!-- Event Header Preview -->
                                 <div class="mb-6">
-                                    <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Event Header Preview</h4>
-                                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                                      <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                                         <x-events.event-header :event="$event" :section="'info'" :hideActions="true" />
                                     </div>
                                 </div>
@@ -37,8 +36,7 @@
                         <!-- Layout Settings -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <h4 class="text-md font-semibold text-gray-900 dark:text-gray-100 mb-4">Design Settings</h4>
-                                <div class="space-y-3">
+                                       <div class="space-y-3">
                                     @if(isset($layoutData['primary_color']))
                                         <div class="flex items-center justify-between">
                                             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Primary Color:</span>
@@ -79,8 +77,7 @@
                             </div>
 
                             <div>
-                                <h4 class="text-md font-semibold text-gray-900 dark:text-gray-100 mb-4">Layout Elements</h4>
-                                <div class="space-y-3">
+                                 <div class="space-y-3">
                                     @if(isset($layoutData['show_header']))
                                         <div class="flex items-center justify-between">
                                             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Show Header:</span>

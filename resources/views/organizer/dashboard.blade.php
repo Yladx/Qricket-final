@@ -655,8 +655,8 @@
                 </div>
                 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort By</label>
-                    <select name="sort" class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-lg focus:ring-qricket-500 focus:border-qricket-500">
+                    <label for="event-sort" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort By</label>
+                    <select name="sort" id="event-sort" class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-lg focus:ring-qricket-500 focus:border-qricket-500">
                         <option value="revenue">Revenue</option>
                         <option value="date">Date</option>
                         <option value="tickets">Tickets Sold</option>
@@ -664,8 +664,8 @@
                 </div>
                 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort Order</label>
-                    <select name="order" class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-lg focus:ring-qricket-500 focus:border-qricket-500">
+                    <label for="event-order" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort Order</label>
+                    <select name="order" id="event-order" class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-lg focus:ring-qricket-500 focus:border-qricket-500">
                         <option value="desc">Descending</option>
                         <option value="asc">Ascending</option>
                     </select>

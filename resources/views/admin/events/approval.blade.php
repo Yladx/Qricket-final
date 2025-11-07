@@ -68,8 +68,8 @@
                             </div>
                         <!-- Status Filter -->
                         <div>
-                            <label class="sr-only">Status</label>
-                            <select name="status" class="block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100 focus:ring-qricket-500 focus:border-qricket-500">
+                            <label for="event-status-filter" class="sr-only">Status</label>
+                            <select name="status" id="event-status-filter" class="block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100 focus:ring-qricket-500 focus:border-qricket-500">
                                 <option value="all" {{ request('status')=='all' ? 'selected' : '' }}>All Statuses</option>
                                 <option value="pending_approval" {{ request('status')=='pending_approval' ? 'selected' : '' }}>Pending Approval</option>
                                 <option value="published" {{ request('status')=='published' ? 'selected' : '' }}>Published</option>

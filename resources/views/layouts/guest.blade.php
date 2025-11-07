@@ -135,3 +135,23 @@
     @endisset
 </body>
 </html>
+
+    
+    <!-- Profanity Filter (Real-time) -->
+    <script src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
+</head>
+<body class="h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Flash Alerts -->
+    {{-- <x-flash-alerts /> --}}
+    
+    <!-- Main Content -->
+    <main class="h-full">
+        {{ $slot }}
+    </main>
+
+    <!-- Scripts -->
+    @isset($scripts)
+        {{ $scripts }}
+    @endisset
+</body>
+</html>

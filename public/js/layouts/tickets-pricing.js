@@ -17,30 +17,30 @@
                         <div class="ticket-item border border-gray-200 dark:border-gray-600 rounded-lg p-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ticket Name</label>
-                                    <input type="text" class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="General Admission">
+                                    <label for="${componentId}-ticket-name-0" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ticket Name</label>
+                                    <input id="${componentId}-ticket-name-0" type="text" class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="General Admission">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Price</label>
-                                    <input type="text" class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="$25">
+                                    <label for="${componentId}-ticket-price-0" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Price</label>
+                                    <input id="${componentId}-ticket-price-0" type="text" class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="$25">
                                 </div>
                             </div>
                             <div class="mt-3">
-                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Description</label>
-                                <input type="text" class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Perfect for individuals">
+                                <label for="${componentId}-ticket-description-0" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Description</label>
+                                    <input id="${componentId}-ticket-description-0" type="text" class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Perfect for individuals">
                             </div>
                             <div class="mt-3">
-                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Features (one per line)</label>
-                                <textarea class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" rows="3" placeholder="Event access&#10;Welcome materials&#10;Networking opportunities"></textarea>
+                                <label for="${componentId}-ticket-features-0" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Features (one per line)</label>
+                                <textarea id="${componentId}-ticket-features-0" class="w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" rows="3" placeholder="Event access&#10;Welcome materials&#10;Networking opportunities"></textarea>
                             </div>
                             <div class="mt-3 flex items-center space-x-4">
                                 <div class="flex items-center">
-                                    <input type="checkbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                                    <label class="ml-2 text-xs text-gray-600 dark:text-gray-400">Most Popular</label>
+                                    <input type="checkbox" id="${componentId}-ticket-popular-0" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                    <label for="${componentId}-ticket-popular-0" class="ml-2 text-xs text-gray-600 dark:text-gray-400">Most Popular</label>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Button Text</label>
-                                    <input type="text" class="w-32 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Select Ticket">
+                                    <label for="${componentId}-ticket-button-0" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Button Text</label>
+                                    <input id="${componentId}-ticket-button-0" type="text" class="w-32 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Select Ticket">
                                 </div>
                             </div>
                             <button type="button" onclick="removeTicketItem(this)" class="mt-2 text-red-600 hover:text-red-800 text-sm">Remove</button>

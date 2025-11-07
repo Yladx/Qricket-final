@@ -399,21 +399,21 @@
         <div ${rowIdAttr} class="border border-gray-200 dark:border-gray-700 rounded-md p-3 space-y-3 bg-white dark:bg-gray-800">
           <div class="grid grid-cols-12 gap-3 items-end">
             <div class="col-span-12 md:col-span-6">
-              <label class="block text-xs text-gray-500">Name ${nameBadge}</label>
-              <input data-k="name" data-i="${idx}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.name || ''}">
+              <label for="ticket-name-${idx}" class="block text-xs text-gray-500">Name ${nameBadge}</label>
+              <input id="ticket-name-${idx}" data-k="name" data-i="${idx}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.name || ''}">
             </div>
             <div class="col-span-6 md:col-span-3">
-              <label class="block text-xs text-gray-500">Price</label>
-              <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10 ${free ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-700' : ''}" value="${free ? '0' : (t.price || '500')}" ${free ? 'readonly disabled' : ''} ${free ? 'tabindex="-1"' : ''}>
+              <label for="ticket-price-${idx}" class="block text-xs text-gray-500">Price</label>
+              <input id="ticket-price-${idx}" data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10 ${free ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-700' : ''}" value="${free ? '0' : (t.price || '500')}" ${free ? 'readonly disabled' : ''} ${free ? 'tabindex="-1"' : ''}>
             </div>
             <div class="col-span-6 md:col-span-3">
-              <label class="block text-xs text-gray-500">Quantity</label>
-              <input data-k="quantity" data-i="${idx}" type="number" min="${soldCount}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${displayQty}" ${free ? `max="${getTicketsPerEventLimit() || ''}"` : ''}>
+              <label for="ticket-quantity-${idx}" class="block text-xs text-gray-500">Quantity</label>
+              <input id="ticket-quantity-${idx}" data-k="quantity" data-i="${idx}" type="number" min="${soldCount}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${displayQty}" ${free ? `max="${getTicketsPerEventLimit() || ''}"` : ''}>
             </div>
           </div>
           <div>
-            <label class="block text-xs text-gray-500">Description</label>
-            <textarea data-k="description" data-i="${idx}" rows="2" maxlength="200" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100" oninput="updateDescriptionCounter(this)">${t.description || ''}</textarea>
+            <label for="ticket-description-${idx}" class="block text-xs text-gray-500">Description</label>
+            <textarea id="ticket-description-${idx}" data-k="description" data-i="${idx}" rows="2" maxlength="200" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100" oninput="updateDescriptionCounter(this)">${t.description || ''}</textarea>
             <div class="flex justify-end mt-0.5">
               <span class="text-xs text-gray-400 description-counter" data-counter-for="${idx}">${(t.description || '').length}/200</span>
             </div>

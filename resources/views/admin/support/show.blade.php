@@ -101,7 +101,8 @@
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Ticket Status</h3>
                     <form method="POST" action="{{ route('admin.support.reply', $ticket) }}" class="flex items-center space-x-2">
                         @csrf
-                        <select name="status" class="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-qricket-500 focus:border-qricket-500">
+                        <label for="ticket-status-update" class="sr-only">Update Status</label>
+                        <select name="status" id="ticket-status-update" class="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-qricket-500 focus:border-qricket-500">
                             <option value="">{{ ucfirst(str_replace('_',' ', $ticket->status)) }}</option>
                             <option value="open">Open</option>
                             <option value="in_progress">In Progress</option>

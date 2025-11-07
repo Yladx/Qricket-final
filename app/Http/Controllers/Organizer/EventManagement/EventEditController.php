@@ -247,9 +247,7 @@ class EventEditController extends Controller
         $isAdmin = Auth::guard('admin')->check();
         $isOwner = $event->user_id === Auth::id();
         $isAdminEvent = $event->user_id === null && $isAdmin;
-        $user = Auth::user();
-        $staff = $event->staff()->where('user_id', $user?->id)->first();
-        $isStaff = $staff !== null;
+        $isStaff = $event->staff()->where('user_id', Auth::id())->exists();
         
         $hasAccess = $isAdmin || $isOwner || $isAdminEvent || $isStaff;
         
@@ -257,18 +255,23 @@ class EventEditController extends Controller
             abort(403, 'Unauthorized access to this event.');
         }
 
-        // Check if user can manage event
-        $canManageEvent = $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false);
-
-        // If user cannot manage event, show info view (read-only)
-        if (!$canManageEvent) {
+        // Check if event has ended - if so, show view-only mode
+        $eventEnded = $event->end_date && now()->gt($event->end_date);
+        if ($eventEnded) {
             $layoutType = $isAdmin ? 'admin' : 'organizer';
             return view('organizer.events.info.basic', compact('event', 'layoutType'));
         }
 
-        // Check if event has ended - if so, show view-only mode
-        $eventEnded = $event->end_date && now()->gt($event->end_date);
-        if ($eventEnded) {
+        // Check if user can manage event or is admin
+        $isAdmin = Auth::guard('admin')->check();
+        $user = Auth::user();
+        $isOwner = $user && (int)$event->user_id === (int)$user->id;
+        $staff = $event->staff()->where('user_id', $user?->id)->first();
+        $canManageEvent = $isOwner || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
+
+        // Allow editing if: admin created this event (user_id is null) OR user can manage event
+        // Block editing if: admin viewing someone else's event OR regular user without manage permissions
+        if (!$isAdminEvent && !$canManageEvent) {
             $layoutType = $isAdmin ? 'admin' : 'organizer';
             return view('organizer.events.info.basic', compact('event', 'layoutType'));
         }
@@ -302,9 +305,7 @@ class EventEditController extends Controller
         $isAdmin = Auth::guard('admin')->check();
         $isOwner = $event->user_id === Auth::id();
         $isAdminEvent = $event->user_id === null && $isAdmin;
-        $user = Auth::user();
-        $staff = $event->staff()->where('user_id', $user?->id)->first();
-        $isStaff = $staff !== null;
+        $isStaff = $event->staff()->where('user_id', Auth::id())->exists();
         
         $hasAccess = $isAdmin || $isOwner || $isAdminEvent || $isStaff;
         
@@ -312,26 +313,7 @@ class EventEditController extends Controller
             abort(403, 'Unauthorized access to this event.');
         }
 
-        // Check if user can manage event
-        $canManageEvent = $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false);
-
-        // If user cannot manage event, show info view (read-only)
-        if (!$canManageEvent) {
-            $layoutType = $isAdmin ? 'admin' : 'organizer';
-            
-            // Load layout data for display only
-            $layoutData = null;
-            $layoutPath = $event->layout_path ?? null;
-            try {
-                $layoutData = $this->loadLayoutDataFromR2($event->id);
-            } catch (\Exception $e) {
-                \Log::error('Failed to load layout data for info view: ' . $e->getMessage());
-            }
-            
-            return view('organizer.events.info.layout', compact('event', 'layoutData', 'layoutPath', 'layoutType'));
-        }
-
-        // Check if event has ended - if so, show info view instead
+        // Check if event has ended - if so, show info view instead (clean and working)
         $eventEnded = $event->end_date && $event->end_date->isPast();
         if ($eventEnded) {
             $layoutType = $isAdmin ? 'admin' : 'organizer';
@@ -341,11 +323,47 @@ class EventEditController extends Controller
             $layoutPath = $event->layout_path ?? null;
             try {
                 $layoutData = $this->loadLayoutDataFromR2($event->id);
+                \Log::info('Event ended - Layout data loaded for event ' . $event->id, [
+                    'event_id' => $event->id,
+                    'end_date' => $event->end_date,
+                    'layout_path' => $layoutPath,
+                    'layout_data_exists' => !empty($layoutData),
+                    'layout_data_count' => is_array($layoutData) ? count($layoutData) : 0,
+                    'layout_data_preview' => is_array($layoutData) ? array_slice($layoutData, 0, 2) : null
+                ]);
             } catch (\Exception $e) {
-                \Log::error('Failed to load layout data for ended event: ' . $e->getMessage());
+                \Log::error('Failed to load layout data for ended event: ' . $e->getMessage(), [
+                    'event_id' => $event->id,
+                    'error' => $e->getMessage()
+                ]);
             }
             
             return view('organizer.events.info.layout', compact('event', 'layoutData', 'layoutPath', 'layoutType'));
+        }
+
+        // Check if event is upcoming (not ended)
+        $isUpcoming = !$event->end_date || now()->lt($event->end_date);
+        
+        // User is already owner (checked above), so allow editing if event is upcoming
+        // Also allow admin-created events or staff with manage permissions
+        // Include 'rejected' status so users can fix and resubmit
+        $canEditLayout = ($isOwner && $isUpcoming && in_array($event->status, ['draft', 'rejected', 'published', 'pending_approval', 'approved'])) 
+                        || ($isAdminEvent && $isUpcoming)
+                        || ($isStaff && $isUpcoming);
+                        
+        if (!$canEditLayout) {
+            $layoutType = $isAdmin ? 'admin' : 'organizer';
+            
+            // Load layout data for preview
+            $layoutData = null;
+            try {
+                $layoutData = $this->loadLayoutDataFromR2($event->id);
+                \Log::info('Layout data loaded for event ' . $event->id . ': ' . json_encode($layoutData));
+            } catch (\Exception $e) {
+                \Log::error('Failed to load layout data for preview: ' . $e->getMessage());
+            }
+            
+            return view('organizer.events.info.layout', compact('event', 'layoutData', 'layoutType'));
         }
 
         // Determine layout type
@@ -407,9 +425,7 @@ class EventEditController extends Controller
         $isAdmin = Auth::guard('admin')->check();
         $isOwner = $event->user_id === Auth::id();
         $isAdminEvent = $event->user_id === null && $isAdmin;
-        $user = Auth::user();
-        $staff = $event->staff()->where('user_id', $user?->id)->first();
-        $isStaff = $staff !== null;
+        $isStaff = $event->staff()->where('user_id', Auth::id())->exists();
         
         $hasAccess = $isAdmin || $isOwner || $isAdminEvent || $isStaff;
         
@@ -417,10 +433,49 @@ class EventEditController extends Controller
             abort(403, 'Unauthorized access to this event.');
         }
 
-        // Check if user can manage event
-        $canManageEvent = $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false);
+        // Check if event has ended - if so, show view-only mode
+        $eventEnded = $event->end_date && now()->gt($event->end_date);
+        if ($eventEnded) {
+            $layoutType = $isAdmin ? 'admin' : 'organizer';
+            
+            // Load certificate data for info view
+            $certificateData = [];
+            try {
+                $candidates = [
+                    "events/{$event->id}/certificate/certificate.json",
+                    "events/{$event->id}/certificate_data.json",
+                    "events/{$event->id}/certificate/certificate_data.json",
+                    "events/{$event->id}/certificate.json",
+                ];
+                
+                foreach ($candidates as $certificateDataPath) {
+                    if (\Storage::disk('r2')->exists($certificateDataPath)) {
+                        $certificateDataJson = \Storage::disk('r2')->get($certificateDataPath);
+                        $data = json_decode($certificateDataJson, true) ?? [];
+                        $certificateData = $this->normalizeCertificateUrls($event->id, $data);
+                        break;
+                    }
+                }
+            } catch (\Throwable $t) {
+                \Log::warning('Failed to load certificate.json for info view', ['event_id' => $event->id, 'error' => $t->getMessage()]);
+            }
+            
+            // Generate fallback values for event date and location
+            $fallbackWhen = $event && $event->start_date 
+                ? 'held on ' . \Carbon\Carbon::parse($event->start_date)->format('F j, Y \a\t g:i A') . 
+                  ($event->location ? ' at ' . $event->location : '') . '.'
+                : 'Event Date';
+                
+            $fallbackGiven = $event && $event->start_date 
+                ? 'Given this ' . \Carbon\Carbon::parse($event->start_date)->format('jS') . ' day of ' .
+                  \Carbon\Carbon::parse($event->start_date)->format('F, Y') . '.'
+                : 'Event Location';
+            
+            // Redirect to info view for certificate
+            return view('organizer.events.info.certificate', compact('event', 'layoutType', 'certificateData', 'fallbackWhen', 'fallbackGiven'));
+        }
 
-        // Load certificate data for info view
+        // Load certificate data from R2 storage using the same method as CertificateController
         $certificateData = [];
         try {
             $candidates = [
@@ -434,14 +489,25 @@ class EventEditController extends Controller
                 if (\Storage::disk('r2')->exists($certificateDataPath)) {
                     $certificateDataJson = \Storage::disk('r2')->get($certificateDataPath);
                     $data = json_decode($certificateDataJson, true) ?? [];
+                    \Log::info('Certificate data loaded from R2', ['event_id' => $event->id, 'path' => $certificateDataPath]);
                     $certificateData = $this->normalizeCertificateUrls($event->id, $data);
                     break;
                 }
             }
+            
+            // If no file exists, create default data
+            if (empty($certificateData)) {
+                \Log::info('No certificate data found, creating default data', ['event_id' => $event->id]);
+                $defaultData = $this->getDefaultCertificateData();
+                $certificateData = $this->normalizeCertificateUrls($event->id, $defaultData);
+            }
         } catch (\Throwable $t) {
             \Log::warning('Failed to load certificate.json', ['event_id' => $event->id, 'error' => $t->getMessage()]);
+            $certificateData = $this->getDefaultCertificateData();
         }
-        
+
+        $eventId = $event->id;
+
         // Generate fallback values for event date and location
         $fallbackWhen = $event && $event->start_date 
             ? 'held on ' . \Carbon\Carbon::parse($event->start_date)->format('F j, Y \a\t g:i A') . 
@@ -453,31 +519,8 @@ class EventEditController extends Controller
               \Carbon\Carbon::parse($event->start_date)->format('F, Y') . '.'
             : 'Event Location';
 
-        // If user cannot manage event, show info view (read-only)
-        if (!$canManageEvent) {
-            $layoutType = $isAdmin ? 'admin' : 'organizer';
-            return view('organizer.events.info.certificate', compact('event', 'layoutType', 'certificateData', 'fallbackWhen', 'fallbackGiven'));
-        }
-
-        // If no certificate data was loaded, create default data for edit form
-        if (empty($certificateData)) {
-            try {
-                $defaultData = $this->getDefaultCertificateData();
-                $certificateData = $this->normalizeCertificateUrls($event->id, $defaultData);
-            } catch (\Throwable $t) {
-                \Log::warning('Failed to create default certificate data', ['event_id' => $event->id, 'error' => $t->getMessage()]);
-                $certificateData = $this->getDefaultCertificateData();
-            }
-        }
-
-        // Check if event has ended - if so, show view-only mode
-        $eventEnded = $event->end_date && now()->gt($event->end_date);
-        if ($eventEnded) {
-            $layoutType = $isAdmin ? 'admin' : 'organizer';
-            return view('organizer.events.info.certificate', compact('event', 'layoutType', 'certificateData', 'fallbackWhen', 'fallbackGiven'));
-        }
-
-        $eventId = $event->id;
+        // Determine layout type
+        $isAdmin = Auth::guard('admin')->check();
         $layoutType = $isAdmin ? 'admin' : 'organizer';
 
         return view('organizer.events.edit.certificate', compact('event', 'certificateData', 'eventId', 'isAdmin', 'layoutType', 'fallbackWhen', 'fallbackGiven'));
