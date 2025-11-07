@@ -808,9 +808,12 @@ function addLayoutComponentFromData(componentData) {
                             items.forEach((it) => {
                                 const row = document.createElement('div');
                                 row.className = 'grid grid-cols-5 gap-2';
+                                const rowIndex = container.querySelectorAll('.grid').length;
                                 row.innerHTML = `
-                                    <input type='text' class='col-span-2 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Time (e.g., 10:00)' value='${it.time || ''}'>
-                                    <input type='text' class='col-span-3 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Item (e.g., Opening)' value='${it.item || ''}'>
+                                    <label for="${componentId}-schedule-time-${rowIndex}" class="sr-only">Time</label>
+                                    <input id="${componentId}-schedule-time-${rowIndex}" type='text' class='col-span-2 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Time (e.g., 10:00)' value='${it.time || ''}'>
+                                    <label for="${componentId}-schedule-item-${rowIndex}" class="sr-only">Item</label>
+                                    <input id="${componentId}-schedule-item-${rowIndex}" type='text' class='col-span-3 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Item (e.g., Opening)' value='${it.item || ''}'>
                                 `;
                                 container.appendChild(row);
                             });
