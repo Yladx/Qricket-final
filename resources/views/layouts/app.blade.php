@@ -26,7 +26,7 @@
         <!-- Critical CSS - Load first -->
         <link rel="preload" href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
         <noscript><link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet"></noscript>
-        <script src="https://cdn.tailwindcss.com" defer></script>
+        <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="{{ asset('css/qricket-styles.css') }}">
         
         <!-- Non-critical CSS - Load after -->
