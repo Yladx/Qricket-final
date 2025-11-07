@@ -227,7 +227,7 @@
         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-900 dark:text-gray-100">Switch Mode</span>
-                <button id="offcanvas-mode-toggle" onclick="confirmModeSwitch()" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800" role="switch" aria-checked="false">
+                <button id="offcanvas-mode-toggle" onclick="confirmModeSwitch()" aria-label="Switch between user and organizer mode" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800" role="switch" aria-checked="false">
                     <span id="offcanvas-mode-toggle-slider" class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 translate-x-1"></span>
                 </button>
             </div>
