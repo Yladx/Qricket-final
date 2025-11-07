@@ -185,7 +185,7 @@ class BasicInfoController extends Controller
 
         $validator = Validator::make($request->all(), [
             'title' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
-            'description' => ['required', 'string', 'min:10', new \App\Rules\NoProfanity()],
+            'description' => 'required|string|min:10',
             'category' => 'required|string|in:conference,workshop,seminar,meetup,training,networking,social,sports,entertainment,other',
             'tags' => 'required|string|min:2',
             'start_date' => 'required|date|after:now',
