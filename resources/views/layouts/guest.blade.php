@@ -25,6 +25,8 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/qricket-styles.css') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- Pusher.js for Laravel Reverb -->
     <script defer src="https://js.pusher.com/8.2.0/pusher.min.js"></script>

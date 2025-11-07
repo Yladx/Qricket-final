@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://cdn.tailwindcss.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <script src="https://cdn.tailwindcss.com" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/qricket-styles.css') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- Alpine.js -->
