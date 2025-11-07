@@ -133,18 +133,24 @@
     <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300 overflow-x-hidden">
         <script>
             (function () {
+                const applyTheme = (isDark) => {
+                    const root = document.documentElement;
+                    const theme = isDark ? 'dark' : 'light';
+                    root.classList.toggle('dark', isDark);
+                    root.dataset.theme = theme;
+                    root.style.backgroundColor = isDark ? '#111827' : '#f9fafb';
+                    root.style.color = isDark ? '#f9fafb' : '#111827';
+                    root.style.colorScheme = theme;
+                };
+
                 try {
                     const storedTheme = localStorage.getItem('theme');
                     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                     const isDark = storedTheme ? storedTheme === 'dark' : prefersDark;
-                    const root = document.documentElement;
-                    root.classList.toggle('dark', isDark);
-                    root.dataset.theme = isDark ? 'dark' : 'light';
+                    applyTheme(isDark);
                 } catch (error) {
                     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                        const root = document.documentElement;
-                        root.classList.add('dark');
-                        root.dataset.theme = 'dark';
+                        applyTheme(true);
                     }
                 }
             })();
