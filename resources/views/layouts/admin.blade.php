@@ -54,9 +54,12 @@
     <script src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
     
     <script>
-        // Configure Tailwind for dark mode
-        tailwind.config = {
-            darkMode: 'class',
+        // Wait for Tailwind to load before configuring it
+        function configureTailwind() {
+            if (typeof tailwind !== 'undefined') {
+                // Configure Tailwind for dark mode
+                tailwind.config = {
+                    darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -102,6 +105,18 @@
                 }
             }
         }
+        
+        // Try to configure Tailwind immediately if already loaded
+        configureTailwind();
+        
+        // Also try after DOMContentLoaded and after a delay
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', configureTailwind);
+        }
+        
+        // Fallback: try again after a short delay
+        setTimeout(configureTailwind, 100);
+        setTimeout(configureTailwind, 500);
     </script>
     
     @yield('styles')

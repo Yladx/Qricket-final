@@ -31,8 +31,11 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <script>
-        tailwind.config = {
-            darkMode: 'class',
+        // Wait for Tailwind to load before configuring it
+        function configureTailwind() {
+            if (typeof tailwind !== 'undefined') {
+                tailwind.config = {
+                    darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -78,6 +81,18 @@
                 }
             }
         }
+        
+        // Try to configure Tailwind immediately if already loaded
+        configureTailwind();
+        
+        // Also try after DOMContentLoaded and after a delay
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', configureTailwind);
+        }
+        
+        // Fallback: try again after a short delay
+        setTimeout(configureTailwind, 100);
+        setTimeout(configureTailwind, 500);
     </script>
 
     <script>

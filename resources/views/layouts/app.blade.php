@@ -36,12 +36,6 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         
-        <!-- Defer non-critical JavaScript -->
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-        <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script defer src="{{ asset('js/sweetalert-utils.js') }}"></script>
-        <script defer src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-        
         <!-- Broadcasting configuration MUST be set before notifications.js -->
         <script>
             // Broadcasting configuration for frontend (Pusher Cloud only)
@@ -55,6 +49,11 @@
             @endauth
         </script>
         
+        <!-- Defer non-critical JavaScript -->
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script defer src="{{ asset('js/sweetalert-utils.js') }}"></script>
+        <script defer src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
         <script defer src="{{ asset('js/notifications.js') }}"></script>
         <script defer src="{{ asset('js/notification-badge.js') }}"></script>
         <script defer src="{{ asset('js/dark-mode.js') }}"></script>
@@ -64,8 +63,11 @@
         <script defer src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
         
         <script>
-            // Configure Tailwind for better dark mode
-            tailwind.config = {
+            // Wait for Tailwind to load before configuring it
+            function configureTailwind() {
+                if (typeof tailwind !== 'undefined') {
+                    // Configure Tailwind for better dark mode
+                    tailwind.config = {
                 darkMode: 'class',
                 theme: {
                     extend: {
@@ -169,45 +171,64 @@
         <!-- Global Flash Alerts (SweetAlert2) via component -->
         <x-flash-alerts />
         
-        <!-- Pusher already loaded above, no need to reload -->
+        <!-- Initialize Pusher after it loads -->
         <script>
-            // Initialize Pusher (already loaded via defer above)
-            const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
-                cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
-                encrypted: true
-            });
-
-            // Listen for user logout notifications
-            @auth
-            const userId = {{ Auth::id() }};
-            const channel = pusher.subscribe('user-session.' + userId);
-            
-            channel.bind('user.logged.out', function(data) {
-                console.log('User logout notification received:', data);
+            // Wait for Pusher to load before initializing
+            function initializePusher() {
+                if (typeof Pusher === 'undefined') {
+                    // Retry after a short delay
+                    setTimeout(initializePusher, 100);
+                    return;
+                }
                 
-                // Show SweetAlert notification
-                Swal.fire({
-                    title: 'Session Ended',
-                    text: data.message,
-                    icon: 'warning',
-                    showCancelButton: false,
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#ef4444',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    customClass: {
-                        popup: 'rounded-2xl shadow-2xl',
-                        title: 'text-xl font-semibold',
-                        htmlContainer: 'text-gray-600',
-                        confirmButton: 'bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
-                    },
-                    buttonsStyling: false
-                }).then(() => {
-                    // Redirect to login page after user acknowledges
-                    window.location.href = '{{ route('login') }}';
-                });
-            });
-            @endauth
+                try {
+                    const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
+                        cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
+                        encrypted: true
+                    });
+
+                    // Listen for user logout notifications
+                    @auth
+                    const userId = {{ Auth::id() }};
+                    const channel = pusher.subscribe('user-session.' + userId);
+                    
+                    channel.bind('user.logged.out', function(data) {
+                        // Show SweetAlert notification (wait for Swal to be available)
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: 'Session Ended',
+                                text: data.message,
+                                icon: 'warning',
+                                showCancelButton: false,
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#ef4444',
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                                customClass: {
+                                    popup: 'rounded-2xl shadow-2xl',
+                                    title: 'text-xl font-semibold',
+                                    htmlContainer: 'text-gray-600',
+                                    confirmButton: 'bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
+                                },
+                                buttonsStyling: false
+                            }).then(() => {
+                                // Redirect to login page after user acknowledges
+                                window.location.href = '{{ route('login') }}';
+                            });
+                        } else {
+                            // Fallback if Swal not loaded yet
+                            alert('Your session has ended. You will be redirected to the login page.');
+                            window.location.href = '{{ route('login') }}';
+                        }
+                    });
+                    @endauth
+                } catch (error) {
+                    // Silently handle Pusher initialization errors
+                }
+            }
+            
+            // Start trying to initialize Pusher
+            initializePusher();
         </script>
         
         <!-- Include Qricket Feedback Modal -->
@@ -215,4 +236,6 @@
         
         @yield('scripts')
     </body>
+</html>
+
 </html>
