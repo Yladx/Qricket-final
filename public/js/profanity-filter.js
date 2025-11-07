@@ -65,6 +65,9 @@
     
     // Track last value to detect space-only changes
     const lastValues = new WeakMap();
+    
+    // Track pending debounced calls so we can cancel them
+    const pendingDebounces = new WeakMap();
 
     // Process input field
     async function processInputField(input) {
@@ -82,11 +85,31 @@
         const cursorPosition = input.selectionStart;
         const lastValue = lastValues.get(input) || '';
         
+        // Check if cursor is right after a space - if so, skip filtering
+        if (cursorPosition > 0) {
+            const charBeforeCursor = originalValue[cursorPosition - 1];
+            if (charBeforeCursor === ' ') {
+                // Cursor is right after a space - user might still be typing
+                // Only filter if there's actual text after the space
+                const textAfterCursor = originalValue.substring(cursorPosition);
+                if (textAfterCursor.trim().length === 0) {
+                    lastValues.set(input, originalValue);
+                    return;
+                }
+            }
+        }
+        
         // Additional check: skip if only spaces were added
         if (originalValue.length > lastValue.length) {
             const addedText = originalValue.slice(lastValue.length);
             if (addedText.trim().length === 0 && addedText.length > 0) {
                 lastValues.set(input, originalValue);
+                // Cancel any pending debounced calls
+                const pending = pendingDebounces.get(input);
+                if (pending) {
+                    clearTimeout(pending);
+                    pendingDebounces.delete(input);
+                }
                 return;
             }
         }
@@ -94,6 +117,12 @@
         // Skip if text was deleted (user is editing)
         if (originalValue.length < lastValue.length) {
             lastValues.set(input, originalValue);
+            // Cancel any pending debounced calls
+            const pending = pendingDebounces.get(input);
+            if (pending) {
+                clearTimeout(pending);
+                pendingDebounces.delete(input);
+            }
             return;
         }
 
@@ -135,8 +164,26 @@
         }
     }
 
-    // Debounced version - slightly longer delay for smoother experience (250ms)
-    const debouncedProcessInput = debounce(processInputField, 250);
+    // Create a debounced function that tracks pending calls per input
+    function createDebouncedProcessInput(input) {
+        let timeoutId = null;
+        
+        return function() {
+            // Clear any existing timeout for this input
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            
+            // Set new timeout
+            timeoutId = setTimeout(() => {
+                pendingDebounces.delete(input);
+                processInputField(input);
+            }, 300);
+            
+            // Store the timeout ID so we can cancel it
+            pendingDebounces.set(input, timeoutId);
+        };
+    }
 
     // Initialize profanity filter on an input/textarea
     function initializeProfanityFilter(element) {
@@ -147,6 +194,9 @@
 
         // Mark as initialized
         element.dataset.profanityFilterInitialized = 'true';
+        
+        // Create a debounced function for this specific input element
+        const debouncedProcessInput = createDebouncedProcessInput(element);
 
         // Add input event listener - use 'input' for real-time detection
         element.addEventListener('input', function(e) {
@@ -160,16 +210,22 @@
                 return;
             }
 
-                // Check if user just typed a space - skip filtering completely for spaces
+            // Check if user just typed a space - skip filtering completely for spaces
             const currentValue = this.value;
             const lastValue = lastValues.get(this) || '';
             
             // If the change is just adding a space or spaces, skip filtering entirely
             if (currentValue.length > lastValue.length) {
                 const addedText = currentValue.slice(lastValue.length);
-                // If only spaces were added, don't filter at all
+                // If only spaces were added, don't filter at all and cancel pending calls
                 if (addedText.trim().length === 0 && addedText.length > 0) {
                     lastValues.set(this, currentValue);
+                    // Cancel any pending debounced calls for this input
+                    const pending = pendingDebounces.get(this);
+                    if (pending) {
+                        clearTimeout(pending);
+                        pendingDebounces.delete(this);
+                    }
                     return; // Don't filter when only spaces are added
                 }
             }
@@ -177,18 +233,24 @@
             // If user deleted text, also skip filtering (they're editing, let them finish)
             if (currentValue.length < lastValue.length) {
                 lastValues.set(this, currentValue);
+                // Cancel any pending debounced calls
+                const pending = pendingDebounces.get(this);
+                if (pending) {
+                    clearTimeout(pending);
+                    pendingDebounces.delete(this);
+                }
                 return;
             }
 
             // Only filter when user is typing actual characters (not spaces, not deleting)
-            debouncedProcessInput(this);
+            debouncedProcessInput();
         }, { passive: true });
 
         // Also check on paste (with longer delay to allow paste to complete)
         element.addEventListener('paste', function(e) {
             setTimeout(() => {
                 if (!isFiltering) {
-                    debouncedProcessInput(this);
+                    debouncedProcessInput();
                 }
             }, 100);
         });
