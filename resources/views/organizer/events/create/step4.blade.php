@@ -206,11 +206,11 @@
                 '</div>' +
                 '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">' +
                     '<div>' +
-                        '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>' +
+                        '<label for="sig_' + sigNum + '_name_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>' +
                         '<input id="sig_' + sigNum + '_name_input" name="sig_' + sigNum + '_name" type="text" maxlength="36" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 36 characters">' +
                     '</div>' +
                     '<div>' +
-                        '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>' +
+                        '<label for="sig_' + sigNum + '_title_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>' +
                         '<input id="sig_' + sigNum + '_title_input" name="sig_' + sigNum + '_title" type="text" maxlength="28" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 28 characters">' +
                     '</div>' +
                 '</div>' +
