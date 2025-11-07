@@ -82,15 +82,19 @@
         const cursorPosition = input.selectionStart;
         const lastValue = lastValues.get(input) || '';
         
-        // Check if the only change is adding a space at the end
-        // If so, skip filtering to allow smooth typing
+        // Additional check: skip if only spaces were added
         if (originalValue.length > lastValue.length) {
             const addedText = originalValue.slice(lastValue.length);
-            // If only spaces were added, skip filtering for smoother experience
             if (addedText.trim().length === 0 && addedText.length > 0) {
                 lastValues.set(input, originalValue);
                 return;
             }
+        }
+        
+        // Skip if text was deleted (user is editing)
+        if (originalValue.length < lastValue.length) {
+            lastValues.set(input, originalValue);
+            return;
         }
 
         try {
@@ -156,26 +160,27 @@
                 return;
             }
 
-            // Check if user just typed a space - if so, delay filtering slightly
+                // Check if user just typed a space - skip filtering completely for spaces
             const currentValue = this.value;
             const lastValue = lastValues.get(this) || '';
             
-            // If the change is just adding a space or spaces at the end, be more lenient
+            // If the change is just adding a space or spaces, skip filtering entirely
             if (currentValue.length > lastValue.length) {
                 const addedText = currentValue.slice(lastValue.length);
-                // If only spaces were added, wait a bit longer before filtering
-                if (addedText.trim().length === 0) {
-                    // Longer delay for space-only additions
-                    setTimeout(() => {
-                        if (!isFiltering) {
-                            debouncedProcessInput(this);
-                        }
-                    }, 300);
-                    return;
+                // If only spaces were added, don't filter at all
+                if (addedText.trim().length === 0 && addedText.length > 0) {
+                    lastValues.set(this, currentValue);
+                    return; // Don't filter when only spaces are added
                 }
             }
+            
+            // If user deleted text, also skip filtering (they're editing, let them finish)
+            if (currentValue.length < lastValue.length) {
+                lastValues.set(this, currentValue);
+                return;
+            }
 
-            // Process normally for other changes
+            // Only filter when user is typing actual characters (not spaces, not deleting)
             debouncedProcessInput(this);
         }, { passive: true });
 

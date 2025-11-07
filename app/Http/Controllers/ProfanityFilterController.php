@@ -23,23 +23,16 @@ class ProfanityFilterController extends Controller
         $text = $request->input('text');
         
         // Remove profanity completely (empty replacement)
+        // The filter service already handles word boundaries correctly
         $filteredText = ProfanityFilterService::filterProfanity($text, '');
         
-        // Only clean up spaces if text was actually filtered (to avoid unnecessary processing)
+        // Minimal space cleanup - ONLY remove spaces that are clearly orphaned
+        // This happens when a word is removed and leaves "space space" pattern
+        // We'll only clean up double spaces that are definitely from word removal
         if ($filteredText !== $text) {
-            // Clean up spaces intelligently:
-            // 1. Remove multiple consecutive spaces (3+) but allow double spaces
-            // 2. Only remove spaces that are clearly orphaned
-            
-            // Remove multiple consecutive spaces (3 or more) - be more conservative
-            $filteredText = preg_replace('/\s{3,}/', '  ', $filteredText);
-            
-            // Remove orphaned spaces before punctuation (but preserve structure)
-            // Only remove if there are multiple spaces before punctuation
-            $filteredText = preg_replace('/\s{2,}([.,!?;:])/', '$1', $filteredText);
-            
-            // Normalize spaces after punctuation (ensure single space)
-            $filteredText = preg_replace('/([.,!?;:])\s{2,}/', '$1 ', $filteredText);
+            // Only remove double spaces that appear between words (not at start/end)
+            // Pattern: non-space, space, space, non-space -> replace with single space
+            $filteredText = preg_replace('/(\S)\s{2,}(\S)/', '$1 $2', $filteredText);
         }
         
         return response()->json([
