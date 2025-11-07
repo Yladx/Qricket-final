@@ -113,22 +113,33 @@ class ProfanityFilterService
             return false;
         }
 
-        $text = strtolower($text);
+        $textLower = strtolower($text);
         
         // Remove common punctuation and special characters for better matching
-        $text = preg_replace('/[^a-z0-9\s]/', '', $text);
+        $textClean = preg_replace('/[^a-z0-9\s]/', '', $textLower);
         
         // Check against profanity list
         foreach (self::$profanityList as $profanity) {
-            $profanity = strtolower($profanity);
+            $profanity = trim(strtolower($profanity));
+            if (empty($profanity) || strlen($profanity) < 3) {
+                continue;
+            }
             
             // Exact word match (with word boundaries)
-            if (preg_match('/\b' . preg_quote($profanity, '/') . '\b/i', $text)) {
+            if (preg_match('/\b' . preg_quote($profanity, '/') . '\b/i', $textClean)) {
                 return true;
             }
             
-            // Also check if profanity is contained (for partial matches)
-            if (strpos($text, $profanity) !== false) {
+            // Check for obfuscated profanity (without spaces)
+            $textNoSpaces = preg_replace('/\s+/', '', $textClean);
+            
+            // Check if profanity appears as substring (handles "rfuck", "nboobs", etc.)
+            if (strlen($profanity) >= 4 && strpos($textNoSpaces, $profanity) !== false) {
+                return true;
+            }
+            
+            // Fuzzy matching for obfuscated profanity
+            if (strlen($profanity) >= 4 && self::fuzzyMatchProfanity($text, $profanity)) {
                 return true;
             }
         }
@@ -137,12 +148,95 @@ class ProfanityFilterService
     }
 
     /**
-     * Filter profanity from text (replace with asterisks)
-     *
-     * @param string $text
-     * @param string $replacement
-     * @return string
+     * Check if a profanity word appears in text (fuzzy matching for obfuscation)
+     * This detects profanity even when written with spaces or extra characters
      */
+    private static function fuzzyMatchProfanity(string $text, string $profanity): bool
+    {
+        // Remove spaces and convert to lowercase for comparison
+        $textNoSpaces = preg_replace('/\s+/', '', strtolower($text));
+        $profanityClean = strtolower($profanity);
+        
+        // Check if profanity appears as substring (handles cases like "rfuck" containing "fuck")
+        if (strpos($textNoSpaces, $profanityClean) !== false) {
+            return true;
+        }
+        
+        // Check if letters of profanity appear in sequence (handles cases like "r f u c k")
+        $profanityLetters = str_split($profanityClean);
+        $textIndex = 0;
+        $matches = 0;
+        
+        foreach ($profanityLetters as $letter) {
+            $found = strpos($textNoSpaces, $letter, $textIndex);
+            if ($found !== false) {
+                $matches++;
+                $textIndex = $found + 1;
+            }
+        }
+        
+        // If 80% of letters match in sequence, consider it a match
+        if ($matches >= (count($profanityLetters) * 0.8)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Find and replace obfuscated profanity in text
+     * Handles cases where profanity is embedded in other text (e.g., "rfuck", "nboobs")
+     */
+    private static function replaceObfuscatedProfanity(string $text, string $profanity, string $replacement): string
+    {
+        $result = $text;
+        $profanityLower = strtolower($profanity);
+        $textNoSpaces = preg_replace('/\s+/', '', strtolower($text));
+        
+        // Find all occurrences of profanity in text without spaces
+        $offset = 0;
+        while (($pos = strpos($textNoSpaces, $profanityLower, $offset)) !== false) {
+            // Map position back to original text
+            $charCount = 0;
+            $startPos = 0;
+            $endPos = strlen($text);
+            
+            // Find start position in original text
+            for ($i = 0; $i < strlen($text); $i++) {
+                if (!ctype_space($text[$i])) {
+                    if ($charCount == $pos) {
+                        $startPos = $i;
+                        break;
+                    }
+                    $charCount++;
+                }
+            }
+            
+            // Find end position
+            $charCount = 0;
+            for ($i = 0; $i < strlen($text); $i++) {
+                if (!ctype_space($text[$i])) {
+                    if ($charCount == $pos + strlen($profanity)) {
+                        $endPos = $i;
+                        break;
+                    }
+                    $charCount++;
+                }
+            }
+            
+            // Replace the matched portion
+            $before = substr($result, 0, $startPos);
+            $after = substr($result, $endPos);
+            $result = $before . $replacement . $after;
+            
+            // Update textNoSpaces for next search
+            $textNoSpaces = preg_replace('/\s+/', '', strtolower($result));
+            $offset = $pos + strlen($replacement);
+        }
+        
+        return $result;
+    }
+
     public static function filterProfanity(string $text, string $replacement = '***'): string
     {
         if (empty($text)) {
@@ -150,10 +244,17 @@ class ProfanityFilterService
         }
 
         $originalText = $text;
+        $textLower = strtolower($text);
         
+        // First pass: Exact word matching with word boundaries
         foreach (self::$profanityList as $profanity) {
             $profanity = trim($profanity);
             if (empty($profanity)) {
+                continue;
+            }
+            
+            // Skip single character words (too many false positives)
+            if (strlen($profanity) < 3) {
                 continue;
             }
             
@@ -163,14 +264,45 @@ class ProfanityFilterService
             // Check if it's a multi-word phrase
             if (strpos($profanity, ' ') !== false) {
                 // For multi-word phrases, match the exact phrase with word boundaries
-                // This ensures "blue waffle" matches "blue waffle" but not "blueberry waffle"
                 $pattern = '/\b' . $escapedProfanity . '\b/iu';
                 $originalText = preg_replace($pattern, $replacement, $originalText);
             } else {
-                // For single words, ONLY use word boundaries to prevent matching words within other words
-                // This ensures "ass" matches "ass" but not "classic" or "pass"
+                // For single words, use word boundaries for exact matches
                 $pattern = '/\b' . $escapedProfanity . '\b/iu';
                 $originalText = preg_replace($pattern, $replacement, $originalText);
+                
+                // Also check for obfuscated versions embedded in other text
+                // Handles cases like "rfuck", "nboobs", "puki", "sait"
+                if (strlen($profanity) >= 4) {
+                    // Remove spaces for matching (handles "r f u c k" -> "rfuck")
+                    $textNoSpaces = preg_replace('/\s+/', '', strtolower($originalText));
+                    $profanityLower = strtolower($profanity);
+                    
+                    // Check if profanity appears as substring when spaces are removed
+                    if (strpos($textNoSpaces, $profanityLower) !== false) {
+                        // Use the replaceObfuscatedProfanity function which handles position mapping
+                        $originalText = self::replaceObfuscatedProfanity($originalText, $profanity, $replacement);
+                    }
+                }
+            }
+        }
+        
+        // Second pass: Check for obfuscated profanity (with spaces or extra chars)
+        foreach (self::$profanityList as $profanity) {
+            $profanity = trim($profanity);
+            if (empty($profanity) || strlen($profanity) < 4) {
+                continue;
+            }
+            
+            // Skip multi-word phrases for fuzzy matching
+            if (strpos($profanity, ' ') !== false) {
+                continue;
+            }
+            
+            // Use fuzzy matching to detect obfuscated profanity
+            if (self::fuzzyMatchProfanity($originalText, $profanity)) {
+                // Try to replace the obfuscated version
+                $originalText = self::replaceObfuscatedProfanity($originalText, $profanity, $replacement);
             }
         }
 
