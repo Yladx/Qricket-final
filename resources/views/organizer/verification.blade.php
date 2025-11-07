@@ -110,14 +110,14 @@
                                         Please wait for the cooldown period to end before submitting a new verification request. The timer above shows exactly when you can resubmit.
                                     </p>
                                     <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                                        <button onclick="location.reload()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-qricket-600 hover:bg-qricket-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qricket-500 transition-colors duration-200">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <button onclick="location.reload()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-qricket-600 hover:bg-qricket-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qricket-500 transition-colors duration-200" aria-label="Refresh page">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                             </svg>
                                             Refresh Page
                                         </button>
-                                        <button onclick="window.location.href='{{ route('dashboard') }}'" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qricket-500 transition-colors duration-200">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <button onclick="window.location.href='{{ route('dashboard') }}'" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qricket-500 transition-colors duration-200" aria-label="Go to dashboard">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"></path>
                                             </svg>
@@ -521,7 +521,7 @@
                                                class="mt-1 rounded border-gray-300 dark:border-gray-600 text-qricket-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:checked:bg-qricket-600"
                                                required>
                                         <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            I have carefully read and understood the <button type="button" id="view-terms-btn" class="text-qricket-600 dark:text-qricket-400 hover:underline font-medium">Terms and Conditions</button> above. I acknowledge that I am applying to become a verified organizer on the Qricket platform and agree to comply with all terms, responsibilities, and obligations outlined therein. I certify that all information provided is accurate and truthful, and I understand the consequences of providing false information.
+                                            I have carefully read and understood the <button type="button" id="view-terms-btn" class="text-qricket-600 dark:text-qricket-400 hover:underline font-medium" aria-label="View terms and conditions">Terms and Conditions</button> above. I acknowledge that I am applying to become a verified organizer on the Qricket platform and agree to comply with all terms, responsibilities, and obligations outlined therein. I certify that all information provided is accurate and truthful, and I understand the consequences of providing false information.
                                         </span>
                                     </label>
                                     <x-input-error class="mt-2" :messages="$errors->get('terms_accepted')" />

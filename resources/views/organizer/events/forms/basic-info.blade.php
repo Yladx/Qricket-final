@@ -23,20 +23,20 @@
 
     <div class="flex items-center space-x-3">
         @php($isFreeInit = old('is_free', $eventData['is_free'] ?? ($event->is_free ?? false)))
-        <label class="inline-flex items-center space-x-2">
+        <label for="is_free_checkbox" class="inline-flex items-center space-x-2">
             <input type="checkbox" name="is_free" value="1" id="is_free_checkbox" {{ $isFreeInit ? 'checked' : '' }} class="rounded border-gray-300 text-qricket-600">
             <span class="text-sm text-gray-700 dark:text-gray-300">Is your event free?</span>
         </label>
     </div>
 
     <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
         <textarea id="description" name="description" rows="5" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" oninput="this.value = this.value.replace(/\n/g, ' ').replace(/\r/g, '')">{{ old('description', $eventData['description'] ?? $event->description ?? '') }}</textarea>
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Note: Line breaks are automatically converted to spaces to prevent formatting issues.</p>
     </div>
 
     <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags <span class="text-red-500">*</span></label>
+        <label for="tags" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags <span class="text-red-500">*</span></label>
         <div class="relative">
             <input id="tags" type="text" name="tags" value="{{ old('tags', $eventData['tags'] ?? $event->tags ?? '') }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" placeholder="music, conference, workshop (separate with commas)" autocomplete="off" required>
             <div id="tag-suggestions" class="absolute z-50 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg hidden max-h-60 overflow-y-auto"></div>
@@ -46,24 +46,24 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date &amp; Time</label>
-            <input type="datetime-local" name="start_date" value="{{ old('start_date', isset($eventData['start_date'])?\Carbon\Carbon::parse($eventData['start_date'])->format('Y-m-d\TH:i'):(isset($event->start_date)?\Carbon\Carbon::parse($event->start_date)->format('Y-m-d\TH:i'):'')) }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+            <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date &amp; Time</label>
+            <input type="datetime-local" id="start_date" name="start_date" value="{{ old('start_date', isset($eventData['start_date'])?\Carbon\Carbon::parse($eventData['start_date'])->format('Y-m-d\TH:i'):(isset($event->start_date)?\Carbon\Carbon::parse($event->start_date)->format('Y-m-d\TH:i'):'')) }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date &amp; Time</label>
-            <input type="datetime-local" name="end_date" value="{{ old('end_date', isset($eventData['end_date'])?\Carbon\Carbon::parse($eventData['end_date'])->format('Y-m-d\TH:i'):(isset($event->end_date)?\Carbon\Carbon::parse($event->end_date)->format('Y-m-d\TH:i'):'')) }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+            <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date &amp; Time</label>
+            <input type="datetime-local" id="end_date" name="end_date" value="{{ old('end_date', isset($eventData['end_date'])?\Carbon\Carbon::parse($eventData['end_date'])->format('Y-m-d\TH:i'):(isset($event->end_date)?\Carbon\Carbon::parse($event->end_date)->format('Y-m-d\TH:i'):'')) }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
         </div>
     </div>
 
     <div class="space-y-3">
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+            <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
             <input id="location" type="text" name="location" value="{{ old('location', $eventData['location'] ?? $event->location ?? '') }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" placeholder="Enter event location (e.g., Municipal hall San Jose, Batangas, Philippines)">
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Enter the event location address.</p>
         </div>
         
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location URL (Optional)</label>
+            <label for="location_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location URL (Optional)</label>
             <input id="location_url" type="text" name="location_url" value="{{ old('location_url', $eventData['location_url'] ?? $event->location_url ?? '') }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" placeholder="https://maps.google.com/... (optional)">
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional: Add a Google Maps link for directions.</p>
         </div>

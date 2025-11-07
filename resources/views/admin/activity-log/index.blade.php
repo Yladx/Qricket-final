@@ -64,8 +64,8 @@
                                 {{ \Carbon\Carbon::parse($date)->format('M j, Y') }}
                             </h4>
                             <!-- Collapse Toggle -->
-                            <button onclick="toggleAdminGroup('{{ $date }}')" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                                <svg id="admin-icon-{{ $date }}" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <button onclick="toggleAdminGroup('{{ $date }}')" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Toggle activities for {{ \Carbon\Carbon::parse($date)->format('M j, Y') }}" aria-expanded="true">
+                                <svg id="admin-icon-{{ $date }}" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>

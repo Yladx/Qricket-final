@@ -48,9 +48,9 @@
             <div class="mb-4">
                 @php($currentView = request('view', 'all'))
                 <div class="flex items-center gap-2 text-xs">
-                    <button type="button" data-view="all" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='all' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}">All</button>
-                    <button type="button" data-view="owner" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='owner' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}">My Posted</button>
-                    <button type="button" data-view="staff" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='staff' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}">I'm Staff</button>
+                    <button type="button" data-view="all" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='all' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}" aria-label="View all events">All</button>
+                    <button type="button" data-view="owner" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='owner' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}" aria-label="View my posted events">My Posted</button>
+                    <button type="button" data-view="staff" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='staff' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}" aria-label="View events where I'm staff">I'm Staff</button>
                 </div>
             </div>
 

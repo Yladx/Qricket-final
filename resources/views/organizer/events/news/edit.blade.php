@@ -13,8 +13,8 @@
                             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit News Article</h1>
                             <p class="text-gray-600 dark:text-gray-400 mt-1">Update news article for {{ $event->title }}</p>
                         </div>
-                        <a href="{{ route('organizer.events.news.index', $event) }}" class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('organizer.events.news.index', $event) }}" class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700 transition" aria-label="Back to news articles">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                             </svg>
                             Back
@@ -63,7 +63,7 @@
 
                         <!-- Media (images) -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Photos</label>
+                            <label for="images" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Photos</label>
                             <div id="dropzone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-white/50 dark:bg-gray-700/30 text-center cursor-pointer">
                                 <p class="text-sm text-gray-600 dark:text-gray-300">Drag & drop images here or click to upload</p>
                                 <p class="text-xs text-gray-400 mt-1">Up to 10 images, PNG/JPG/WebP</p>
@@ -76,7 +76,8 @@
                                             <img src="{{ $img }}" class="h-28 w-full object-cover rounded-md border border-gray-200 dark:border-gray-600"/>
                                             <button type="button" 
                                                     class="absolute top-1 right-1 hidden group-hover:block bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded delete-existing-btn"
-                                                    onclick="deleteExistingImage({{ $index }})">
+                                                    onclick="deleteExistingImage({{ $index }})"
+                                                    aria-label="Delete image">
                                                 ✕
                                             </button>
                                         </div>

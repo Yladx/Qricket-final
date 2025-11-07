@@ -4,16 +4,16 @@
         return `
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
+                    <label for="${componentId}-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
                     <input type="text" id="${componentId}-title" class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Choose Your Ticket">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subtitle</label>
+                    <label for="${componentId}-subtitle" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subtitle</label>
                     <input type="text" id="${componentId}-subtitle" class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Select the ticket that best fits your needs">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ticket Options</label>
-                    <div id="${componentId}-tickets-container" class="space-y-3">
+                    <p id="${componentId}-tickets-label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ticket Options</p>
+                    <div id="${componentId}-tickets-container" class="space-y-3" role="group" aria-labelledby="${componentId}-tickets-label">
                         <div class="ticket-item border border-gray-200 dark:border-gray-600 rounded-lg p-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -43,7 +43,7 @@
                                     <input id="${componentId}-ticket-button-0" type="text" class="w-32 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Select Ticket">
                                 </div>
                             </div>
-                            <button type="button" onclick="removeTicketItem(this)" class="mt-2 text-red-600 hover:text-red-800 text-sm">Remove</button>
+                            <button type="button" onclick="removeTicketItem(this)" class="mt-2 text-red-600 hover:text-red-800 text-sm" aria-label="Remove ticket option">Remove</button>
                         </div>
                     </div>
                     <button type="button" onclick="addTicketItem('${componentId}')" class="mt-2 text-indigo-600 hover:text-indigo-800 text-sm">+ Add Ticket Option</button>
@@ -59,6 +59,7 @@
     window.addTicketItem = window.addTicketItem || function(componentId) {
         const container = document.getElementById(`${componentId}-tickets-container`);
         if (container) {
+            const nextIndex = container.querySelectorAll('.ticket-item').length;
             const ticketItem = document.createElement('div');
             ticketItem.className = 'ticket-item border border-gray-200 dark:border-gray-600 rounded-lg p-4';
             ticketItem.innerHTML = `

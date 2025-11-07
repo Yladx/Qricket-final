@@ -14,7 +14,7 @@
                 <div>
                 <div class="flex items-center justify-between mb-3">
                     <div class="text-sm text-gray-600 dark:text-gray-300">You can set up a certificate now or skip it and add later.</div>
-                    <label class="inline-flex items-center space-x-2 text-sm">
+                    <label for="skip_certificate_step4" class="inline-flex items-center space-x-2 text-sm">
                         <input type="checkbox" id="skip_certificate_step4" class="rounded border-gray-300 text-emerald-600">
                         <span class="text-gray-700 dark:text-gray-300">Skip certificate for this event</span>
                     </label>
@@ -38,10 +38,10 @@
                 </div>
             <!-- Bottom: Live Preview with collapsible toggle -->
             <details id="cert_section" class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden" open>
-                <summary class="cursor-pointer select-none px-4 py-3 text-sm font-medium flex items-center justify-between">
+                <summary class="cursor-pointer select-none px-4 py-3 text-sm font-medium flex items-center justify-between" aria-label="Certificate preview section">
                     <span>Certificate Preview</span>
                     <div class="flex items-center gap-3">
-                        <button type="button" onclick="window.print()" class="px-3 py-1.5 text-xs rounded bg-qricket-500 text-white hover:bg-qricket-600">Print</button>
+                        <button type="button" onclick="window.print()" class="px-3 py-1.5 text-xs rounded bg-qricket-500 text-white hover:bg-qricket-600" aria-label="Print certificate">Print</button>
                         <span class="text-xs text-gray-500">Click to collapse/expand</span>
                     </div>
                 </summary>
@@ -185,28 +185,28 @@
             newSignatory.innerHTML = 
                 '<div class="flex items-center justify-between mb-2">' +
                     '<h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory ' + sigNum + '</h4>' +
-                    '<button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" onclick="window.removeSignatory(' + sigNum + ')">' +
-                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" onclick="window.removeSignatory(' + sigNum + ')" aria-label="Remove signatory ' + sigNum + '">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">' +
                             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
                         '</svg>' +
                     '</button>' +
                 '</div>' +
                 '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">' +
                     '<div>' +
-                        '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>' +
+                        '<label for="sig_' + sigNum + '_name_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>' +
                         '<input id="sig_' + sigNum + '_name_input" name="sig_' + sigNum + '_name" type="text" maxlength="36" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 36 characters">' +
                     '</div>' +
                     '<div>' +
-                        '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>' +
+                        '<label for="sig_' + sigNum + '_title_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>' +
                         '<input id="sig_' + sigNum + '_title_input" name="sig_' + sigNum + '_title" type="text" maxlength="28" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 28 characters">' +
                     '</div>' +
                 '</div>' +
                 '<div class="mt-3">' +
-                    '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>' +
-                    '<label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">' +
+                    '<label for="sig_' + sigNum + '_file" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>' +
+                    '<label for="sig_' + sigNum + '_file" class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">' +
                         '<div class="flex items-center gap-2">' +
                             '<div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">' +
-                                '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>' +
+                                '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>' +
                             '</div>' +
                             '<div>' +
                                 '<div class="text-xs font-medium">Signature ' + sigNum + '</div>' +
@@ -328,10 +328,24 @@
                     chooseBtn.setAttribute('onclick', `window.uploadSignature(${newNum})`);
                 }
                 
-                // Update remove button onclick
+                // Update remove button onclick and aria-label
                 const removeBtn = item.querySelector('.remove-signatory-btn');
                 if (removeBtn) {
                     removeBtn.setAttribute('onclick', `window.removeSignatory(${newNum})`);
+                    removeBtn.setAttribute('aria-label', `Remove signatory ${newNum}`);
+                }
+                
+                // Update label for attributes
+                const nameLabel = item.querySelector('label[for^="sig_"][for$="_name_input"]');
+                const titleLabel = item.querySelector('label[for^="sig_"][for$="_title_input"]');
+                const fileLabel = item.querySelector('label[for^="sig_"][for$="_file"]');
+                if (nameLabel) nameLabel.setAttribute('for', `sig_${newNum}_name_input`);
+                if (titleLabel) titleLabel.setAttribute('for', `sig_${newNum}_title_input`);
+                if (fileLabel) {
+                    fileLabel.setAttribute('for', `sig_${newNum}_file`);
+                    // Also update the inner label
+                    const innerFileLabel = item.querySelector('label[class*="flex items-center"]');
+                    if (innerFileLabel) innerFileLabel.setAttribute('for', `sig_${newNum}_file`);
                 }
                 
                 // Update heading

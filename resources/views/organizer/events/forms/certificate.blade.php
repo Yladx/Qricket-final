@@ -66,10 +66,10 @@
         <div>
             <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Logos</label>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                <label for="logo_left_file" class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
                         </div>
                         <div>
                             <div class="text-xs font-medium">Left Logo</div>
@@ -83,10 +83,10 @@
                     <input type="file" id="logo_left_file" accept="image/*" class="hidden" onchange="uploadLogo('left')">
                     <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>
                 </label>
-                <label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                <label for="logo_right_file" class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
                         </div>
                         <div>
                             <div class="text-xs font-medium">Right Logo</div>
@@ -109,7 +109,7 @@
         <h3 class="text-xs font-semibold text-gray-800 dark:text-gray-100 mb-1">Recipient</h3>
         <div class="grid grid-cols-1">
             <div>
-                <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Recipient Preview Name</label>
+                <label for="recipient_name_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Recipient Preview Name</label>
                 @php($hasLogo = !empty($cd['logo_left_url']) || !empty($cd['logo_right_url']))
                 <input id="recipient_name_input" name="recipient_name" @if(!$hasLogo) disabled @endif type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['recipient_name'] ?? '' }}" placeholder="Upload a logo first, then enter name">
             </div>
@@ -138,28 +138,28 @@
             <div class="signatory-item border border-gray-200 dark:border-gray-700 rounded-lg p-3" data-signatory="1">
                 <div class="flex items-center justify-between mb-2">
                     <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory 1</h4>
-                    <button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs hidden" onclick="window.removeSignatory(1)">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs hidden" onclick="window.removeSignatory(1)" aria-label="Remove signatory 1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                     </button>
                 </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-                        <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>
+                        <label for="sig_1_name_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>
                         <input id="sig_1_name_input" name="sig_1_name" type="text" maxlength="36" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['sig_1_name'] ?? $cd['sig_left_name'] ?? '' }}" placeholder="Max 36 characters">
                     </div>
                     <div>
-                        <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>
+                        <label for="sig_1_title_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>
                         <input id="sig_1_title_input" name="sig_1_title" type="text" maxlength="28" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['sig_1_title'] ?? $cd['sig_left_title'] ?? '' }}" placeholder="Max 28 characters">
                     </div>
                 </div>
                 <div class="mt-3">
-                    <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>
-            <label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <label for="sig_1_file" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>
+            <label for="sig_1_file" class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
                     </div>
                     <div>
                                 <div class="text-xs font-medium">Signature 1</div>

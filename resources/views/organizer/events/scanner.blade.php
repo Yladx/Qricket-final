@@ -455,25 +455,25 @@
     <div class="controls">
         <div class="controls-section">
             <div class="btn-group">
-                <button id="start-btn" class="btn flex-1" onclick="startScanner()">
+                <button id="start-btn" class="btn flex-1" onclick="startScanner()" aria-label="Start scanner">
                     <span style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-                        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                         </svg>
                         Start Scanner
                     </span>
                 </button>
-                <button id="stop-btn" class="btn btn-secondary flex-1 hidden" onclick="stopScanner()">
+                <button id="stop-btn" class="btn btn-secondary flex-1 hidden" onclick="stopScanner()" aria-label="Stop scanner">
                     <span style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-                        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
                         </svg>
                         Stop
                     </span>
                 </button>
-                <button class="btn btn-secondary" onclick="goBack()" style="min-width: 60px;">
-                    <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button class="btn btn-secondary" onclick="goBack()" style="min-width: 60px;" aria-label="Go back">
+                    <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                     </svg>
                 </button>

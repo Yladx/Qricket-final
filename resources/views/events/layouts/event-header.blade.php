@@ -126,8 +126,8 @@
                     @if(isset($details['show_buttons']) && $details['show_buttons'] !== false)
                         <div class="flex flex-col sm:flex-row sm:gap-4 gap-3">
                             @if(isset($details['primary_button_text']) || isset($event->ticketTypes) && count($event->ticketTypes) > 0)
-                                <button type="button" class="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors duration-200 flex items-center justify-center">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <button type="button" class="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors duration-200 flex items-center justify-center" aria-label="{{ $details['primary_button_text'] ?? 'Buy Ticket' }}">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
                                     </svg>
                                     {{ $details['primary_button_text'] ?? 'Buy Ticket' }}
@@ -135,8 +135,8 @@
                             @endif
                             
                             @if($details['secondary_button_text'] ?? true)
-                                <button type="button" class="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors duration-200 flex items-center justify-center">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <button type="button" class="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors duration-200 flex items-center justify-center" aria-label="{{ $details['secondary_button_text'] ?? 'Save Event' }}">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                                     </svg>
                                     {{ $details['secondary_button_text'] ?? 'Save Event' }}

@@ -32,12 +32,12 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Poster</label>
+            <label for="poster-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Poster</label>
             <input id="poster-input" type="file" name="poster" accept="image/*" class="block w-full text-sm text-gray-900 dark:text-gray-100 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-qricket-500 file:text-white hover:file:bg-qricket-600 dark:file:bg-qricket-600 dark:hover:file:bg-qricket-700" onchange="previewPoster(this)">
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, or WEBP • up to 5MB</p>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thumbnail</label>
+            <label for="thumbnail-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thumbnail</label>
             <input id="thumbnail-input" type="file" name="thumbnail" accept="image/*" class="block w-full text-sm text-gray-900 dark:text-gray-100 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-qricket-500 file:text-white hover:file:bg-qricket-600 dark:file:bg-qricket-600 dark:hover:file:bg-qricket-700" onchange="previewThumbnail(this)">
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Square image recommended • up to 5MB</p>
         </div>

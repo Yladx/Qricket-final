@@ -1,6 +1,14 @@
 <x-app-layout title="Qrciket - Profile">
  
-
+<x-slot name="header">
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Ticket #{{ $ticket->ticket_number }}</h2>
+            <button onclick="goBack()" class="inline-flex items-center px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md text-xs font-semibold hover:bg-gray-300 dark:hover:bg-gray-600">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back
+            </button>
+        </div>
+    </x-slot>
     <div class="pt-0 lg:pt-12 pb-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
        
@@ -226,8 +234,8 @@
                             </svg>
                             <h3 class="text-xl font-semibold text-white">Request Refund</h3>
                         </div>
-                        <button onclick="closeRefundModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1 transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button onclick="closeRefundModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1 transition-colors" aria-label="Close refund modal">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
@@ -244,8 +252,8 @@
                     <input type="hidden" id="refund_amount" name="amount">
                     
                     <div class="mb-5">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Refund Amount</label>
-                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                        <p id="refund_amount_label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Refund Amount</p>
+                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600" role="group" aria-labelledby="refund_amount_label">
                             <div class="text-2xl font-bold text-qricket-600 dark:text-qricket-400" id="refundAmountDisplay"></div>
                         </div>
                     </div>
