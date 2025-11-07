@@ -19,9 +19,12 @@ class CacheControlMiddleware
 
         // Set cache headers for static assets
         $path = $request->path();
+        $uri = $request->getRequestUri();
         
         // Cache static assets (CSS, JS, images, fonts) for 1 year
-        if (preg_match('/\.(css|js|jpg|jpeg|png|gif|svg|ico|woff|woff2|ttf|eot)$/i', $path)) {
+        // Check both path and URI to catch asset() URLs
+        if (preg_match('/\.(css|js|jpg|jpeg|png|gif|svg|ico|woff|woff2|ttf|eot)$/i', $path) ||
+            preg_match('/\.(css|js|jpg|jpeg|png|gif|svg|ico|woff|woff2|ttf|eot)(\?|$)/i', $uri)) {
             $response->headers->set('Cache-Control', 'public, max-age=31536000, immutable');
             $response->headers->set('Expires', gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
         }
