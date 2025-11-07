@@ -19,6 +19,22 @@
             transition: none !important;
             animation-duration: 0s !important;
         }
+
+        input::-webkit-autofill,
+        textarea::-webkit-autofill,
+        select::-webkit-autofill {
+            -webkit-text-fill-color: #1f2937;
+            transition: background-color 5000s ease-in-out 0s,
+                color 5000s ease-in-out 0s;
+            box-shadow: 0 0 0 1000px #f9fafb inset;
+        }
+
+        .dark input::-webkit-autofill,
+        .dark textarea::-webkit-autofill,
+        .dark select::-webkit-autofill {
+            -webkit-text-fill-color: #f9fafb;
+            box-shadow: 0 0 0 1000px #1f2937 inset;
+        }
     </style>
     
     <!-- Alpine.js -->
