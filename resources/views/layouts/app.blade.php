@@ -132,21 +132,19 @@
     </head>
     <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300 overflow-x-hidden">
         <script>
-            // Apply dark mode class ASAP to avoid flash of light theme
-            (function(){
+            (function () {
                 try {
-                    const stored = localStorage.getItem('theme');
+                    const storedTheme = localStorage.getItem('theme');
                     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    const shouldDark = stored ? (stored === 'dark') : prefersDark;
-                    if (shouldDark) {
-                        document.documentElement.classList.add('dark');
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                    }
-                } catch (e) {
-                    // fallback to prefers-color-scheme
+                    const isDark = storedTheme ? storedTheme === 'dark' : prefersDark;
+                    const root = document.documentElement;
+                    root.classList.toggle('dark', isDark);
+                    root.dataset.theme = isDark ? 'dark' : 'light';
+                } catch (error) {
                     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                        document.documentElement.classList.add('dark');
+                        const root = document.documentElement;
+                        root.classList.add('dark');
+                        root.dataset.theme = 'dark';
                     }
                 }
             })();

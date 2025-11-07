@@ -127,6 +127,24 @@
     <script defer src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
 </head>
 <body class="h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <script>
+        (function () {
+            try {
+                const storedTheme = localStorage.getItem('theme');
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const isDark = storedTheme ? storedTheme === 'dark' : prefersDark;
+                const root = document.documentElement;
+                root.classList.toggle('dark', isDark);
+                root.dataset.theme = isDark ? 'dark' : 'light';
+            } catch (error) {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    const root = document.documentElement;
+                    root.classList.add('dark');
+                    root.dataset.theme = 'dark';
+                }
+            }
+        })();
+    </script>
     <!-- Flash Alerts -->
     {{-- <x-flash-alerts /> --}}
     
