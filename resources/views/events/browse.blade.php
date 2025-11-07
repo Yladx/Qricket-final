@@ -337,8 +337,66 @@
                                     </div>
                     @endif
                                 </div>
+                                @php
+                                    $eventEnded = false;
+                                    if ($event->end_date) {
+                                        $endDate = $event->end_date instanceof \Illuminate\Support\Carbon
+                                            ? $event->end_date
+                                            : \Illuminate\Support\Carbon::parse($event->end_date);
+                                        $eventEnded = $endDate->isPast();
+                                    } elseif ($event->start_date) {
+                                        $startDate = $event->start_date instanceof \Illuminate\Support\Carbon
+                                            ? $event->start_date
+                                            : \Illuminate\Support\Carbon::parse($event->start_date);
+                                        $eventEnded = $startDate->isPast();
+                                    }
+
+                                    $hasUnlimitedTickets = false;
+                                    $availableTickets = 0;
+
+                                    foreach ($event->ticketTypes as $ticketType) {
+                                        if (!$ticketType->is_active) {
+                                            continue;
+                                        }
+
+                                        $saleStart = $ticketType->sale_start instanceof \Illuminate\Support\Carbon
+                                            ? $ticketType->sale_start
+                                            : ($ticketType->sale_start ? \Illuminate\Support\Carbon::parse($ticketType->sale_start) : null);
+                                        if ($saleStart && $saleStart->isFuture()) {
+                                            continue;
+                                        }
+
+                                        $saleEnd = $ticketType->sale_end instanceof \Illuminate\Support\Carbon
+                                            ? $ticketType->sale_end
+                                            : ($ticketType->sale_end ? \Illuminate\Support\Carbon::parse($ticketType->sale_end) : null);
+                                        if ($saleEnd && $saleEnd->isPast()) {
+                                            continue;
+                                        }
+
+                                        if (is_null($ticketType->quantity)) {
+                                            $hasUnlimitedTickets = true;
+                                            break;
+                                        }
+
+                                        $remaining = max(0, ($ticketType->quantity ?? 0) - ($ticketType->sold_count ?? 0));
+
+                                        if ($remaining > 0) {
+                                            $availableTickets += $remaining;
+                                        }
+                                    }
+
+                                    $noTicketsAvailable = !$hasUnlimitedTickets && $availableTickets <= 0;
+                                @endphp
                                 <div class="mt-3 flex items-center justify-between">
-                                    <div class="text-xs text-qricket-600 dark:text-qricket-400 font-medium">{{ $event->ticket_price_range['display'] }}</div>
+                                    <div class="text-xs text-qricket-600 dark:text-qricket-400 font-medium">
+                                        @if($eventEnded)
+                                            Event ended
+                                        @elseif($noTicketsAvailable)
+                                            No tickets available
+                                        @else
+                                            {{ $event->ticket_price_range['display'] }}
+                                        @endif
+                                    </div>
                                     <span class="inline-flex items-center gap-1.5 text-qricket-600 dark:text-qricket-400 text-xs font-medium group-hover:underline">View details
                                         <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                     </span>
