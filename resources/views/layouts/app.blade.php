@@ -12,6 +12,7 @@
         <meta http-equiv="Expires" content="{{ gmdate('D, d M Y H:i:s', time() + 3600) }} GMT">
 
         <title>{{ $title ?? config('app.name', 'Qricket') }}</title>
+        <meta name="description" content="{{ $metaDescription ?? 'Qricket - Effortless event ticketing and QR-based check-ins. Create, manage, and attend events with ease.' }}">
 
         <!-- Favicon -->
         <link rel="icon" type="image/svg+xml" href="{{ asset('Logo.svg') }}">

@@ -35,6 +35,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Add user status check middleware (after auth)
         $middleware->web(append: \App\Http\Middleware\CheckUserStatus::class);
         
+        // Add security headers middleware (CSP, HSTS, COOP, XFO)
+        $middleware->web(append: \App\Http\Middleware\Security\SecurityHeadersMiddleware::class);
+        
         // Add organizer guard middleware only to specific routes (not globally)
         // $middleware->web(append: \App\Http\Middleware\OrganizerGuard::class);
         
