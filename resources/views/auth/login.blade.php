@@ -48,9 +48,9 @@
                 </p>
 
     <!-- Session Status -->
-                @if (session('status'))
-                    <div class="mb-4 text-sm text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
-                        {{ session('status') }}
+                @if ($statusMessage = session()->pull('status'))
+                    <div id="session-status-alert" class="mb-4 text-sm text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800 transition-opacity duration-300">
+                        {{ $statusMessage }}
                     </div>
                 @endif
 
@@ -204,6 +204,33 @@
     </div>
 
     <x-slot name="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const statusAlert = document.getElementById('session-status-alert');
+                if (!statusAlert) {
+                    return;
+                }
+
+                function removeStatusAlert() {
+                    statusAlert.style.opacity = '0';
+                    setTimeout(() => {
+                        if (statusAlert && statusAlert.parentNode) {
+                            statusAlert.parentNode.removeChild(statusAlert);
+                        }
+                    }, 320);
+                }
+
+                // Fade out after a short delay
+                setTimeout(removeStatusAlert, 2600);
+
+                // Ensure alert is cleared when returning via browser back cache
+                window.addEventListener('pageshow', function (event) {
+                    if (event.persisted) {
+                        removeStatusAlert();
+                    }
+                });
+            });
+        </script>
         <!-- Dark Mode Script -->
         <script>
             // Dark Mode Management
