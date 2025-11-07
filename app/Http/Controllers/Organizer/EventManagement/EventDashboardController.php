@@ -207,8 +207,8 @@ class EventDashboardController extends Controller
         if ($event->is_free || $netAmount <= 0) {
             $expectedEarnings = 0;
         } else {
-            $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
-            $qricketFee = $netAmount * ($qricketFeePercentage / 100);
+        $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
+        $qricketFee = $netAmount * ($qricketFeePercentage / 100);
             $expectedEarnings = max(0, $netAmount - $qricketFee); // clamp to zero
         }
 
@@ -382,8 +382,8 @@ class EventDashboardController extends Controller
         if ($event->is_free || $netAmountTotal <= 0) {
             $expectedRevenue = 0;
         } else {
-            $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
-            $qricketFee = $netAmountTotal * ($qricketFeePercentage / 100);
+        $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
+        $qricketFee = $netAmountTotal * ($qricketFeePercentage / 100);
             $expectedRevenue = max(0, $netAmountTotal - $qricketFee); // clamp to zero
         }
         $netRevenue = $expectedRevenue; // Use expected revenue as net revenue

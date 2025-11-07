@@ -306,6 +306,16 @@ class ProfanityFilterService
             }
         }
 
+        // Clean up multiple spaces left after word removal (only between non-space characters)
+        // This ensures "hello fuck world" -> "hello  world" becomes "hello world"
+        $originalText = preg_replace('/(\S)\s{2,}(\S)/', '$1 $2', $originalText);
+        // Also clean up spaces at the beginning/end if replacement was empty
+        if ($replacement === '') {
+            $originalText = trim($originalText);
+            // Clean up any remaining multiple spaces
+            $originalText = preg_replace('/\s+/', ' ', $originalText);
+        }
+
         return $originalText;
     }
 

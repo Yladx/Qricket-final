@@ -960,4 +960,4 @@ class CertificateController extends Controller
             'Expires' => '0',
         ]);
     }
-}
+} 
