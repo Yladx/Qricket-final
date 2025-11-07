@@ -13,15 +13,15 @@
         <h3 class="text-xs font-semibold text-gray-800 dark:text-gray-100 mb-1">Organization</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
-            <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Organization Line 1</label>
+            <label for="org_line1_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Organization Line 1</label>
             <input id="org_line1_input" name="org_line1" type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['org_line1'] ?? '' }}">
         </div>
         <div>
-            <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Organization Line 2</label>
+            <label for="org_line2_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Organization Line 2</label>
             <input id="org_line2_input" name="org_line2" type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['org_line2'] ?? '' }}">
         </div>
         <div>
-            <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">School/Organization Name</label>
+            <label for="org_school_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">School/Organization Name</label>
             <input id="org_school_input" name="org_school" type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['org_school'] ?? '' }}">
         </div>
         </div>
@@ -36,23 +36,26 @@
             <div class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-2">Certificate Color Customization</div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Primary Color</label>
+                    <label for="theme_primary" class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Primary Color</label>
                     <div class="flex items-center space-x-1">
-                        <input type="color" id="theme_primary" name="theme_primary" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_primary'] ?? '#0b2f6b' }}">
+                        <input type="color" id="theme_primary" name="theme_primary" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_primary'] ?? '#0b2f6b' }}" aria-label="Primary color picker">
+                        <label for="theme_primary-hex" class="sr-only">Primary color hex value</label>
                         <input type="text" id="theme_primary-hex" class="flex-1 rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 h-6 text-xs" value="{{ $cd['theme_primary'] ?? '#0b2f6b' }}" placeholder="#0b2f6b">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Secondary Color</label>
+                    <label for="theme_secondary" class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Secondary Color</label>
                     <div class="flex items-center space-x-1">
-                        <input type="color" id="theme_secondary" name="theme_secondary" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_secondary'] ?? '#092557' }}">
+                        <input type="color" id="theme_secondary" name="theme_secondary" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_secondary'] ?? '#092557' }}" aria-label="Secondary color picker">
+                        <label for="theme_secondary-hex" class="sr-only">Secondary color hex value</label>
                         <input type="text" id="theme_secondary-hex" class="flex-1 rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 h-6 text-xs" value="{{ $cd['theme_secondary'] ?? '#092557' }}" placeholder="#092557">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Border Color</label>
+                    <label for="theme_border" class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Border Color</label>
                     <div class="flex items-center space-x-1">
-                        <input type="color" id="theme_border" name="theme_border" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_border'] ?? '#0b2f6b' }}">
+                        <input type="color" id="theme_border" name="theme_border" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_border'] ?? '#0b2f6b' }}" aria-label="Border color picker">
+                        <label for="theme_border-hex" class="sr-only">Border color hex value</label>
                         <input type="text" id="theme_border-hex" class="flex-1 rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 h-6 text-xs" value="{{ $cd['theme_border'] ?? '#0b2f6b' }}" placeholder="#0b2f6b">
                     </div>
                 </div>

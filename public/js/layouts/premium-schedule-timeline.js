@@ -16,8 +16,11 @@ window.addTimelineRow = function(componentId, time = '', item = '') {
     if (!c) return;
     const row = document.createElement('div');
     row.className = 'grid grid-cols-5 gap-2';
-    row.innerHTML = `<input type='text' class='col-span-2 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Time (e.g., 10:00)' value='${(time||'').replace(/'/g, "&#39;")}' oninput=\"updateLayoutJSON()\">` +
-        `<input type='text' class='col-span-3 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Activity / Description' value='${(item||'').replace(/'/g, "&#39;")}' oninput=\"updateLayoutJSON()\">`;
+    const nextIndex = c.querySelectorAll('.grid').length;
+    row.innerHTML = `<label for="${componentId}-timeline-time-${nextIndex}" class="sr-only">Time</label>` +
+        `<input id="${componentId}-timeline-time-${nextIndex}" type='text' class='col-span-2 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Time (e.g., 10:00)' value='${(time||'').replace(/'/g, "&#39;")}' oninput=\"updateLayoutJSON()\">` +
+        `<label for="${componentId}-timeline-item-${nextIndex}" class="sr-only">Activity / Description</label>` +
+        `<input id="${componentId}-timeline-item-${nextIndex}" type='text' class='col-span-3 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Activity / Description' value='${(item||'').replace(/'/g, "&#39;")}' oninput=\"updateLayoutJSON()\">`;
     c.appendChild(row);
     try { if (typeof updateLayoutJSON === 'function') updateLayoutJSON(); } catch(_) {}
 };
