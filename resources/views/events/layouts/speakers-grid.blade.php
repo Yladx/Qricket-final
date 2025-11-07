@@ -14,28 +14,26 @@
             // Get speakers array
             $speakers = isset($details['speakers']) && is_array($details['speakers']) ? $details['speakers'] : [];
             $speakerCount = count($speakers);
-            
-            // Grid classes based on count
+
             if ($speakerCount === 1) {
-                $gridClasses = 'flex justify-center';
-                $cardContainerClasses = 'max-w-md w-full';
+                $gridClasses = 'grid grid-cols-1 gap-4 md:gap-6 lg:gap-8 justify-items-center';
+                $cardClasses = 'w-full max-w-md';
             } elseif ($speakerCount === 2) {
                 $gridClasses = 'grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 lg:gap-8';
-                $cardContainerClasses = 'w-full';
+                $cardClasses = 'w-full';
             } elseif ($speakerCount === 3) {
                 $gridClasses = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8';
-                $cardContainerClasses = 'w-full';
+                $cardClasses = 'w-full';
             } else {
-                // 4 or more: responsive grid without horizontal scrolling
                 $gridClasses = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 xl:gap-8';
-                $cardContainerClasses = 'w-full';
+                $cardClasses = 'w-full';
             }
         @endphp
-        
+
         <div class="{{ $gridClasses }}">
             @if($speakerCount > 0)
                 @foreach($speakers as $index => $speaker)
-                <div class="{{ $cardContainerClasses }}">
+                <div class="{{ $cardClasses }}">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden h-full min-h-[350px] sm:min-h-[400px] flex flex-col">
                     @php
                         // Try multiple possible image fields
