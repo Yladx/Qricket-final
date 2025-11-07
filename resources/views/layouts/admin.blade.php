@@ -157,21 +157,29 @@
     <x-flash-alerts />
     
     <!-- Pusher for real-time notifications -->
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script defer src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script>
-        // Initialize Pusher
-        const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
-            cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
-            encrypted: true
-        });
+        // Wait for Pusher to load before initializing
+        function initializePusher() {
+            if (typeof Pusher === 'undefined') {
+                // Retry after a short delay
+                setTimeout(initializePusher, 100);
+                return;
+            }
+            
+            try {
+                // Initialize Pusher
+                const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
+                    cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
+                    encrypted: true
+                });
 
-        // Listen for admin logout notifications
-        @auth('admin')
-        const adminId = '{{ Auth::guard('admin')->id() }}';
-        const channel = pusher.subscribe('admin-session.' + adminId);
-        
-        channel.bind('admin.logged.out', function(data) {
-            console.log('Admin logout notification received:', data);
+                // Listen for admin logout notifications
+                @auth('admin')
+                const adminId = '{{ Auth::guard('admin')->id() }}';
+                const channel = pusher.subscribe('admin-session.' + adminId);
+                
+                channel.bind('admin.logged.out', function(data) {
             
             // Get current session ID to compare with the conflicting session
             const currentSessionId = '{{ session()->getId() }}';
