@@ -13,15 +13,15 @@
         <h3 class="text-xs font-semibold text-gray-800 dark:text-gray-100 mb-1">Organization</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
-            <label for="org_line1_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Organization Line 1</label>
+            <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Organization Line 1</label>
             <input id="org_line1_input" name="org_line1" type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['org_line1'] ?? '' }}">
         </div>
         <div>
-            <label for="org_line2_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Organization Line 2</label>
+            <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Organization Line 2</label>
             <input id="org_line2_input" name="org_line2" type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['org_line2'] ?? '' }}">
         </div>
         <div>
-            <label for="org_school_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">School/Organization Name</label>
+            <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">School/Organization Name</label>
             <input id="org_school_input" name="org_school" type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['org_school'] ?? '' }}">
         </div>
         </div>
@@ -36,26 +36,23 @@
             <div class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-2">Certificate Color Customization</div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                    <label for="theme_primary" class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Primary Color</label>
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Primary Color</label>
                     <div class="flex items-center space-x-1">
-                        <input type="color" id="theme_primary" name="theme_primary" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_primary'] ?? '#0b2f6b' }}" aria-label="Primary color picker">
-                        <label for="theme_primary-hex" class="sr-only">Primary color hex value</label>
+                        <input type="color" id="theme_primary" name="theme_primary" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_primary'] ?? '#0b2f6b' }}">
                         <input type="text" id="theme_primary-hex" class="flex-1 rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 h-6 text-xs" value="{{ $cd['theme_primary'] ?? '#0b2f6b' }}" placeholder="#0b2f6b">
                     </div>
                 </div>
                 <div>
-                    <label for="theme_secondary" class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Secondary Color</label>
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Secondary Color</label>
                     <div class="flex items-center space-x-1">
-                        <input type="color" id="theme_secondary" name="theme_secondary" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_secondary'] ?? '#092557' }}" aria-label="Secondary color picker">
-                        <label for="theme_secondary-hex" class="sr-only">Secondary color hex value</label>
+                        <input type="color" id="theme_secondary" name="theme_secondary" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_secondary'] ?? '#092557' }}">
                         <input type="text" id="theme_secondary-hex" class="flex-1 rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 h-6 text-xs" value="{{ $cd['theme_secondary'] ?? '#092557' }}" placeholder="#092557">
                     </div>
                 </div>
                 <div>
-                    <label for="theme_border" class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Border Color</label>
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-0.5">Border Color</label>
                     <div class="flex items-center space-x-1">
-                        <input type="color" id="theme_border" name="theme_border" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_border'] ?? '#0b2f6b' }}" aria-label="Border color picker">
-                        <label for="theme_border-hex" class="sr-only">Border color hex value</label>
+                        <input type="color" id="theme_border" name="theme_border" class="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 cursor-pointer" value="{{ $cd['theme_border'] ?? '#0b2f6b' }}">
                         <input type="text" id="theme_border-hex" class="flex-1 rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 h-6 text-xs" value="{{ $cd['theme_border'] ?? '#0b2f6b' }}" placeholder="#0b2f6b">
                     </div>
                 </div>
@@ -66,10 +63,10 @@
         <div>
             <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Logos</label>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <label for="logo_left_file" class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                <label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
                         </div>
                         <div>
                             <div class="text-xs font-medium">Left Logo</div>
@@ -83,10 +80,10 @@
                     <input type="file" id="logo_left_file" accept="image/*" class="hidden" onchange="uploadLogo('left')">
                     <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>
                 </label>
-                <label for="logo_right_file" class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                <label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
                         </div>
                         <div>
                             <div class="text-xs font-medium">Right Logo</div>
@@ -109,7 +106,7 @@
         <h3 class="text-xs font-semibold text-gray-800 dark:text-gray-100 mb-1">Recipient</h3>
         <div class="grid grid-cols-1">
             <div>
-                <label for="recipient_name_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Recipient Preview Name</label>
+                <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Recipient Preview Name</label>
                 @php($hasLogo = !empty($cd['logo_left_url']) || !empty($cd['logo_right_url']))
                 <input id="recipient_name_input" name="recipient_name" @if(!$hasLogo) disabled @endif type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['recipient_name'] ?? '' }}" placeholder="Upload a logo first, then enter name">
             </div>
@@ -138,28 +135,28 @@
             <div class="signatory-item border border-gray-200 dark:border-gray-700 rounded-lg p-3" data-signatory="1">
                 <div class="flex items-center justify-between mb-2">
                     <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory 1</h4>
-                    <button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs hidden" onclick="window.removeSignatory(1)" aria-label="Remove signatory 1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs hidden" onclick="window.removeSignatory(1)">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                     </button>
                 </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-                        <label for="sig_1_name_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>
+                        <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>
                         <input id="sig_1_name_input" name="sig_1_name" type="text" maxlength="36" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['sig_1_name'] ?? $cd['sig_left_name'] ?? '' }}" placeholder="Max 36 characters">
                     </div>
                     <div>
-                        <label for="sig_1_title_input" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>
+                        <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>
                         <input id="sig_1_title_input" name="sig_1_title" type="text" maxlength="28" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['sig_1_title'] ?? $cd['sig_left_title'] ?? '' }}" placeholder="Max 28 characters">
                     </div>
                 </div>
                 <div class="mt-3">
-                    <label for="sig_1_file" class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>
-            <label for="sig_1_file" class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>
+            <label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
                     </div>
                     <div>
                                 <div class="text-xs font-medium">Signature 1</div>

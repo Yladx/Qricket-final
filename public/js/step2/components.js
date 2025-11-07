@@ -40,7 +40,7 @@ function addLayoutComponent(layoutType) {
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
                             <h4 class="text-sm font-medium text-gray-800 dark:text-gray-200">Photo Highlights</h4>
-                            <button type="button" onclick="addPhotoItem('${componentId}')" class="px-3 py-1.5 text-xs rounded bg-qricket-500 text-white hover:bg-qricket-600" aria-label="Add photo">Add Photo</button>
+                            <button type="button" onclick="addPhotoItem('${componentId}')" class="px-3 py-1.5 text-xs rounded bg-qricket-500 text-white hover:bg-qricket-600">Add Photo</button>
                         </div>
                         <div id="${componentId}-photos-container" class="space-y-3"></div>
                     </div>`;
@@ -128,18 +128,18 @@ function addLayoutComponent(layoutType) {
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">${getLayoutDisplayName(layoutType)}</h3>
             <div class="flex items-center space-x-2">
-                <button type="button" onclick="moveComponentUp('${componentId}')" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="Move component up">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <button type="button" onclick="moveComponentUp('${componentId}')" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
                     </svg>
                 </button>
-                <button type="button" onclick="moveComponentDown('${componentId}')" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="Move component down">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <button type="button" onclick="moveComponentDown('${componentId}')" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <button type="button" onclick="removeLayoutComponent('${componentId}')" class="p-1 text-red-400 hover:text-red-600" aria-label="Remove component">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <button type="button" onclick="removeLayoutComponent('${componentId}')" class="p-1 text-red-400 hover:text-red-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
                 </button>
@@ -550,18 +550,18 @@ function addLayoutComponentFromData(componentData) {
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">${getLayoutDisplayName(layoutType)}</h3>
             <div class="flex items-center space-x-2">
-                <button type="button" onclick="moveComponentUp('${componentId}')" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="Move component up">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <button type="button" onclick="moveComponentUp('${componentId}')" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
                     </svg>
                 </button>
-                <button type="button" onclick="moveComponentDown('${componentId}')" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="Move component down">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <button type="button" onclick="moveComponentDown('${componentId}')" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <button type="button" onclick="removeLayoutComponent('${componentId}')" class="p-1 text-red-400 hover:text-red-600" aria-label="Remove component">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <button type="button" onclick="removeLayoutComponent('${componentId}')" class="p-1 text-red-400 hover:text-red-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
                 </button>
@@ -808,12 +808,9 @@ function addLayoutComponentFromData(componentData) {
                             items.forEach((it) => {
                                 const row = document.createElement('div');
                                 row.className = 'grid grid-cols-5 gap-2';
-                                const rowIndex = container.querySelectorAll('.grid').length;
                                 row.innerHTML = `
-                                    <label for="${componentId}-schedule-time-${rowIndex}" class="sr-only">Time</label>
-                                    <input id="${componentId}-schedule-time-${rowIndex}" type='text' class='col-span-2 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Time (e.g., 10:00)' value='${it.time || ''}'>
-                                    <label for="${componentId}-schedule-item-${rowIndex}" class="sr-only">Item</label>
-                                    <input id="${componentId}-schedule-item-${rowIndex}" type='text' class='col-span-3 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Item (e.g., Opening)' value='${it.item || ''}'>
+                                    <input type='text' class='col-span-2 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Time (e.g., 10:00)' value='${it.time || ''}'>
+                                    <input type='text' class='col-span-3 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded' placeholder='Item (e.g., Opening)' value='${it.item || ''}'>
                                 `;
                                 container.appendChild(row);
                             });
@@ -919,16 +916,16 @@ function populateComponentData(componentId, data) {
                 wrapper.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div>
-                            <label for="${componentId}-card-icon-${idx}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Icon</label>
-                            <input id="${componentId}-card-icon-${idx}" list="icon_list_datalist" type="text" value="${card.icon || 'calendar'}" onchange="updateCardDetail('${componentId}', ${idx}, 'icon', this.value)" class="block w-full text-sm bg-white text-gray-900 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="calendar">
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Icon</label>
+                            <input list="icon_list_datalist" type="text" value="${card.icon || 'calendar'}" onchange="updateCardDetail('${componentId}', ${idx}, 'icon', this.value)" class="block w-full text-sm bg-white text-gray-900 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="calendar">
                         </div>
                         <div>
-                            <label for="${componentId}-card-title-${idx}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Title</label>
-                            <input id="${componentId}-card-title-${idx}" type="text" value="${card.title || ''}" onchange="updateCardDetail('${componentId}', ${idx}, 'title', this.value)" class="block w-full text-sm bg-white text-gray-900 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Title">
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Title</label>
+                            <input type="text" value="${card.title || ''}" onchange="updateCardDetail('${componentId}', ${idx}, 'title', this.value)" class="block w-full text-sm bg-white text-gray-900 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Title">
                         </div>
                         <div>
-                            <label for="${componentId}-card-content-${idx}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Content</label>
-                            <input id="${componentId}-card-content-${idx}" type="text" value="${card.content || ''}" onchange="updateCardDetail('${componentId}', ${idx}, 'content', this.value)" class="block w-full text-sm bg-white text-gray-900 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Content">
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Content</label>
+                            <input type="text" value="${card.content || ''}" onchange="updateCardDetail('${componentId}', ${idx}, 'content', this.value)" class="block w-full text-sm bg-white text-gray-900 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Content">
                         </div>
                     </div>
                 `;
@@ -1036,15 +1033,15 @@ function populateComponentData(componentId, data) {
                 faqItem.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="${componentId}-faq-question-${index}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Question</label>
-                            <input id="${componentId}-faq-question-${index}" type="text" class="faq-question w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="What should I bring to the event?" value="${faq.question || ''}">
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Question</label>
+                            <input type="text" class="faq-question w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="What should I bring to the event?" value="${faq.question || ''}">
                         </div>
                         <div>
-                            <label for="${componentId}-faq-answer-${index}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Answer</label>
-                            <textarea id="${componentId}-faq-answer-${index}" class="faq-answer w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" rows="2" placeholder="Please bring a valid ID and your ticket.">${faq.answer || ''}</textarea>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Answer</label>
+                            <textarea class="faq-answer w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" rows="2" placeholder="Please bring a valid ID and your ticket.">${faq.answer || ''}</textarea>
                         </div>
                     </div>
-                    <button type="button" onclick="removeFaqItem(this)" class="mt-2 text-red-600 hover:text-red-800 text-sm" aria-label="Remove FAQ item">Remove</button>
+                    <button type="button" onclick="removeFaqItem(this)" class="mt-2 text-red-600 hover:text-red-800 text-sm">Remove</button>
                 `;
                 container.appendChild(faqItem);
             });
@@ -1062,33 +1059,33 @@ function populateComponentData(componentId, data) {
                 ticketItem.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="${componentId}-ticket-name-${index}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ticket Name</label>
-                            <input id="${componentId}-ticket-name-${index}" type="text" class="w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="General Admission" value="${ticket.name || ''}">
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ticket Name</label>
+                            <input type="text" class="w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="General Admission" value="${ticket.name || ''}">
                         </div>
                         <div>
-                            <label for="${componentId}-ticket-price-${index}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Price</label>
-                            <input id="${componentId}-ticket-price-${index}" type="text" class="w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="$25" value="${ticket.price || ''}">
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Price</label>
+                            <input type="text" class="w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="$25" value="${ticket.price || ''}">
                         </div>
                     </div>
                     <div class="mt-3">
-                        <label for="${componentId}-ticket-description-${index}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Description</label>
-                        <input id="${componentId}-ticket-description-${index}" type="text" class="w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Perfect for individuals" value="${ticket.description || ''}">
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Description</label>
+                        <input type="text" class="w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Perfect for individuals" value="${ticket.description || ''}">
                     </div>
                     <div class="mt-3">
-                        <label for="${componentId}-ticket-features-${index}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Features (one per line)</label>
-                        <textarea id="${componentId}-ticket-features-${index}" class="w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" rows="3" placeholder="Event access&#10;Welcome materials&#10;Networking opportunities">${ticket.features || ''}</textarea>
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Features (one per line)</label>
+                        <textarea class="w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" rows="3" placeholder="Event access&#10;Welcome materials&#10;Networking opportunities">${ticket.features || ''}</textarea>
                     </div>
                     <div class="mt-3 flex items-center space-x-4">
                         <div class="flex items-center">
-                            <input type="checkbox" id="${componentId}-ticket-popular-${index}" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" ${ticket.popular ? 'checked' : ''}>
-                            <label for="${componentId}-ticket-popular-${index}" class="ml-2 text-xs text-gray-600 dark:text-gray-400">Most Popular</label>
+                            <input type="checkbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" ${ticket.popular ? 'checked' : ''}>
+                            <label class="ml-2 text-xs text-gray-600 dark:text-gray-400">Most Popular</label>
                         </div>
                         <div>
-                            <label for="${componentId}-ticket-button-${index}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Button Text</label>
-                            <input id="${componentId}-ticket-button-${index}" type="text" class="w-32 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Select Ticket" value="${ticket.buttonText || ''}">
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Button Text</label>
+                            <input type="text" class="w-32 text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Select Ticket" value="${ticket.buttonText || ''}">
                         </div>
                     </div>
-                    <button type="button" onclick="removeTicketItem(this)" class="mt-2 text-red-600 hover:text-red-800 text-sm" aria-label="Remove ticket item">Remove</button>
+                    <button type="button" onclick="removeTicketItem(this)" class="mt-2 text-red-600 hover:text-red-800 text-sm">Remove</button>
                 `;
                 container.appendChild(ticketItem);
             });

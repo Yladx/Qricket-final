@@ -5,21 +5,21 @@
             <div class="speaker-item border border-gray-200 dark:border-gray-600 rounded-lg p-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="${componentId}-speakers_${index}_name" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Name</label>
-                        <input id="${componentId}-speakers_${index}_name" type="text" class="speaker-name w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" placeholder="Juan Dela Cruz">
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Name</label>
+                        <input type="text" class="speaker-name w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" placeholder="Juan Dela Cruz">
                     </div>
                     <div>
-                        <label for="${componentId}-speakers_${index}_title" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Title/Role</label>
-                        <input id="${componentId}-speakers_${index}_title" type="text" class="speaker-title w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" placeholder="CEO, Company Inc.">
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Title/Role</label>
+                        <input type="text" class="speaker-title w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" placeholder="CEO, Company Inc.">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 items-start">
                     <div>
-                        <label for="${componentId}-speakers_${index}_bio" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Bio</label>
-                        <textarea id="${componentId}-speakers_${index}_bio" class="speaker-bio w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" rows="3" placeholder="Short introduction..."></textarea>
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Bio</label>
+                        <textarea class="speaker-bio w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" rows="3" placeholder="Short introduction..."></textarea>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2" for="${componentId}-speakers_${index}_image">Photo</label>
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Photo</label>
                         <div class="relative w-full overflow-hidden rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700" style="padding-bottom:56.25%">
                             <div id="${componentId}-speakers_${index}_image-preview" class="absolute inset-0 hidden">
                                 <img class="w-full h-full object-cover" alt="Speaker Photo">
@@ -42,11 +42,11 @@
             <div class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="${componentId}-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Section Title</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Section Title</label>
                         <input id="${componentId}-title" type="text" class="w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" placeholder="Event Speakers">
                     </div>
                     <div>
-                        <label for="${componentId}-subtitle" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subtitle</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subtitle</label>
                         <input id="${componentId}-subtitle" type="text" class="w-full text-sm bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-qricket-500 focus:ring-qricket-500 rounded-md shadow-sm" placeholder="Meet the experts">
                     </div>
                 </div>
@@ -77,42 +77,10 @@
         item.remove();
         // Reindex remaining to keep image ids aligned
         Array.from(container.querySelectorAll('.speaker-item')).forEach((el, idx) => {
-            const nameInput = el.querySelector('.speaker-name');
-            if (nameInput) {
-                const newNameId = `${componentId}-speakers_${idx}_name`;
-                nameInput.id = newNameId;
-                const nameLabel = nameInput.closest('div')?.querySelector('label');
-                if (nameLabel) nameLabel.setAttribute('for', newNameId);
-            }
-
-            const titleInput = el.querySelector('.speaker-title');
-            if (titleInput) {
-                const newTitleId = `${componentId}-speakers_${idx}_title`;
-                titleInput.id = newTitleId;
-                const titleLabel = titleInput.closest('div')?.querySelector('label');
-                if (titleLabel) titleLabel.setAttribute('for', newTitleId);
-            }
-
-            const bioInput = el.querySelector('.speaker-bio');
-            if (bioInput) {
-                const newBioId = `${componentId}-speakers_${idx}_bio`;
-                bioInput.id = newBioId;
-                const bioLabel = bioInput.closest('div')?.querySelector('label');
-                if (bioLabel) bioLabel.setAttribute('for', newBioId);
-            }
-
+            // reset image input/preview ids
             const file = el.querySelector('input[type="file"]');
-            if (file) {
-                const newFileId = `${componentId}-speakers_${idx}_image`;
-                file.id = newFileId;
-                el.querySelectorAll('label[for]').forEach(lbl => {
-                    if (lbl.getAttribute('for')?.includes('_image')) {
-                        lbl.setAttribute('for', newFileId);
-                    }
-                });
-            }
-
             const preview = el.querySelector('[id$="_image-preview"]');
+            if (file) file.id = `${componentId}-speakers_${idx}_image`;
             if (preview) preview.id = `${componentId}-speakers_${idx}_image-preview`;
         });
         if (typeof updateLayoutJSON === 'function') updateLayoutJSON();

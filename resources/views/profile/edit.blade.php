@@ -234,8 +234,8 @@
                             </svg>
                             <h3 class="text-xl font-semibold text-white">Request Refund</h3>
                         </div>
-                        <button onclick="closeRefundModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1 transition-colors" aria-label="Close refund modal">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <button onclick="closeRefundModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-1 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
@@ -252,8 +252,8 @@
                     <input type="hidden" id="refund_amount" name="amount">
                     
                     <div class="mb-5">
-                        <p id="refund_amount_label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Refund Amount</p>
-                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600" role="group" aria-labelledby="refund_amount_label">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Refund Amount</label>
+                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                             <div class="text-2xl font-bold text-qricket-600 dark:text-qricket-400" id="refundAmountDisplay"></div>
                         </div>
                     </div>

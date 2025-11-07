@@ -115,7 +115,7 @@
                                     <div class="flex items-center justify-between mb-4">
                                         <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">Individual Tickets</h4>
                                         <div class="flex items-center space-x-2">
-                                            <label for="hide-shared-{{ $eventGroup->event->id }}" class="flex items-center text-xs text-gray-500 dark:text-gray-400" onclick="event.stopPropagation()">
+                                            <label class="flex items-center text-xs text-gray-500 dark:text-gray-400" onclick="event.stopPropagation()">
                                                 <input type="checkbox" id="hide-shared-{{ $eventGroup->event->id }}" 
                                                        class="rounded border-gray-300 text-qricket-600 focus:ring-qricket-500" 
                                                        onclick="event.stopPropagation()" 

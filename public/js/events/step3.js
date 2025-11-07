@@ -393,44 +393,44 @@
         <div class="flex justify-end items-center space-x-2">
           ${purchaseIndicator}
           <button type="button" data-remove="${idx}" class="${deleteButtonClass}" title="${deleteButtonTitle}" aria-label="${deleteButtonTitle}" ${canDelete ? '' : 'disabled'}>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0V5a2 2 0 012-2h2a2 2 0 012 2v2m-6 0h6"/></svg>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0V5a2 2 0 012-2h2a2 2 0 012 2v2m-6 0h6"/></svg>
           </button>
         </div>
         <div ${rowIdAttr} class="border border-gray-200 dark:border-gray-700 rounded-md p-3 space-y-3 bg-white dark:bg-gray-800">
           <div class="grid grid-cols-12 gap-3 items-end">
             <div class="col-span-12 md:col-span-6">
-              <label for="ticket-name-${idx}" class="block text-xs text-gray-500">Name ${nameBadge}</label>
-              <input id="ticket-name-${idx}" data-k="name" data-i="${idx}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.name || ''}">
+              <label class="block text-xs text-gray-500">Name ${nameBadge}</label>
+              <input data-k="name" data-i="${idx}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.name || ''}">
             </div>
             <div class="col-span-6 md:col-span-3">
-              <label for="ticket-price-${idx}" class="block text-xs text-gray-500">Price</label>
-              <input id="ticket-price-${idx}" data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10 ${free ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-700' : ''}" value="${free ? '0' : (t.price || '500')}" ${free ? 'readonly disabled' : ''} ${free ? 'tabindex="-1"' : ''}>
+              <label class="block text-xs text-gray-500">Price</label>
+              <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10 ${free ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-700' : ''}" value="${free ? '0' : (t.price || '500')}" ${free ? 'readonly disabled' : ''} ${free ? 'tabindex="-1"' : ''}>
             </div>
             <div class="col-span-6 md:col-span-3">
-              <label for="ticket-quantity-${idx}" class="block text-xs text-gray-500">Quantity</label>
-              <input id="ticket-quantity-${idx}" data-k="quantity" data-i="${idx}" type="number" min="${soldCount}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${displayQty}" ${free ? `max="${getTicketsPerEventLimit() || ''}"` : ''}>
+              <label class="block text-xs text-gray-500">Quantity</label>
+              <input data-k="quantity" data-i="${idx}" type="number" min="${soldCount}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${displayQty}" ${free ? `max="${getTicketsPerEventLimit() || ''}"` : ''}>
             </div>
           </div>
           <div>
-            <label for="ticket-description-${idx}" class="block text-xs text-gray-500">Description</label>
-            <textarea id="ticket-description-${idx}" data-k="description" data-i="${idx}" rows="2" maxlength="200" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100" oninput="updateDescriptionCounter(this)">${t.description || ''}</textarea>
+            <label class="block text-xs text-gray-500">Description</label>
+            <textarea data-k="description" data-i="${idx}" rows="2" maxlength="200" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100" oninput="updateDescriptionCounter(this)">${t.description || ''}</textarea>
             <div class="flex justify-end mt-0.5">
               <span class="text-xs text-gray-400 description-counter" data-counter-for="${idx}">${(t.description || '').length}/200</span>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label for="ticket-sale-start-${idx}" class="block text-xs text-gray-500">Sale start</label>
-              <input id="ticket-sale-start-${idx}" data-k="sale_start" data-i="${idx}" type="datetime-local" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${formatDateTimeLocal(t.sale_start)}">
+              <label class="block text-xs text-gray-500">Sale start</label>
+              <input data-k="sale_start" data-i="${idx}" type="datetime-local" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${formatDateTimeLocal(t.sale_start)}">
             </div>
             <div>
-              <label for="ticket-sale-end-${idx}" class="block text-xs text-gray-500">Sale end</label>
-              <input id="ticket-sale-end-${idx}" data-k="sale_end" data-i="${idx}" type="datetime-local" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${formatDateTimeLocal(t.sale_end)}">
+              <label class="block text-xs text-gray-500">Sale end</label>
+              <input data-k="sale_end" data-i="${idx}" type="datetime-local" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${formatDateTimeLocal(t.sale_end)}">
             </div>
           </div>
           <div class="flex items-center space-x-2 pt-1">
-            <input data-k="is_active" data-i="${idx}" type="checkbox" id="ticket-active-${idx}" class="rounded border-gray-300 text-qricket-600" ${String(t.is_active)==='1' || t.is_active===true ? 'checked' : ''}>
-            <label for="ticket-active-${idx}" class="text-xs text-gray-500">Active</label>
+            <input data-k="is_active" data-i="${idx}" type="checkbox" class="rounded border-gray-300 text-qricket-600" ${String(t.is_active)==='1' || t.is_active===true ? 'checked' : ''}>
+            <label class="text-xs text-gray-500">Active</label>
           </div>
         </div>`;
       ticketContainer.appendChild(row);

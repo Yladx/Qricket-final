@@ -48,9 +48,9 @@
             <div class="mb-4">
                 @php($currentView = request('view', 'all'))
                 <div class="flex items-center gap-2 text-xs">
-                    <button type="button" data-view="all" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='all' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}" aria-label="View all events">All</button>
-                    <button type="button" data-view="owner" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='owner' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}" aria-label="View my posted events">My Posted</button>
-                    <button type="button" data-view="staff" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='staff' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}" aria-label="View events where I'm staff">I'm Staff</button>
+                    <button type="button" data-view="all" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='all' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}">All</button>
+                    <button type="button" data-view="owner" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='owner' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}">My Posted</button>
+                    <button type="button" data-view="staff" class="dash-view-btn px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 {{ $currentView==='staff' ? 'bg-qricket-500 text-white border-transparent' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' }}">I'm Staff</button>
                 </div>
             </div>
 
@@ -448,7 +448,7 @@
 
     <!-- External Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script defer src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     
     <!-- Dashboard Configuration -->
     <script>
@@ -655,8 +655,8 @@
                 </div>
                 
                 <div class="mb-4">
-                    <label for="event-sort" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort By</label>
-                    <select name="sort" id="event-sort" class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-lg focus:ring-qricket-500 focus:border-qricket-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort By</label>
+                    <select name="sort" class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-lg focus:ring-qricket-500 focus:border-qricket-500">
                         <option value="revenue">Revenue</option>
                         <option value="date">Date</option>
                         <option value="tickets">Tickets Sold</option>
@@ -664,8 +664,8 @@
                 </div>
                 
                 <div class="mb-4">
-                    <label for="event-order" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort Order</label>
-                    <select name="order" id="event-order" class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-lg focus:ring-qricket-500 focus:border-qricket-500">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort Order</label>
+                    <select name="order" class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-lg focus:ring-qricket-500 focus:border-qricket-500">
                         <option value="desc">Descending</option>
                         <option value="asc">Ascending</option>
                     </select>

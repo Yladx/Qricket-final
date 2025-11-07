@@ -39,19 +39,24 @@
             });
 
             if (!response.ok) {
-                // Silently fail - return original text if API fails
-                return text;
+                const errorText = await response.text();
+                console.warn('Profanity filter API error:', response.status, errorText);
+                return text; // Return original text if API fails
             }
 
             const data = await response.json();
             if (data.success && data.filtered !== undefined) {
+                // Debug logging (remove in production)
+                if (data.filtered !== data.original) {
+                    console.log('Profanity filtered:', { original: data.original, filtered: data.filtered });
+                }
                 return data.filtered;
             }
 
             return text;
         } catch (error) {
-            // Silently fail - return original text on error
-            return text;
+            console.error('Profanity filter error:', error);
+            return text; // Return original text on error
         }
     }
 
@@ -153,7 +158,7 @@
             // Update last value
             lastValues.set(input, input.value);
         } catch (error) {
-            // Silently handle errors
+            console.error('Error filtering profanity:', error);
         } finally {
             isFiltering = false;
         }
@@ -256,6 +261,8 @@
         // Find all text inputs and textareas
         const textInputs = document.querySelectorAll('input[type="text"], input[type="email"], textarea');
         
+        console.log('[ProfanityFilter] Initializing on', textInputs.length, 'fields');
+        
         textInputs.forEach(input => {
             // Skip if it's a search field or has a specific class to exclude
             if (input.classList.contains('no-profanity-filter') || 
@@ -266,6 +273,8 @@
 
             initializeProfanityFilter(input);
         });
+        
+        console.log('[ProfanityFilter] Initialization complete');
     }
 
     // Initialize when DOM is ready
@@ -326,3 +335,4 @@
         filter: filterProfanity,
     };
 })();
+

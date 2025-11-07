@@ -25,10 +25,7 @@
                     @if(isset($details['image']) && $details['image'])
                         <img src="{{ $details['image'] }}" 
                              alt="{{ $details['image_alt'] ?? 'Event Experience' }}" 
-                             width="800"
-                             height="600"
-                             class="w-full h-64 md:h-80 lg:h-96 object-cover rounded-lg shadow-lg"
-                             loading="lazy">
+                             class="w-full h-64 md:h-80 lg:h-96 object-cover rounded-lg shadow-lg">
                     @else
                         <div class="w-full h-64 md:h-80 lg:h-96 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transition-colors duration-200">
                             <div class="text-center text-gray-900 dark:text-gray-400">

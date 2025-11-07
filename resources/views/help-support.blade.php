@@ -1,4 +1,4 @@
-<x-app-layout title="Help & Support - Qricket" page-title="Help & Support" meta-description="Get help and support for Qricket Event Management System. Find answers to frequently asked questions, contact support, and learn how to use Qricket's event ticketing and management features.">
+<x-app-layout title="Help & Support - Qrickett" page-title="Help & Support">
    
 
     <div class="py-12">

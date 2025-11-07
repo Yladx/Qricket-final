@@ -44,5 +44,3 @@ class ProfanityFilterController extends Controller
     }
 }
 
-
-

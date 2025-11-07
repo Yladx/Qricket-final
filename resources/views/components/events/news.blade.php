@@ -224,7 +224,7 @@ function initializeImageGrid(newsId, images) {
     // 1 image = full width
     if (displayCount === 1) {
         html = `
-            <img src="${displayImages[0]}" width="800" height="288" class="w-full h-72 object-cover cursor-pointer hover:opacity-90 transition-opacity" alt="post image" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Crect fill=\'%23ddd\' width=\'400\' height=\'300\'/%3E%3Ctext fill=\'%23999\' font-family=\'sans-serif\' font-size=\'14\' dy=\'10.5\' font-weight=\'bold\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\'%3EImage not available%3C/text%3E%3C/svg%3E';" onclick="window.openImageModalFromAll(${startIndex >= 0 ? startIndex : 0})">
+            <img src="${displayImages[0]}" class="w-full h-72 object-cover cursor-pointer hover:opacity-90 transition-opacity" alt="post image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Crect fill=\'%23ddd\' width=\'400\' height=\'300\'/%3E%3Ctext fill=\'%23999\' font-family=\'sans-serif\' font-size=\'14\' dy=\'10.5\' font-weight=\'bold\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\'%3EImage not available%3C/text%3E%3C/svg%3E';" onclick="window.openImageModalFromAll(${startIndex >= 0 ? startIndex : 0})">
         `;
     }
     // 2 images = side by side

@@ -23,14 +23,14 @@
                 <form id="disbursementTestForm">
                     <div class="space-y-4">
                         <div>
-                            <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Amount (PHP)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Amount (PHP)</label>
                             <input type="number" name="amount" id="amount" required 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
                                    placeholder="100" min="1" step="0.01" value="100">
                         </div>
 
                         <div>
-                            <label for="bank_code" class="block text-sm font-medium text-gray-700 mb-2">Bank Code</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bank Code</label>
                             <select name="bank_code" id="bank_code" required 
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Select Bank</option>

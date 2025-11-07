@@ -4,25 +4,25 @@
         return `
             <div class="space-y-4">
                 <div>
-                    <label for="${componentId}-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Section Title</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Section Title</label>
                     <input type="text" id="${componentId}-title" onchange="updateComponentDetail('${componentId}', 'title', this.value)" class="block w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Enter section title...">
                 </div>
                 <div>
-                    <p id="${componentId}-cards-label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cards</p>
-                    <div id="cards_${componentId}" class="space-y-3" role="group" aria-labelledby="${componentId}-cards-label">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cards</label>
+                    <div id="cards_${componentId}" class="space-y-3">
                         <div class="card-item border border-gray-200 dark:border-gray-600 rounded-lg p-3">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <div>
-                                    <label for="${componentId}-card-icon-0" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Icon</label>
-                                    <input id="${componentId}-card-icon-0" list="icon_list_datalist" type="text" value="calendar" onchange="updateCardDetail('${componentId}', 0, 'icon', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="calendar">
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Icon</label>
+                                    <input list="icon_list_datalist" type="text" value="calendar" onchange="updateCardDetail('${componentId}', 0, 'icon', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="calendar">
                                 </div>
                                 <div>
-                                    <label for="${componentId}-card-title-0" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Title</label>
-                                    <input id="${componentId}-card-title-0" type="text" value="Date" onchange="updateCardDetail('${componentId}', 0, 'title', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Date">
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Title</label>
+                                    <input type="text" value="Date" onchange="updateCardDetail('${componentId}', 0, 'title', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Date">
                                 </div>
                                 <div>
-                                    <label for="${componentId}-card-content-0" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Content</label>
-                                    <input id="${componentId}-card-content-0" type="text" value="Event Date" onchange="updateCardDetail('${componentId}', 0, 'content', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Event Date">
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Content</label>
+                                    <input type="text" value="Event Date" onchange="updateCardDetail('${componentId}', 0, 'content', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Event Date">
                                 </div>
                             </div>
                         </div>
@@ -77,16 +77,16 @@
             cardItem.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
-                        <label for="${componentId}-card-icon-${nextIndex}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Icon</label>
-                        <input id="${componentId}-card-icon-${nextIndex}" list="icon_list_datalist" type="text" value="calendar" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'icon', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="calendar">
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Icon</label>
+                        <input list="icon_list_datalist" type="text" value="calendar" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'icon', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="calendar">
                     </div>
                     <div>
-                        <label for="${componentId}-card-title-${nextIndex}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Title</label>
-                        <input id="${componentId}-card-title-${nextIndex}" type="text" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'title', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Date">
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Title</label>
+                        <input type="text" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'title', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Date">
                     </div>
                     <div>
-                        <label for="${componentId}-card-content-${nextIndex}" class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Content</label>
-                        <input id="${componentId}-card-content-${nextIndex}" type="text" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'content', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Event Date">
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Content</label>
+                        <input type="text" onchange="updateCardDetail('${componentId}', ${nextIndex}, 'content', this.value)" class="block w-full text-sm rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 shadow-sm focus:border-qricket-500 focus:ring-qricket-500 dark:bg-gray-700 dark:text-white" placeholder="Event Date">
                     </div>
                 </div>`;
             container.appendChild(cardItem);

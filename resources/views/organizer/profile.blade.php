@@ -58,13 +58,12 @@
                                             <a href="{{ $link->full_url }}" 
                                                target="_blank" 
                                                rel="noopener noreferrer"
-                                               aria-label="Visit {{ $link->platform_name }} profile"
                                                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium transition-colors duration-200"
                                                style="background-color: {{ $link->platform_color }}20; color: {{ $link->platform_color }}; border: 1px solid {{ $link->platform_color }}40;"
                                                onmouseover="this.style.backgroundColor='{{ $link->platform_color }}'; this.style.color='white';"
                                                onmouseout="this.style.backgroundColor='{{ $link->platform_color }}20'; this.style.color='{{ $link->platform_color }}';">
                                                 <span>{{ $link->platform_name }}</span>
-                                                <svg class="w-3 h-3 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <svg class="w-3 h-3 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                                 </svg>
                                             </a>

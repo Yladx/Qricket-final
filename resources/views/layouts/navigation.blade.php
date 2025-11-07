@@ -51,21 +51,21 @@
             @auth
             <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
                 <!-- Dark Mode Toggle -->
-                <button id="dark-mode-toggle" aria-label="Toggle dark mode" class="p-2 text-gray-500 hover:text-qricket-500 dark:text-gray-400 dark:hover:text-qricket-400 focus:outline-none focus:text-qricket-500 dark:focus:text-qricket-400 transition-all duration-200 transform hover:scale-110 dark-mode-toggle">
+                <button id="dark-mode-toggle" class="p-2 text-gray-500 hover:text-qricket-500 dark:text-gray-400 dark:hover:text-qricket-400 focus:outline-none focus:text-qricket-500 dark:focus:text-qricket-400 transition-all duration-200 transform hover:scale-110 dark-mode-toggle">
                     <!-- Sun icon for dark mode -->
-                    <svg id="sun-icon" class="h-6 w-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg id="sun-icon" class="h-6 w-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
                     <!-- Moon icon for light mode -->
-                    <svg id="moon-icon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg id="moon-icon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
                     </svg>
                 </button>
 
                 <!-- Notification Bell -->
                 <div class="relative">
-                    <a href="{{ route('notifications.index') }}" id="notifications-toggle" aria-label="View notifications" class="p-2 text-gray-500 hover:text-qricket-500 dark:text-gray-400 dark:hover:text-qricket-400 focus:outline-none focus:text-qricket-500 dark:focus:text-qricket-400 transition-all duration-200 transform hover:scale-110 relative inline-block">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <a href="{{ route('notifications.index') }}" id="notifications-toggle" class="p-2 text-gray-500 hover:text-qricket-500 dark:text-gray-400 dark:hover:text-qricket-400 focus:outline-none focus:text-qricket-500 dark:focus:text-qricket-400 transition-all duration-200 transform hover:scale-110 relative inline-block">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                         </svg>
                         <!-- Notification Badge -->
@@ -103,7 +103,7 @@
                         <!-- Mode Toggle Switch -->
                         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between">
-                                <button id="mode-toggle" onclick="confirmModeSwitch()" aria-label="Switch between user and organizer mode" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800" role="switch" aria-checked="false">
+                                <button id="mode-toggle" onclick="confirmModeSwitch()" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800" role="switch" aria-checked="false">
                                     <span id="mode-toggle-slider" class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 translate-x-1"></span>
                                 </button>
                                 <span id="mode-text" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $isOrganizerSide ? 'Organizer' : 'User' }}</span>
@@ -182,8 +182,8 @@
                 </button>
                 
                 <!-- Mobile Notification Bell -->
-                <a href="{{ route('notifications.index') }}" id="notifications-toggle-mobile" aria-label="View notifications" class="relative inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-qricket-500 dark:hover:text-qricket-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700 focus:text-qricket-500 dark:focus:text-qricket-400 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <a href="{{ route('notifications.index') }}" id="notifications-toggle-mobile" class="relative inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-qricket-500 dark:hover:text-qricket-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700 focus:text-qricket-500 dark:focus:text-qricket-400 transition duration-150 ease-in-out" aria-label="Notifications">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                     </svg>
                     <span class="notification-badge absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 z-10 hidden min-w-[1.1rem] h-4 inline-flex items-center justify-center px-1 text-[10px] font-bold leading-none text-white bg-red-500 rounded-full border-2 border-white dark:border-gray-700 shadow-sm">0</span>
@@ -196,8 +196,8 @@
                 @endauth
                 
                 <!-- Bootstrap-style Offcanvas Toggle -->
-                <button id="offcanvas-toggle" aria-label="Toggle navigation menu" aria-expanded="false" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-qricket-500 dark:hover:text-qricket-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700 focus:text-qricket-500 dark:focus:text-qricket-400 transition duration-150 ease-in-out" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-nav">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <button id="offcanvas-toggle" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-qricket-500 dark:hover:text-qricket-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-700 focus:text-qricket-500 dark:focus:text-qricket-400 transition duration-150 ease-in-out" aria-label="Toggle menu" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-nav">
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
@@ -227,7 +227,7 @@
         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-900 dark:text-gray-100">Switch Mode</span>
-                <button id="offcanvas-mode-toggle" onclick="confirmModeSwitch()" aria-label="Switch between user and organizer mode" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800" role="switch" aria-checked="false">
+                <button id="offcanvas-mode-toggle" onclick="confirmModeSwitch()" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800" role="switch" aria-checked="false">
                     <span id="offcanvas-mode-toggle-slider" class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 translate-x-1"></span>
                 </button>
             </div>
@@ -328,11 +328,11 @@
                     </svg>
                     Subscription
                 </a>
-                <a href="{{ route('help.index') }}" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-qricket-500 dark:hover:text-qricket-400 rounded-lg transition-colors duration-200" aria-label="Help & Support">
-                    <svg class="w-5 h-5 mr-3 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <a href="{{ route('help.index') }}" class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-qricket-500 dark:hover:text-qricket-400 rounded-lg transition-colors duration-200">
+                    <svg class="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    <span>Help & Support</span>
+                    Help & Support
                 </a>
             </div>
         </div>

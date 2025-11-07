@@ -41,3 +41,4 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/tickets/shares/received', [EventTicketShareController::class, 'getReceivedShares']);
     Route::post('/tickets/share/log', [EventTicketShareController::class, 'logSharing']);
 });
+

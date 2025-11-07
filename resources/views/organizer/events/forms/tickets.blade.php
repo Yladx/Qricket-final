@@ -50,14 +50,14 @@
             @endphp
             @if($showBuyLink)
             <a href="{{ route('organizer.events.ticket-limits', $eventId) }}" 
-               class="inline-flex items-center px-2.5 py-1 rounded-md bg-green-600 text-white hover:bg-green-700 text-xs font-medium transition-colors" aria-label="Buy additional tickets">
-                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+               class="inline-flex items-center px-2.5 py-1 rounded-md bg-green-600 text-white hover:bg-green-700 text-xs font-medium transition-colors">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 Buy Additional Tickets
             </a>
             @endif
-            <button type="button" id="add-ticket-type-btn" class="px-2.5 py-1 rounded-md bg-qricket-500 text-white hover:bg-qricket-600 text-xs" onclick="if (typeof window.addTicketType === 'function') { window.addTicketType(); } else { /* console.error('addTicketType not available!'); */ }" aria-label="Add ticket type">Add Ticket Type</button>
+            <button type="button" id="add-ticket-type-btn" class="px-2.5 py-1 rounded-md bg-qricket-500 text-white hover:bg-qricket-600 text-xs" onclick="if (typeof window.addTicketType === 'function') { window.addTicketType(); } else { /* console.error('addTicketType not available!'); */ }">Add Ticket Type</button>
         </div>
     </div>
 

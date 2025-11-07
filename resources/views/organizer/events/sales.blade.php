@@ -35,28 +35,23 @@
                         </div>
                     </div>
                     <form method="GET" action="{{ route('organizer.events.sales', $event) }}" class="grid grid-cols-1 md:grid-cols-5 gap-3">
-                        <label for="sales-search" class="sr-only">Search buyer</label>
-                        <input type="text" name="search" id="sales-search" value="{{ $search }}" placeholder="Search buyer…" class="md:col-span-2 bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm" />
-                        <label for="sales-status" class="sr-only">Status</label>
-                        <select name="status" id="sales-status" class="bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm">
+                        <input type="text" name="search" value="{{ $search }}" placeholder="Search buyer…" class="md:col-span-2 bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm" />
+                        <select name="status" class="bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm">
                             <option value="">All Statuses</option>
                             @foreach($statuses as $k=>$v)
                                 <option value="{{ $k }}" {{ $status===$k?'selected':'' }}>{{ $v }}</option>
                             @endforeach
                         </select>
-                        <label for="sales-date-from" class="sr-only">Date from</label>
-                        <input type="date" name="date_from" id="sales-date-from" value="{{ $dateFrom }}" class="bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm" />
-                        <label for="sales-date-to" class="sr-only">Date to</label>
-                        <input type="date" name="date_to" id="sales-date-to" value="{{ $dateTo }}" class="bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm" />
+                        <input type="date" name="date_from" value="{{ $dateFrom }}" class="bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm" />
+                        <input type="date" name="date_to" value="{{ $dateTo }}" class="bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm" />
                         <div class="md:col-span-5 flex items-center gap-2">
-                            <label for="sales-sort" class="text-xs text-gray-500 dark:text-gray-400">Sort by:</label>
-                            <select name="sort" id="sales-sort" class="bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm">
+                            <label class="text-xs text-gray-500 dark:text-gray-400">Sort by:</label>
+                            <select name="sort" class="bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm">
                                 <option value="paid_at" {{ $sort==='paid_at'?'selected':'' }}>Paid Date</option>
                                 <option value="total_amount" {{ $sort==='total_amount'?'selected':'' }}>Total Amount</option>
                                 <option value="quantity" {{ $sort==='quantity'?'selected':'' }}>Quantity</option>
                             </select>
-                            <label for="sales-dir" class="sr-only">Sort direction</label>
-                            <select name="dir" id="sales-dir" class="bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm">
+                            <select name="dir" class="bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md text-sm">
                                 <option value="desc" {{ $dir==='desc'?'selected':'' }}>Desc</option>
                                 <option value="asc" {{ $dir==='asc'?'selected':'' }}>Asc</option>
                             </select>
@@ -106,7 +101,7 @@
                                     <td class="px-4 py-2 text-gray-700 dark:text-gray-300">₱{{ number_format($sale->vat_amount ?? 0, 2) }}</td>
                                     <td class="px-4 py-2 text-gray-900 dark:text-gray-100 font-semibold text-green-600">₱{{ number_format($sale->net_amount ?? $sale->total_amount, 2) }}</td>
                                     <td class="px-4 py-2 text-gray-700 dark:text-gray-300 flex items-center gap-2">{{ optional($sale->paid_at)->format('M d, Y g:i A') }}
-                                        <button type="button" class="ml-auto text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600" data-toggle-details="sale-{{ $sale->id }}" aria-label="Toggle sale details for sale {{ $sale->id }}">Details</button>
+                                        <button type="button" class="ml-auto text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600" data-toggle-details="sale-{{ $sale->id }}">Details</button>
                                     </td>
                                 </tr>
                                 <tr id="sale-{{ $sale->id }}" class="hidden">

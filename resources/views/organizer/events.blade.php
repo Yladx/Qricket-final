@@ -134,11 +134,11 @@
                                     @if($canDeleteTop && $event->status === 'draft')
                                         <!-- 3-dot menu for draft events -->
                                         <div class="relative">
-                                            <button type="button" class="p-1 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white" data-menu-toggle="event-menu-{{ $event->id }}" aria-label="Event actions menu" aria-haspopup="true" aria-expanded="false">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                            <button type="button" class="p-1 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white" data-menu-toggle="event-menu-{{ $event->id }}">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                                             </button>
                                             <div id="event-menu-{{ $event->id }}" class="hidden absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 z-20">
-                                                <button type="button" onclick="hideEventMenu('event-menu-{{ $event->id }}'); deleteEvent({{ $event->id }}, this)" class="w-full text-left px-3 py-2 text-xs text-red-600 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" aria-label="Delete event">Delete</button>
+                                                <button type="button" onclick="hideEventMenu('event-menu-{{ $event->id }}'); deleteEvent({{ $event->id }}, this)" class="w-full text-left px-3 py-2 text-xs text-red-600 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">Delete</button>
                                             </div>
                                         </div>
                                     @elseif($event->status === 'rejected' && $event->rejection_reason)
@@ -261,8 +261,8 @@
                                     @endif
                                 
                                 <!-- Preview button with eye icon only on the right -->
-                                <a href="{{ route('organizer.events.preview', $event) }}" class="bg-qricket-500 hover:bg-qricket-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center" title="Preview Event" aria-label="Preview event">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <a href="{{ route('organizer.events.preview', $event) }}" class="bg-qricket-500 hover:bg-qricket-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center" title="Preview Event">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                     </svg>
