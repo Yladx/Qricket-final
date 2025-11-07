@@ -51,10 +51,13 @@ class SecurityHeadersMiddleware
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
 
         // Cross-Origin-Embedder-Policy (COEP) - Additional isolation
-        $response->headers->set('Cross-Origin-Embedder-Policy', 'require-corp');
+        // Set to 'unsafe-none' to avoid breaking third-party integrations
+        // Can be changed to 'require-corp' if all resources support CORS
+        $response->headers->set('Cross-Origin-Embedder-Policy', 'unsafe-none');
 
         // Cross-Origin-Resource-Policy (CORP) - Resource isolation
-        $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
+        // Set to 'cross-origin' to allow third-party resources (CDN, fonts, etc.)
+        $response->headers->set('Cross-Origin-Resource-Policy', 'cross-origin');
 
         // HSTS (HTTP Strict Transport Security) - Force HTTPS
         if ($request->secure()) {
