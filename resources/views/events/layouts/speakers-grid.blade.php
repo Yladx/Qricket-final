@@ -1,16 +1,5 @@
 <!-- Speakers Grid Layout -->
 <div class="speakers-grid-section py-8 md:py-16">
-    <style>
-        /* Hide scrollbar for Chrome, Safari and Opera */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        /* Hide scrollbar for IE, Edge and Firefox */
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         @if(isset($details['title']) && $details['title'])
         <div class="text-center mb-8 md:mb-12">
@@ -29,24 +18,24 @@
             // Grid classes based on count
             if ($speakerCount === 1) {
                 $gridClasses = 'flex justify-center';
-                $cardContainerClasses = 'flex';
+                $cardContainerClasses = 'max-w-md w-full';
             } elseif ($speakerCount === 2) {
                 $gridClasses = 'grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 lg:gap-8';
-                $cardContainerClasses = '';
+                $cardContainerClasses = 'w-full';
             } elseif ($speakerCount === 3) {
                 $gridClasses = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8';
-                $cardContainerClasses = '';
+                $cardContainerClasses = 'w-full';
             } else {
-                // 4 or more: horizontal scroll (no visible scrollbar)
-                $gridClasses = 'flex gap-4 md:gap-6 lg:gap-8 overflow-x-auto pb-2';
-                $cardContainerClasses = 'flex-shrink-0';
+                // 4 or more: responsive grid without horizontal scrolling
+                $gridClasses = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 xl:gap-8';
+                $cardContainerClasses = 'w-full';
             }
         @endphp
         
-        <div class="{{ $gridClasses }} {{ $speakerCount >= 4 ? 'scrollbar-hide' : '' }}" style="{{ $speakerCount >= 4 ? 'scrollbar-width: none; -ms-overflow-style: none;' : '' }}">
+        <div class="{{ $gridClasses }}">
             @if($speakerCount > 0)
                 @foreach($speakers as $index => $speaker)
-                <div class="{{ $cardContainerClasses }} w-full {{ $speakerCount >= 4 ? 'w-72 sm:w-80' : '' }}">
+                <div class="{{ $cardContainerClasses }}">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden h-full min-h-[350px] sm:min-h-[400px] flex flex-col">
                     @php
                         // Try multiple possible image fields
