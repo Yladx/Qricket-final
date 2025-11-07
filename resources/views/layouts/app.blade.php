@@ -32,6 +32,15 @@
         <!-- Non-critical CSS - Load after -->
         <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
         <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+
+        <style>
+            .disable-theme-transitions *,
+            .disable-theme-transitions *::before,
+            .disable-theme-transitions *::after {
+                transition: none !important;
+                animation-duration: 0s !important;
+            }
+        </style>
         
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -133,8 +142,10 @@
     <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300 overflow-x-hidden">
         <script>
             (function () {
+                const root = document.documentElement;
+                root.classList.add('disable-theme-transitions');
+
                 const applyTheme = (isDark) => {
-                    const root = document.documentElement;
                     const theme = isDark ? 'dark' : 'light';
                     root.classList.toggle('dark', isDark);
                     root.dataset.theme = theme;
@@ -143,15 +154,25 @@
                     root.style.colorScheme = theme;
                 };
 
+                const finalize = () => {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            root.classList.remove('disable-theme-transitions');
+                        });
+                    });
+                };
+ 
                 try {
                     const storedTheme = localStorage.getItem('theme');
                     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                     const isDark = storedTheme ? storedTheme === 'dark' : prefersDark;
                     applyTheme(isDark);
+                    finalize();
                 } catch (error) {
                     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                         applyTheme(true);
                     }
+                    finalize();
                 }
             })();
         </script>
