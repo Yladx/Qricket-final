@@ -64,7 +64,10 @@
                     @if($img)
                         <img src="{{ $img }}" 
                              alt="{{ $speaker['name'] ?? 'Speaker' }}" 
+                             width="400"
+                             height="256"
                              class="w-full h-64 object-cover"
+                             loading="lazy"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <div class="w-full h-64 bg-gradient-to-br from-blue-500 to-purple-600 hidden"></div>
                     @else

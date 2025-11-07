@@ -38,6 +38,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Add security headers middleware (CSP, HSTS, COOP, XFO)
         $middleware->web(append: \App\Http\Middleware\Security\SecurityHeadersMiddleware::class);
         
+        // Add cache control middleware for efficient cache lifetimes
+        $middleware->web(append: \App\Http\Middleware\CacheControlMiddleware::class);
+        
         // Add organizer guard middleware only to specific routes (not globally)
         // $middleware->web(append: \App\Http\Middleware\OrganizerGuard::class);
         

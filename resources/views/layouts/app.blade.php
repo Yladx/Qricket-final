@@ -24,8 +24,9 @@
         <link rel="preconnect" href="https://cdnjs.cloudflare.com">
         
         <!-- Critical CSS - Load first -->
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="preload" href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet"></noscript>
+        <script src="https://cdn.tailwindcss.com" defer></script>
         <link rel="stylesheet" href="{{ asset('css/qricket-styles.css') }}">
         
         <!-- Non-critical CSS - Load after -->
@@ -60,7 +61,7 @@
         <script defer src="{{ asset('js/organizer-verification.js') }}?v={{ time() }}"></script>
         <script defer src="{{ asset('js/qricket-scripts.js') }}?v={{ time() }}"></script>
         <script defer src="{{ asset('js/logout-prevention.js') }}?v={{ time() }}"></script>
-        <script src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
+        <script defer src="{{ asset('js/profanity-filter.js') }}?v={{ time() }}"></script>
         
         <script>
             // Configure Tailwind for better dark mode
@@ -168,10 +169,9 @@
         <!-- Global Flash Alerts (SweetAlert2) via component -->
         <x-flash-alerts />
         
-        <!-- Pusher for real-time notifications -->
-        <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+        <!-- Pusher already loaded above, no need to reload -->
         <script>
-            // Initialize Pusher
+            // Initialize Pusher (already loaded via defer above)
             const pusher = new Pusher('{{ config('broadcasting.connections.pusher.key') }}', {
                 cluster: '{{ config('broadcasting.connections.pusher.options.cluster') }}',
                 encrypted: true
