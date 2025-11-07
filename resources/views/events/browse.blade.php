@@ -18,7 +18,8 @@
                         
                         <!-- Category -->
                         <div class="order-2 relative">
-                            <select name="category" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none">
+                            <label for="category" class="sr-only">Category</label>
+                            <select name="category" id="category" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none">
                                 @php $currentCategory = request('category'); @endphp
                                 <option value="">All Categories</option>
                                 @foreach($categories as $category)
@@ -37,8 +38,8 @@
                         <!-- Sort & Order moved to Advanced Filters -->
                         
                         <!-- Search Button -->
-                        <button type="submit" class="order-5 px-4 py-2 bg-qricket-500 hover:bg-qricket-600 text-white rounded-lg transition-colors duration-200">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button type="submit" aria-label="Search events" class="order-5 px-4 py-2 bg-qricket-500 hover:bg-qricket-600 text-white rounded-lg transition-colors duration-200">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </button>

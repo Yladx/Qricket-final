@@ -79,7 +79,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Sales Trend</h3>
                             <div class="flex items-center gap-2 text-xs">
-                                <label class="text-gray-600 dark:text-gray-300">Range</label>
+                                <label for="salesTrendRange" class="text-gray-600 dark:text-gray-300">Range</label>
                                 <select id="salesTrendRange" class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded px-2 py-1">
                                     <option value="30">Last 30 days</option>
                                     <option value="90">Last 90 days</option>

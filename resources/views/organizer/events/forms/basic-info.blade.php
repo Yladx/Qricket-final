@@ -7,12 +7,12 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Title</label>
-            <input type="text" name="title" value="{{ old('title', $eventData['title'] ?? $event->title ?? '') }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" required>
+            <label for="event-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Title</label>
+            <input type="text" name="title" id="event-title" value="{{ old('title', $eventData['title'] ?? $event->title ?? '') }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" required>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-            <select name="category" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+            <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+            <select name="category" id="category" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
                 @php($cats = ['conference','workshop','seminar','meetup','webinar','festival','sports','music','art','technology','business','education','health','charity','other'])
                 @foreach($cats as $c)
                     <option value="{{ $c }}" {{ (old('category', $eventData['category'] ?? $event->category ?? '')==$c)?'selected':'' }}>{{ ucfirst($c) }}</option>
