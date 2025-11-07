@@ -638,7 +638,7 @@
 
     <!-- External Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script defer src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     
     <!-- Configuration -->
     <script>
@@ -667,13 +667,13 @@
     </script>
     
     <!-- Event Management Dashboard System -->
-    <script src="{{ asset('js/events/dashboard/pusher-config.js') }}"></script>
-    <script src="{{ asset('js/events/dashboard/stats-updater.js') }}"></script>
-    <script src="{{ asset('js/events/dashboard/sales-updater.js') }}"></script>
-    <script src="{{ asset('js/events/dashboard/events-updater.js') }}"></script>
-    <script src="{{ asset('js/events/dashboard/activity-updater.js') }}"></script>
-    <script src="{{ asset('js/events/dashboard/chart-manager.js') }}"></script>
-    <script src="{{ asset('js/events/dashboard/index.js') }}"></script>
+    <script defer src="{{ asset('js/events/dashboard/pusher-config.js') }}"></script>
+    <script defer src="{{ asset('js/events/dashboard/stats-updater.js') }}"></script>
+    <script defer src="{{ asset('js/events/dashboard/sales-updater.js') }}"></script>
+    <script defer src="{{ asset('js/events/dashboard/events-updater.js') }}"></script>
+    <script defer src="{{ asset('js/events/dashboard/activity-updater.js') }}"></script>
+    <script defer src="{{ asset('js/events/dashboard/chart-manager.js') }}"></script>
+    <script defer src="{{ asset('js/events/dashboard/index.js') }}"></script>
     
     <!-- Debug and Test -->
     <script>

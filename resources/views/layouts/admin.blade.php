@@ -14,8 +14,8 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- Pusher.js for Laravel Reverb -->
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <!-- Pusher.js for Laravel Reverb (deferred to prevent blocking) -->
+    <script defer src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     
     <!-- Dark Mode Management -->
     <script src="{{ asset('js/dark-mode.js') }}"></script>
