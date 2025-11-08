@@ -69,33 +69,6 @@
       }
     });
 
-    // Close offcanvas when clicking on elements that create their own overlays
-    // This prevents double overlay issues (e.g., select dropdown + offcanvas backdrop)
-    document.addEventListener('click', (e) => {
-      if (!isOpen) return;
-      
-      const target = e.target;
-      // Don't close if clicking inside the offcanvas itself
-      if (target.closest('#offcanvas-nav')) return;
-      // Don't close if clicking the backdrop (already handled)
-      if (target === backdrop) return;
-      
-      // Close if clicking on select elements (they create native dropdown overlays)
-      if (target.tagName === 'SELECT' || target.closest('select')) {
-        close();
-        return;
-      }
-      
-      // Close if clicking on dropdown trigger buttons outside offcanvas
-      // Check for common dropdown trigger patterns
-      const isDropdownTrigger = target.closest('[x-data*="open"]') || 
-                                 target.closest('[data-toggle="dropdown"]') ||
-                                 target.closest('.dropdown-toggle');
-      if (isDropdownTrigger) {
-        close();
-      }
-    }, true); // Use capture phase to run before other handlers
-
     // Support elements with data-bs-toggle="offcanvas"
     document.addEventListener('click', (e) => {
       const trigger = e.target.closest('[data-bs-toggle="offcanvas"]');

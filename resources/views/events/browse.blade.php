@@ -17,8 +17,8 @@
                     </div>
                         
                         <!-- Category -->
-                        <div class="order-2 relative">
-                            <select name="category" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none">
+                        <div class="order-2 relative z-10 isolate">
+                            <select name="category" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none relative z-10">
                                 @php $currentCategory = request('category'); @endphp
                                 <option value="">All Categories</option>
                                 @foreach($categories as $category)
@@ -27,7 +27,7 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none z-20">
                                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -58,7 +58,7 @@
                         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                             <form method="GET" action="{{ route('events.browse') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                 <!-- Tags Filter -->
-                                <div class="relative">
+                                <div class="relative z-20 isolate">
                                     <label for="tags" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
                                     <input type="text" 
                                            name="tags" 
@@ -67,7 +67,7 @@
                                            placeholder="Enter tags (comma separated)..." 
                                            autocomplete="off"
                                            class="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300">
-                                    <div id="tag-suggestions" class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
+                                    <div id="tag-suggestions" class="absolute z-[100] w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
                                         <!-- Tag suggestions will be populated here -->
                                     </div>
                                 </div>
@@ -119,15 +119,15 @@
                         </div>
                         
                                 <!-- Sort -->
-                        <div>
+                        <div class="relative z-10 isolate">
                             <label for="sort" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort By</label>
                             <div class="relative">
-                                <select name="sort" id="sort" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none">
+                                <select name="sort" id="sort" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none relative z-10">
                                     <option value="date" {{ request('sort', 'date') == 'date' ? 'selected' : '' }}>Date</option>
                                     <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Name</option>
                                     <option value="created" {{ request('sort') == 'created' ? 'selected' : '' }}>Created</option>
                                 </select>
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none z-20">
                                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                     </svg>
@@ -136,14 +136,14 @@
                         </div>
                         
                                 <!-- Order -->
-                                <div>
+                                <div class="relative z-10 isolate">
                                     <label for="order" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Order</label>
                                     <div class="relative">
-                                        <select name="order" id="order" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none">
+                                        <select name="order" id="order" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none relative z-10">
                                             <option value="asc" {{ request('order', 'asc') == 'asc' ? 'selected' : '' }}>Ascending</option>
                             <option value="desc" {{ request('order') == 'desc' ? 'selected' : '' }}>Descending</option>
                         </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none z-20">
                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
@@ -458,6 +458,27 @@
         select.appearance-none::-ms-value {
             background: transparent;
         }
+        
+        /* Fix double overlay issue - prevent stacking context conflicts */
+        .isolate {
+            isolation: isolate;
+        }
+        
+        /* Ensure select dropdowns don't create double overlays */
+        select:focus {
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Prevent backdrop/overlay duplication */
+        select:not(:focus) {
+            z-index: 1;
+        }
+        
+        /* Ensure tag suggestions appear above everything */
+        #tag-suggestions:not(.hidden) {
+            z-index: 9999 !important;
+        }
     </style>
 
     <script>
@@ -549,6 +570,28 @@
 
         // Remove auto-submit on filter change; user must click Apply
         document.addEventListener('DOMContentLoaded', function() {
+            // Fix double overlay issue - ensure only one dropdown is active at a time
+            const allSelects = document.querySelectorAll('select');
+            allSelects.forEach(select => {
+                // When a select is focused, blur others to prevent multiple dropdowns
+                select.addEventListener('focus', function() {
+                    allSelects.forEach(otherSelect => {
+                        if (otherSelect !== this && document.activeElement === otherSelect) {
+                            otherSelect.blur();
+                        }
+                    });
+                });
+                
+                // Prevent backdrop duplication by ensuring proper z-index on focus
+                select.addEventListener('mousedown', function(e) {
+                    // Close tag suggestions if open when clicking a select
+                    const tagSuggestions = document.getElementById('tag-suggestions');
+                    if (tagSuggestions && !tagSuggestions.classList.contains('hidden')) {
+                        tagSuggestions.classList.add('hidden');
+                    }
+                });
+            });
+            
             // If desired, we only auto-submit category changes; others require clicking Apply
             const categorySelect = document.querySelector('select[name="category"]');
             if (categorySelect && categorySelect.form) {

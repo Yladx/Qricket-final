@@ -208,8 +208,8 @@
 </nav>
 
 <!-- Bootstrap-style Offcanvas Sidebar (mobile) -->
-<div id="offcanvas-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-[45] hidden transition-opacity duration-300"></div>
-<aside id="offcanvas-nav" class="fixed top-0 end-0 h-full w-320px max-w-[85vw] bg-white dark:bg-gray-800 shadow-xl z-[55] transition-transform duration-300 ease-in-out transform translate-x-full flex flex-col">
+<div id="offcanvas-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden transition-opacity duration-300"></div>
+<aside id="offcanvas-nav" class="fixed top-0 end-0 h-full w-320px max-w-[85vw] bg-white dark:bg-gray-800 shadow-xl z-50 transition-transform duration-300 ease-in-out transform translate-x-full flex flex-col">
     <!-- Offcanvas Header -->
     <div class="offcanvas-header px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <h4 class="offcanvas-title text-lg font-semibold text-gray-900 dark:text-gray-100">Navigation Menu</h4>
