@@ -9,12 +9,8 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                 <div>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    Edit Event - Basic Information
-                </h1>
-                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    Update your event's essential details like title, description, date, and location.
-                </p>
+             
+
             </div>
         </div>
                     <form id="editBasicForm" method="POST" action="{{ route('organizer.events.step1.store') }}?id={{ $event->id }}" enctype="multipart/form-data" class="space-y-6">

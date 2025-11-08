@@ -78,7 +78,16 @@
             <!-- Events Grid (compact cards) -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                 @forelse($events as $event)
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200" data-event-id="{{ $event->id }}">
+                    @php
+                        // Check if event has ended
+                        $eventEnded = false;
+                        if ($event->end_date) {
+                            $eventEnded = \Carbon\Carbon::parse($event->end_date)->isPast();
+                        } elseif ($event->start_date) {
+                            $eventEnded = \Carbon\Carbon::parse($event->start_date)->isPast();
+                        }
+                    @endphp
+                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200 {{ $eventEnded ? 'border-2 border-gray-400 dark:border-gray-600' : '' }}" data-event-id="{{ $event->id }}">
                         <div class="relative">
                             @if($event->thumbnail_url)
                                 <img src="{{ $event->thumbnail_url }}" alt="{{ $event->title ?: 'Event' }}" class="h-36 w-full object-cover">
