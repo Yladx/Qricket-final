@@ -154,6 +154,34 @@
         const debounce = (fn, d=600)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), d); }; };
         const statusEl = document.getElementById('cert_autosave_status');
         
+        // Function to show autosave indicator (like in autosave.js)
+        function showAutosaveIndicator(status) {
+            // Remove existing indicator
+            const existingIndicator = document.getElementById('autosave-indicator');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+            
+            // Create new indicator
+            const indicator = document.createElement('div');
+            indicator.id = 'autosave-indicator';
+            indicator.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 shadow-lg ${
+                status === 'success' 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+            }`;
+            indicator.textContent = status === 'success' ? '✓ Auto-saved' : '✗ Save failed';
+            
+            document.body.appendChild(indicator);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (indicator && indicator.parentNode) {
+                    indicator.remove();
+                }
+            }, 3000);
+        }
+        
         // We'll define autosaveCert and autosaveDebounced after collectPayload is defined
         let autosaveDebounced = null;
         
@@ -657,9 +685,11 @@
                 await postJSON(autosaveUrl, { certificate_data_json: JSON.stringify(payload) });
                 if (statusEl) statusEl.textContent = 'Saved';
                 refreshPreview(payload);
+                showAutosaveIndicator('success');
                 setTimeout(()=>{ if (statusEl) statusEl.textContent=''; }, 1200);
             } catch(e) {
                 if (statusEl) statusEl.textContent = 'Save failed';
+                showAutosaveIndicator('error');
                 console.error('Certificate autosave failed', e);
             }
         }
@@ -1045,8 +1075,10 @@
                     });
                     
                     console.log('Certificate autosaved successfully');
+                    showAutosaveIndicator('success');
                 } catch (error) {
                     console.error('Certificate autosave failed:', error);
+                    showAutosaveIndicator('error');
                 }
             }
             

@@ -15,26 +15,35 @@
             $speakers = isset($details['speakers']) && is_array($details['speakers']) ? $details['speakers'] : [];
             $speakerCount = count($speakers);
 
+            // Flexible grid layout with max 3 columns
+            // Fixed card size for consistency
+            $fixedCardWidth = 'w-full max-w-sm';
+            $fixedCardHeight = 'h-full min-h-[450px] sm:min-h-[500px]';
+            
+            // Determine grid layout based on speaker count
+            // Always use max 3 columns for desktop
             if ($speakerCount === 1) {
                 $gridClasses = 'grid grid-cols-1 gap-4 md:gap-6 lg:gap-8 justify-items-center';
-                $cardClasses = 'w-full max-w-md';
             } elseif ($speakerCount === 2) {
-                $gridClasses = 'grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 lg:gap-8';
-                $cardClasses = 'w-full';
-            } elseif ($speakerCount === 3) {
+                $gridClasses = 'grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 lg:gap-8 justify-items-center';
+            } elseif ($speakerCount >= 3) {
+                // For 3+ cards, use max 3 columns
+                // CSS Grid will automatically handle wrapping:
+                // - 3 cards: 3 columns
+                // - 4 cards: 3 top, 1 bottom (or 2-2 on smaller screens)
+                // - 5 cards: 3 top, 2 bottom (will need special styling for centering)
+                // - 6 cards: 3-3 layout
                 $gridClasses = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8';
-                $cardClasses = 'w-full';
             } else {
-                $gridClasses = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 xl:gap-8';
-                $cardClasses = 'w-full';
+                $gridClasses = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8';
             }
         @endphp
 
-        <div class="{{ $gridClasses }}">
+        <div class="{{ $gridClasses }} {{ $speakerCount === 5 ? 'speakers-grid-5' : '' }}">
             @if($speakerCount > 0)
                 @foreach($speakers as $index => $speaker)
-                <div class="{{ $cardClasses }}">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden h-full min-h-[350px] sm:min-h-[400px] flex flex-col">
+                <div class="{{ $fixedCardWidth }} {{ $speakerCount === 5 && $index >= 3 ? 'lg:col-start-auto' : '' }} mx-auto">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden {{ $fixedCardHeight }} flex flex-col">
                     @php
                         // Try multiple possible image fields
                         $img = $speaker['image'] ?? ($speaker['image_path'] ?? ($speaker['image_url'] ?? null));
@@ -75,13 +84,13 @@
                 @endforeach
             @else
                 <!-- Default speakers if no data provided -->
-                <div class="flex justify-center w-full">
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden min-h-[400px] flex flex-col w-full max-w-md">
+                <div class="{{ $fixedCardWidth }} mx-auto">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden {{ $fixedCardHeight }} flex flex-col">
                         <div class="h-64 bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0"></div>
-                        <div class="p-6 flex-1 flex flex-col">
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Add Speakers</h3>
-                            <p class="text-qricket-600 dark:text-qricket-400 mb-3">Speaker Title</p>
-                            <p class="text-gray-900 dark:text-gray-400 text-sm flex-1">
+                        <div class="p-4 md:p-6 flex-1 flex flex-col">
+                            <h3 class="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Add Speakers</h3>
+                            <p class="text-sm md:text-base text-qricket-600 dark:text-qricket-400 mb-3">Speaker Title</p>
+                            <p class="text-gray-900 dark:text-gray-400 text-xs md:text-sm flex-1">
                                 Add speaker information here.
                             </p>
                         </div>
@@ -91,3 +100,27 @@
         </div>
     </div>
 </div>
+
+<style>
+/* Special styling for 5 cards: center the last 2 cards on desktop */
+@media (min-width: 1024px) {
+    /* For 5 cards: Position last 2 cards in columns 1 and 3 to center them */
+    /* First 3 cards fill columns 1, 2, 3 naturally */
+    /* Last 2 cards: position in columns 1 and 3, leaving column 2 empty for visual centering */
+    .speakers-grid-5 > div:nth-child(4) {
+        grid-column: 1;
+    }
+    
+    .speakers-grid-5 > div:nth-child(5) {
+        grid-column: 3;
+    }
+}
+
+/* Ensure all cards have consistent fixed width and are centered within their grid cells */
+.speakers-grid-section [class*="max-w-sm"] {
+    width: 100%;
+    max-width: 24rem; /* 384px - fixed card width */
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>

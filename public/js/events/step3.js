@@ -300,6 +300,34 @@
     // console.log('Ticket colors queued for autosave (300ms delay)');
   }
 
+  // Function to show autosave indicator (like in autosave.js)
+  function showAutosaveIndicator(status) {
+    // Remove existing indicator
+    const existingIndicator = document.getElementById('autosave-indicator');
+    if (existingIndicator) {
+      existingIndicator.remove();
+    }
+    
+    // Create new indicator
+    const indicator = document.createElement('div');
+    indicator.id = 'autosave-indicator';
+    indicator.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 shadow-lg ${
+      status === 'success' 
+        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+    }`;
+    indicator.textContent = status === 'success' ? '✓ Auto-saved' : '✗ Save failed';
+    
+    document.body.appendChild(indicator);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      if (indicator && indicator.parentNode) {
+        indicator.remove();
+      }
+    }, 3000);
+  }
+
   function showColorSaveIndicator() {
     const indicator = document.getElementById('color-save-indicator');
     if (indicator) {
@@ -626,22 +654,19 @@
         updatedSettings.ticket_colors = ticketColors;
         writeSettings(updatedSettings);
         
-        // Show success indicator for color save
-        if (ticketColors && (ticketColors.primary || ticketColors.secondary || ticketColors.accent)) {
-          showColorSaveIndicator();
-        }
+        // Show success indicator
+        showAutosaveIndicator('success');
       } else {
         // console.error('[Step3] Autosave failed with status:', response.status);
         const errorText = await response.text();
         // console.error('[Step3] Autosave error response:', errorText);
         
-        // Show error indicator for color save
-        if (ticketColors && (ticketColors.primary || ticketColors.secondary || ticketColors.accent)) {
-          showColorSaveError();
-        }
+        // Show error indicator
+        showAutosaveIndicator('error');
       }
     } catch (e) {
       // console.error('[Step3] Autosave failed', e);
+      showAutosaveIndicator('error');
     }
   }
 

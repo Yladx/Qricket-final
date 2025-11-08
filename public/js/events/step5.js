@@ -150,6 +150,34 @@
   }
 
 
+  // Function to show autosave indicator (like in autosave.js)
+  function showAutosaveIndicator(status) {
+    // Remove existing indicator
+    const existingIndicator = document.getElementById('autosave-indicator');
+    if (existingIndicator) {
+      existingIndicator.remove();
+    }
+    
+    // Create new indicator
+    const indicator = document.createElement('div');
+    indicator.id = 'autosave-indicator';
+    indicator.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 shadow-lg ${
+      status === 'success' 
+        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+    }`;
+    indicator.textContent = status === 'success' ? '✓ Auto-saved' : '✗ Save failed';
+    
+    document.body.appendChild(indicator);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      if (indicator && indicator.parentNode) {
+        indicator.remove();
+      }
+    }, 3000);
+  }
+
   function queueAutosave() {
     clearTimeout(autosaveTimer);
     autosaveTimer = setTimeout(autosave, 600);
@@ -182,11 +210,14 @@
       });
       if (!resp.ok) {
         // console.warn('[Step5] Autosave response not OK', resp.status);
+        showAutosaveIndicator('error');
       } else {
         // console.log('[Step5] Autosave succeeded');
+        showAutosaveIndicator('success');
       }
     } catch (e) {
       // console.error('[Step5] Autosave failed', e);
+      showAutosaveIndicator('error');
     }
   }
 
