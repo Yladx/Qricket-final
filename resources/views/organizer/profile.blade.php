@@ -50,6 +50,25 @@
                                 Event Organizer
                             </p>
 
+                            <!-- Email Link -->
+                            @if($organizer->email)
+                                <div class="mb-2">
+                                    <a href="mailto:{{ $organizer->email }}?subject={{ urlencode('Question about your events') }}" 
+                                       class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium transition-colors duration-200"
+                                       style="background-color: #dc354520; color: #dc3545; border: 1px solid #dc354540;"
+                                       onmouseover="this.style.backgroundColor='#dc3545'; this.style.color='white';"
+                                       onmouseout="this.style.backgroundColor='#dc354520'; this.style.color='#dc3545';">
+                                        <svg class="w-3 h-3 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span>{{ $organizer->email }}</span>
+                                        <svg class="w-3 h-3 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            @endif
+
                             <!-- Social Media Links -->
                             @if($socialLinks->count() > 0)
                                 <div class="flex flex-wrap gap-2">

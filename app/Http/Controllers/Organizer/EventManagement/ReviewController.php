@@ -192,6 +192,18 @@ class ReviewController extends Controller
         $publishOption = $request->input('publish_option', 'draft');
         $publishAt = $request->input('publish_at');
 
+        // Validate event dates are set (required for all publish options)
+        if (empty($event->start_date) || empty($event->end_date)) {
+            $msg = 'Event start date and end date are required. Please set these in Step 1 (Basic Info) before submitting.';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'error' => 'Event dates required',
+                    'message' => $msg,
+                ], 422);
+            }
+            return redirect()->back()->with('error', $msg)->withInput();
+        }
+
         // Check subscription limits only when publishing (not when saving as draft)
         // Skip subscription check for admin-created events
         if ($publishOption !== 'draft' && !$isAdminEvent) {

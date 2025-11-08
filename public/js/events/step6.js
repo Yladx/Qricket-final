@@ -254,6 +254,26 @@ document.addEventListener('DOMContentLoaded', function() {
       if (selectedPublishOption) {
         const publishOption = selectedPublishOption.value;
         
+        // Validate event dates are set (check from eventData passed to the view)
+        // This will be set as a data attribute or inline script by the Blade template
+        const eventStartDate = document.querySelector('[data-event-start-date]')?.getAttribute('data-event-start-date');
+        const eventEndDate = document.querySelector('[data-event-end-date]')?.getAttribute('data-event-end-date');
+        
+        if (!eventStartDate || !eventEndDate) {
+          e.preventDefault();
+          if (typeof Swal !== 'undefined' && window.Swal) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Event Dates Required',
+              text: 'Please set the event start date and end date before submitting. You can set these in Step 1 (Basic Info).',
+              confirmButtonColor: '#10b981'
+            });
+          } else {
+            alert('Please set the event start date and end date before submitting.');
+          }
+          return;
+        }
+        
         // Show confirmation dialog based on publish option
         let confirmMessage = '';
         switch (publishOption) {

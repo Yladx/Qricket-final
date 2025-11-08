@@ -396,6 +396,9 @@
             </div>
     </div>
 
+    <!-- Store event dates for JavaScript validation -->
+    <div data-event-start-date="{{ $eventData['start_date'] ?? '' }}" data-event-end-date="{{ $eventData['end_date'] ?? '' }}" style="display: none;"></div>
+    
     <script src="{{ asset('js/events/step6.js') }}?v={{ time() }}"></script>
     
     <script>
@@ -485,30 +488,7 @@
             });
         });
 
-        // Handle form submission
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const selectedOption = document.querySelector('input[name="publish_option"]:checked');
-                const publishAt = document.querySelector('input[name="publish_at"]').value;
-
-                // Validate scheduled option
-                if (selectedOption.value === 'scheduled' && !publishAt) {
-                    e.preventDefault();
-                    if (typeof Swal !== 'undefined' && window.Swal) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Publish Date Required',
-                            text: 'Please select a publish date and time for scheduled publication.',
-                            confirmButtonColor: '#10b981'
-                        });
-                    } else {
-                        alert('Please select a publish date and time for scheduled publication.');
-                    }
-                    return false;
-                }
-            });
-        }
+        // Note: Date validation is handled in step6.js
     </script>
 </div>
 
