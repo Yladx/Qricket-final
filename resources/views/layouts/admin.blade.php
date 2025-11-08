@@ -4,8 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Qricket Admin' }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Apply saved theme IMMEDIATELY in head to prevent flicker -->
+    <script>
+        (function() {
+            try {
+                const darkMode = localStorage.getItem('darkMode');
+                if (darkMode === 'true') {
+                    document.documentElement.classList.add('dark');
+                } else if (darkMode === 'false') {
+                    document.documentElement.classList.remove('dark');
+                } else {
+                    // If no preference stored, check system preference
+                    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (prefersDark) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                }
+            } catch (e) {
+                // Fallback: use system preference if localStorage fails
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                }
+            }
+        })();
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

@@ -13,7 +13,31 @@
     <meta http-equiv="Expires" content="0">
 
     <!-- Apply saved theme ASAP to avoid flash -->
-    <script>(function(){try{if(localStorage.getItem('darkMode')==='true'){document.documentElement.classList.add('dark');}}catch(e){}})();</script>
+    <script>
+        (function() {
+            try {
+                const darkMode = localStorage.getItem('darkMode');
+                if (darkMode === 'true') {
+                    document.documentElement.classList.add('dark');
+                } else if (darkMode === 'false') {
+                    document.documentElement.classList.remove('dark');
+                } else {
+                    // If no preference stored, check system preference
+                    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (prefersDark) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                }
+            } catch (e) {
+                // Fallback: use system preference if localStorage fails
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                }
+            }
+        })();
+    </script>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

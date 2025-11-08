@@ -11,6 +11,33 @@
         <meta http-equiv="Cache-Control" content="public, max-age=3600">
         <meta http-equiv="Expires" content="{{ gmdate('D, d M Y H:i:s', time() + 3600) }} GMT">
 
+        <!-- Apply saved theme IMMEDIATELY in head to prevent flicker -->
+        <script>
+            (function() {
+                try {
+                    const darkMode = localStorage.getItem('darkMode');
+                    if (darkMode === 'true') {
+                        document.documentElement.classList.add('dark');
+                    } else if (darkMode === 'false') {
+                        document.documentElement.classList.remove('dark');
+                    } else {
+                        // If no preference stored, check system preference
+                        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        if (prefersDark) {
+                            document.documentElement.classList.add('dark');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                        }
+                    }
+                } catch (e) {
+                    // Fallback: use system preference if localStorage fails
+                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        document.documentElement.classList.add('dark');
+                    }
+                }
+            })();
+        </script>
+
         <title>{{ $title ?? config('app.name', 'Qricket') }}</title>
 
         <!-- Favicon -->
@@ -113,26 +140,6 @@
         </script>
     </head>
     <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300 overflow-x-hidden">
-        <script>
-            // Apply dark mode class ASAP to avoid flash of light theme
-            (function(){
-                try {
-                    const stored = localStorage.getItem('theme');
-                    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    const shouldDark = stored ? (stored === 'dark') : prefersDark;
-                    if (shouldDark) {
-                        document.documentElement.classList.add('dark');
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                    }
-                } catch (e) {
-                    // fallback to prefers-color-scheme
-                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                        document.documentElement.classList.add('dark');
-                    }
-                }
-            })();
-        </script>
         <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 overflow-x-hidden">
             @include('layouts.navigation')
 
