@@ -444,11 +444,39 @@ class MyTicketsController extends Controller
                     });
                     
                     // Get available tickets (not checked in, not shared to others, no explicit pending)
+                    // A ticket is available if:
+                    // 1. Currently owned by the user (user_id = user->id) - already filtered in main query
+                    // 2. Not checked in
+                    // 3. Not already shared/transferred to others (shared_by_user_id is NULL)
+                    // 4. No explicit pending shares
+                    // 
+                    // Note: If a ticket has shared_by_user_id set, it means it was transferred to someone else,
+                    // so it's no longer owned by the user (user_id would be different). Since we already filter
+                    // by user_id = user->id in the main query, any tickets here are still owned by the user.
+                    // So shared_by_user_id should be NULL for available tickets (not yet shared/transferred).
                     $availableTickets = $ticketsOfType->filter(function($ticket) use ($user, $ticketPendingSharesMap) {
+                        // Double-check: ticket must be owned by the user
+                        if ($ticket->user_id != $user->id) {
+                            return false;
+                        }
+                        
+                        // Ticket must not be checked in
+                        if (!is_null($ticket->checked_in_at)) {
+                            return false;
+                        }
+                        
+                        // Ticket must not have explicit pending shares
                         $hasPending = isset($ticketPendingSharesMap[$ticket->id]) && count($ticketPendingSharesMap[$ticket->id]) > 0;
-                        return is_null($ticket->checked_in_at) && // Not checked in
-                               (is_null($ticket->shared_by_user_id) || $ticket->shared_by_user_id != $user->id) && // Not shared to others
-                               !$hasPending; // No explicit pending shares
+                        if ($hasPending) {
+                            return false;
+                        }
+                        
+                        // Ticket must not be already shared/transferred to others
+                        // If shared_by_user_id is set, it means the ticket was shared/transferred,
+                        // but since user_id = user->id, the ticket is still owned by the user.
+                        // This shouldn't happen in normal flow, but to be safe, we check:
+                        // - shared_by_user_id should be NULL (not shared/transferred)
+                        return is_null($ticket->shared_by_user_id);
                     });
                     
                     // Count explicit pending (where shared_ticket_id is set)

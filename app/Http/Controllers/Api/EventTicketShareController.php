@@ -367,19 +367,19 @@ class EventTicketShareController extends Controller
                     ->toArray();
                 
                 // Get available tickets that are:
-                // 1. Owned by the sharer
+                // 1. Owned by the sharer (user_id = sharer_id)
                 // 2. Of the specified ticket type
                 // 3. Not checked in
-                // 4. Not already shared to others (shared_by_user_id is NULL or not the sharer)
+                // 4. Not already shared/transferred to others (shared_by_user_id should be NULL)
                 // 5. Not in the list of tickets with pending shares
+                // 
+                // Important: After a ticket is transferred, user_id changes to the recipient,
+                // so it won't be in this query. Only tickets still owned by the sharer will be included.
                 $availableTicketsQuery = EventTicketInformation::where('user_id', $ticketShare->sharer_id)
                     ->where('event_id', $ticketShare->event_id)
                     ->where('ticket_type_id', $ticketShare->ticket_type_id)
                     ->whereNull('checked_in_at') // Not checked in
-                    ->where(function($query) use ($ticketShare) {
-                        $query->whereNull('shared_by_user_id') // Not shared to others
-                              ->orWhere('shared_by_user_id', '!=', $ticketShare->sharer_id); // Or received from others
-                    });
+                    ->whereNull('shared_by_user_id'); // Not already shared/transferred to others
                 
                 // Exclude tickets that have pending shares
                 if (!empty($pendingShareTicketIds)) {
