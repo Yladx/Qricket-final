@@ -365,8 +365,8 @@
                                 <div class="p-3 border-b border-gray-200 dark:border-gray-700">
                                     <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Certificate Preview</h4>
                                 </div>
-                                <div class="p-3">
-                                    <div class="transform scale-50 origin-top-left" style="width: 200%;">
+                                <div class="p-4 overflow-x-auto overflow-y-auto max-h-[800px]">
+                                    <div class="flex justify-center min-w-full">
                                         @include('organizer.events.preview.certificate-template', [
                                             'certificateData' => $eventData['certificate_data'],
                                             'event' => $event,
