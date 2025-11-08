@@ -356,6 +356,9 @@ class MyTicketsController extends Controller
             $ticketPendingSharesMap = [];
             $ticketPendingRecipientsMap = [];
             
+            // Also track pending shares by ticket_type_id when shared_ticket_id is NULL
+            $pendingSharesByTypeId = [];
+            
             // Create a set of ticket IDs for faster lookup
             $ticketIdSet = array_flip($ticketIds);
             
@@ -375,9 +378,16 @@ class MyTicketsController extends Controller
                         }
                     }
                 }
+                // Handle case where shared_ticket_id is NULL - track by ticket_type_id
+                else if (is_null($share->shared_ticket_id) && !is_null($share->ticket_type_id)) {
+                    if (!isset($pendingSharesByTypeId[$share->ticket_type_id])) {
+                        $pendingSharesByTypeId[$share->ticket_type_id] = [];
+                    }
+                    $pendingSharesByTypeId[$share->ticket_type_id][] = $share;
+                }
                 
                 // Handle shared_ticket_ids (JSON array of ticket IDs)
-                if ($share->shared_ticket_ids && is_array($share->shared_ticket_ids)) {
+                if ($share->shared_ticket_ids && is_array($share->shared_ticket_ids) && !empty($share->shared_ticket_ids)) {
                     foreach ($share->shared_ticket_ids as $ticketId) {
                         if (isset($ticketIdSet[$ticketId])) {
                             if (!isset($ticketPendingSharesMap[$ticketId])) {
@@ -396,6 +406,13 @@ class MyTicketsController extends Controller
                 }
             }
             
+            // Log pending shares by type for debugging
+            Log::info('Pending shares by ticket_type_id (where shared_ticket_id is NULL)', [
+                'pending_shares_by_type' => array_map(function($shares) {
+                    return count($shares);
+                }, $pendingSharesByTypeId),
+            ]);
+            
             // Debug logging for the map
             Log::info('Ticket pending shares map after filtering', [
                 'total_pending_shares' => $pendingShares->count(),
@@ -412,26 +429,41 @@ class MyTicketsController extends Controller
             return response()->json([
                 'success' => true,
                 'event' => $allTickets->first()?->event,
-                'tickets_by_type' => $ticketsByType->map(function($ticketsOfType) use ($user, $ticketPendingSharesMap, $ticketPendingRecipientsMap) {
+                'tickets_by_type' => $ticketsByType->map(function($ticketsOfType) use ($user, $ticketPendingSharesMap, $ticketPendingRecipientsMap, $pendingSharesByTypeId) {
                     $ticketType = $ticketsOfType->first()->ticketType;
+                    $ticketTypeId = $ticketType->id;
+                    
+                    // Get pending shares for this ticket type where shared_ticket_id is NULL
+                    $typePendingShares = $pendingSharesByTypeId[$ticketTypeId] ?? [];
+                    $typePendingQuantity = collect($typePendingShares)->sum('quantity');
                     
                     // Count available vs pending tickets using the map
-                    $availableCount = $ticketsOfType->filter(function($ticket) use ($user, $ticketPendingSharesMap) {
-                        $hasPending = isset($ticketPendingSharesMap[$ticket->id]) && count($ticketPendingSharesMap[$ticket->id]) > 0;
-                        return is_null($ticket->checked_in_at) && // Not checked in
-                               (is_null($ticket->shared_by_user_id) || $ticket->shared_by_user_id != $user->id) && // Not shared to others
-                               !$hasPending; // No pending shares
-                    })->count();
+                    // First, get tickets that have explicit pending shares (shared_ticket_id is set)
+                    $ticketsWithExplicitPending = $ticketsOfType->filter(function($ticket) use ($ticketPendingSharesMap) {
+                        return isset($ticketPendingSharesMap[$ticket->id]) && count($ticketPendingSharesMap[$ticket->id]) > 0;
+                    });
                     
-                    $pendingCount = $ticketsOfType->filter(function($ticket) use ($user, $ticketPendingSharesMap) {
+                    // Get available tickets (not checked in, not shared to others, no explicit pending)
+                    $availableTickets = $ticketsOfType->filter(function($ticket) use ($user, $ticketPendingSharesMap) {
                         $hasPending = isset($ticketPendingSharesMap[$ticket->id]) && count($ticketPendingSharesMap[$ticket->id]) > 0;
                         return is_null($ticket->checked_in_at) && // Not checked in
                                (is_null($ticket->shared_by_user_id) || $ticket->shared_by_user_id != $user->id) && // Not shared to others
-                               $hasPending; // Has pending shares
-                    })->count();
+                               !$hasPending; // No explicit pending shares
+                    });
+                    
+                    // Count explicit pending (where shared_ticket_id is set)
+                    $explicitPendingCount = $ticketsWithExplicitPending->count();
+                    
+                    // Calculate available count: available tickets minus type-level pending quantity
+                    // Type-level pending (where shared_ticket_id is NULL) reduces available count
+                    $availableCount = max(0, $availableTickets->count() - $typePendingQuantity);
+                    
+                    // Pending count: explicit pending + type-level pending
+                    $pendingCount = $explicitPendingCount + $typePendingQuantity;
                     
                     // Get pending share details (unique recipients across all pending tickets of this type)
                     $pendingSharesInfo = [];
+                    // Add recipients from explicit pending shares (shared_ticket_id is set)
                     foreach ($ticketsOfType as $ticket) {
                         if (isset($ticketPendingRecipientsMap[$ticket->id])) {
                             foreach ($ticketPendingRecipientsMap[$ticket->id] as $recipientName) {
@@ -441,18 +473,29 @@ class MyTicketsController extends Controller
                             }
                         }
                     }
+                    // Add recipients from type-level pending shares (shared_ticket_id is NULL)
+                    foreach ($typePendingShares as $share) {
+                        if ($share->recipient) {
+                            $recipientName = $share->recipient->first_name . ' ' . $share->recipient->last_name;
+                            if (!in_array($recipientName, $pendingSharesInfo)) {
+                                $pendingSharesInfo[] = $recipientName;
+                            }
+                        }
+                    }
                     
                     // Log counts for debugging
                     Log::info('Ticket type counts', [
                         'ticket_type_id' => $ticketType->id,
                         'ticket_type_name' => $ticketType->name,
                         'total_tickets' => $ticketsOfType->count(),
+                        'available_tickets_count' => $availableTickets->count(),
+                        'type_pending_quantity' => $typePendingQuantity,
+                        'explicit_pending_count' => $explicitPendingCount,
                         'available_count' => $availableCount,
                         'pending_count' => $pendingCount,
                         'ticket_ids' => $ticketsOfType->pluck('id')->toArray(),
-                        'tickets_with_pending' => $ticketsOfType->filter(function($ticket) use ($ticketPendingSharesMap) {
-                            return isset($ticketPendingSharesMap[$ticket->id]) && count($ticketPendingSharesMap[$ticket->id]) > 0;
-                        })->pluck('id')->toArray(),
+                        'tickets_with_explicit_pending' => $ticketsWithExplicitPending->pluck('id')->toArray(),
+                        'type_pending_shares' => count($typePendingShares),
                     ]);
                     
                     return [
