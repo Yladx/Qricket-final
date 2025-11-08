@@ -38,7 +38,8 @@ class MyTicketsController extends Controller
                     'sharedByUser:id,first_name,last_name,email',
                     'user:id,first_name,last_name,email', // Current owner
                     'shares' => function($q) {
-                        $q->where('status', 'pending'); // Only load pending shares for performance
+                        $q->where('status', 'pending')
+                          ->with(['recipient:id,first_name,last_name,email', 'sharer:id,first_name,last_name,email']); // Load recipient and sharer for pending shares
                     }
                 ])
                 ->whereHas('ticketPurchase', function($query) {
@@ -174,7 +175,8 @@ class MyTicketsController extends Controller
                     'sharedByUser:id,first_name,last_name,email',
                     'user:id,first_name,last_name,email', // Current owner
                     'shares' => function($q) {
-                        $q->where('status', 'pending'); // Only load pending shares for performance
+                        $q->where('status', 'pending')
+                          ->with(['recipient:id,first_name,last_name,email', 'sharer:id,first_name,last_name,email']); // Load recipient and sharer for pending shares
                     }
                 ])
                 ->whereHas('ticketPurchase', function($query) {

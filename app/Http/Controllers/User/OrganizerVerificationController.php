@@ -3,13 +3,10 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Notifications\OrganizerVerificationSubmitted;
 use App\Models\OrganizerVerification;
 use App\Models\User;
-use App\Models\Admin;
 use App\Models\Notification;
 use App\Services\NotificationService;
-use App\Events\AdminDashboardUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -203,6 +200,8 @@ class OrganizerVerificationController extends Controller
                     'user_name' => $userName,
                     'user_email' => $user->email,
                     'organization_name' => $verification->organization_name,
+                    'document_type' => $verification->document_type,
+                    'submitted_at' => $verification->created_at->toIso8601String(),
                 ],
                 'is_read' => false,
             ]);
@@ -220,24 +219,6 @@ class OrganizerVerificationController extends Controller
             }
         } catch (\Exception $e) {
             \Log::error('Failed to create admin notification for organizer verification: ' . $e->getMessage());
-        }
-
-        $admins = Admin::all();
-        if ($admins->count() > 0) {
-            foreach ($admins as $admin) {
-                // Create a shadow user for notification if needed
-                $shadowEmail = 'admin+' . $admin->id . '@admin.local';
-                $shadowUser = User::firstOrCreate(
-                    ['email' => $shadowEmail],
-                    [
-                        'first_name' => 'Admin',
-                        'last_name' => $admin->username,
-                        'password' => bcrypt(Str::random(24)),
-                        'organizer' => false,
-                    ]
-                );
-                $shadowUser->notify(new OrganizerVerificationSubmitted($verification, $user));
-            }
         }
 
         // Trigger admin dashboard update

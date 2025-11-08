@@ -50,8 +50,8 @@
                         <span class="text-xs text-gray-500">Click to collapse/expand</span>
                     </div>
                 </summary>
-                <div class="p-4 overflow-x-auto overflow-y-auto max-h-[800px]">
-                    <div id="cert_preview_wrapper" class="flex justify-center min-w-full">
+                <div class="p-4">
+                    <div id="cert_preview_wrapper">
                         @include('organizer.events.preview.certificate-template', [
                             'certificateData' => $certificateData, 
                             'event' => $event ?? (object)['id' => $eventId], 

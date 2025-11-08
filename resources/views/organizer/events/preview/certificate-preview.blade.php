@@ -42,8 +42,8 @@
             </div>
             
             <!-- Certificate Content -->
-            <div class="p-6 overflow-x-auto overflow-y-auto max-h-[800px]">
-                <div class="flex justify-center min-w-full">
+            <div class="p-6">
+                <div class="transform scale-75 origin-top-left" style="width: 133.33%;">
                     @include('organizer.events.preview.certificate-template', [
                         'certificateData' => $certificateData,
                         'event' => $event,

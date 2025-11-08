@@ -433,14 +433,9 @@ class EventEditController extends Controller
             abort(403, 'Unauthorized access to this event.');
         }
 
-        // Check if user can manage event (this is the key change)
-        $user = Auth::user();
-        $staff = $event->staff()->where('user_id', $user?->id)->first();
-        $canManageEvent = $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false);
-
-        // Check if event has ended or user cannot manage event - if so, show view-only mode
+        // Check if event has ended - if so, show view-only mode
         $eventEnded = $event->end_date && now()->gt($event->end_date);
-        if ($eventEnded || !$canManageEvent) {
+        if ($eventEnded) {
             $layoutType = $isAdmin ? 'admin' : 'organizer';
             
             // Load certificate data for info view
@@ -458,52 +453,12 @@ class EventEditController extends Controller
                         $certificateDataJson = \Storage::disk('r2')->get($certificateDataPath);
                         $data = json_decode($certificateDataJson, true) ?? [];
                         $certificateData = $this->normalizeCertificateUrls($event->id, $data);
-                        
-                        // Resolve logo URLs from R2 to signed/public URLs for preview
-                        try {
-                            $disk = \Storage::disk('r2');
-                            $leftCandidatePaths = [];
-                            $rightCandidatePaths = [];
-                            // Common filenames stored by Step 4
-                            $leftCandidatePaths[] = "events/{$event->id}/certificate/logo_left.png";
-                            $rightCandidatePaths[] = "events/{$event->id}/certificate/logo_right.png";
-                            // If paths exist in JSON, respect them
-                            foreach (['logo_left_path','logo_left'] as $k) {
-                                if (!empty($certificateData[$k])) { $leftCandidatePaths[] = $certificateData[$k]; }
-                            }
-                            foreach (['logo_right_path','logo_right'] as $k) {
-                                if (!empty($certificateData[$k])) { $rightCandidatePaths[] = $certificateData[$k]; }
-                            }
-
-                            $resolvePath = function(array $candidates) use ($disk) {
-                                foreach ($candidates as $p) {
-                                    if (is_string($p)) {
-                                        if (str_starts_with($p, 'http')) { return $p; }
-                                        $path = str_contains($p, 'events/') ? $p : null;
-                                        if ($path && $disk->exists($path)) { return $this->getR2Url($path); }
-                                    }
-                                }
-                                return null;
-                            };
-
-                            $leftUrl = $resolvePath($leftCandidatePaths);
-                            $rightUrl = $resolvePath($rightCandidatePaths);
-
-                            if ($leftUrl) { $certificateData['logo_left_url'] = $leftUrl; }
-                            if ($rightUrl) { $certificateData['logo_right_url'] = $rightUrl; }
-                        } catch (\Throwable $t) {
-                            \Log::warning('Failed resolving certificate logo URLs for info view', ['event_id' => $event->id, 'error' => $t->getMessage()]);
-                        }
-                        
                         break;
                     }
                 }
             } catch (\Throwable $t) {
                 \Log::warning('Failed to load certificate.json for info view', ['event_id' => $event->id, 'error' => $t->getMessage()]);
             }
-            
-            // Get certificate enabled status from event
-            $certificateEnabled = (bool)($event->certificate_enabled ?? false);
             
             // Generate fallback values for event date and location
             $fallbackWhen = $event && $event->start_date 
@@ -517,7 +472,7 @@ class EventEditController extends Controller
                 : 'Event Location';
             
             // Redirect to info view for certificate
-            return view('organizer.events.info.certificate', compact('event', 'layoutType', 'certificateData', 'certificateEnabled', 'fallbackWhen', 'fallbackGiven'));
+            return view('organizer.events.info.certificate', compact('event', 'layoutType', 'certificateData', 'fallbackWhen', 'fallbackGiven'));
         }
 
         // Load certificate data from R2 storage using the same method as CertificateController

@@ -132,12 +132,30 @@
                             @foreach($ticketsOfType as $ticket)
                                 @php
                                     $isCheckedIn = $ticket->checked_in_at !== null;
-                                    $hasPendingShares = $ticket->shares && $ticket->shares->where('status', 'pending')->count() > 0;
+                                    $pendingShares = $ticket->shares ? $ticket->shares->where('status', 'pending') : collect();
+                                    $hasPendingShares = $pendingShares->count() > 0;
                                     $isSharedToOthers = $ticket->shared_by_user_id && $ticket->shared_by_user_id == auth()->id();
                                     $wasReceivedThroughShare = $ticket->shared_by_user_id && $ticket->shared_by_user_id != auth()->id(); // Show even if checked in
                                     $sharedFromName = $ticket->sharedByUser ? ($ticket->sharedByUser->first_name . ' ' . $ticket->sharedByUser->last_name) : 'Someone';
                                     
-                                    // Find who this ticket was sent to (if shared by current user)
+                                    // Get pending share details
+                                    $pendingShareSent = null; // Share sent by current user (outgoing)
+                                    $pendingShareReceived = null; // Share received by current user (incoming)
+                                    
+                                    if ($hasPendingShares) {
+                                        foreach ($pendingShares as $share) {
+                                            // If sharer is current user, this is a pending share we sent
+                                            if ($share->sharer_id == auth()->id()) {
+                                                $pendingShareSent = $share;
+                                            }
+                                            // If recipient is current user, this is a pending share we received
+                                            if ($share->recipient_id == auth()->id()) {
+                                                $pendingShareReceived = $share;
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Find who this ticket was sent to (if shared by current user and accepted)
                                     $sentToRecipient = null;
                                     if ($isSharedToOthers) {
                                         // Find accepted share for this ticket - check by shared_ticket_id or shared_ticket_ids
@@ -197,9 +215,19 @@
                                                 Event Ended
                                             </div>
                                         @elseif($hasPendingShares)
-                                            <div class="text-xs text-yellow-600 dark:text-yellow-400 truncate">
-                                                Pending Share Request
-                                            </div>
+                                            @if($pendingShareSent && $pendingShareSent->recipient)
+                                                <div class="text-xs text-yellow-600 dark:text-yellow-400 truncate font-medium">
+                                                    Pending to {{ $pendingShareSent->recipient->first_name }} {{ $pendingShareSent->recipient->last_name }}
+                                                </div>
+                                            @elseif($pendingShareReceived && $pendingShareReceived->sharer)
+                                                <div class="text-xs text-yellow-600 dark:text-yellow-400 truncate font-medium">
+                                                    Pending from {{ $pendingShareReceived->sharer->first_name }} {{ $pendingShareReceived->sharer->last_name }}
+                                                </div>
+                                            @else
+                                                <div class="text-xs text-yellow-600 dark:text-yellow-400 truncate">
+                                                    Pending Share Request
+                                                </div>
+                                            @endif
                                         @else
                                             <div class="text-xs text-gray-500 dark:text-gray-400">Available</div>
                                         @endif
@@ -229,9 +257,19 @@
                                                 Checked
                                             </span>
                                         @elseif($hasPendingShares)
-                                            <span class="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded-md">
-                                                Pending
-                                            </span>
+                                            @if($pendingShareSent)
+                                                <span class="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded-md" title="Pending share sent">
+                                                    Pending Out
+                                                </span>
+                                            @elseif($pendingShareReceived)
+                                                <span class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md" title="Pending share received">
+                                                    Pending In
+                                                </span>
+                                            @else
+                                                <span class="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded-md">
+                                                    Pending
+                                                </span>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>

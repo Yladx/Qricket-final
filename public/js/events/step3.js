@@ -403,8 +403,13 @@
               <input data-k="name" data-i="${idx}" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10" value="${t.name || ''}">
             </div>
             <div class="col-span-6 md:col-span-3">
-              <label class="block text-xs text-gray-500">Price</label>
-              <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10 ${free ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-700' : ''}" value="${free ? '0' : (t.price || '500')}" ${free ? 'readonly disabled' : ''} ${free ? 'tabindex="-1"' : ''}>
+              <label class="block text-xs text-gray-500">Price (PHP)</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span class="text-gray-500 dark:text-gray-400 text-sm">₱</span>
+                </div>
+                <input data-k="price" data-i="${idx}" type="number" min="0" step="0.01" class="w-full pl-7 rounded bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 h-10 ${free ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-700' : ''}" value="${free ? '0' : (t.price || '500')}" ${free ? 'readonly disabled' : ''} ${free ? 'tabindex="-1"' : ''} placeholder="0.00">
+              </div>
             </div>
             <div class="col-span-6 md:col-span-3">
               <label class="block text-xs text-gray-500">Quantity</label>

@@ -274,72 +274,6 @@
                 </div>
             </div>
 
-            <!-- Certificate Section -->
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Certificate Template</h3>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">
-                        @if($eventData['certificate_enabled'] ?? true)
-                            @if(!empty($eventData['certificate_data']))
-                                Configured
-                            @else
-                                Not configured
-                            @endif
-                        @else
-                            Disabled
-                        @endif
-                    </span>
-                </div>
-                <div id="review-certificate" class="space-y-3">
-                    @if($eventData['certificate_enabled'] ?? true)
-                        @if(!empty($eventData['certificate_data']))
-                            <div class="flex items-center space-x-3">
-                                <div class="w-12 h-16 bg-gray-200 dark:bg-gray-600 rounded border flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div class="font-medium text-gray-900 dark:text-gray-100">Certificate Template</div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">PDF template configured</div>
-                                </div>
-                            </div>
-                            
-                            <!-- Certificate Preview -->
-                            <div class="mt-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                                <div class="p-3 border-b border-gray-200 dark:border-gray-700">
-                                    <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Certificate Preview</h4>
-                                </div>
-                                <div class="p-4 overflow-x-auto overflow-y-auto max-h-[800px]">
-                                    <div class="flex justify-center min-w-full">
-                                        @include('organizer.events.preview.certificate-template', [
-                                            'certificateData' => $eventData['certificate_data'],
-                                            'event' => $event,
-                                            'fallbackWhen' => $eventData['start_date'] ? \Carbon\Carbon::parse($eventData['start_date'])->format('M j, Y') : 'Date TBD',
-                                            'fallbackGiven' => $eventData['end_date'] ? \Carbon\Carbon::parse($eventData['end_date'])->format('M j, Y') : 'Date TBD',
-                                        ])
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            <div class="text-sm text-gray-500 dark:text-gray-400">No certificate template configured</div>
-                        @endif
-                    @else
-                        <div class="flex items-center space-x-3">
-                            <div class="w-12 h-16 bg-gray-100 dark:bg-gray-700 rounded border flex items-center justify-center">
-                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="font-medium text-gray-900 dark:text-gray-100">Certificate Disabled</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">No certification for this event</div>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
             <!-- Publish Options Section -->
             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
@@ -392,6 +326,72 @@
                 <div id="schedule-input" class="mt-4 hidden">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Publish At</label>
                     <input type="datetime-local" name="publish_at" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+
+            <!-- Certificate Section -->
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Certificate Template</h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                        @if($eventData['certificate_enabled'] ?? true)
+                            @if(!empty($eventData['certificate_data']))
+                                Configured
+                            @else
+                                Not configured
+                            @endif
+                        @else
+                            Disabled
+                        @endif
+                    </span>
+                </div>
+                <div id="review-certificate" class="space-y-3">
+                    @if($eventData['certificate_enabled'] ?? true)
+                        @if(!empty($eventData['certificate_data']))
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-16 bg-gray-200 dark:bg-gray-600 rounded border flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900 dark:text-gray-100">Certificate Template</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">PDF template configured</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Certificate Preview -->
+                            <div class="mt-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                <div class="p-3 border-b border-gray-200 dark:border-gray-700">
+                                    <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Certificate Preview</h4>
+                                </div>
+                                <div class="p-3">
+                                    <div class="transform scale-50 origin-top-left" style="width: 200%;">
+                                        @include('organizer.events.preview.certificate-template', [
+                                            'certificateData' => $eventData['certificate_data'],
+                                            'event' => $event,
+                                            'fallbackWhen' => $eventData['start_date'] ? \Carbon\Carbon::parse($eventData['start_date'])->format('M j, Y') : 'Date TBD',
+                                            'fallbackGiven' => $eventData['end_date'] ? \Carbon\Carbon::parse($eventData['end_date'])->format('M j, Y') : 'Date TBD',
+                                        ])
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-sm text-gray-500 dark:text-gray-400">No certificate template configured</div>
+                        @endif
+                    @else
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-16 bg-gray-100 dark:bg-gray-700 rounded border flex items-center justify-center">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900 dark:text-gray-100">Certificate Disabled</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">No certification for this event</div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
     </div>

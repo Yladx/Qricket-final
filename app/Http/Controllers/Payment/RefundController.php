@@ -935,30 +935,20 @@ class RefundController extends Controller
                             $refunds = $refundsResponse->json();
                             
                             // Calculate total already refunded
-                            // Xendit refund amounts are typically in smallest currency unit (cents)
                             if (isset($refunds['data']) && is_array($refunds['data'])) {
                                 foreach ($refunds['data'] as $refund) {
                                     if (isset($refund['status']) && strtolower($refund['status']) === 'succeeded') {
-                                        $refundAmount = $refund['amount'] ?? 0;
-                                        // Ensure we're working with the same unit as invoice amount
-                                        // If invoice amount is in cents, refund amount should be in cents too
-                                        $alreadyRefunded += $refundAmount;
+                                        $alreadyRefunded += ($refund['amount'] ?? 0);
                                     }
                                 }
                             } elseif (is_array($refunds)) {
                                 // If refunds is a direct array
                                 foreach ($refunds as $refund) {
                                     if (isset($refund['status']) && strtolower($refund['status']) === 'succeeded') {
-                                        $refundAmount = $refund['amount'] ?? 0;
-                                        $alreadyRefunded += $refundAmount;
+                                        $alreadyRefunded += ($refund['amount'] ?? 0);
                                     }
                                 }
                             }
-                            
-                            Log::info('Calculated already refunded amount', [
-                                'already_refunded' => $alreadyRefunded,
-                                'invoice_id' => $checkInvoiceId,
-                            ]);
                         }
                     } catch (\Exception $refundException) {
                         Log::warning('Failed to fetch existing refunds', [
@@ -970,41 +960,22 @@ class RefundController extends Controller
             }
 
             if ($invoiceAmount !== null) {
-                // Normalize invoice amount to cents for consistent calculation
-                // Check if invoice amount is in PHP currency (has decimal and is reasonable)
-                $invoiceAmountString = (string) $invoiceAmount;
-                $invoiceHasDecimal = strpos($invoiceAmountString, '.') !== false;
-                $invoiceAmountInCents = $invoiceHasDecimal && $invoiceAmount < 1000 
-                    ? (int) round($invoiceAmount * 100)  // Convert PHP to cents
-                    : (int) round($invoiceAmount);       // Already in cents
-                
-                // Normalize already refunded amount to cents
-                // Refund amounts from Xendit should be in the same format as invoice amounts
-                $alreadyRefundedString = (string) $alreadyRefunded;
-                $refundHasDecimal = strpos($alreadyRefundedString, '.') !== false;
-                $alreadyRefundedInCents = $refundHasDecimal && $alreadyRefunded < 1000
-                    ? (int) round($alreadyRefunded * 100)  // Convert PHP to cents
-                    : (int) round($alreadyRefunded);       // Already in cents
-                
-                // Calculate refundable amount in cents
-                $refundableAmountInCents = $invoiceAmountInCents - $alreadyRefundedInCents;
+                // Calculate refundable amount = invoice amount - already refunded
+                $refundableAmount = $invoiceAmount - $alreadyRefunded;
                 
                 Log::info('Xendit refundable amount calculation', [
                     'invoice_id' => $finalInvoiceId ?? $invoiceId,
                     'payment_request_id' => $paymentRequestId,
-                    'invoice_amount_raw' => $invoiceAmount,
-                    'invoice_amount_in_cents' => $invoiceAmountInCents,
-                    'invoice_amount_in_php' => $invoiceAmountInCents / 100,
-                    'already_refunded_raw' => $alreadyRefunded,
-                    'already_refunded_in_cents' => $alreadyRefundedInCents,
-                    'already_refunded_in_php' => $alreadyRefundedInCents / 100,
-                    'refundable_amount_in_cents' => $refundableAmountInCents,
-                    'refundable_amount_in_php' => $refundableAmountInCents / 100,
+                    'invoice_amount' => $invoiceAmount,
+                    'already_refunded' => $alreadyRefunded,
+                    'refundable_amount' => $refundableAmount,
                 ]);
                 
-                // Return refundable amount in cents (Xendit's expected format)
-                if ($refundableAmountInCents > 0) {
-                    return $refundableAmountInCents;
+                // Return in cents (convert if needed)
+                if ($refundableAmount > 0) {
+                    // Amount is likely already in smallest currency unit (cents), but check
+                    // Xendit typically returns amounts in smallest currency unit
+                    return (int) round($refundableAmount);
                 }
             }
 
