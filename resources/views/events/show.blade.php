@@ -177,15 +177,13 @@
                 console.log('Event Show: No layout data to render or layout data is not an array');
                 const container = document.getElementById('layout-components-display');
                 if (container) {
+                    const description = eventData.description || 'No description available.';
                     renderHtmlWithScripts(container, `
-                        <div class="text-center py-12 text-gray-500">
-                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                            </svg>
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No Layout Components</h3>
-                            <p class="text-gray-600 dark:text-gray-400 mb-4">This event doesn't have custom layout components.</p>
-                            <div class="prose dark:prose-invert max-w-none">
-                                <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">${eventData.description || 'No description available.'}</p>
+                        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                            <div class="text-center">
+                                <div class="prose prose-lg dark:prose-invert max-w-none mx-auto">
+                                    <p class="text-gray-700 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-line">${description}</p>
+                                </div>
                             </div>
                         </div>
                     `);
@@ -221,7 +219,16 @@
         function renderLayoutComponents(components) {
             const container = document.getElementById('layout-components-display');
             if (!components || components.length === 0) {
-                renderHtmlWithScripts(container, '<div class="text-center text-gray-500 py-8">No layout components added yet</div>');
+                const description = window.eventData?.description || 'No description available.';
+                renderHtmlWithScripts(container, `
+                    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                        <div class="text-center">
+                            <div class="prose prose-lg dark:prose-invert max-w-none mx-auto">
+                                <p class="text-gray-700 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-line">${description}</p>
+                            </div>
+                        </div>
+                    </div>
+                `);
                 return;
             }
 
