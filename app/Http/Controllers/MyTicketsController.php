@@ -102,6 +102,13 @@ class MyTicketsController extends Controller
                 ->with(['recipient', 'ticketType', 'event'])
                 ->get()
                 ->groupBy('event_id');
+            
+            // Get accepted shares received by this user (so they can view the tickets)
+            $acceptedSharesReceived = TicketShare::where('recipient_id', $user->id)
+                ->where('status', 'accepted')
+                ->with(['sharer', 'ticketType', 'event'])
+                ->get()
+                ->groupBy('event_id');
 
             // Check if sharing is allowed for each event (load from R2 ticket settings)
             $eventSharingSettings = [];
@@ -132,7 +139,7 @@ class MyTicketsController extends Controller
                 }
             }
 
-            return view('tickets.my-tickets', compact('ticketsByEvent', 'pendingSharesReceived', 'pendingSharesSent', 'hideShared', 'hidePastEvents', 'sortBy', 'eventSharingSettings'));
+            return view('tickets.my-tickets', compact('ticketsByEvent', 'pendingSharesReceived', 'pendingSharesSent', 'acceptedSharesReceived', 'hideShared', 'hidePastEvents', 'sortBy', 'eventSharingSettings'));
             
         } catch (\Exception $e) {
             Log::error('Error loading tickets: ' . $e->getMessage(), [
@@ -145,6 +152,7 @@ class MyTicketsController extends Controller
                 'ticketsByEvent' => collect(),
                 'pendingSharesReceived' => collect(),
                 'pendingSharesSent' => collect(),
+                'acceptedSharesReceived' => collect(),
                 'hideShared' => $hideShared,
                 'hidePastEvents' => $hidePastEvents,
                 'sortBy' => $sortBy,

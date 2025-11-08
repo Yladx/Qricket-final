@@ -105,11 +105,11 @@
             </div>
 
             <!-- Right Sidebar: Pending Ticket Shares -->
-            @if($pendingSharesReceived->isNotEmpty() || $pendingSharesSent->isNotEmpty())
+            @if($pendingSharesReceived->isNotEmpty() || $pendingSharesSent->isNotEmpty() || ($acceptedSharesReceived ?? collect())->isNotEmpty())
             <div class="w-full lg:w-80 flex-shrink-0">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 sticky top-6">
                     <div class="p-4">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Pending Ticket Shares</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ticket Shares</h2>
                         
                         <!-- Shares Received -->
                         @if($pendingSharesReceived->isNotEmpty())
@@ -160,6 +160,21 @@
                                                                 Decline
                                                             </button>
                                                         </form>
+                                                    @elseif($share->status === 'accepted')
+                                                        @php
+                                                            // Get the ticket ID from the share
+                                                            $ticketId = $share->shared_ticket_id ?? (is_array($share->shared_ticket_ids) && !empty($share->shared_ticket_ids) ? $share->shared_ticket_ids[0] : null);
+                                                        @endphp
+                                                        @if($ticketId)
+                                                            <a href="{{ route('tickets.individual', $ticketId) }}" 
+                                                               class="w-full px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors text-center inline-block">
+                                                                View Ticket
+                                                            </a>
+                                                        @else
+                                                            <span class="w-full px-2 py-1 bg-gray-500 text-white text-xs font-medium rounded text-center">
+                                                                Accepted
+                                                            </span>
+                                                        @endif
                                                     @else
                                                         <span class="w-full px-2 py-1 bg-gray-500 text-white text-xs font-medium rounded text-center">
                                                             @if($share->status !== 'pending')
@@ -169,6 +184,64 @@
                                                             @else
                                                                 Unavailable
                                                             @endif
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                        
+                        <!-- Accepted Shares Received -->
+                        @if(isset($acceptedSharesReceived) && $acceptedSharesReceived->isNotEmpty())
+                        <div class="mb-6">
+                            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Accepted Shares</h3>
+                            <div class="space-y-3 max-h-96 overflow-y-auto">
+                                @foreach($acceptedSharesReceived as $eventId => $shares)
+                                    @php $event = $shares->first()->event; @endphp
+                                    <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+                                        <div class="mb-2">
+                                            <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ $event->title }}</h4>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                {{ \Carbon\Carbon::parse($event->start_date)->format('M j, Y \a\t g:i A') }}
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="space-y-2">
+                                            @foreach($shares as $share)
+                                            <div class="p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                                <div class="flex items-center space-x-2 mb-2">
+                                                    <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        <span class="text-white text-xs font-medium">
+                                                            {{ substr($share->sharer->first_name, 0, 1) }}{{ substr($share->sharer->last_name, 0, 1) }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-xs font-medium text-gray-900 dark:text-white truncate">
+                                                            {{ $share->sharer->first_name }} {{ $share->sharer->last_name }}
+                                                        </p>
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                            {{ $share->ticketType->name ?? 'N/A' }} • {{ $share->quantity }} ticket(s)
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex space-x-1 mt-2">
+                                                    @php
+                                                        // Get the ticket ID from the share
+                                                        $ticketId = $share->shared_ticket_id ?? (is_array($share->shared_ticket_ids) && !empty($share->shared_ticket_ids) ? $share->shared_ticket_ids[0] : null);
+                                                    @endphp
+                                                    @if($ticketId)
+                                                        <a href="{{ route('tickets.individual', $ticketId) }}" 
+                                                           class="w-full px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors text-center inline-block">
+                                                            View Ticket
+                                                        </a>
+                                                    @else
+                                                        <span class="w-full px-2 py-1 bg-green-500 text-white text-xs font-medium rounded text-center">
+                                                            Accepted
                                                         </span>
                                                     @endif
                                                 </div>
