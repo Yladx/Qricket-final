@@ -218,12 +218,19 @@ class TicketShareController extends Controller
         }
 
         // Check if sharer has any tickets of this type (including checked-in ones)
-        $totalTickets = EventTicketInformation::where('user_id', $share->sharer_id)
-            ->whereHas('ticketPurchase', function($query) use ($share) {
-                $query->where('status', 'paid')
-                      ->where('ticket_type_id', $share->ticket_type_id);
-            })
-            ->count();
+        // The ticket_type_id and event_id are on EventTicketInformation, not TicketPurchase
+        $totalTicketsQuery = EventTicketInformation::where('user_id', $share->sharer_id)
+            ->where('event_id', $share->event_id)
+            ->whereHas('ticketPurchase', function($query) {
+                $query->where('status', 'paid');
+            });
+        
+        // If ticket_type_id is set, filter by it
+        if (!is_null($share->ticket_type_id)) {
+            $totalTicketsQuery->where('ticket_type_id', $share->ticket_type_id);
+        }
+        
+        $totalTickets = $totalTicketsQuery->count();
 
         if ($totalTickets === 0) {
             return response()->json([
@@ -233,28 +240,93 @@ class TicketShareController extends Controller
         }
 
         // Get available tickets of this type from the sharer
-        $availableTickets = EventTicketInformation::where('user_id', $share->sharer_id)
-            ->whereHas('ticketPurchase', function($query) use ($share) {
-                $query->where('status', 'paid')
-                      ->where('ticket_type_id', $share->ticket_type_id);
+        // First, get all ticket IDs that have pending shares (to exclude them)
+        $pendingShareTicketIds = \App\Models\EventTicketShare::where('status', 'pending')
+            ->where('sharer_id', $share->sharer_id)
+            ->where('event_id', $share->event_id)
+            ->where('id', '!=', $share->id) // Exclude current share
+            ->where(function($q) {
+                $q->whereNotNull('shared_ticket_id')
+                  ->orWhereNotNull('shared_ticket_ids');
             })
-            ->where(function($query) use ($share) {
-                $query->whereNull('shared_by_user_id') // Not shared to others
-                      ->orWhere('shared_by_user_id', '!=', $share->sharer_id); // Or received from others
+            ->get()
+            ->flatMap(function($pendingShare) {
+                $ids = [];
+                if ($pendingShare->shared_ticket_id) {
+                    $ids[] = $pendingShare->shared_ticket_id;
+                }
+                if ($pendingShare->shared_ticket_ids && is_array($pendingShare->shared_ticket_ids)) {
+                    $ids = array_merge($ids, $pendingShare->shared_ticket_ids);
+                }
+                return $ids;
             })
-            ->whereNull('checked_in_at') // Not checked in
-            ->limit($share->quantity)
-            ->get();
+            ->unique()
+            ->values()
+            ->toArray();
+        
+        // Get available tickets
+        $availableTicketsQuery = EventTicketInformation::where('user_id', $share->sharer_id)
+            ->where('event_id', $share->event_id)
+            ->whereHas('ticketPurchase', function($query) {
+                $query->where('status', 'paid');
+            })
+            ->whereNull('shared_by_user_id') // Not already shared/transferred
+            ->whereNull('checked_in_at'); // Not checked in
+        
+        // If ticket_type_id is set, filter by it
+        if (!is_null($share->ticket_type_id)) {
+            $availableTicketsQuery->where('ticket_type_id', $share->ticket_type_id);
+        }
+        
+        // Exclude tickets that have pending shares
+        if (!empty($pendingShareTicketIds)) {
+            $availableTicketsQuery->whereNotIn('id', $pendingShareTicketIds);
+        }
+        
+        $quantity = $share->quantity ?? 1;
+        $availableTickets = $availableTicketsQuery->limit($quantity)->get();
 
-        if ($availableTickets->count() < $share->quantity) {
-            // Check if all tickets are checked-in
-            $checkedInTickets = EventTicketInformation::where('user_id', $share->sharer_id)
-                ->whereHas('ticketPurchase', function($query) use ($share) {
-                    $query->where('status', 'paid')
-                          ->where('ticket_type_id', $share->ticket_type_id);
+        // Also handle case where shared_ticket_id is set (specific ticket share)
+        $ticketsToTransfer = collect();
+        if (!is_null($share->shared_ticket_id)) {
+            // Check if the specific ticket is available
+            $specificTicket = EventTicketInformation::where('id', $share->shared_ticket_id)
+                ->where('user_id', $share->sharer_id)
+                ->where('event_id', $share->event_id)
+                ->whereNull('checked_in_at')
+                ->whereNull('shared_by_user_id')
+                ->whereHas('ticketPurchase', function($query) {
+                    $query->where('status', 'paid');
                 })
-                ->whereNotNull('checked_in_at')
-                ->count();
+                ->first();
+            
+            if ($specificTicket) {
+                $ticketsToTransfer->push($specificTicket);
+            } else {
+                // If specific ticket is not available, try to get available tickets by type
+                if ($availableTickets->count() >= $quantity) {
+                    $ticketsToTransfer = $availableTickets->take($quantity);
+                }
+            }
+        } else {
+            // No specific ticket ID, use available tickets
+            $ticketsToTransfer = $availableTickets;
+        }
+
+        if ($ticketsToTransfer->count() < $quantity) {
+            // Check if all tickets are checked-in
+            $checkedInTicketsQuery = EventTicketInformation::where('user_id', $share->sharer_id)
+                ->where('event_id', $share->event_id)
+                ->whereHas('ticketPurchase', function($query) {
+                    $query->where('status', 'paid');
+                })
+                ->whereNotNull('checked_in_at');
+            
+            if (!is_null($share->ticket_type_id)) {
+                $checkedInTicketsQuery->where('ticket_type_id', $share->ticket_type_id);
+            }
+            
+            $checkedInTickets = $checkedInTicketsQuery->count();
 
             if ($checkedInTickets > 0) {
                 return response()->json([
@@ -265,12 +337,12 @@ class TicketShareController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Not enough available tickets to fulfill this share request. Some tickets may be checked-in or already shared.'
+                'message' => "Not enough available tickets to fulfill this share request. Required: {$quantity}, Available: {$ticketsToTransfer->count()}"
             ], 400);
         }
 
         // Transfer the tickets - update user_id to make recipient the owner
-        foreach ($availableTickets as $ticket) {
+        foreach ($ticketsToTransfer as $ticket) {
             $ticket->update([
                 'user_id' => $user->id, // Make recipient the owner
                 'shared_by_user_id' => $share->sharer_id, // Keep track of who shared it
@@ -281,7 +353,8 @@ class TicketShareController extends Controller
         // Update the share status
         $share->update([
             'status' => 'accepted',
-            'shared_ticket_ids' => $availableTickets->pluck('id')->toArray(),
+            'shared_ticket_id' => $ticketsToTransfer->first()?->id ?? $share->shared_ticket_id,
+            'shared_ticket_ids' => $ticketsToTransfer->pluck('id')->toArray(),
         ]);
 
         // Send notification to sharer about acceptance
