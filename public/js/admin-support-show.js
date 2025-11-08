@@ -312,8 +312,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Determine if this is an admin or user reply
-            const isAdmin = data.is_admin_reply === true;
+            // Properly determine if this is an admin or user reply
+            // Check admin_id first, then is_admin_reply flag (matching Blade template logic)
+            const isAdmin = !!(data.admin_id || data.is_admin_reply === true);
+            // User replies should have user_id and NOT be admin replies
+            const isUser = !!(data.user_id && !isAdmin);
             
             // if (!isAdmin) {
             //     console.log('[Admin Support] 🎯 USER REPLY RECEIVED! Adding to chat immediately...', replyId);
@@ -323,6 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const authorName = isAdmin ? (data.author || 'Admin') : (data.author || 'User');
             const replyElement = document.createElement('div');
+            // Admin replies go to the right (justify-end), user replies go to the left (justify-start)
             replyElement.className = `flex ${isAdmin ? 'justify-end' : 'justify-start'}`;
             replyElement.setAttribute('data-reply-id', replyId);
             replyElement.style.opacity = '0';
@@ -332,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
             replyElement.innerHTML = `
                 <div class="max-w-[80%]">
                     <div class="flex items-center space-x-2 ${isAdmin ? 'justify-end flex-row-reverse space-x-reverse' : ''} mb-1">
-                        <div class="h-7 w-7 rounded-full ${isAdmin ? 'bg-qricket-600' : 'bg-gray-300 dark:bg-gray-600'} flex items-center justify-center text-[11px] font-bold text-white">${escapeHtml(authorName).charAt(0)}</div>
+                        <div class="h-7 w-7 rounded-full ${isAdmin ? 'bg-qricket-600' : 'bg-gray-300 dark:bg-gray-600'} flex items-center justify-center text-[11px] font-bold text-white">${escapeHtml(authorName).charAt(0).toUpperCase()}</div>
                         <div class="text-xs text-gray-500 dark:text-gray-400"><span class="font-medium text-gray-700 dark:text-gray-300">${escapeHtml(authorName)}</span> • ${data.created_at || 'Just now'}</div>
                     </div>
                     <div class="rounded-2xl px-4 py-2 text-sm shadow-sm ${isAdmin ? 'bg-qricket-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'}">${escapeHtml(data.message || '')}</div>

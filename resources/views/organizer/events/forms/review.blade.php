@@ -141,10 +141,10 @@
                                     <div class="font-medium text-gray-900 dark:text-gray-100">{{ $ticket['name'] ?? 'Ticket Type' }}</div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ $ticket['description'] ?? 'No description' }}</div>
                                     <div class="flex items-center space-x-4 mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                        <span>Price: ${{ number_format($ticket['price'] ?? 0, 2) }}</span>
+                                        <span>Price: ₱{{ number_format($ticket['price'] ?? 0, 2) }}</span>
                                         <span>Quantity: {{ $ticket['quantity'] ?? 'Unlimited' }}</span>
                                         @if($ticket['early_bird_price'] ?? false)
-                                            <span class="text-emerald-600">Early Bird: ${{ number_format($ticket['early_bird_price'], 2) }}</span>
+                                            <span class="text-emerald-600">Early Bird: ₱{{ number_format($ticket['early_bird_price'], 2) }}</span>
                                         @endif
                                     </div>
                                 </div>

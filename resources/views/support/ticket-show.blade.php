@@ -75,12 +75,13 @@
 
                 <!-- Messages Area -->
                 <div id="replies-list" class="flex-1 overflow-auto p-5 bg-gradient-to-b from-qricket-50/40 to-white dark:from-gray-900 dark:to-gray-800 flex flex-col gap-4">
-                    <!-- Initial Message (Ticket Message) -->
-                    <div class="flex flex-col items-start max-w-[80%]">
-                        <div class="text-xs text-gray-600 dark:text-gray-400 mb-1 px-1">You</div>
-                        <div class="bg-white dark:bg-gray-700 border border-qricket-100 dark:border-qricket-900 shadow-sm rounded-xl p-3">
-                            <div class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line">{{ $ticket->message }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ optional($ticket->created_at)->format('M d, Y · g:i A') }}</div>
+                    <!-- Initial Message (Ticket Message) - User's side (right) -->
+                    <div class="flex flex-col items-end max-w-[80%] self-end">
+                        <div class="text-xs text-gray-600 dark:text-gray-400 mb-1 px-1 text-right">You</div>
+                        <div class="bg-gradient-to-r from-qricket-600 to-qricket-500 text-white shadow-md rounded-xl p-3">
+                            <div class="text-xs font-semibold mb-2 text-white/90">{{ $ticket->ticket_number }}</div>
+                            <div class="text-sm text-white whitespace-pre-line">{{ $ticket->message }}</div>
+                            <div class="text-xs text-white/80 mt-1 text-right">{{ optional($ticket->created_at)->format('M d, Y · g:i A') }}</div>
                         </div>
                     </div>
 

@@ -51,8 +51,14 @@
                 </div>
                 <!-- Chat area -->
                 <div id="admin-replies-list" class="px-4 sm:px-6 pb-4 space-y-3 h-[420px] overflow-y-auto scroll-smooth no-scrollbar">
-                    @foreach($ticket->replies as $reply)
-                        @php($isAdmin = (bool) $reply->is_admin_reply)
+                    @forelse($ticket->replies as $reply)
+                        @php
+                            // Properly determine if this is an admin reply
+                            // Check admin_id first, then is_admin_reply flag
+                            $isAdmin = !empty($reply->admin_id) || (bool) $reply->is_admin_reply;
+                            // User replies should have user_id and NOT be admin replies
+                            $isUser = !empty($reply->user_id) && !$isAdmin;
+                        @endphp
                         <div class="flex {{ $isAdmin ? 'justify-end' : 'justify-start' }}" data-reply-id="{{ $reply->id }}">
                             <div class="max-w-[80%]">
                                 <div class="flex items-center space-x-2 {{ $isAdmin ? 'justify-end flex-row-reverse space-x-reverse' : '' }} mb-1">
@@ -69,7 +75,11 @@
                                 </div>
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <div class="text-center py-8">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">No replies yet.</p>
+                        </div>
+                    @endforelse
                 </div>
                 <!-- Composer -->
                 <form id="admin-reply-form" method="POST" action="{{ route('admin.support.reply', $ticket) }}" class="border-t border-gray-200 dark:border-gray-700 p-4 sm:p-6 bg-gray-50/60 dark:bg-gray-800/60">
