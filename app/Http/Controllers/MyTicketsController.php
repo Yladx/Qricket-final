@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\EventTicketInformation;
 use App\Models\TicketShare;
+use App\Models\EventTicketShare;
 use App\Models\User;
 use App\Models\Event;
 use Illuminate\Support\Facades\DB;
@@ -298,10 +299,6 @@ class MyTicketsController extends Controller
                     'event:id,title,start_date,end_date,location,thumbnail',
                     'ticketType:id,name,price',
                     'ticketPurchase:id,status,purchase_id',
-                    'shares' => function($query) {
-                        $query->where('status', 'pending')
-                              ->with(['recipient:id,first_name,last_name,email']);
-                    }
                 ])
                 ->whereHas('ticketPurchase', function($query) {
                     $query->where('status', 'paid');
@@ -313,38 +310,95 @@ class MyTicketsController extends Controller
                 return $ticket->ticketType !== null;
             });
 
+            // Get all ticket IDs
+            $ticketIds = $allTickets->pluck('id')->toArray();
+
+            // Get all pending shares for these tickets from EventTicketShare table
+            // Only check shares sent BY this user (sharer_id = user->id)
+            // Check both shared_ticket_id and shared_ticket_ids (array) columns
+            $pendingShares = EventTicketShare::where('status', 'pending')
+                ->where('sharer_id', $user->id) // Only shares sent by this user
+                ->where(function($query) use ($ticketIds) {
+                    $query->whereIn('shared_ticket_id', $ticketIds);
+                    // Also check JSON array column for each ticket ID
+                    foreach ($ticketIds as $ticketId) {
+                        $query->orWhereJsonContains('shared_ticket_ids', $ticketId);
+                    }
+                })
+                ->with(['recipient:id,first_name,last_name,email', 'sharer:id,first_name,last_name,email'])
+                ->get();
+
+            // Create a map of ticket_id => pending shares
+            $ticketPendingSharesMap = [];
+            $ticketPendingRecipientsMap = [];
+            
+            foreach ($pendingShares as $share) {
+                // Handle shared_ticket_id (single ticket)
+                if ($share->shared_ticket_id && in_array($share->shared_ticket_id, $ticketIds)) {
+                    if (!isset($ticketPendingSharesMap[$share->shared_ticket_id])) {
+                        $ticketPendingSharesMap[$share->shared_ticket_id] = [];
+                        $ticketPendingRecipientsMap[$share->shared_ticket_id] = [];
+                    }
+                    $ticketPendingSharesMap[$share->shared_ticket_id][] = $share;
+                    if ($share->recipient) {
+                        $recipientName = $share->recipient->first_name . ' ' . $share->recipient->last_name;
+                        if (!in_array($recipientName, $ticketPendingRecipientsMap[$share->shared_ticket_id])) {
+                            $ticketPendingRecipientsMap[$share->shared_ticket_id][] = $recipientName;
+                        }
+                    }
+                }
+                
+                // Handle shared_ticket_ids (array of tickets)
+                if ($share->shared_ticket_ids && is_array($share->shared_ticket_ids)) {
+                    foreach ($share->shared_ticket_ids as $ticketId) {
+                        if (in_array($ticketId, $ticketIds)) {
+                            if (!isset($ticketPendingSharesMap[$ticketId])) {
+                                $ticketPendingSharesMap[$ticketId] = [];
+                                $ticketPendingRecipientsMap[$ticketId] = [];
+                            }
+                            $ticketPendingSharesMap[$ticketId][] = $share;
+                            if ($share->recipient) {
+                                $recipientName = $share->recipient->first_name . ' ' . $share->recipient->last_name;
+                                if (!in_array($recipientName, $ticketPendingRecipientsMap[$ticketId])) {
+                                    $ticketPendingRecipientsMap[$ticketId][] = $recipientName;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             // Group all tickets by type (including those with pending shares)
             $ticketsByType = $allTickets->groupBy('ticket_type_id');
 
             return response()->json([
                 'success' => true,
                 'event' => $allTickets->first()?->event,
-                'tickets_by_type' => $ticketsByType->map(function($ticketsOfType) use ($user) {
+                'tickets_by_type' => $ticketsByType->map(function($ticketsOfType) use ($user, $ticketPendingSharesMap, $ticketPendingRecipientsMap) {
                     $ticketType = $ticketsOfType->first()->ticketType;
                     
-                    // Count available vs pending tickets
-                    $availableCount = $ticketsOfType->filter(function($ticket) use ($user) {
+                    // Count available vs pending tickets using the map
+                    $availableCount = $ticketsOfType->filter(function($ticket) use ($user, $ticketPendingSharesMap) {
+                        $hasPending = isset($ticketPendingSharesMap[$ticket->id]) && count($ticketPendingSharesMap[$ticket->id]) > 0;
                         return is_null($ticket->checked_in_at) && // Not checked in
                                (is_null($ticket->shared_by_user_id) || $ticket->shared_by_user_id != $user->id) && // Not shared to others
-                               (!$ticket->shares || $ticket->shares->where('status', 'pending')->count() === 0); // No pending shares
+                               !$hasPending; // No pending shares
                     })->count();
                     
-                    $pendingCount = $ticketsOfType->filter(function($ticket) use ($user) {
+                    $pendingCount = $ticketsOfType->filter(function($ticket) use ($user, $ticketPendingSharesMap) {
+                        $hasPending = isset($ticketPendingSharesMap[$ticket->id]) && count($ticketPendingSharesMap[$ticket->id]) > 0;
                         return is_null($ticket->checked_in_at) && // Not checked in
                                (is_null($ticket->shared_by_user_id) || $ticket->shared_by_user_id != $user->id) && // Not shared to others
-                               $ticket->shares && $ticket->shares->where('status', 'pending')->count() > 0; // Has pending shares
+                               $hasPending; // Has pending shares
                     })->count();
                     
-                    // Get pending share details
+                    // Get pending share details (unique recipients across all pending tickets of this type)
                     $pendingSharesInfo = [];
                     foreach ($ticketsOfType as $ticket) {
-                        if ($ticket->shares && $ticket->shares->where('status', 'pending')->count() > 0) {
-                            foreach ($ticket->shares->where('status', 'pending') as $share) {
-                                if ($share->recipient) {
-                                    $recipientName = $share->recipient->first_name . ' ' . $share->recipient->last_name;
-                                    if (!in_array($recipientName, $pendingSharesInfo)) {
-                                        $pendingSharesInfo[] = $recipientName;
-                                    }
+                        if (isset($ticketPendingRecipientsMap[$ticket->id])) {
+                            foreach ($ticketPendingRecipientsMap[$ticket->id] as $recipientName) {
+                                if (!in_array($recipientName, $pendingSharesInfo)) {
+                                    $pendingSharesInfo[] = $recipientName;
                                 }
                             }
                         }
@@ -356,16 +410,9 @@ class MyTicketsController extends Controller
                         'pending_count' => $pendingCount,
                         'total_count' => $ticketsOfType->count(),
                         'pending_recipients' => $pendingSharesInfo,
-                        'tickets' => $ticketsOfType->map(function($ticket) use ($user) {
-                            $hasPending = $ticket->shares && $ticket->shares->where('status', 'pending')->count() > 0;
-                            $pendingRecipients = [];
-                            if ($hasPending) {
-                                foreach ($ticket->shares->where('status', 'pending') as $share) {
-                                    if ($share->recipient) {
-                                        $pendingRecipients[] = $share->recipient->first_name . ' ' . $share->recipient->last_name;
-                                    }
-                                }
-                            }
+                        'tickets' => $ticketsOfType->map(function($ticket) use ($user, $ticketPendingSharesMap, $ticketPendingRecipientsMap) {
+                            $hasPending = isset($ticketPendingSharesMap[$ticket->id]) && count($ticketPendingSharesMap[$ticket->id]) > 0;
+                            $pendingRecipients = $ticketPendingRecipientsMap[$ticket->id] ?? [];
                             
                             return [
                                 'id' => $ticket->id,

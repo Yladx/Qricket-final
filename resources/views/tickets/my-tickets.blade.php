@@ -388,8 +388,14 @@ function renderShareModalContent(event, ticketsByType) {
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm text-green-700 dark:text-green-300 font-medium">Available: ${totalAvailableTickets} tickets</p>
-                    ${totalPendingTickets > 0 ? `<p class="text-sm text-yellow-700 dark:text-yellow-300 font-medium mt-1">Pending: ${totalPendingTickets} ticket${totalPendingTickets > 1 ? 's' : ''}</p>` : ''}
+                    ${totalAvailableTickets > 0 && totalPendingTickets > 0 ? 
+                        `<p class="text-sm text-green-700 dark:text-green-300 font-medium">Available: ${totalAvailableTickets} ticket${totalAvailableTickets > 1 ? 's' : ''}</p><p class="text-sm text-yellow-700 dark:text-yellow-300 font-medium mt-1">Pending: ${totalPendingTickets} ticket${totalPendingTickets > 1 ? 's' : ''}</p>` :
+                        totalAvailableTickets > 0 ?
+                            `<p class="text-sm text-green-700 dark:text-green-300 font-medium">Available: ${totalAvailableTickets} ticket${totalAvailableTickets > 1 ? 's' : ''}</p>` :
+                            totalPendingTickets > 0 ?
+                                `<p class="text-sm text-yellow-700 dark:text-yellow-300 font-medium">${totalPendingTickets} ticket${totalPendingTickets > 1 ? 's' : ''} pending (none available)</p>` :
+                                `<p class="text-sm text-gray-700 dark:text-gray-300 font-medium">No tickets available</p>`
+                    }
                 </div>
             </div>
             ${hasEnded ? '<div class="mt-3 p-2 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded-md"><p class="text-xs text-red-700 dark:text-red-300">⚠️ This event has ended. Ticket sharing is no longer available.</p></div>' : ''}
@@ -420,8 +426,15 @@ function renderShareModalContent(event, ticketsByType) {
                     <div class="ml-4 flex-1">
                         <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">${ticketType.name}</div>
                         <div class="text-xs text-gray-600 dark:text-gray-400">
-                            ₱${ticketType.price} each • ${availableCount} available
-                            ${pendingCount > 0 ? `<span class="text-yellow-600 dark:text-yellow-400 ml-2">• ${pendingCount} pending</span>` : ''}
+                            ₱${ticketType.price} each
+                            ${availableCount > 0 && pendingCount > 0 ? 
+                                `<span class="text-green-600 dark:text-green-400">• ${availableCount} available</span><span class="text-yellow-600 dark:text-yellow-400 ml-2">• ${pendingCount} pending</span>` :
+                                availableCount > 0 ? 
+                                    `<span class="text-green-600 dark:text-green-400">• ${availableCount} available</span>` :
+                                    pendingCount > 0 ?
+                                        `<span class="text-yellow-600 dark:text-yellow-400">• ${pendingCount} pending (none available)</span>` :
+                                        ''
+                            }
                         </div>
                         ${pendingCount > 0 && pendingRecipients.length > 0 ? `
                             <div class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
@@ -440,7 +453,7 @@ function renderShareModalContent(event, ticketsByType) {
                     <div class="ml-4 flex-1">
                         <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">${ticketType.name}</div>
                         <div class="text-xs text-yellow-600 dark:text-yellow-400">
-                            ₱${ticketType.price} each • ${pendingCount} pending (no available tickets)
+                            ₱${ticketType.price} each • <span class="font-medium">${pendingCount} pending</span> (none available for new shares)
                         </div>
                         ${pendingRecipients.length > 0 ? `
                             <div class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
