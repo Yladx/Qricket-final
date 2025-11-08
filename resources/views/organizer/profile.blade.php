@@ -46,9 +46,9 @@
                                 @endif
                             </div>
                             
-                            <!-- Role and Email Section -->
-                            <div class="space-y-2">
-                                @if($organizer->email)
+                            <!-- Email Section -->
+                            @if($organizer->email)
+                            <div class="space-y-2 mb-3">
                                 <div class="flex items-center gap-2 text-gray-900 dark:text-gray-400">
                                     <svg class="w-4 h-4 text-gray-900 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
@@ -57,16 +57,8 @@
                                         {{ $organizer->email }}
                                     </a>
                                 </div>
-                                @endif
-                                <div class="flex items-center gap-2 text-gray-900 dark:text-gray-300">
-                                    <svg class="w-4 h-4 text-qricket-500 dark:text-qricket-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                    </svg>
-                                    <span class="text-sm font-medium">
-                                        Event Organizer
-                                    </span>
-                                </div>
                             </div>
+                            @endif
 
                             <!-- Social Media Links -->
                             @if($socialLinks->count() > 0)
@@ -80,8 +72,13 @@
                                                style="background-color: {{ $link->platform_color }}20; color: {{ $link->platform_color }}; border: 1px solid {{ $link->platform_color }}40;"
                                                onmouseover="this.style.backgroundColor='{{ $link->platform_color }}'; this.style.color='white';"
                                                onmouseout="this.style.backgroundColor='{{ $link->platform_color }}20'; this.style.color='{{ $link->platform_color }}';">
+                                                @if($link->platform_icon)
+                                                    <svg class="w-4 h-4 mr-1.5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="{{ $link->platform_icon }}"/>
+                                                    </svg>
+                                                @endif
                                                 <span>{{ $link->platform_name }}</span>
-                                                <svg class="w-3 h-3 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="w-3 h-3 ml-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                                 </svg>
                                             </a>
