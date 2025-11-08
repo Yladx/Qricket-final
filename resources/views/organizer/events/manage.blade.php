@@ -38,9 +38,13 @@
                                         </svg>
                                         </div>
                                     </div>
-                                    <div class="ml-4">
+                                    <div class="ml-4 flex-1">
                                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</p>
                                         <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100" data-stat="event-total-revenue">₱{{ number_format($salesStats['totalRevenue'], 2) }}</p>
+                                        @php
+                                            $netRevenueAfterFees = ($salesStats['totalRevenue'] ?? 0) - ($salesStats['transactionFees'] ?? 0) - ($salesStats['vatAmount'] ?? 0);
+                                        @endphp
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Net: ₱{{ number_format($netRevenueAfterFees, 2) }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -101,60 +105,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-                    @if($canManageSales && $salesStats)
-                    <!-- Net Value Breakdown -->
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 border border-blue-200 dark:border-gray-600 rounded-lg p-6 mt-6">
-                        <div class="flex items-start justify-between">
-                            <div class="flex-1">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Total Net Value Breakdown</h3>
-                                <div class="space-y-2 text-sm">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-700 dark:text-gray-300 font-medium">Gross Revenue (Total Amount Collected):</span>
-                                        <span class="text-gray-900 dark:text-gray-100 font-semibold">₱{{ number_format($salesStats['totalRevenue'] ?? 0, 2) }}</span>
-                                    </div>
-                                    @if(($salesStats['transactionFees'] ?? 0) > 0)
-                                    <div class="flex justify-between items-center text-gray-600 dark:text-gray-400">
-                                        <span>Less: Transaction Fees</span>
-                                        <span class="font-medium">-₱{{ number_format($salesStats['transactionFees'] ?? 0, 2) }}</span>
-                                    </div>
-                                    @endif
-                                    @if(($salesStats['vatAmount'] ?? 0) > 0)
-                                    <div class="flex justify-between items-center text-gray-600 dark:text-gray-400">
-                                        <span>Less: VAT</span>
-                                        <span class="font-medium">-₱{{ number_format($salesStats['vatAmount'] ?? 0, 2) }}</span>
-                                    </div>
-                                    @endif
-                                    @php
-                                        $netAmountBeforeQricket = ($salesStats['totalRevenue'] ?? 0) - ($salesStats['transactionFees'] ?? 0) - ($salesStats['vatAmount'] ?? 0);
-                                        $qricketFee = $netAmountBeforeQricket > 0 ? ($netAmountBeforeQricket * (config('app.qricket_fee_percentage', 5) / 100)) : 0;
-                                    @endphp
-                                    @if($qricketFee > 0)
-                                    <div class="flex justify-between items-center text-gray-600 dark:text-gray-400">
-                                        <span>Less: Qricket Service Fee ({{ config('app.qricket_fee_percentage', 5) }}%)</span>
-                                        <span class="font-medium">-₱{{ number_format($qricketFee, 2) }}</span>
-                                    </div>
-                                    @endif
-                                    <div class="border-t border-blue-200 dark:border-gray-600 pt-2 mt-2">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-900 dark:text-gray-100 font-bold text-base">Net Value (Your Expected Earnings):</span>
-                                            <span class="text-teal-600 dark:text-teal-400 font-bold text-lg">₱{{ number_format(max(0, $salesStats['expectedRevenue'] ?? 0), 2) }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="ml-4 flex-shrink-0">
-                                <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
                 </div>
             </div>
 

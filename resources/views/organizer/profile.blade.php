@@ -33,7 +33,7 @@
 
                         <!-- Organizer Info -->
                         <div class="flex-1 min-w-0">
-                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                            <div class="flex flex-wrap items-center gap-3 mb-3">
                                 <h1 class="text-xl font-bold text-gray-900 dark:text-white">
                                     {{ $organizer->full_name }}
                                 </h1>
@@ -46,28 +46,28 @@
                                     </span>
                                 @endif
                             </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                Event Organizer
-                            </p>
-
-                            <!-- Email Link -->
-                            @if($organizer->email)
-                                <div class="mb-2">
-                                    <a href="mailto:{{ $organizer->email }}?subject={{ urlencode('Question about your events') }}" 
-                                       class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium transition-colors duration-200"
-                                       style="background-color: #dc354520; color: #dc3545; border: 1px solid #dc354540;"
-                                       onmouseover="this.style.backgroundColor='#dc3545'; this.style.color='white';"
-                                       onmouseout="this.style.backgroundColor='#dc354520'; this.style.color='#dc3545';">
-                                        <svg class="w-3 h-3 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                        </svg>
-                                        <span>{{ $organizer->email }}</span>
-                                        <svg class="w-3 h-3 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                        </svg>
+                            
+                            <!-- Role and Email Section -->
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2 text-gray-900 dark:text-gray-300">
+                                    <svg class="w-4 h-4 text-qricket-500 dark:text-qricket-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span class="text-sm font-medium">
+                                        Event Organizer
+                                    </span>
+                                </div>
+                                @if($organizer->email)
+                                <div class="flex items-center gap-2 text-gray-900 dark:text-gray-400">
+                                    <svg class="w-4 h-4 text-gray-900 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <a href="mailto:{{ $organizer->email }}?subject={{ urlencode('Question about your events') }}" class="text-sm hover:text-qricket-500 dark:hover:text-qricket-400 transition-colors duration-200">
+                                        {{ $organizer->email }}
                                     </a>
                                 </div>
-                            @endif
+                                @endif
+                            </div>
 
                             <!-- Social Media Links -->
                             @if($socialLinks->count() > 0)
