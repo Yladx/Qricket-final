@@ -233,30 +233,28 @@
                                         @endif
                                     </div>
                                     <div class="flex items-center space-x-1 ml-2">
-                                        @if($wasReceivedThroughShare || $isSharedToOthers)
-                                            @if($isCheckedIn)
-                                                <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-md">
-                                                    Checked
-                                                </span>
-                                            @elseif($eventEnded)
-                                                <span class="text-xs px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-md">
-                                                    Ended
-                                                </span>
-                                            @endif
-                                        @elseif($canShare)
-                                            <button onclick="viewTicketDetails({{ $ticket->id }})" 
-                                                    class="text-xs px-2 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded-md transition-colors">
+                                        @php
+                                            // User can view ticket if they currently own it (user_id matches auth()->id())
+                                            // This includes tickets they purchased and tickets they received through sharing
+                                            $canViewTicket = $ticket->user_id == auth()->id();
+                                        @endphp
+                                        
+                                        @if($canViewTicket)
+                                            <a href="{{ route('tickets.individual', $ticket->id) }}" 
+                                               class="text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors inline-block">
                                                 View
-                                            </button>
-                                        @elseif($eventEnded)
-                                            <span class="text-xs px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-md">
-                                                Ended
-                                            </span>
-                                        @elseif($isCheckedIn)
+                                            </a>
+                                        @endif
+                                        
+                                        @if($isCheckedIn)
                                             <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-md">
                                                 Checked
                                             </span>
-                                        @elseif($hasPendingShares)
+                                        @elseif($eventEnded && !$canViewTicket)
+                                            <span class="text-xs px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-md">
+                                                Ended
+                                            </span>
+                                        @elseif($hasPendingShares && !$canViewTicket)
                                             @if($pendingShareSent)
                                                 <span class="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded-md" title="Pending share sent">
                                                     Pending Out
