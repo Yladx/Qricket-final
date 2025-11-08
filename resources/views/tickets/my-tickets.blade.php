@@ -331,6 +331,23 @@ function openShareModal(eventId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Debug: Log the received data
+            console.log('Share modal data received:', {
+                event: data.event,
+                tickets_by_type: data.tickets_by_type,
+                tickets_by_type_keys: Object.keys(data.tickets_by_type || {})
+            });
+            // Log each ticket type's data
+            Object.values(data.tickets_by_type || {}).forEach((ticketTypeData, index) => {
+                console.log(`Ticket type ${index}:`, {
+                    name: ticketTypeData.ticket_type?.name,
+                    available_count: ticketTypeData.available_count,
+                    pending_count: ticketTypeData.pending_count,
+                    pending_recipients: ticketTypeData.pending_recipients,
+                    total_count: ticketTypeData.total_count
+                });
+            });
+            
             renderShareModalContent(data.event, data.tickets_by_type);
             document.getElementById('shareModal').classList.remove('hidden');
         } else {
@@ -383,9 +400,18 @@ function renderShareModalContent(event, ticketsByType) {
             </div>
             <div class="flex items-center mt-2">
                 <div class="flex-shrink-0">
-                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
+                    ${totalAvailableTickets > 0 ? 
+                        `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>` :
+                        totalPendingTickets > 0 ?
+                            `<svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>` :
+                            `<svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>`
+                    }
                 </div>
                 <div class="ml-3">
                     ${totalAvailableTickets > 0 && totalPendingTickets > 0 ? 
@@ -393,7 +419,7 @@ function renderShareModalContent(event, ticketsByType) {
                         totalAvailableTickets > 0 ?
                             `<p class="text-sm text-green-700 dark:text-green-300 font-medium">Available: ${totalAvailableTickets} ticket${totalAvailableTickets > 1 ? 's' : ''}</p>` :
                             totalPendingTickets > 0 ?
-                                `<p class="text-sm text-yellow-700 dark:text-yellow-300 font-medium">${totalPendingTickets} ticket${totalPendingTickets > 1 ? 's' : ''} pending (none available)</p>` :
+                                `<p class="text-sm text-yellow-700 dark:text-yellow-300 font-medium">${totalPendingTickets} ticket${totalPendingTickets > 1 ? 's' : ''} pending (none available for new shares)</p>` :
                                 `<p class="text-sm text-gray-700 dark:text-gray-300 font-medium">No tickets available</p>`
                     }
                 </div>
