@@ -145,22 +145,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="flex space-x-1 mt-2">
-                                                    @php
-                                                        // Check if sharer has any available (non-checked-in) tickets
-                                                        $availableTickets = \App\Models\EventTicketInformation::where('user_id', $share->sharer_id)
-                                                            ->whereHas('ticketPurchase', function($query) use ($share) {
-                                                                $query->where('status', 'paid')
-                                                                      ->where('ticket_type_id', $share->ticket_type_id);
-                                                            })
-                                                            ->where(function($query) use ($share) {
-                                                                $query->whereNull('shared_by_user_id')
-                                                                      ->orWhere('shared_by_user_id', '!=', $share->sharer_id);
-                                                            })
-                                                            ->whereNull('checked_in_at')
-                                                            ->count();
-                                                    @endphp
-                                                    
-                                                    @if($availableTickets >= $share->quantity)
+                                                    @if($share->canBeAccepted())
                                                         <form method="POST" action="{{ route('ticket-shares.accept', $share->id) }}" class="inline flex-1">
                                                             @csrf
                                                             <button type="submit" 
@@ -177,7 +162,13 @@
                                                         </form>
                                                     @else
                                                         <span class="w-full px-2 py-1 bg-gray-500 text-white text-xs font-medium rounded text-center">
-                                                            Checked-In
+                                                            @if($share->status !== 'pending')
+                                                                {{ ucfirst($share->status) }}
+                                                            @elseif($share->isExpired())
+                                                                Expired
+                                                            @else
+                                                                Unavailable
+                                                            @endif
                                                         </span>
                                                     @endif
                                                 </div>
@@ -369,12 +360,12 @@ function renderShareModalContent(event, ticketsByType) {
     const now = new Date();
     const hasEnded = eventEndDate < now;
     
-    // Calculate total available tickets
+    // Calculate total available and pending tickets
     let totalAvailableTickets = 0;
+    let totalPendingTickets = 0;
     Object.values(ticketsByType).forEach(ticketTypeData => {
-        const tickets = ticketTypeData.tickets;
-        const availableTickets = tickets.filter(t => !t.is_shared_to_others && !t.is_checked_in && !t.has_pending_shares);
-        totalAvailableTickets += availableTickets.length;
+        totalAvailableTickets += ticketTypeData.available_count || 0;
+        totalPendingTickets += ticketTypeData.pending_count || 0;
     });
     
     let html = `
@@ -398,6 +389,7 @@ function renderShareModalContent(event, ticketsByType) {
                 </div>
                 <div class="ml-3">
                     <p class="text-sm text-green-700 dark:text-green-300 font-medium">Available: ${totalAvailableTickets} tickets</p>
+                    ${totalPendingTickets > 0 ? `<p class="text-sm text-yellow-700 dark:text-yellow-300 font-medium mt-1">Pending: ${totalPendingTickets} ticket${totalPendingTickets > 1 ? 's' : ''}</p>` : ''}
                 </div>
             </div>
             ${hasEnded ? '<div class="mt-3 p-2 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded-md"><p class="text-xs text-red-700 dark:text-red-300">⚠️ This event has ended. Ticket sharing is no longer available.</p></div>' : ''}
@@ -414,20 +406,49 @@ function renderShareModalContent(event, ticketsByType) {
     
     Object.values(ticketsByType).forEach(ticketTypeData => {
         const ticketType = ticketTypeData.ticket_type;
-        const tickets = ticketTypeData.tickets;
-        const availableTickets = tickets.filter(t => !t.is_shared_to_others && !t.is_checked_in && !t.has_pending_shares);
+        const availableCount = ticketTypeData.available_count || 0;
+        const pendingCount = ticketTypeData.pending_count || 0;
+        const pendingRecipients = ticketTypeData.pending_recipients || [];
         
-        if (availableTickets.length > 0) {
+        // Only show ticket types that have at least 1 available ticket
+        if (availableCount > 0) {
             html += `
                 <label class="flex items-center p-4 border border-gray-300 dark:border-gray-500 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors bg-white dark:bg-gray-800">
                     <input type="radio" name="ticket_type_id" value="${ticketType.id}" 
                            class="text-teal-500 focus:ring-teal-500 focus:ring-2" 
-                           onchange="onTicketTypeChange(${ticketType.id}, ${availableTickets.length})">
-                    <div class="ml-4">
+                           onchange="onTicketTypeChange(${ticketType.id}, ${availableCount})">
+                    <div class="ml-4 flex-1">
                         <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">${ticketType.name}</div>
-                        <div class="text-xs text-gray-600 dark:text-gray-400">₱${ticketType.price} each • ${availableTickets.length} available</div>
+                        <div class="text-xs text-gray-600 dark:text-gray-400">
+                            ₱${ticketType.price} each • ${availableCount} available
+                            ${pendingCount > 0 ? `<span class="text-yellow-600 dark:text-yellow-400 ml-2">• ${pendingCount} pending</span>` : ''}
+                        </div>
+                        ${pendingCount > 0 && pendingRecipients.length > 0 ? `
+                            <div class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                Pending to: ${pendingRecipients.join(', ')}
+                            </div>
+                        ` : ''}
                     </div>
                 </label>
+            `;
+        } else if (pendingCount > 0) {
+            // Show ticket types with only pending shares (but disabled)
+            html += `
+                <div class="flex items-center p-4 border border-yellow-300 dark:border-yellow-600 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 opacity-60 cursor-not-allowed">
+                    <input type="radio" name="ticket_type_id" value="${ticketType.id}" disabled
+                           class="text-gray-400 cursor-not-allowed">
+                    <div class="ml-4 flex-1">
+                        <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">${ticketType.name}</div>
+                        <div class="text-xs text-yellow-600 dark:text-yellow-400">
+                            ₱${ticketType.price} each • ${pendingCount} pending (no available tickets)
+                        </div>
+                        ${pendingRecipients.length > 0 ? `
+                            <div class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                Pending to: ${pendingRecipients.join(', ')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
             `;
         }
     });
