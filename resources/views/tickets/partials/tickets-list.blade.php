@@ -10,6 +10,13 @@
                    (is_null($ticket->shared_by_user_id) || $ticket->shared_by_user_id != auth()->id()) &&
                    (!$ticket->shares || $ticket->shares->where('status', 'pending')->count() === 0);
         });
+        
+        // Check if user has any checked-in tickets with certificates for this event
+        $hasCertificate = $tickets->contains(function($ticket) {
+            return $ticket->user_id == auth()->id() && 
+                   !is_null($ticket->checked_in_at) && 
+                   $ticket->certificate_given === true;
+        });
     @endphp
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6 overflow-hidden">
@@ -42,7 +49,30 @@
                         <span>{{ $event->location }}</span>
                     </div>
                 </div>
-                <div class="ml-4 flex-shrink-0 relative z-10">
+                <div class="ml-4 flex-shrink-0 relative z-10 flex items-center space-x-2">
+                    <!-- View Event Button (Eye Icon) -->
+                    <a href="{{ route('events.show', $event->id) }}" 
+                       class="inline-flex items-center px-3 py-2 border {{ $event->thumbnail_url ? 'border-white/30' : 'border-gray-300 dark:border-gray-600' }} text-sm font-medium rounded-md {{ $event->thumbnail_url ? 'text-white bg-white/10 hover:bg-white/20' : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600' }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors shadow-sm"
+                       title="View Event">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </a>
+                    
+                    <!-- View Certificate Button (if certificates are available) -->
+                    @if($hasCertificate)
+                        <a href="{{ route('events.certificate.view', $event->id) }}" 
+                           target="_blank"
+                           class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors shadow-sm">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Certificate
+                        </a>
+                    @endif
+                    
+                    <!-- Share Tickets Button -->
                     @if(!$eventEnded && $hasAvailableTickets && ($eventSharingSettings[$eventId] ?? false))
                         <button onclick="openShareModal({{ $eventId }})" 
                                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors shadow-lg">
@@ -51,11 +81,11 @@
                             </svg>
                             Share Tickets
                         </button>
-                    @elseif($eventEnded)
+                    @elseif($eventEnded && !$hasCertificate)
                         <span class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700">
                             Event Ended
                         </span>
-                    @elseif($allTicketsShared)
+                    @elseif($allTicketsShared && !$hasCertificate)
                         <span class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700">
                             All Tickets Shared
                         </span>
