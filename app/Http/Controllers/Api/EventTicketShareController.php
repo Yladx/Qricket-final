@@ -319,30 +319,109 @@ class EventTicketShareController extends Controller
 
         DB::beginTransaction();
         try {
-            // Get the specific ticket that was shared
-            $ticketToTransfer = EventTicketInformation::where('id', $ticketShare->shared_ticket_id)
-                ->where('event_id', $ticketShare->event_id)
-                ->where('user_id', $ticketShare->sharer_id)
-                ->first();
+            $ticketsToTransfer = collect();
+            $quantity = $ticketShare->quantity ?? 1;
+            
+            // Case 1: shared_ticket_id is set - transfer specific ticket
+            if (!is_null($ticketShare->shared_ticket_id)) {
+                $ticketToTransfer = EventTicketInformation::where('id', $ticketShare->shared_ticket_id)
+                    ->where('event_id', $ticketShare->event_id)
+                    ->where('user_id', $ticketShare->sharer_id)
+                    ->first();
 
-            if (!$ticketToTransfer) {
+                if (!$ticketToTransfer) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'The shared ticket is no longer available for transfer.'
+                    ], 400);
+                }
+                
+                $ticketsToTransfer->push($ticketToTransfer);
+            }
+            // Case 2: shared_ticket_id is NULL - find available tickets by ticket_type_id
+            else if (!is_null($ticketShare->ticket_type_id)) {
+                // First, get all ticket IDs that have pending shares (either in shared_ticket_id or shared_ticket_ids)
+                // Exclude the current share being accepted
+                $pendingShareTicketIds = EventTicketShare::where('status', 'pending')
+                    ->where('sharer_id', $ticketShare->sharer_id)
+                    ->where('event_id', $ticketShare->event_id)
+                    ->where('id', '!=', $ticketShare->id) // Exclude current share
+                    ->where(function($q) {
+                        $q->whereNotNull('shared_ticket_id')
+                          ->orWhereNotNull('shared_ticket_ids');
+                    })
+                    ->get()
+                    ->flatMap(function($share) {
+                        $ids = [];
+                        if ($share->shared_ticket_id) {
+                            $ids[] = $share->shared_ticket_id;
+                        }
+                        if ($share->shared_ticket_ids && is_array($share->shared_ticket_ids)) {
+                            $ids = array_merge($ids, $share->shared_ticket_ids);
+                        }
+                        return $ids;
+                    })
+                    ->unique()
+                    ->values()
+                    ->toArray();
+                
+                // Get available tickets that are:
+                // 1. Owned by the sharer
+                // 2. Of the specified ticket type
+                // 3. Not checked in
+                // 4. Not already shared to others (shared_by_user_id is NULL or not the sharer)
+                // 5. Not in the list of tickets with pending shares
+                $availableTicketsQuery = EventTicketInformation::where('user_id', $ticketShare->sharer_id)
+                    ->where('event_id', $ticketShare->event_id)
+                    ->where('ticket_type_id', $ticketShare->ticket_type_id)
+                    ->whereNull('checked_in_at') // Not checked in
+                    ->where(function($query) use ($ticketShare) {
+                        $query->whereNull('shared_by_user_id') // Not shared to others
+                              ->orWhere('shared_by_user_id', '!=', $ticketShare->sharer_id); // Or received from others
+                    });
+                
+                // Exclude tickets that have pending shares
+                if (!empty($pendingShareTicketIds)) {
+                    $availableTicketsQuery->whereNotIn('id', $pendingShareTicketIds);
+                }
+                
+                $availableTickets = $availableTicketsQuery->limit($quantity)->get();
+                
+                if ($availableTickets->count() < $quantity) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Not enough available tickets to fulfill this share request. Required: {$quantity}, Available: {$availableTickets->count()}"
+                    ], 400);
+                }
+                
+                $ticketsToTransfer = $availableTickets;
+            }
+            else {
                 DB::rollBack();
                 return response()->json([
-                    'success' => false, 
-                    'message' => 'The shared ticket is no longer available for transfer.'
+                    'success' => false,
+                    'message' => 'Invalid share request: missing ticket information.'
                 ], 400);
             }
 
             // Update share status
-            $ticketShare->update(['status' => 'accepted']);
-
-            // Transfer the specific ticket to the recipient
-            // Keep shared_by_user_id so the sharer can still see they shared it
-            $ticketToTransfer->update([
-                'user_id' => $ticketShare->recipient_id,
-                'shared_by_user_id' => $ticketShare->sharer_id, // Track who originally shared it
-                'shared_at' => now(),
+            $ticketShare->update([
+                'status' => 'accepted',
+                // Store the transferred ticket IDs if not already set
+                'shared_ticket_ids' => $ticketShare->shared_ticket_ids ?? $ticketsToTransfer->pluck('id')->toArray(),
             ]);
+
+            // Transfer the tickets to the recipient
+            // Keep shared_by_user_id so the sharer can still see they shared it
+            foreach ($ticketsToTransfer as $ticket) {
+                $ticket->update([
+                    'user_id' => $ticketShare->recipient_id,
+                    'shared_by_user_id' => $ticketShare->sharer_id, // Track who originally shared it
+                    'shared_at' => now(),
+                ]);
+            }
 
             // Create notification for the sharer (accepted)
             try {
@@ -430,9 +509,10 @@ class EventTicketShareController extends Controller
             } catch (\Throwable $e) { /* ignore */ }
 
             DB::commit();
+            $ticketCount = $ticketsToTransfer->count();
             return response()->json([
                 'success' => true, 
-                'message' => 'Ticket share accepted. 1 ticket is now in your account.'
+                'message' => "Ticket share accepted. {$ticketCount} ticket" . ($ticketCount > 1 ? 's are' : ' is') . " now in your account."
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
