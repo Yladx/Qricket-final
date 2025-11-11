@@ -148,35 +148,27 @@
     <script src="/js/sweetalert-utils.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Hide and lock free event checkbox if event is already free (only in manage/edit)
+            // Block free event checkbox if event is already free (only in manage/edit)
             @if($event->is_free === true || (isset($eventData['is_free']) && $eventData['is_free'] === true))
                 const freeEventCheckbox = document.getElementById('is_free_checkbox');
                 const freeEventLabel = freeEventCheckbox ? freeEventCheckbox.closest('label') : null;
-                const freeEventContainer = freeEventCheckbox ? freeEventCheckbox.closest('.flex.items-center.space-x-3') : null;
                 
-                if (freeEventCheckbox && freeEventContainer) {
-                    // Hide the entire checkbox container
-                    freeEventContainer.style.display = 'none';
+                if (freeEventCheckbox) {
+                    // Block the checkbox - disable it and ensure it's checked
+                    freeEventCheckbox.disabled = true;
+                    freeEventCheckbox.checked = true;
+                    freeEventCheckbox.style.pointerEvents = 'none';
+                    freeEventCheckbox.style.cursor = 'not-allowed';
                     
-                    // Create a clean read-only display instead
-                    const readOnlyDisplay = document.createElement('div');
-                    readOnlyDisplay.className = 'flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg';
-                    readOnlyDisplay.innerHTML = `
-                        <div class="flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">This event is set as <strong>Free</strong></span>
-                        </div>
-                        <span class="text-xs text-amber-600 dark:text-amber-400 font-medium ml-auto">(Cannot be changed)</span>
-                    `;
-                    
-                    // Insert the read-only display where the checkbox was
-                    if (freeEventContainer.parentNode) {
-                        freeEventContainer.parentNode.insertBefore(readOnlyDisplay, freeEventContainer);
+                    // Block label interactions
+                    if (freeEventLabel) {
+                        freeEventLabel.style.pointerEvents = 'none';
+                        freeEventLabel.style.cursor = 'not-allowed';
+                        freeEventLabel.style.opacity = '0.6';
                     }
                     
-                    // Add hidden input to ensure is_free is always submitted as true
+                    // Remove checkbox name and add hidden input to ensure is_free=1 is submitted
+                    freeEventCheckbox.name = '';
                     const hiddenInput = document.createElement('input');
                     hiddenInput.type = 'hidden';
                     hiddenInput.name = 'is_free';
@@ -186,21 +178,6 @@
                     const editForm = document.getElementById('editBasicForm');
                     if (editForm) {
                         editForm.appendChild(hiddenInput);
-                        
-                        // Ensure is_free is always submitted as true before form submission
-                        editForm.addEventListener('submit', function(e) {
-                            let hiddenInputEl = document.getElementById('is_free_hidden');
-                            if (!hiddenInputEl) {
-                                hiddenInputEl = document.createElement('input');
-                                hiddenInputEl.type = 'hidden';
-                                hiddenInputEl.name = 'is_free';
-                                hiddenInputEl.value = '1';
-                                hiddenInputEl.id = 'is_free_hidden';
-                                editForm.appendChild(hiddenInputEl);
-                            } else {
-                                hiddenInputEl.value = '1';
-                            }
-                        }, true);
                     }
                 }
             @endif
