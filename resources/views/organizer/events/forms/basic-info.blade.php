@@ -23,15 +23,20 @@
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
     @php
+        // Safely get variables with defaults
+        $eventData = isset($eventData) && is_array($eventData) ? $eventData : [];
+        $isFreeEventParam = isset($isFreeEvent) ? $isFreeEvent : false;
+        $eventModel = isset($event) && is_object($event) ? $event : null;
+        
         // Determine if this is an existing free event that should be locked
-        // Check in order: isFreeEvent parameter, event model, eventData array
+        // Check in order: isFreeEvent parameter (from edit controller), event model, eventData array
         $isExistingFreeEvent = false;
         
-        if (isset($isFreeEvent) && ($isFreeEvent === true || $isFreeEvent === 1 || $isFreeEvent === '1')) {
-            // Event is explicitly marked as free via parameter (from controller)
+        if ($isFreeEventParam === true || $isFreeEventParam === 1 || $isFreeEventParam === '1') {
+            // Event is explicitly marked as free via parameter (from edit controller)
             $isExistingFreeEvent = true;
-        } elseif (isset($event) && is_object($event) && isset($event->is_free) && (bool)$event->is_free === true) {
-            // Event model has is_free set to true
+        } elseif ($eventModel && isset($eventModel->is_free) && (bool)$eventModel->is_free === true) {
+            // Event model has is_free set to true (for draft events being continued)
             $isExistingFreeEvent = true;
         } elseif (isset($eventData['is_free']) && (bool)$eventData['is_free'] === true) {
             // EventData array has is_free set to true
@@ -43,12 +48,12 @@
         if (!$isExistingFreeEvent) {
             // For new events or paid events, check old input first, then eventData, then event model
             $oldIsFree = old('is_free');
-            if ($oldIsFree !== null) {
+            if ($oldIsFree !== null && $oldIsFree !== '') {
                 $isFreeChecked = (bool)$oldIsFree;
-            } elseif (isset($eventData['is_free'])) {
+            } elseif (isset($eventData['is_free']) && $eventData['is_free'] !== null && $eventData['is_free'] !== '') {
                 $isFreeChecked = (bool)$eventData['is_free'];
-            } elseif (isset($event) && is_object($event) && isset($event->is_free)) {
-                $isFreeChecked = (bool)$event->is_free;
+            } elseif ($eventModel && isset($eventModel->is_free) && $eventModel->is_free !== null) {
+                $isFreeChecked = (bool)$eventModel->is_free;
             }
         }
     @endphp
@@ -75,7 +80,7 @@
                     name="is_free" 
                     value="1" 
                     id="is_free_checkbox" 
-                    {{ $isFreeChecked ? 'checked' : '' }}
+                    @if($isFreeChecked) checked @endif
                     class="rounded border-gray-300 text-qricket-600 focus:ring-qricket-500"
                 >
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
