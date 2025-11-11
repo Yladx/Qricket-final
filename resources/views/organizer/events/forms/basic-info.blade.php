@@ -31,40 +31,21 @@
             $isFreeValue = (bool)$event->is_free;
         }
         $isFreeChecked = old('is_free', $isFreeValue);
-        
-        // Check if checkbox should be locked (only set in edit/basic.blade.php for manage/edit)
-        // Default to false if not provided (e.g., in step1 for event creation)
-        if (!isset($isFreeLocked)) {
-            $isFreeLocked = false;
-        }
     @endphp
     <div class="flex items-center space-x-3">
-        <label class="inline-flex items-center space-x-2{{ $isFreeLocked ? ' opacity-60 cursor-not-allowed' : '' }}">
+        <label class="inline-flex items-center space-x-2">
             <input 
                 type="checkbox" 
                 name="is_free" 
                 value="1" 
                 id="is_free_checkbox" 
                 {{ $isFreeChecked ? 'checked' : '' }}
-                {{ $isFreeLocked ? 'disabled' : '' }}
-                class="rounded border-gray-300 text-qricket-600{{ $isFreeLocked ? ' cursor-not-allowed' : '' }}"
+                class="rounded border-gray-300 text-qricket-600"
             >
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
         </label>
-        @if($isFreeLocked)
-            <input type="hidden" name="is_free" value="1">
-            <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">(Cannot be changed - Event is already free)</span>
-        @else
-            <span class="text-xs text-gray-500 dark:text-gray-400">(See sidebar for details)</span>
-        @endif
+        <span class="text-xs text-gray-500 dark:text-gray-400">(See sidebar for details)</span>
     </div>
-    @if($isFreeLocked)
-        <div class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-            <p class="text-xs text-amber-800 dark:text-amber-200">
-                <strong>Note:</strong> Once an event is created as free, it cannot be changed to a paid event. This ensures consistency for attendees who have already registered.
-            </p>
-        </div>
-    @endif
 
     <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>

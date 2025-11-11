@@ -7,16 +7,9 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    @php
-                        // Lock the free event checkbox if the event is already free (only in manage/edit)
-                        $isFreeLocked = false;
-                        if ($event->is_free === true || (isset($eventData['is_free']) && $eventData['is_free'] === true)) {
-                            $isFreeLocked = true;
-                        }
-                    @endphp
                     <form id="editBasicForm" method="POST" action="{{ route('organizer.events.step1.store') }}?id={{ $event->id }}" enctype="multipart/form-data" class="space-y-6">
                         @csrf
-                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event, 'isFreeLocked' => $isFreeLocked])
+                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event])
 
                         <!-- Navigation Buttons -->
                         <div class="flex items-center justify-between pt-6">
@@ -155,6 +148,46 @@
     <script src="/js/sweetalert-utils.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Lock free event checkbox if event is already free (only in manage/edit)
+            @if($event->is_free === true || (isset($eventData['is_free']) && $eventData['is_free'] === true))
+                const freeEventCheckbox = document.getElementById('is_free_checkbox');
+                const freeEventLabel = freeEventCheckbox ? freeEventCheckbox.closest('label') : null;
+                
+                if (freeEventCheckbox) {
+                    // Disable the checkbox
+                    freeEventCheckbox.disabled = true;
+                    freeEventCheckbox.checked = true;
+                    
+                    // Add hidden input to ensure is_free is submitted as true
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'is_free';
+                    hiddenInput.value = '1';
+                    freeEventCheckbox.parentNode.insertBefore(hiddenInput, freeEventCheckbox.nextSibling);
+                    
+                    // Update label styling
+                    if (freeEventLabel) {
+                        freeEventLabel.classList.add('opacity-60', 'cursor-not-allowed');
+                    }
+                    
+                    // Add warning message after the label
+                    const warningSpan = document.createElement('span');
+                    warningSpan.className = 'text-xs text-amber-600 dark:text-amber-400 font-medium';
+                    warningSpan.textContent = '(Cannot be changed - Event is already free)';
+                    if (freeEventLabel && freeEventLabel.parentNode) {
+                        freeEventLabel.parentNode.insertBefore(warningSpan, freeEventLabel.nextSibling);
+                    }
+                    
+                    // Add info box below the checkbox
+                    const infoBox = document.createElement('div');
+                    infoBox.className = 'mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg';
+                    infoBox.innerHTML = '<p class="text-xs text-amber-800 dark:text-amber-200"><strong>Note:</strong> Once an event is created as free, it cannot be changed to a paid event. This ensures consistency for attendees who have already registered.</p>';
+                    if (freeEventCheckbox.closest('.flex.items-center.space-x-3')) {
+                        freeEventCheckbox.closest('.flex.items-center.space-x-3').parentNode.insertBefore(infoBox, freeEventCheckbox.closest('.flex.items-center.space-x-3').nextSibling);
+                    }
+                }
+            @endif
+            
             // AJAX Form Submission
             const form = document.getElementById('editBasicForm');
             const submitBtn = document.getElementById('submitBtn');
