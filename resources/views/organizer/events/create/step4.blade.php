@@ -122,49 +122,81 @@
             const elI = document.getElementById(idInput);
             const elP = document.getElementById(idPreview);
             if (!elI || !elP) return;
-            elI.addEventListener('input', () => { elP.textContent = elI.value; });
+            elI.addEventListener('input', function() { 
+                if (elP) elP.textContent = elI.value; 
+            });
         }
+        
         // Sync preview for basic fields
-        ['org_line1','org_line2','org_school','recipient_name','event_title','event_when','event_given']
-            .forEach(k => syncPreview(`${k}_input`, k));
+        (function() {
+            try {
+                var fieldsToSync = ['org_line1','org_line2','org_school','recipient_name','event_title','event_when','event_given'];
+                fieldsToSync.forEach(function(k) {
+                    if (typeof syncPreview === 'function') {
+                        syncPreview(k + '_input', k);
+                    }
+                });
+            } catch(e) {
+                console.error('Error syncing preview fields:', e);
+            }
+        })();
         
         // Sync preview for dynamic signatory fields
         function syncAllSignatories() {
-            document.querySelectorAll('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]').forEach(input => {
-                const fieldName = input.name;
-                const previewId = fieldName.replace('_input', '').replace('sig_', 'sig_');
-                syncPreview(fieldName, previewId);
-            });
+            try {
+                var signatoryInputs = document.querySelectorAll('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]');
+                for (var si = 0; si < signatoryInputs.length; si++) {
+                    var input = signatoryInputs[si];
+                    if (input && input.name) {
+                        var fieldName = input.name;
+                        var previewId = fieldName.replace('_input', '').replace('sig_', 'sig_');
+                        if (typeof syncPreview === 'function') {
+                            syncPreview(fieldName, previewId);
+                        }
+                    }
+                }
+            } catch(e) {
+                console.error('Error in syncAllSignatories:', e);
+            }
         }
         
         // Update preview when signatories change
         function updateSignatoryPreview() {
-            // Remove all existing signatory previews
-            document.querySelectorAll('[id^="sig_"][id$="_name"], [id^="sig_"][id$="_title"]').forEach(el => {
-                el.textContent = '';
-            });
-            
-            // Add current signatories to preview
-            const signatoryItems = document.querySelectorAll('.signatory-item');
-            signatoryItems.forEach((item, index) => {
-                const signatoryNum = index + 1;
-                const nameInput = item.querySelector(`input[name="sig_${signatoryNum}_name"]`);
-                const titleInput = item.querySelector(`input[name="sig_${signatoryNum}_title"]`);
-                
-                if (nameInput) {
-                    const namePreview = document.getElementById(`sig_${signatoryNum}_name`);
-                    if (namePreview) {
-                        namePreview.textContent = nameInput.value || `Signatory ${signatoryNum}`;
+            try {
+                // Remove all existing signatory previews
+                var previewElements = document.querySelectorAll('[id^="sig_"][id$="_name"], [id^="sig_"][id$="_title"]');
+                for (var pe = 0; pe < previewElements.length; pe++) {
+                    var el = previewElements[pe];
+                    if (el) {
+                        el.textContent = '';
                     }
                 }
                 
-                if (titleInput) {
-                    const titlePreview = document.getElementById(`sig_${signatoryNum}_title`);
-                    if (titlePreview) {
-                        titlePreview.textContent = titleInput.value || 'Signature';
+                // Add current signatories to preview
+                var signatoryItems = document.querySelectorAll('.signatory-item');
+                for (var idx = 0; idx < signatoryItems.length; idx++) {
+                    var item = signatoryItems[idx];
+                    var signatoryNum = idx + 1;
+                    var nameInput = item.querySelector('input[name="sig_' + signatoryNum + '_name"]');
+                    var titleInput = item.querySelector('input[name="sig_' + signatoryNum + '_title"]');
+                    
+                    if (nameInput) {
+                        var namePreview = document.getElementById('sig_' + signatoryNum + '_name');
+                        if (namePreview) {
+                            namePreview.textContent = nameInput.value || ('Signatory ' + signatoryNum);
+                        }
+                    }
+                    
+                    if (titleInput) {
+                        var titlePreview = document.getElementById('sig_' + signatoryNum + '_title');
+                        if (titlePreview) {
+                            titlePreview.textContent = titleInput.value || 'Signature';
+                        }
                     }
                 }
-            });
+            } catch(e) {
+                console.error('Error in updateSignatoryPreview:', e);
+            }
         }
         
         // Initial sync
@@ -338,9 +370,13 @@
             }
             
             // Show remove buttons for all signatories
-            document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
-                btn.classList.remove('hidden');
-            });
+            var removeBtns = document.querySelectorAll('.remove-signatory-btn');
+            for (var rb = 0; rb < removeBtns.length; rb++) {
+                var btn = removeBtns[rb];
+                if (btn) {
+                    btn.classList.remove('hidden');
+                }
+            }
             
             // Sync with preview
             updateSignatoryPreview();
@@ -391,88 +427,99 @@
             
             // Hide remove buttons if only one signatory left
             if (signatoryCount === 1) {
-                document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
-                    btn.classList.add('hidden');
-                });
+                var hideBtns = document.querySelectorAll('.remove-signatory-btn');
+                for (var hb = 0; hb < hideBtns.length; hb++) {
+                    var btn = hideBtns[hb];
+                    if (btn) {
+                        btn.classList.add('hidden');
+                    }
+                }
             }
             
             // Renumber remaining signatories
-            const remainingSignatories = document.querySelectorAll('.signatory-item');
-            remainingSignatories.forEach((item, index) => {
-                const newNum = index + 1;
+            var remainingSignatories = document.querySelectorAll('.signatory-item');
+            for (var remIdx = 0; remIdx < remainingSignatories.length; remIdx++) {
+                var item = remainingSignatories[remIdx];
+                var newNum = remIdx + 1;
                 item.setAttribute('data-signatory', newNum);
                 
                 // Update all input IDs and names
-                const nameInput = item.querySelector('input[name^="sig_"][name$="_name"]');
-                const titleInput = item.querySelector('input[name^="sig_"][name$="_title"]');
-                const fileInput = item.querySelector('input[type="file"][id^="sig_"]');
-                const statusEl = item.querySelector('[id^="sig_"][id$="_status"]');
+                var nameInput = item.querySelector('input[name^="sig_"][name$="_name"]');
+                var titleInput = item.querySelector('input[name^="sig_"][name$="_title"]');
+                var fileInput = item.querySelector('input[type="file"][id^="sig_"]');
+                var statusEl = item.querySelector('[id^="sig_"][id$="_status"]');
                 
                 if (nameInput) {
-                    nameInput.id = `sig_${newNum}_name_input`;
-                    nameInput.name = `sig_${newNum}_name`;
+                    nameInput.id = 'sig_' + newNum + '_name_input';
+                    nameInput.name = 'sig_' + newNum + '_name';
                 }
                 if (titleInput) {
-                    titleInput.id = `sig_${newNum}_title_input`;
-                    titleInput.name = `sig_${newNum}_title`;
+                    titleInput.id = 'sig_' + newNum + '_title_input';
+                    titleInput.name = 'sig_' + newNum + '_title';
                 }
                 if (fileInput) {
-                    fileInput.id = `sig_${newNum}_file`;
-                    fileInput.name = `sig_${newNum}_file`;
+                    fileInput.id = 'sig_' + newNum + '_file';
+                    fileInput.name = 'sig_' + newNum + '_file';
                     // Remove old event listeners and add new one
-                    const newFileInput = fileInput.cloneNode(true);
+                    var newFileInput = fileInput.cloneNode(true);
                     fileInput.parentNode.replaceChild(newFileInput, fileInput);
-                    newFileInput.addEventListener('change', function() {
-                        if (typeof window.uploadSignature === 'function') {
-                            window.uploadSignature(newNum);
-                        }
-                    });
+                    (function(sigNum) {
+                        newFileInput.addEventListener('change', function() {
+                            if (typeof window.uploadSignature === 'function') {
+                                window.uploadSignature(sigNum);
+                            }
+                        });
+                    })(newNum);
                 }
                 if (statusEl) {
-                    statusEl.id = `sig_${newNum}_status`;
+                    statusEl.id = 'sig_' + newNum + '_status';
                 }
-                const previewEl = item.querySelector(`[id^="sig_"][id$="_preview"]`);
+                var previewEl = item.querySelector('[id^="sig_"][id$="_preview"]');
                 if (previewEl) {
-                    previewEl.id = `sig_${newNum}_preview`;
+                    previewEl.id = 'sig_' + newNum + '_preview';
                 }
-                const sigRemoveBtn = document.getElementById(`sig_${newNum}_remove_btn`) || item.querySelector(`[id^="sig_"][id$="_remove_btn"]`);
+                var sigRemoveBtn = document.getElementById('sig_' + newNum + '_remove_btn') || item.querySelector('[id^="sig_"][id$="_remove_btn"]');
                 if (sigRemoveBtn) {
-                    sigRemoveBtn.id = `sig_${newNum}_remove_btn`;
+                    sigRemoveBtn.id = 'sig_' + newNum + '_remove_btn';
                     // Remove old event listeners and add new one
-                    const newRemoveBtn = sigRemoveBtn.cloneNode(true);
+                    var newRemoveBtn = sigRemoveBtn.cloneNode(true);
                     sigRemoveBtn.parentNode.replaceChild(newRemoveBtn, sigRemoveBtn);
-                    newRemoveBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (typeof window.removeSignature === 'function') {
-                            window.removeSignature(newNum);
-                        }
-                    });
+                    (function(sigNum) {
+                        newRemoveBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (typeof window.removeSignature === 'function') {
+                                window.removeSignature(sigNum);
+                            }
+                        });
+                    })(newNum);
                 }
                 
                 // Update remove button data attribute and event listener
-                const removeBtn = item.querySelector('.remove-signatory-btn');
+                var removeBtn = item.querySelector('.remove-signatory-btn');
                 if (removeBtn) {
                     removeBtn.removeAttribute('onclick');
                     removeBtn.setAttribute('data-signatory', newNum);
                     // Clone and replace to ensure clean event listener
-                    const newRemoveBtn = removeBtn.cloneNode(true);
+                    var newRemoveBtn = removeBtn.cloneNode(true);
                     removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
-                    newRemoveBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (typeof window.removeSignatory === 'function') {
-                            window.removeSignatory(newNum);
-                        }
-                    });
+                    (function(sigNum) {
+                        newRemoveBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (typeof window.removeSignatory === 'function') {
+                                window.removeSignatory(sigNum);
+                            }
+                        });
+                    })(newNum);
                 }
                 
                 // Update heading
-                const heading = item.querySelector('h4');
+                var heading = item.querySelector('h4');
                 if (heading) {
-                    heading.textContent = `Signatory ${newNum}`;
+                    heading.textContent = 'Signatory ' + newNum;
                 }
-            });
+            }
             
             // Update preview
             updateSignatoryPreview();
@@ -751,12 +798,21 @@
         
         // Re-sync when signatories are added/removed
         const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'childList') {
-                    syncAllSignatories();
-                    updateSignatoryPreview();
+            try {
+                for (var m = 0; m < mutations.length; m++) {
+                    var mutation = mutations[m];
+                    if (mutation && mutation.type === 'childList') {
+                        if (typeof syncAllSignatories === 'function') {
+                            syncAllSignatories();
+                        }
+                        if (typeof updateSignatoryPreview === 'function') {
+                            updateSignatoryPreview();
+                        }
+                    }
                 }
-            });
+            } catch(e) {
+                console.error('Error in MutationObserver:', e);
+            }
         });
         
         const container = document.getElementById('signatory-details-container');
@@ -1125,25 +1181,29 @@
             function attachEventListeners() {
                 try {
                     // Attach event listeners for logo remove buttons
-                    ['left', 'right'].forEach(side => {
+                    var logoSides = ['left', 'right'];
+                    for (var ls = 0; ls < logoSides.length; ls++) {
                         try {
-                            const removeBtn = document.getElementById(`logo_${side}_remove_btn`);
-                            const fileInput = document.getElementById(`logo_${side}_file`);
+                            var side = logoSides[ls];
+                            var removeBtn = document.getElementById('logo_' + side + '_remove_btn');
+                            var fileInput = document.getElementById('logo_' + side + '_file');
                             
                             // Attach event listener for logo remove button
                             if (removeBtn) {
                                 // Remove any inline onclick
                                 removeBtn.removeAttribute('onclick');
                                 // Clone to remove any existing handlers
-                                const newRemoveBtn = removeBtn.cloneNode(true);
+                                var newRemoveBtn = removeBtn.cloneNode(true);
                                 removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
-                                newRemoveBtn.addEventListener('click', function(e) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    if (typeof window.removeLogo === 'function') {
-                                        window.removeLogo(side);
-                                    }
-                                });
+                                (function(btnSide) {
+                                    newRemoveBtn.addEventListener('click', function(e) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        if (typeof window.removeLogo === 'function') {
+                                            window.removeLogo(btnSide);
+                                        }
+                                    });
+                                })(side);
                             }
                             
                             // Attach event listener for logo file input
@@ -1151,19 +1211,21 @@
                                 // Remove inline onchange
                                 fileInput.removeAttribute('onchange');
                                 // Clone to remove any existing handlers
-                                const newFileInput = fileInput.cloneNode(true);
+                                var newFileInput = fileInput.cloneNode(true);
                                 fileInput.parentNode.replaceChild(newFileInput, fileInput);
-                                newFileInput.addEventListener('change', function(e) {
-                                    e.stopPropagation();
-                                    if (typeof window.uploadLogo === 'function') {
-                                        window.uploadLogo(side);
-                                    }
-                                });
+                                (function(btnSide) {
+                                    newFileInput.addEventListener('change', function(e) {
+                                        e.stopPropagation();
+                                        if (typeof window.uploadLogo === 'function') {
+                                            window.uploadLogo(btnSide);
+                                        }
+                                    });
+                                })(side);
                             }
                             
                             // Show remove button if logo exists
-                            const previewEl = document.getElementById(`logo_${side}_preview`);
-                            const statusEl = document.getElementById(`logo_${side}_status`);
+                            var previewEl = document.getElementById('logo_' + side + '_preview');
+                            var statusEl = document.getElementById('logo_' + side + '_status');
                             if (previewEl && statusEl && !previewEl.classList.contains('hidden') && (statusEl.textContent === 'Uploaded' || previewEl.src)) {
                                 if (typeof showLogoRemoveButton === 'function') {
                                     showLogoRemoveButton(side);
@@ -1172,7 +1234,7 @@
                         } catch(e) {
                             console.error('Error initializing logo buttons for', side, ':', e);
                         }
-                    });
+                    }
                     
                     // Attach event listeners for signature remove buttons and file inputs
                     for (let i = 1; i <= 4; i++) {
@@ -1294,11 +1356,13 @@
             };
             
             // Copy non-signatory fields from JSON (like logos, event details, etc.)
-            Object.keys(basePayload).forEach(key => {
-                if (!key.startsWith('sig_') && !payload.hasOwnProperty(key)) {
+            var basePayloadKeys = Object.keys(basePayload);
+            for (var keyIdx = 0; keyIdx < basePayloadKeys.length; keyIdx++) {
+                var key = basePayloadKeys[keyIdx];
+                if (key && typeof key === 'string' && !key.startsWith('sig_') && !payload.hasOwnProperty(key)) {
                     payload[key] = basePayload[key];
                 }
-            });
+            }
             
             // Dynamic signatories - ONLY include signatories that exist in DOM
             const items = document.querySelectorAll('.signatory-item');
@@ -1306,96 +1370,145 @@
             
             // First, clear any old signatory data from payload (only keep what exists in DOM)
             for (let i = 1; i <= 10; i++) {
-                delete payload[`sig_${i}_name`];
-                delete payload[`sig_${i}_title`];
-                delete payload[`sig_${i}_signature`];
+                delete payload['sig_' + i + '_name'];
+                delete payload['sig_' + i + '_title'];
+                delete payload['sig_' + i + '_signature'];
             }
             
             // Now only add signatories that exist in DOM
-            items.forEach((item, index)=>{
-                const n = index + 1;
-                const nameInput = item.querySelector(`input[name="sig_${n}_name"]`);
-                const titleInput = item.querySelector(`input[name="sig_${n}_title"]`);
+            for (var itemIdx = 0; itemIdx < items.length; itemIdx++) {
+                var item = items[itemIdx];
+                var n = itemIdx + 1;
+                var nameInput = item.querySelector('input[name="sig_' + n + '_name"]');
+                var titleInput = item.querySelector('input[name="sig_' + n + '_title"]');
                 
-                payload[`sig_${n}_name`] = nameInput?.value || '';
-                payload[`sig_${n}_title`] = titleInput?.value || '';
+                payload['sig_' + n + '_name'] = (nameInput && nameInput.value) ? nameInput.value : '';
+                payload['sig_' + n + '_title'] = (titleInput && titleInput.value) ? titleInput.value : '';
                 
                 // Get signature path from JSON if it exists for this signatory
-                const statusEl = document.getElementById(`sig_${n}_status`);
-                if (statusEl && (statusEl.textContent === 'Uploaded' || statusEl.textContent.includes('signature'))) {
+                var statusEl = document.getElementById('sig_' + n + '_status');
+                if (statusEl && (statusEl.textContent === 'Uploaded' || (statusEl.textContent && statusEl.textContent.includes('signature')))) {
                     try {
-                        const jsonEl = document.getElementById('certificate_data_json');
-                        const current = jsonEl?.value ? JSON.parse(jsonEl.value) : {};
-                        if (current[`sig_${n}_signature`]) {
-                            payload[`sig_${n}_signature`] = current[`sig_${n}_signature`];
+                        var jsonEl = document.getElementById('certificate_data_json');
+                        var current = (jsonEl && jsonEl.value) ? JSON.parse(jsonEl.value) : {};
+                        if (current['sig_' + n + '_signature']) {
+                            payload['sig_' + n + '_signature'] = current['sig_' + n + '_signature'];
                         }
-                    } catch(_) {}
+                    } catch(e) {
+                        // Ignore parse errors
+                    }
                 }
-            });
+            }
             
             return payload;
         }
 
         function refreshPreview(payload){
-            // Update text fields inline
-            const map = {
-                org_line1: 'org_line1', org_line2: 'org_line2', org_line3: 'org_line3',
-                org_school: 'org_school', recipient_name: 'recipient_name', event_title: 'event_title'
-            };
-            Object.keys(map).forEach(k=>{
-                const el = document.getElementById(map[k]);
-                if (el && payload[k] !== undefined) el.textContent = payload[k];
-            });
-            // Dynamic signatory names/titles
-            const count = payload.signatory_count || 0;
-            for (let i=1;i<=count;i++){
-                const nEl = document.getElementById(`sig_${i}_name`);
-                const tEl = document.getElementById(`sig_${i}_title`);
-                if (nEl && payload[`sig_${i}_name`] !== undefined) nEl.textContent = payload[`sig_${i}_name`] || `Signatory ${i}`;
-                if (tEl && payload[`sig_${i}_title`] !== undefined) tEl.textContent = payload[`sig_${i}_title`] || 'Signature';
-            }
-            
-            // Update logo images in preview
-            ['left', 'right'].forEach(side => {
-                const logoUrl = payload[`logo_${side}_url`];
-                const previewImg = document.getElementById(`logo_${side}_img`);
-                if (previewImg) {
-                    if (logoUrl) {
-                        previewImg.src = logoUrl + '?t=' + Date.now(); // Add timestamp to force reload
-                        previewImg.style.display = 'block';
-                        previewImg.onload = function() {
-                            this.style.display = 'block';
-                        };
-                        previewImg.onerror = function() {
-                            this.style.display = 'none';
-                        };
-                    } else {
-                        previewImg.style.display = 'none';
+            try {
+                // Update text fields inline
+                const map = {
+                    org_line1: 'org_line1', org_line2: 'org_line2', org_line3: 'org_line3',
+                    org_school: 'org_school', recipient_name: 'recipient_name', event_title: 'event_title'
+                };
+                var mapKeys = Object.keys(map);
+                for (var i = 0; i < mapKeys.length; i++) {
+                    var k = mapKeys[i];
+                    var el = document.getElementById(map[k]);
+                    if (el && payload[k] !== undefined) {
+                        el.textContent = payload[k];
                     }
                 }
-            });
-            
-            // Apply colors
-            const primary = payload.theme_primary;
-            document.querySelectorAll('#cert_preview_wrapper .text-blue-900, #cert_preview_wrapper .text-violet-900, #cert_preview_wrapper .text-emerald-900')
-                .forEach(el=>{ el.style.color = primary; });
-            const bands = document.querySelectorAll('#cert_preview_wrapper .band-top, #cert_preview_wrapper .band-bottom');
-            bands.forEach(el=>{ el.style.backgroundImage = `linear-gradient(to right, ${payload.theme_primary}, ${payload.theme_secondary})`; });
-            // Apply border color
-            const borderColor = payload.theme_border || payload.theme_primary || '#0b2f6b';
-            const pageElement = document.querySelector('#cert_preview_wrapper .page');
-            if (pageElement) {
-                pageElement.style.borderColor = borderColor;
+                
+                // Dynamic signatory names/titles
+                const count = payload.signatory_count || 0;
+                for (let i = 1; i <= count; i++) {
+                    var nEl = document.getElementById('sig_' + i + '_name');
+                    var tEl = document.getElementById('sig_' + i + '_title');
+                    if (nEl && payload['sig_' + i + '_name'] !== undefined) {
+                        nEl.textContent = payload['sig_' + i + '_name'] || ('Signatory ' + i);
+                    }
+                    if (tEl && payload['sig_' + i + '_title'] !== undefined) {
+                        tEl.textContent = payload['sig_' + i + '_title'] || 'Signature';
+                    }
+                }
+                
+                // Update logo images in preview
+                var sides = ['left', 'right'];
+                for (var j = 0; j < sides.length; j++) {
+                    var side = sides[j];
+                    var logoUrl = payload['logo_' + side + '_url'];
+                    var previewImg = document.getElementById('logo_' + side + '_img');
+                    if (previewImg) {
+                        if (logoUrl) {
+                            previewImg.src = logoUrl + '?t=' + Date.now();
+                            previewImg.style.display = 'block';
+                            previewImg.onload = function() {
+                                this.style.display = 'block';
+                            };
+                            previewImg.onerror = function() {
+                                this.style.display = 'none';
+                            };
+                        } else {
+                            previewImg.style.display = 'none';
+                        }
+                    }
+                }
+                
+                // Apply colors
+                const primary = payload.theme_primary;
+                var colorElements = document.querySelectorAll('#cert_preview_wrapper .text-blue-900, #cert_preview_wrapper .text-violet-900, #cert_preview_wrapper .text-emerald-900');
+                if (colorElements) {
+                    for (var c = 0; c < colorElements.length; c++) {
+                        var el = colorElements[c];
+                        if (el && el.style) {
+                            el.style.color = primary;
+                        }
+                    }
+                }
+                
+                var bands = document.querySelectorAll('#cert_preview_wrapper .band-top, #cert_preview_wrapper .band-bottom');
+                if (bands) {
+                    for (var b = 0; b < bands.length; b++) {
+                        var bandEl = bands[b];
+                        if (bandEl && bandEl.style) {
+                            bandEl.style.backgroundImage = 'linear-gradient(to right, ' + payload.theme_primary + ', ' + payload.theme_secondary + ')';
+                        }
+                    }
+                }
+                
+                // Apply border color
+                const borderColor = payload.theme_border || payload.theme_primary || '#0b2f6b';
+                const pageElement = document.querySelector('#cert_preview_wrapper .page');
+                if (pageElement) {
+                    pageElement.style.borderColor = borderColor;
+                }
+            } catch(e) {
+                console.error('Error in refreshPreview:', e);
             }
         }
 
         // Wire autosave on inputs
-        ['org_line1_input','org_line2_input','org_line3_input','org_school_input','recipient_name_input','theme_primary','theme_secondary','theme_border','theme_primary-hex','theme_secondary-hex','theme_border-hex']
-            .forEach(id=>{ const el = document.getElementById(id); el && el.addEventListener('input', autosaveDebounced); el && el.addEventListener('change', autosaveDebounced); });
+        (function() {
+            try {
+                var autosaveFieldIds = ['org_line1_input','org_line2_input','org_line3_input','org_school_input','recipient_name_input','theme_primary','theme_secondary','theme_border','theme_primary-hex','theme_secondary-hex','theme_border-hex'];
+                autosaveFieldIds.forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el && typeof autosaveDebounced === 'function') {
+                        el.addEventListener('input', autosaveDebounced);
+                        el.addEventListener('change', autosaveDebounced);
+                    }
+                });
+            } catch(e) {
+                console.error('Error wiring autosave inputs:', e);
+            }
+        })();
+        
         // Dynamic signatory inputs also trigger autosave
-        document.addEventListener('input', (e)=>{
-            if (e.target && e.target.matches('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]')) {
-                autosaveDebounced();
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.matches && e.target.matches('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]')) {
+                if (typeof autosaveDebounced === 'function') {
+                    autosaveDebounced();
+                }
             }
         });
 
