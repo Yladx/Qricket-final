@@ -838,7 +838,8 @@ class StaffController extends Controller
         // Base query with owner exclusion
         $userQuery = \App\Models\User::query()
             ->select(['id','first_name','last_name','email'])
-            ->where('status', 'active'); // Only show active users
+            ->where('status', 'active') // Only show active users
+            ->where('email', 'not like', '%@admin.local%'); // Exclude admin shadow user accounts (admin+{id}@admin.local)
         
         // Exclude the owner if event exists
         if ($ownerId) {
