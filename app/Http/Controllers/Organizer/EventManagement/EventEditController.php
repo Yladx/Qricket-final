@@ -263,14 +263,16 @@ class EventEditController extends Controller
         }
 
         // Check if user can manage event or is admin
+        // Allow staff members to manage events even without explicit can_manage_event permission
         $isAdmin = Auth::guard('admin')->check();
         $user = Auth::user();
         $isOwner = $user && (int)$event->user_id === (int)$user->id;
         $staff = $event->staff()->where('user_id', $user?->id)->first();
-        $canManageEvent = $isOwner || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
+        // Allow any staff member to manage event (not just those with can_manage_event permission)
+        $canManageEvent = $isOwner || $isAdminEvent || ($staff !== null) || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
 
-        // Allow editing if: admin created this event (user_id is null) OR user can manage event
-        // Block editing if: admin viewing someone else's event OR regular user without manage permissions
+        // Allow editing if: admin created this event (user_id is null) OR user can manage event OR is staff
+        // Block editing if: admin viewing someone else's event OR regular user without access
         if (!$isAdminEvent && !$canManageEvent) {
             $layoutType = $isAdmin ? 'admin' : 'organizer';
             return view('organizer.events.info.basic', compact('event', 'layoutType'));

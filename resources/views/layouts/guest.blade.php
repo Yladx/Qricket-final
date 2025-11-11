@@ -11,6 +11,12 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    
+    <!-- Favicon - Square SVG to prevent stretching (NOT Logo.svg which is portrait) -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="mask-icon" href="{{ asset('safari-pinned-tab.svg') }}" color="#00B388">
+    <meta name="theme-color" content="#00B388">
 
     <!-- Apply saved theme ASAP to avoid flash -->
     <script>

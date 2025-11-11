@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" preserveAspectRatio="xMidYMid meet">
+  <!-- Safari pinned tab icon - must be monochrome (black shape) -->
+  <rect width="64" height="64" rx="12" ry="12" fill="#000000"/>
+  <g fill="#ffffff">
+    <path d="M46 18H18c-2.209 0-4 1.791-4 4v14c0 2.209 1.791 4 4 4h10.6l6.7 6.7c.63.63 1.7.18 1.7-.71V40H46c2.209 0 4-1.791 4-4V22c0-2.209-1.791-4-4-4z"/>
+    <circle cx="24" cy="28" r="2.5"/>
+    <circle cx="32" cy="28" r="2.5"/>
+    <circle cx="40" cy="28" r="2.5"/>
+  </g>
+</svg>
+

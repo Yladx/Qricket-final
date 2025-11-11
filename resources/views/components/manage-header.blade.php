@@ -54,11 +54,13 @@
                         $isAdminEvent = $event->user_id === null && $isAdmin;
                         $eventEnded = optional($event->end_date)->isPast();
                         // Admins have full access to all navigation
-                        $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_attendance ?? false) || ($staff?->role === 'organizer');
-                        $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_ticket ?? false) || ($staff?->role === 'organizer');
-                        $canManageEvent = $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false);
-                        $canManageNews = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_news ?? false) || ($staff?->role === 'organizer');
-                        $canManageSales = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_sales ?? false) || ($staff?->role === 'organizer');
+                        // Allow staff members to manage events even without explicit permissions
+                        $isStaffMember = $staff !== null;
+                        $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_attendance ?? false) || ($staff?->role === 'organizer');
+                        $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_ticket ?? false) || ($staff?->role === 'organizer');
+                        $canManageEvent = $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
+                        $canManageNews = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_news ?? false) || ($staff?->role === 'organizer');
+                        $canManageSales = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_sales ?? false) || ($staff?->role === 'organizer');
                         
                         // Route helper function
                         $route = function($name, $params = []) use ($isAdmin, $event) {

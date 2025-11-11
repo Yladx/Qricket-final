@@ -81,11 +81,13 @@ class EventDashboardController extends Controller
         $isAdminEvent = $event->user_id === null && $isAdmin;
         $staff = $event->staff()->where('user_id', $user?->id)->first();
         // Admins have full capabilities
-        $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
-        $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_attendance ?? false) || ($staff?->role === 'organizer');
-        $canManageNews = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_news ?? false) || ($staff?->role === 'organizer');
-        $canManageSales = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_sales ?? false) || ($staff?->role === 'organizer');
-        $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_ticket ?? false) || ($staff?->role === 'organizer');
+        // Allow staff members to manage events even without explicit permissions
+        $isStaffMember = $staff !== null;
+        $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
+        $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_attendance ?? false) || ($staff?->role === 'organizer');
+        $canManageNews = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_news ?? false) || ($staff?->role === 'organizer');
+        $canManageSales = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_sales ?? false) || ($staff?->role === 'organizer');
+        $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_ticket ?? false) || ($staff?->role === 'organizer');
 
         // Sales and revenue metrics (only if owner or can_manage_event)
         $salesStats = $canManageSales ? $this->calculateEventSalesStats($event) : null;

@@ -62,12 +62,12 @@ class TrackEventView {
                 if ($isNewView) {
                     // Only trigger Pusher if this is a fresh view (newly created)
                     // This prevents spamming Pusher on every page refresh
-                    $this->triggerPusherEvent('event-viewed', [
-                        'event_id' => $event->id,
-                        'user_id' => $user->id,
-                        'user_name' => $user->first_name . ' ' . $user->last_name,
-                        'timestamp' => now()->toISOString()
-                    ]);
+                $this->triggerPusherEvent('event-viewed', [
+                    'event_id' => $event->id,
+                    'user_id' => $user->id,
+                    'user_name' => $user->first_name . ' ' . $user->last_name,
+                    'timestamp' => now()->toISOString()
+                ]);
                 }
                 
             } catch (\Exception $e) {

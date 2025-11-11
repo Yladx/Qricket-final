@@ -170,12 +170,14 @@ class BasicInfoController extends Controller
                 return redirect()->route('organizer.events.index')->with('error', 'This event cannot be edited in its current status.');
             }
             
-            // Check authorization - allow admin to edit admin-created events (user_id = null) or user's own events
+            // Check authorization - allow admin, owner, or staff to edit events
             $isAdmin = Auth::guard('admin')->check();
             $isOwner = $event->user_id === Auth::id();
             $isAdminEvent = $event->user_id === null && $isAdmin;
+            $isStaff = $event->staff()->where('user_id', Auth::id())->exists();
             
-            if (!$isOwner && !$isAdminEvent) {
+            // Allow staff members to manage events even without explicit can_manage_event permission
+            if (!$isOwner && !$isAdminEvent && !$isStaff) {
                 if ($request->expectsJson() || $request->ajax()) {
                     return response()->json(['success' => false, 'message' => 'Unauthorized access to this event.'], 403);
                 }

@@ -18,17 +18,26 @@
                     </a>
                     @auth
                         @php
-                            $isOrganizerMode = session('role') === 'organizer';
-                            $dashboardRoute = $isOrganizerMode ? route('dashboard') : route('organizer.events.index');
-                            $buttonText = $isOrganizerMode ? 'User Dashboard' : 'Host Your Events';
-                            $buttonIcon = $isOrganizerMode ? 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' : 'M12 6v6m0 0v6m0-6h6m-6 0H6';
+                            $isOrganizerMode = session('user_mode') === 'organizer';
+                            $organizerDashboardRoute = route('organizer.events.index');
+                            $buttonText = $isOrganizerMode ? 'Organizer Dashboard' : 'Host Your Events';
+                            $buttonIcon = 'M12 6v6m0 0v6m0-6h6m-6 0H6';
                         @endphp
-                        <a href="{{ $dashboardRoute }}" class="bg-qricket-700 hover:bg-qricket-800 dark:bg-qricket-600 dark:hover:bg-qricket-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg">
+                        @if($isOrganizerMode)
+                        <a href="{{ $organizerDashboardRoute }}" class="bg-qricket-700 hover:bg-qricket-800 dark:bg-qricket-600 dark:hover:bg-qricket-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg">
                             <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $buttonIcon }}"></path>
                             </svg>
                             {{ $buttonText }}
                         </a>
+                        @else
+                        <a href="javascript:void(0)" onclick="switchToOrganizerAndGo()" class="bg-qricket-700 hover:bg-qricket-800 dark:bg-qricket-600 dark:hover:bg-qricket-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg">
+                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $buttonIcon }}"></path>
+                            </svg>
+                            {{ $buttonText }}
+                        </a>
+                        @endif
                     @else
                         <a href="{{ route('register') }}" class="bg-qricket-700 hover:bg-qricket-800 dark:bg-qricket-600 dark:hover:bg-qricket-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg">
                             <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,4 +200,22 @@
     <!-- Footer -->
     <x-footer />
 
+    @auth
+    <script>
+        function switchToOrganizerAndGo() {
+            const csrf = document.querySelector('meta[name="csrf-token"]');
+            fetch("{{ route('user.mode-switch') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf ? csrf.getAttribute('content') : ''
+                },
+                body: JSON.stringify({ mode: 'organizer' })
+            })
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(() => { window.location.href = "{{ route('organizer.events.index') }}"; })
+            .catch(() => { window.location.href = "{{ route('organizer.events.index') }}"; });
+        }
+    </script>
+    @endauth
 </x-app-layout>

@@ -34,7 +34,7 @@
         } else {
             // No URL in data, but try route anyway (file might exist in storage)
             $leftLogo = url(route('organizer.events.certificate.asset', ['file' => 'logo_left.png', 'id' => $eventId]));
-        }
+    }
     }
     
     // Process right logo URL - always try to get logo if eventId exists
@@ -56,7 +56,7 @@
                 } else {
                     // It's already an absolute URL, use as-is
                     $rightLogo = $rightLogoRaw;
-                }
+    }
             }
         } else {
             // No URL in data, but try route anyway (file might exist in storage)
