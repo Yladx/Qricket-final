@@ -1057,68 +1057,110 @@
 
         // Wire autosave on inputs
         ['org_line1_input','org_line2_input','org_line3_input','org_school_input','recipient_name_input','theme_primary','theme_secondary','theme_border','theme_primary-hex','theme_secondary-hex','theme_border-hex']
-            .forEach(id=>{ const el = document.getElementById(id); el && el.addEventListener('input', autosaveDebounced); el && el.addEventListener('change', autosaveDebounced); });
+            .forEach(function(id) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', autosaveDebounced);
+                    el.addEventListener('change', autosaveDebounced);
+                }
+            });
         // Dynamic signatory inputs also trigger autosave
-        document.addEventListener('input', (e)=>{
+        document.addEventListener('input', function(e) {
             if (e.target && e.target.matches('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]')) {
                 autosaveDebounced();
             }
         });
 
         // Initialize remove buttons for existing logos and signatures on page load
+        // Wrap in DOMContentLoaded to ensure all functions are defined
         (function() {
-            // Initialize logo display in certificate preview
             function initializeLogoDisplay() {
-                ['left', 'right'].forEach(side => {
-                    // Get logo URL from certificate data
-                    try {
-                        const jsonEl = document.getElementById('certificate_data_json');
-                        if (jsonEl && jsonEl.value) {
-                            const certData = JSON.parse(jsonEl.value);
-                            const logoUrl = certData[`logo_${side}_url`];
-                            
-                            if (logoUrl) {
-                                // Update preview image in certificate template
-                                const previewImg = document.getElementById(`logo_${side}_img`);
-                                if (previewImg) {
-                                    previewImg.src = logoUrl + '?t=' + Date.now();
-                                    previewImg.style.display = 'block';
-                                    previewImg.onload = function() {
-                                        this.style.display = 'block';
-                                    };
-                                    previewImg.onerror = function() {
-                                        this.style.display = 'none';
-                                    };
+                try {
+                    ['left', 'right'].forEach(side => {
+                        // Get logo URL from certificate data
+                        try {
+                            const jsonEl = document.getElementById('certificate_data_json');
+                            if (jsonEl && jsonEl.value) {
+                                const certData = JSON.parse(jsonEl.value);
+                                const logoUrl = certData[`logo_${side}_url`];
+                                
+                                if (logoUrl && typeof logoUrl === 'string' && logoUrl.trim() !== '') {
+                                    // Update preview image in certificate template
+                                    const previewImg = document.getElementById(`logo_${side}_img`);
+                                    if (previewImg) {
+                                        // Only set src if URL is valid (not a placeholder or empty)
+                                        if (logoUrl && !logoUrl.includes('logo_right.png') && !logoUrl.includes('logo_left.png')) {
+                                            previewImg.src = logoUrl + '?t=' + Date.now();
+                                            previewImg.style.display = 'block';
+                                            previewImg.onload = function() {
+                                                this.style.display = 'block';
+                                            };
+                                            previewImg.onerror = function() {
+                                                this.style.display = 'none';
+                                                console.warn('Failed to load logo:', logoUrl);
+                                            };
+                                        } else {
+                                            previewImg.style.display = 'none';
+                                        }
+                                    }
                                 }
                             }
+                        } catch(e) {
+                            console.error('Error initializing logo display for', side, ':', e);
                         }
-                    } catch(e) {
-                        console.error('Error initializing logo display:', e);
-                    }
-                    
-                    // Check for existing logos in form and show remove buttons
-                    const previewEl = document.getElementById(`logo_${side}_preview`);
-                    const statusEl = document.getElementById(`logo_${side}_status`);
-                    if (previewEl && statusEl && !previewEl.classList.contains('hidden') && statusEl.textContent === 'Uploaded') {
-                        showLogoRemoveButton(side);
-                    }
-                });
-            }
-            
-            // Initialize on page load
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initializeLogoDisplay);
-            } else {
-                initializeLogoDisplay();
-            }
-            
-            // Also check for existing signatures and show remove buttons
-            for (let i = 1; i <= 4; i++) {
-                const previewEl = document.getElementById(`sig_${i}_preview`);
-                const statusEl = document.getElementById(`sig_${i}_status`);
-                if (previewEl && statusEl && !previewEl.classList.contains('hidden') && statusEl.textContent === 'Uploaded') {
-                    showSignatureRemoveButton(i);
+                        
+                        // Check for existing logos in form and show remove buttons
+                        try {
+                            const previewEl = document.getElementById(`logo_${side}_preview`);
+                            const statusEl = document.getElementById(`logo_${side}_status`);
+                            if (previewEl && statusEl && !previewEl.classList.contains('hidden') && statusEl.textContent === 'Uploaded') {
+                                if (typeof showLogoRemoveButton === 'function') {
+                                    showLogoRemoveButton(side);
+                                }
+                            }
+                        } catch(e) {
+                            console.error('Error showing logo remove button for', side, ':', e);
+                        }
+                    });
+                } catch(e) {
+                    console.error('Error in initializeLogoDisplay:', e);
                 }
+            }
+            
+            function initializeSignatureButtons() {
+                try {
+                    // Also check for existing signatures and show remove buttons
+                    for (let i = 1; i <= 4; i++) {
+                        try {
+                            const previewEl = document.getElementById(`sig_${i}_preview`);
+                            const statusEl = document.getElementById(`sig_${i}_status`);
+                            if (previewEl && statusEl && !previewEl.classList.contains('hidden') && statusEl.textContent === 'Uploaded') {
+                                if (typeof showSignatureRemoveButton === 'function') {
+                                    showSignatureRemoveButton(i);
+                                }
+                            }
+                        } catch(e) {
+                            console.error('Error showing signature remove button for', i, ':', e);
+                        }
+                    }
+                } catch(e) {
+                    console.error('Error in initializeSignatureButtons:', e);
+                }
+            }
+            
+            // Initialize after DOM is ready and functions are defined
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(function() {
+                        initializeLogoDisplay();
+                        initializeSignatureButtons();
+                    }, 100);
+                });
+            } else {
+                setTimeout(function() {
+                    initializeLogoDisplay();
+                    initializeSignatureButtons();
+                }, 100);
             }
         })();
 

@@ -20,8 +20,8 @@
             $hasActiveSubscription = $user?->hasActiveSubscription() ?? false;
         @endphp
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Event Details Cards -->
-            <div class="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onclick="selectLayout('event-details-cards')">
+            {{-- Event Details Cards - Commented out for now --}}
+            {{-- <div class="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onclick="selectLayout('event-details-cards')">
                 <div class="h-48 bg-gray-100 dark:bg-gray-700 p-4">
                     <div class="grid grid-cols-2 gap-3 h-full">
                         <div class="bg-white dark:bg-gray-600 rounded-lg p-3 shadow-sm">
@@ -50,7 +50,7 @@
                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event Details Cards</h4>
                     <p class="text-sm text-gray-600 dark:text-gray-300">Grid of information cards highlighting key event details</p>
                 </div>
-            </div>
+            </div> --}}
 
             <!-- About Two Images -->
             <div class="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onclick="selectLayout('about-two-images')">

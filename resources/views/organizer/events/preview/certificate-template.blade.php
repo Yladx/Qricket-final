@@ -94,8 +94,10 @@
     <div class="px-10 pt-16 pb-8 relative z-10">
             <div class="grid grid-cols-3 items-center">
             <div class="justify-self-start">
-                @if($eventId)
-                <img id="logo_left_img" src="{{ $hasLeftLogo ? $leftLogo : (url(route('organizer.events.certificate.asset', ['file' => 'logo_left.png', 'id' => $eventId]))) }}" alt="Left Logo" class="w-20 h-20 object-contain certificate-image" onload="this.style.display='block';" onerror="this.style.display='none';" style="{{ $hasLeftLogo ? 'display: block;' : 'display: none;' }} max-width: 80px; max-height: 80px;">
+                @if($eventId && $hasLeftLogo && !empty($leftLogo))
+                <img id="logo_left_img" src="{{ $leftLogo }}" alt="Left Logo" class="w-20 h-20 object-contain certificate-image" onload="this.style.display='block';" onerror="this.style.display='none';" style="display: block; max-width: 80px; max-height: 80px;">
+                @elseif($eventId)
+                <img id="logo_left_img" src="" alt="Left Logo" class="w-20 h-20 object-contain certificate-image" style="display: none; max-width: 80px; max-height: 80px;">
                 @endif
             </div>
             <div class="text-center">
@@ -107,8 +109,10 @@
                 <div class="text-sm text-gray-600">Ticket ID: <span id="ticket_id_preview">{{ $certificateData['ticket_id_preview'] ?? '—' }}</span></div>
             </div>
             <div class="justify-self-end">
-                @if($eventId)
-                <img id="logo_right_img" src="{{ $hasRightLogo ? $rightLogo : (url(route('organizer.events.certificate.asset', ['file' => 'logo_right.png', 'id' => $eventId]))) }}" alt="Right Logo" class="w-20 h-20 object-contain certificate-image" onload="this.style.display='block';" onerror="this.style.display='none';" style="{{ $hasRightLogo ? 'display: block;' : 'display: none;' }} max-width: 80px; max-height: 80px;">
+                @if($eventId && $hasRightLogo && !empty($rightLogo))
+                <img id="logo_right_img" src="{{ $rightLogo }}" alt="Right Logo" class="w-20 h-20 object-contain certificate-image" onload="this.style.display='block';" onerror="this.style.display='none';" style="display: block; max-width: 80px; max-height: 80px;">
+                @elseif($eventId)
+                <img id="logo_right_img" src="" alt="Right Logo" class="w-20 h-20 object-contain certificate-image" style="display: none; max-width: 80px; max-height: 80px;">
                 @endif
             </div>
         </div>

@@ -40,10 +40,10 @@
 
         <title>{{ $title ?? config('app.name', 'Qricket') }}</title>
 
-        <!-- Favicon - Square SVG to prevent stretching (NOT Logo.svg which is portrait) -->
-        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+        <!-- Favicon - Using Logo.svg for all layouts -->
+        <link rel="icon" type="image/svg+xml" href="{{ asset('Logo.svg') }}">
         <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-        <link rel="mask-icon" href="{{ asset('safari-pinned-tab.svg') }}" color="#00B388">
+        <link rel="mask-icon" href="{{ asset('Logo.svg') }}" color="#00B388">
         <meta name="theme-color" content="#00B388">
 
         <!-- Preload critical resources -->
