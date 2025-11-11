@@ -7,9 +7,16 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
+                    @php
+                        // Lock the free event checkbox if the event is already free (only in manage/edit)
+                        $isFreeLocked = false;
+                        if ($event->is_free === true || (isset($eventData['is_free']) && $eventData['is_free'] === true)) {
+                            $isFreeLocked = true;
+                        }
+                    @endphp
                     <form id="editBasicForm" method="POST" action="{{ route('organizer.events.step1.store') }}?id={{ $event->id }}" enctype="multipart/form-data" class="space-y-6">
                         @csrf
-                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event])
+                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event, 'isFreeLocked' => $isFreeLocked])
 
                         <!-- Navigation Buttons -->
                         <div class="flex items-center justify-between pt-6">

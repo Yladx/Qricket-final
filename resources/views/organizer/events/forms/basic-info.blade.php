@@ -23,91 +23,42 @@
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
     @php
-    // CRITICAL: Initialize ALL variables FIRST - these MUST exist
-    $eventIsFreeValue = false;
-    $isFreeInitValue = false;
-    $isFreeLockedValue = false;
-    
-    // Safely get is_free value - check eventData array first (controllers should always set this)
-    try {
+        // Simple initialization - get is_free value from eventData or event object
+        $isFreeValue = false;
         if (isset($eventData) && is_array($eventData) && array_key_exists('is_free', $eventData)) {
-            $eventIsFreeValue = (bool)$eventData['is_free'];
+            $isFreeValue = (bool)$eventData['is_free'];
+        } elseif (isset($event) && is_object($event) && isset($event->is_free)) {
+            $isFreeValue = (bool)$event->is_free;
         }
-    } catch (\Exception $e) {
-        // Keep default false
-    }
-    
-    // Fallback: get from event object if eventData doesn't have it
-    if ($eventIsFreeValue === false) {
-        try {
-            if (isset($event) && is_object($event)) {
-                if (isset($event->is_free)) {
-                    $eventIsFreeValue = (bool)$event->is_free;
-                }
-            }
-        } catch (\Exception $e) {
-            // Keep default false
+        $isFreeChecked = old('is_free', $isFreeValue);
+        
+        // Check if checkbox should be locked (only set in edit/basic.blade.php for manage/edit)
+        // Default to false if not provided (e.g., in step1 for event creation)
+        if (!isset($isFreeLocked)) {
+            $isFreeLocked = false;
         }
-    }
-    
-    // Get checkbox checked state (prioritize old input for validation errors)
-    try {
-        $oldIsFree = old('is_free');
-        if ($oldIsFree !== null) {
-            $isFreeInitValue = (bool)$oldIsFree;
-        } else {
-            $isFreeInitValue = $eventIsFreeValue;
-        }
-    } catch (\Exception $e) {
-        $isFreeInitValue = $eventIsFreeValue;
-    }
-    
-    // Check if we're editing (has eventId) - this determines if we should lock the checkbox
-    $isEditing = false;
-    try {
-        if (isset($eventId) && $eventId !== null && $eventId !== '' && $eventId !== '0') {
-            $isEditing = true;
-        } elseif (isset($event) && is_object($event)) {
-            if (isset($event->id) && $event->id !== null && $event->id !== '' && $event->id !== '0') {
-                $isEditing = true;
-            }
-        }
-    } catch (\Exception $e) {
-        // Keep default false
-    }
-    
-    // ONLY lock when editing an existing free event
-    // This ensures it's NOT locked during event creation
-    if ($isEditing === true && $eventIsFreeValue === true) {
-        $isFreeLockedValue = true;
-    }
-    
-    // FINAL SAFETY CHECK: Ensure all variables are defined (should never be needed, but just in case)
-    if (!isset($eventIsFreeValue)) $eventIsFreeValue = false;
-    if (!isset($isFreeInitValue)) $isFreeInitValue = false;
-    if (!isset($isFreeLockedValue)) $isFreeLockedValue = false;
     @endphp
     <div class="flex items-center space-x-3">
-        <label class="inline-flex items-center space-x-2{{ $isFreeLockedValue ? ' opacity-60 cursor-not-allowed' : '' }}">
+        <label class="inline-flex items-center space-x-2{{ $isFreeLocked ? ' opacity-60 cursor-not-allowed' : '' }}">
             <input 
                 type="checkbox" 
                 name="is_free" 
                 value="1" 
                 id="is_free_checkbox" 
-                @if($isFreeInitValue) checked @endif
-                @if($isFreeLockedValue) disabled @endif
-                class="rounded border-gray-300 text-qricket-600{{ $isFreeLockedValue ? ' cursor-not-allowed' : '' }}"
+                {{ $isFreeChecked ? 'checked' : '' }}
+                {{ $isFreeLocked ? 'disabled' : '' }}
+                class="rounded border-gray-300 text-qricket-600{{ $isFreeLocked ? ' cursor-not-allowed' : '' }}"
             >
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
         </label>
-        @if($isFreeLockedValue)
+        @if($isFreeLocked)
             <input type="hidden" name="is_free" value="1">
             <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">(Cannot be changed - Event is already free)</span>
         @else
             <span class="text-xs text-gray-500 dark:text-gray-400">(See sidebar for details)</span>
         @endif
     </div>
-    @if($isFreeLockedValue)
+    @if($isFreeLocked)
         <div class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
             <p class="text-xs text-amber-800 dark:text-amber-200">
                 <strong>Note:</strong> Once an event is created as free, it cannot be changed to a paid event. This ensures consistency for attendees who have already registered.
