@@ -22,39 +22,33 @@
     </div>
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
-    @php
-        // Determine if event is free (check multiple sources)
-        $eventIsFree = false;
-        if (isset($isFreeEvent) && ($isFreeEvent === true || $isFreeEvent === 1 || $isFreeEvent === '1')) {
-            $eventIsFree = true;
-        } elseif (isset($event) && is_object($event) && isset($event->is_free) && (bool)$event->is_free === true) {
-            $eventIsFree = true;
-        } elseif (isset($eventData) && is_array($eventData) && isset($eventData['is_free']) && (bool)$eventData['is_free'] === true) {
-            $eventIsFree = true;
-        }
-        
-        // Check if checkbox should be locked
-        // Locked if: isFreeEventLocked is passed (from controller), OR event is free, OR event is paid with sales
-        $checkboxLocked = false;
-        $eventIsPaidWithSales = false;
-        
-        if (isset($isFreeEventLocked) && $isFreeEventLocked === true) {
-            $checkboxLocked = true;
-            // Determine if it's paid with sales (hasSales is true and event is not free)
-            if (isset($hasSales) && $hasSales === true && !$eventIsFree) {
+    @if(
+        // Locked if: isFreeEventLocked is passed (from controller)
+        (isset($isFreeEventLocked) && $isFreeEventLocked === true) ||
+        // OR event is free (cannot change to paid)
+        (isset($isFreeEvent) && ($isFreeEvent === true || $isFreeEvent === 1 || $isFreeEvent === '1')) ||
+        (isset($event) && is_object($event) && isset($event->is_free) && (bool)$event->is_free === true) ||
+        (isset($eventData) && is_array($eventData) && isset($eventData['is_free']) && (bool)$eventData['is_free'] === true) ||
+        // OR event is paid with sales (cannot change to free)
+        (isset($hasSales) && $hasSales === true && isset($isFreeEvent) && $isFreeEvent === false && isset($event) && is_object($event) && isset($event->is_free) && (bool)$event->is_free === false)
+    )
+        @php
+            // Determine if event is free for display
+            $eventIsFree = false;
+            if (isset($isFreeEvent) && ($isFreeEvent === true || $isFreeEvent === 1 || $isFreeEvent === '1')) {
+                $eventIsFree = true;
+            } elseif (isset($event) && is_object($event) && isset($event->is_free) && (bool)$event->is_free === true) {
+                $eventIsFree = true;
+            } elseif (isset($eventData) && is_array($eventData) && isset($eventData['is_free']) && (bool)$eventData['is_free'] === true) {
+                $eventIsFree = true;
+            }
+            
+            // Check if it's paid with sales
+            $eventIsPaidWithSales = false;
+            if (!$eventIsFree && isset($hasSales) && $hasSales === true) {
                 $eventIsPaidWithSales = true;
             }
-        } elseif ($eventIsFree) {
-            // Event is free - always locked
-            $checkboxLocked = true;
-        } elseif (isset($hasSales) && $hasSales === true && !$eventIsFree) {
-            // Event is paid and has sales - locked
-            $checkboxLocked = true;
-            $eventIsPaidWithSales = true;
-        }
-    @endphp
-    
-    @if($checkboxLocked)
+        @endphp
         <!-- Event type is locked - show read-only display instead of checkbox -->
         <div class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
             <div class="flex items-center space-x-2">
@@ -63,7 +57,7 @@
                 </svg>
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                     This event is set as <strong>{{ $eventIsFree ? 'Free' : 'Paid' }}</strong>
-                    @if($eventIsPaidWithSales)
+                    @if(isset($eventIsPaidWithSales) && $eventIsPaidWithSales)
                         <span class="text-xs text-gray-500 dark:text-gray-400">(has ticket sales)</span>
                     @endif
                 </span>
@@ -71,7 +65,7 @@
             <span class="text-xs text-amber-600 dark:text-amber-400 font-medium ml-auto">(Cannot be changed)</span>
         </div>
         <!-- Hidden input to ensure is_free value is always submitted -->
-        <input type="hidden" name="is_free" value="{{ $eventIsFree ? '1' : '0' }}">
+        <input type="hidden" name="is_free" value="{{ (isset($eventIsFree) && $eventIsFree) ? '1' : '0' }}">
     @else
         <!-- Normal checkbox for event creation or events without restrictions -->
         <div class="flex items-center space-x-3">
