@@ -7,9 +7,18 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
+                    @php
+                        // Check if event is free - be very explicit about the check
+                        $eventIsFree = false;
+                        if (isset($event->is_free)) {
+                            $eventIsFree = ($event->is_free == 1 || $event->is_free === true || $event->is_free === '1');
+                        } elseif (isset($eventData['is_free'])) {
+                            $eventIsFree = ($eventData['is_free'] == 1 || $eventData['is_free'] === true || $eventData['is_free'] === '1');
+                        }
+                    @endphp
                     <form id="editBasicForm" method="POST" action="{{ route('organizer.events.step1.store') }}?id={{ $event->id }}" enctype="multipart/form-data" class="space-y-6">
                         @csrf
-                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event])
+                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event, 'isFreeEvent' => $eventIsFree])
 
                         <!-- Navigation Buttons -->
                         <div class="flex items-center justify-between pt-6">
@@ -147,40 +156,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/sweetalert-utils.js"></script>
     <script>
+        
         document.addEventListener('DOMContentLoaded', function() {
-            // Block free event checkbox if event is already free (only in manage/edit)
-            @if($event->is_free === true || (isset($eventData['is_free']) && $eventData['is_free'] === true))
-                const freeEventCheckbox = document.getElementById('is_free_checkbox');
-                const freeEventLabel = freeEventCheckbox ? freeEventCheckbox.closest('label') : null;
-                
-                if (freeEventCheckbox) {
-                    // Block the checkbox - disable it and ensure it's checked
-                    freeEventCheckbox.disabled = true;
-                    freeEventCheckbox.checked = true;
-                    freeEventCheckbox.style.pointerEvents = 'none';
-                    freeEventCheckbox.style.cursor = 'not-allowed';
-                    
-                    // Block label interactions
-                    if (freeEventLabel) {
-                        freeEventLabel.style.pointerEvents = 'none';
-                        freeEventLabel.style.cursor = 'not-allowed';
-                        freeEventLabel.style.opacity = '0.6';
-                    }
-                    
-                    // Remove checkbox name and add hidden input to ensure is_free=1 is submitted
-                    freeEventCheckbox.name = '';
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'is_free';
-                    hiddenInput.value = '1';
-                    hiddenInput.id = 'is_free_hidden';
-                    
-                    const editForm = document.getElementById('editBasicForm');
-                    if (editForm) {
-                        editForm.appendChild(hiddenInput);
-                    }
-                }
-            @endif
             
             // AJAX Form Submission
             const form = document.getElementById('editBasicForm');
