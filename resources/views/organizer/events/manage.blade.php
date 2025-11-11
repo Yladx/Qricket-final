@@ -10,10 +10,11 @@
                 $isOwner = $user && (int)$event->user_id === (int)$user->id;
                 $staffWelcome = $staffNotes['staff_welcome_message'] ?? null;
                 $staffInstructions = $staffNotes['staff_instructions'] ?? null;
+                $eventEnded = $event->end_date && now()->gte($event->end_date);
             @endphp
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div class="space-y-6">
                 <!-- Main Content -->
-                <div class="lg:col-span-3 space-y-6">
+                <div class="space-y-6">
                     @if($canManageSales)
                     <!-- Sales Analytics Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -145,233 +146,166 @@
         </div>
                     @endif
 
-                    @if($canManageSales)
-                    <!-- Ticket Performance -->
+                    <!-- Three Column Layout: Ticket Performance, Rules & Instructions, Recent Sales/Activity -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Left Column: Ticket Performance -->
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                             <div class="p-6">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-6">Ticket Performance</h3>
-                            
-                            @if($ticketPerformance->count() > 0)
-                                <div class="overflow-x-auto">
-                                    <table id="ticket-performance-table" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                        <thead class="bg-gray-50 dark:bg-gray-700">
-                                            <tr>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ticket Type</th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Sold</th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Remaining</th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Utilization</th>
-                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Revenue</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                            @foreach($ticketPerformance as $ticket)
-                                                <tr>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                        {{ $ticket['name'] }}
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                        ₱{{ number_format($ticket['price'], 2) }}
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                        {{ number_format($ticket['total_sold']) }}
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                        @if($ticket['remaining'] !== null)
-                                                            {{ number_format($ticket['remaining']) }}
-                                                        @else
-                                                            <span class="text-green-600 dark:text-green-400">Unlimited</span>
-                                                        @endif
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                                            <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                                                <div class="bg-blue-600 h-2 rounded-full" style="width: {{ min($ticket['utilization'], 100) }}%"></div>
-                                                            </div>
-                                                            <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                                                                {{ number_format($ticket['utilization'], 1) }}%
-                                                            </span>
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Ticket Performance</h3>
+                                
+                                @if($canManageSales && $ticketPerformance->count() > 0)
+                                    <div class="space-y-4">
+                                        @foreach($ticketPerformance as $ticket)
+                                            <div>
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $ticket['name'] }}</span>
+                                                </div>
+                                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                                    @php
+                                                        $maxTickets = $ticket['total_sold'] + ($ticket['remaining'] ?? 0);
+                                                        $percentage = $maxTickets > 0 ? ($ticket['total_sold'] / $maxTickets) * 100 : 0;
+                                                    @endphp
+                                                    <div class="bg-gray-400 dark:bg-gray-600 h-2.5 rounded-full" style="width: {{ min($percentage, 100) }}%"></div>
+                                                </div>
+                                            </div>
+                                        @endforeach
                                     </div>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                        ₱{{ number_format($ticket['total_revenue'], 2) }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                    </div>
-                            @else
-                                <div class="text-center py-8">
-                                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                                        </svg>
-                                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No tickets configured</h3>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Configure tickets to see performance metrics.</p>
-                                    </div>
-                            @endif
-                                    </div>
-                                </div>
-                    @endif
-
-                    @if(!$canManageSales && !$canManageEvent)
-                        <!-- Limited Overview for non-owner/non-manager -->
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                            <div class="p-6">
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Overview</h3>
-                                @if(!empty($staffWelcome))
-                                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ $staffWelcome }}</p>
                                 @else
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">Welcome to the event management dashboard.</p>
+                                    <div class="text-center py-8">
+                                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                                        </svg>
+                                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No tickets configured</h3>
+                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Configure tickets to see performance metrics.</p>
+                                    </div>
                                 @endif
                             </div>
                         </div>
-                    @endif
 
-                    @if(!$isOwner && ($staff))
-                        <!-- Staff Rules and Instructions -->
+                        <!-- Middle Column: Rules & Instructions -->
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                             <div class="p-6">
                                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Rules & Instructions</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Event Guidelines and Staff Expectations</p>
                                 @if(!empty($staffInstructions))
-                                    <div class="text-sm text-gray-700 dark:text-gray-300">{!! nl2br(e($staffInstructions)) !!}</div>
+                                    <div class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                                        {!! nl2br(e($staffInstructions)) !!}
+                                    </div>
                                 @else
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">No specific instructions provided for this event.</p>
+                                    <div class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+                                        <ul class="list-disc list-inside space-y-2">
+                                            <li>Arrive at least 30 minutes before your assigned schedule.</li>
+                                            <li>Always wear your staff ID badge and appropriate attire.</li>
+                                            <li>Check your designated area and make sure everything is ready before attendees arrive.</li>
+                                            <li>Maintain a professional and friendly attitude when interacting with guests and participants.</li>
+                                            <li>Report any issues or emergencies immediately to the event organizer.</li>
+                                            <li>Stay updated on announcements in the staff communication channel or dashboard.</li>
+                                            <li>After the event, assist with cleanup or post-event wrap-up as directed.</li>
+                                        </ul>
+                                    </div>
                                 @endif
                             </div>
                         </div>
-                    @endif
 
-                    <!-- Recent Sales and Activity -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        @if($canManageSales)
-                        <!-- Recent Sales -->
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg" id="recent-sales-section">
-                            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                                <h3 class="text-base font-medium text-gray-900 dark:text-gray-100">Recent Sales</h3>
-                            </div>
-                            <div class="max-h-80 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700" id="recent-sales-list">
-                                @forelse($recentSales->take(5) as $sale)
-                                <div class="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200" data-sale-id="{{ $sale->id }}">
-                                    <div class="flex items-center justify-between">
+                        <!-- Right Column: Recent Sales and Activity -->
+                        <div class="space-y-4">
+                            @if($canManageSales)
+                            <!-- Recent Sales -->
+                            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg" id="recent-sales-section">
+                                <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                                    <h3 class="text-base font-medium text-gray-900 dark:text-gray-100">Recent Sales</h3>
+                                </div>
+                                <div class="max-h-64 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700" id="recent-sales-list">
+                                    @forelse($recentSales->take(5) as $sale)
+                                    <div class="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200" data-sale-id="{{ $sale->id }}">
                                         <div class="flex items-center space-x-2">
-                                    <div class="flex-shrink-0">
-                                                <div class="w-6 h-6 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                                                    <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                        </svg>
-                                    </div>
-                                    </div>
-                                            <div>
-                                                <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
+                                            <div class="flex-shrink-0">
+                                                <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
                                                     {{ $sale->user->first_name }} {{ $sale->user->last_name }}
                                                 </p>
                                                 <p class="text-xs text-gray-600 dark:text-gray-400">
                                                     {{ $sale->quantity }}x {{ $sale->ticketType->name ?? 'Ticket' }}
                                                 </p>
-                                </div>
-                            </div>
-                                        <div class="text-right">
-                                            <p class="text-xs font-semibold text-green-600 dark:text-green-400">
-                                                ₱{{ number_format($sale->total_amount, 2) }}
-                                            </p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                {{ $sale->paid_at->diffForHumans() }}
-                                            </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                                @empty
-                                <div class="p-6 text-center text-gray-500 dark:text-gray-400">
-                                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                    </svg>
+                                    @empty
+                                    <div class="p-6 text-center text-gray-500 dark:text-gray-400">
+                                        <p class="text-sm font-medium">No recent sales</p>
+                                        <p class="text-xs mt-1">Sales will appear here once customers purchase tickets</p>
                                     </div>
-                                    <p class="text-sm font-medium">No recent sales</p>
-                                    <p class="text-xs mt-1">Sales will appear here once customers purchase tickets</p>
+                                    @endforelse
                                 </div>
-                                @endforelse
-                        </div>
-                            
-                            @if($recentSales->count() > 5)
-                            <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-                                <a href="{{ route('organizer.events.sales', $event) }}" class="w-full text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium text-center block">
-                                    View All Sales
-                                </a>
-                            </div>
-                            @endif
-                    </div>
-                        @endif
-
-                        <!-- Recent Activity (Compact with Max Height) -->
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg" id="recent-activity-section">
-                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                            <h3 class="text-base font-medium text-gray-900 dark:text-gray-100">Recent Activity</h3>
-                            @if($totalActivityCount > 5)
-                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $totalActivityCount }} total</span>
+                                @if($recentSales->count() > 5)
+                                <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                                    <a href="{{ route('organizer.events.sales', $event) }}" class="w-full text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium text-center block">
+                                        View All Sales
+                                    </a>
+                                </div>
                                 @endif
-                        </div>
-                        <div class="max-h-80 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700" id="recent-activity-list">
-                            @forelse($recentActivity->take(5) as $activity)
-                                <div class="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200" data-activity-id="{{ $activity->id }}">
-                                    <div class="flex items-start space-x-2">
-                                    <div class="flex-shrink-0">
-                                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2"></div>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                            <div class="text-xs text-gray-900 dark:text-gray-100">
-                                                <div class="font-medium">{{ ucfirst(str_replace('_',' ', $activity->action ?? 'Activity')) }}</div>
-                                                <div class="text-gray-600 dark:text-gray-300 text-xs mt-0.5">{{ Str::limit($activity->description, 60) }}</div>
-                                            </div>
-                                            
-                                            <div class="flex items-center justify-between mt-2 pt-1 border-t border-gray-100 dark:border-gray-700">
-                                                <div class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ $activity->created_at->diffForHumans() }}
-                                                </div>
-                                                <div class="text-xs text-gray-500 dark:text-gray-400">
-                                                    by {{ $activity->user_id === Auth::id() ? 'You' : ($activity->user ? trim($activity->user->first_name . ' ' . $activity->user->last_name) : 'Unknown') }}
-                                                </div>
-                                            </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @empty
-                                <div class="p-6 text-center text-gray-500 dark:text-gray-400">
-                                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                    </div>
-                                    <p class="text-sm font-medium">No recent activity</p>
-                                    <p class="text-xs mt-1">Activity will appear here as you make changes</p>
-                            </div>
-                            @endforelse
-                            </div>
-                            
-                        @if($totalActivityCount > 5)
-                        <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-                            <a href="{{ route('organizer.events.activity-log', $event) }}" class="w-full text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium text-center block">
-                                View All Activities
-                            </a>
                             </div>
                             @endif
+
+                            <!-- Recent Activity -->
+                            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg" id="recent-activity-section">
+                                <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                                    <h3 class="text-base font-medium text-gray-900 dark:text-gray-100">Recent Activity</h3>
+                                    @if($totalActivityCount > 5)
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $totalActivityCount }} total</span>
+                                    @endif
+                                </div>
+                                <div class="max-h-64 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700" id="recent-activity-list">
+                                    @forelse($recentActivity->take(5) as $activity)
+                                        <div class="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200" data-activity-id="{{ $activity->id }}">
+                                            <div class="flex items-start space-x-2">
+                                                <div class="flex-shrink-0">
+                                                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2"></div>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="text-xs text-gray-900 dark:text-gray-100">
+                                                        <div class="font-medium">{{ ucfirst(str_replace('_',' ', $activity->action ?? 'Activity')) }}</div>
+                                                        <div class="text-gray-600 dark:text-gray-300 text-xs mt-0.5">{{ Str::limit($activity->description, 60) }}</div>
+                                                    </div>
+                                                    <div class="flex items-center justify-between mt-2 pt-1 border-t border-gray-100 dark:border-gray-700">
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                            {{ $activity->created_at->diffForHumans() }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                            by {{ $activity->user_id === Auth::id() ? 'You' : ($activity->user ? trim($activity->user->first_name . ' ' . $activity->user->last_name) : 'Unknown') }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="p-6 text-center text-gray-500 dark:text-gray-400">
+                                            <p class="text-sm font-medium">No recent activity</p>
+                                            <p class="text-xs mt-1">Activity will appear here as you make changes</p>
+                                        </div>
+                                    @endforelse
+                                </div>
+                                @if($totalActivityCount > 5)
+                                <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                                    <a href="{{ route('organizer.events.activity-log', $event) }}" class="w-full text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium text-center block">
+                                        View All Activities
+                                    </a>
+                                </div>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sidebar -->
-                <div class="space-y-4">
+                <!-- Payout Section (Only for owners, only when event has ended) -->
+                @if($isOwner && $eventEnded && !$event->is_free)
                     @php
-                        $eventEnded = $event->end_date && now()->gte($event->end_date);
+                        // Check if there's revenue from sales stats, or if there's a payout request (which indicates revenue existed)
+                        $hasRevenue = ($salesStats && ($salesStats['totalRevenue'] ?? 0) > 0) || ($payoutRequest !== null);
                     @endphp
-
-                    @if($eventEnded && !$event->is_free && (($salesStats['expectedRevenue'] ?? 0) > 0))
-                    <!-- Payout Status (Only when event ended - TOP POSITION) -->
-                    @php
-                        $payout = \App\Models\PayoutRequest::where('event_id', $event->id)->orderBy('created_at', 'desc')->first();
-                        $canPayout = $event->end_date && now()->gte($event->end_date) && $isOwner;
-                    @endphp
+                    @if($hasRevenue)
                     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div class="flex items-center">
@@ -384,61 +318,61 @@
                             </div>
                         </div>
                         <div class="p-4">
-                            @if($payout)
+                            @if($payoutRequest)
                                 <div class="space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="text-xs text-gray-500">Status</div>
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ ucfirst(str_replace('_',' ', $payout->status)) }}</div>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">Status</div>
+                                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ ucfirst(str_replace('_',' ', $payoutRequest->status)) }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">Net Amount</div>
+                                            <div class="text-lg font-semibold text-green-600 dark:text-green-400">₱{{ number_format($payoutRequest->net_amount, 2) }}</div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div class="text-xs text-gray-500">Net Amount</div>
-                                        <div class="text-lg font-semibold text-green-600">₱{{ number_format($payout->net_amount,2) }}</div>
-                                    </div>
-                                </div>
                                     
-                                    @if($payout->requested_at)
+                                    @if($payoutRequest->requested_at)
                                         <div class="flex items-center justify-between">
-                                            <div class="text-xs text-gray-500">Requested</div>
-                                            <div class="text-sm text-gray-900 dark:text-gray-100">{{ $payout->requested_at->format('M d, Y') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">Requested</div>
+                                            <div class="text-sm text-gray-900 dark:text-gray-100">{{ $payoutRequest->requested_at->format('M d, Y') }}</div>
                                         </div>
                                     @endif
                                 </div>
 
                                 <!-- Action Buttons -->
                                 <div class="mt-4">
-                                    @if($payout->status === 'released' && $canPayout)
+                                    @if($payoutRequest->status === 'released' && $canPayout)
                                         <a href="{{ route('organizer.events.payout', $event) }}" class="w-full inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-green-600 hover:bg-green-700 text-white text-sm">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
                                             </svg>
                                             Collect Payout
                                         </a>
-                                    @elseif($payout->status === 'approved' && $canPayout)
+                                    @elseif($payoutRequest->status === 'approved')
                                         <div class="text-center py-2">
                                             <div class="text-sm text-blue-600 dark:text-blue-400">✓ Approved - Waiting for release</div>
                                         </div>
-                                @elseif(in_array($payout->status, ['pending','under_review']))
+                                    @elseif(in_array($payoutRequest->status, ['pending','under_review']))
                                         <div class="text-center py-2">
                                             <div class="text-sm text-yellow-600 dark:text-yellow-400">⏳ Under Review</div>
                                         </div>
-                                    @elseif($payout->status === 'paid')
+                                    @elseif($payoutRequest->status === 'paid')
                                         <div class="text-center py-2">
                                             <div class="text-sm text-green-600 dark:text-green-400">✓ Payout Completed</div>
-                                            @if($payout->processed_at)
-                                                <div class="text-xs text-gray-500 mt-1">Completed on {{ $payout->processed_at->format('M d, Y') }}</div>
+                                            @if($payoutRequest->processed_at)
+                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Completed on {{ $payoutRequest->processed_at->format('M d, Y') }}</div>
                                             @endif
                                         </div>
-                                    @elseif($payout->status === 'rejected')
+                                    @elseif($payoutRequest->status === 'rejected')
                                         <div class="text-center py-2">
                                             <div class="text-sm text-red-600 dark:text-red-400">❌ Rejected</div>
                                         </div>
-                                @endif
+                                    @endif
                                 </div>
                             @else
                                 <div class="text-center py-3">
                                     <div class="text-sm text-gray-600 dark:text-gray-400 mb-3">No payout created yet.</div>
-                                @if($canPayout)
+                                    @if($canPayout)
                                         <a href="{{ route('organizer.events.payout', $event) }}" class="w-full inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-qricket-600 hover:bg-qricket-700 text-white text-sm">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -446,191 +380,14 @@
                                             Request Payout
                                         </a>
                                     @else
-                                        <div class="text-xs text-gray-500">Payout becomes available after the event ends and if you are the owner.</div>
-                                @endif
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">Payout becomes available after the event ends.</div>
+                                    @endif
                                 </div>
                             @endif
                         </div>
                     </div>
                     @endif
-
-                    <!-- Sales Summary -->
-                    @if($canManageSales)
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center">
-                                <div class="w-6 h-6 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mr-2">
-                                    <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                    </svg>
-                                </div>
-                                <h3 class="text-base font-medium text-gray-900 dark:text-gray-100">Sales Summary</h3>
-                            </div>
-                        </div>
-                        <div class="p-4 space-y-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Avg Order Value</span>
-                                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100" data-sales-update="averageOrderValue">₱{{ number_format($salesStats['averageOrderValue'], 2) }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">This Month</span>
-                                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100" data-sales-update="thisMonthRevenue">₱{{ number_format($salesStats['thisMonthRevenue'], 2) }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Spent on Additional Tickets</span>
-                                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100" data-sales-update="additionalTicketSpend">₱{{ number_format($salesStats['additionalTicketSpend'] ?? 0, 2) }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Free Tickets Sold</span>
-                                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ number_format($salesStats['freeTicketsSold'] ?? 0) }}</span>
-                            </div>
-                            @if($salesStats['totalCapacity'] > 0)
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Capacity Utilization</span>
-                                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100" data-sales-update="capacityUtilization">{{ number_format($salesStats['capacityUtilization'], 1) }}%</span>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-                    @endif
-
-                    <!-- Event Info -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center">
-                                <div class="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-2">
-                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                </div>
-                                <h3 class="text-base font-medium text-gray-900 dark:text-gray-100">Event Info</h3>
-                            </div>
-                        </div>
-                        <div class="p-4 space-y-3 text-sm">
-                            <div class="flex items-start">
-                                <div class="w-5 h-5 bg-purple-100 dark:bg-purple-900 rounded flex items-center justify-center mr-2 mt-0.5">
-                                    <svg class="w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">Start Date:</span>
-                                    <p class="text-gray-600 dark:text-gray-400">{{ $event->start_date->format('M d, Y g:i A') }}</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start">
-                                <div class="w-5 h-5 bg-red-100 dark:bg-red-900 rounded flex items-center justify-center mr-2 mt-0.5">
-                                    <svg class="w-3 h-3 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">End Date:</span>
-                                    <p class="text-gray-600 dark:text-gray-400">{{ $event->end_date->format('M d, Y g:i A') }}</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start">
-                                <div class="w-5 h-5 bg-green-100 dark:bg-green-900 rounded flex items-center justify-center mr-2 mt-0.5">
-                                    <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">Location:</span>
-                                    <p class="text-gray-600 dark:text-gray-400">{{ $event->location }}</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start">
-                                <div class="w-5 h-5 bg-yellow-100 dark:bg-yellow-900 rounded flex items-center justify-center mr-2 mt-0.5">
-                                    <svg class="w-3 h-3 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">Category:</span>
-                                    <p class="text-gray-600 dark:text-gray-400">{{ $event->category }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <!-- Quick Actions (At the bottom) -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center">
-                                <div class="w-6 h-6 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center mr-2">
-                                    <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                    </svg>
-                                </div>
-                                <h3 class="text-base font-medium text-gray-900 dark:text-gray-100">Quick Actions</h3>
-                            </div>
-                        </div>
-                        <div class="p-4 space-y-2">
-                            <a href="{{ route('organizer.events.attendance', $event) }}" 
-                               class="flex items-center p-2.5 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                                <div class="w-5 h-5 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center mr-3">
-                                    <svg class="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                                </div>
-                                <span class="text-sm">Manage Attendance</span>
-                            </a>
-                            
-                            <a href="{{ route('organizer.events.tickets', $event) }}" 
-                               class="flex items-center p-2.5 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                                <div class="w-5 h-5 bg-purple-100 dark:bg-purple-900 rounded flex items-center justify-center mr-3">
-                                    <svg class="w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                                </svg>
-                                </div>
-                                <span class="text-sm">View Tickets</span>
-                            </a>
-                            
-                            <a href="{{ route('organizer.events.staff', $event) }}" 
-                               class="flex items-center p-2.5 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                                <div class="w-5 h-5 bg-green-100 dark:bg-green-900 rounded flex items-center justify-center mr-3">
-                                    <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                                </svg>
-                                </div>
-                                <span class="text-sm">Manage Staff</span>
-                            </a>
-                            
-                            <a href="{{ route('organizer.events.qr', $event) }}" 
-                               class="flex items-center p-2.5 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                                <div class="w-5 h-5 bg-orange-100 dark:bg-orange-900 rounded flex items-center justify-center mr-3">
-                                    <svg class="w-3 h-3 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
-                                </svg>
-                                </div>
-                                <span class="text-sm">QR Code Scanner</span>
-                            </a>
-                            
-                            <a href="{{ route('organizer.events.news.index', $event) }}" 
-                               class="flex items-center p-2.5 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                                <div class="w-5 h-5 bg-pink-100 dark:bg-pink-900 rounded flex items-center justify-center mr-3">
-                                    <svg class="w-3 h-3 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
-                                </svg>
-                                </div>
-                                <span class="text-sm">Event News</span>
-                            </a>
-                            
-                            <a href="{{ route('organizer.events.activity-log', $event) }}" 
-                               class="flex items-center p-2.5 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                                <div class="w-5 h-5 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center mr-3">
-                                    <svg class="w-3 h-3 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                </svg>
-                                </div>
-                                <span class="text-sm">Activity Log</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                @endif
             </div>
         </div>
     </div>

@@ -130,6 +130,16 @@ class EventDashboardController extends Controller
         // Load staff settings for staff members
         $staffNotes = $this->loadStaffSettingsFromR2($event->id);
 
+        // Load payout request for owners (only when event has ended and event is not free)
+        $payoutRequest = null;
+        $canPayout = false;
+        if ($isOwner && $event->end_date && now()->gte($event->end_date) && !$event->is_free) {
+            $payoutRequest = \App\Models\EventPayoutRequest::where('event_id', $event->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            $canPayout = true;
+        }
+
         return view('organizer.events.manage', compact(
             'event',
             'salesStats',
@@ -149,7 +159,9 @@ class EventDashboardController extends Controller
             'canManageTicket',
             'staffNotes',
             'layoutType',
-            'canViewGraphs'
+            'canViewGraphs',
+            'payoutRequest',
+            'canPayout'
         ));
     }
 

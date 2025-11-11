@@ -255,6 +255,15 @@ class EventEditController extends Controller
             abort(403, 'Unauthorized access to this event.');
         }
 
+        // Check if this is an info route - if so, always show info view
+        $routeName = request()->route()->getName();
+        $isInfoRoute = str_contains($routeName, '.info.');
+        
+        if ($isInfoRoute) {
+            $layoutType = $isAdmin ? 'admin' : 'organizer';
+            return view('organizer.events.info.basic', compact('event', 'layoutType'));
+        }
+
         // Check if event has ended - if so, show view-only mode
         $eventEnded = $event->end_date && now()->gt($event->end_date);
         if ($eventEnded) {
@@ -318,6 +327,34 @@ class EventEditController extends Controller
         
         if (!$hasAccess) {
             abort(403, 'Unauthorized access to this event.');
+        }
+
+        // Check if this is an info route - if so, always show info view
+        $routeName = request()->route()->getName();
+        $isInfoRoute = str_contains($routeName, '.info.');
+        
+        if ($isInfoRoute) {
+            $layoutType = $isAdmin ? 'admin' : 'organizer';
+            
+            // Load layout data for display only
+            $layoutData = null;
+            $layoutPath = $event->layout_path ?? null;
+            try {
+                $layoutData = $this->loadLayoutDataFromR2($event->id);
+                \Log::info('Info route - Layout data loaded for event ' . $event->id, [
+                    'event_id' => $event->id,
+                    'layout_path' => $layoutPath,
+                    'layout_data_exists' => !empty($layoutData),
+                    'layout_data_count' => is_array($layoutData) ? count($layoutData) : 0,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to load layout data for info view: ' . $e->getMessage(), [
+                    'event_id' => $event->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+            
+            return view('organizer.events.info.layout', compact('event', 'layoutData', 'layoutPath', 'layoutType'));
         }
 
         // Check if event has ended - if so, show info view instead (clean and working)
@@ -438,6 +475,49 @@ class EventEditController extends Controller
         
         if (!$hasAccess) {
             abort(403, 'Unauthorized access to this event.');
+        }
+
+        // Check if this is an info route - if so, always show info view
+        $routeName = request()->route()->getName();
+        $isInfoRoute = str_contains($routeName, '.info.');
+        
+        if ($isInfoRoute) {
+            $layoutType = $isAdmin ? 'admin' : 'organizer';
+            
+            // Load certificate data for info view
+            $certificateData = [];
+            try {
+                $candidates = [
+                    "events/{$event->id}/certificate/certificate.json",
+                    "events/{$event->id}/certificate_data.json",
+                    "events/{$event->id}/certificate/certificate_data.json",
+                    "events/{$event->id}/certificate.json",
+                ];
+                
+                foreach ($candidates as $certificateDataPath) {
+                    if (\Storage::disk('r2')->exists($certificateDataPath)) {
+                        $certificateDataJson = \Storage::disk('r2')->get($certificateDataPath);
+                        $data = json_decode($certificateDataJson, true) ?? [];
+                        $certificateData = $this->normalizeCertificateUrls($event->id, $data);
+                        break;
+                    }
+                }
+            } catch (\Throwable $t) {
+                \Log::warning('Failed to load certificate.json for info view', ['event_id' => $event->id, 'error' => $t->getMessage()]);
+            }
+            
+            // Generate fallback values for event date and location
+            $fallbackWhen = $event && $event->start_date 
+                ? 'held on ' . \Carbon\Carbon::parse($event->start_date)->format('F j, Y \a\t g:i A') . 
+                  ($event->location ? ' at ' . $event->location : '') . '.'
+                : 'Event Date';
+                
+            $fallbackGiven = $event && $event->start_date 
+                ? 'Given this ' . \Carbon\Carbon::parse($event->start_date)->format('jS') . ' day of ' .
+                  \Carbon\Carbon::parse($event->start_date)->format('F, Y') . '.'
+                : 'Event Date';
+            
+            return view('organizer.events.info.certificate', compact('event', 'certificateData', 'fallbackWhen', 'fallbackGiven', 'layoutType'));
         }
 
         // Check if event has ended - if so, show view-only mode
