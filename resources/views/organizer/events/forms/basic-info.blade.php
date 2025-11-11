@@ -23,25 +23,37 @@
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
     @php
-        $eventId = $eventId ?? null;
-        $eventData = is_array($eventData ?? null) ? $eventData : [];
-        $isFreeEventParam = $isFreeEvent ?? false;
-        $event = $event ?? null;
+        // Determine if this is an existing free event that should be locked
+        // Check in order: isFreeEvent parameter, event model, eventData array
+        $isExistingFreeEvent = false;
         
-        $isFreeValue = false;
-        if (!empty($eventData['is_free'])) {
-            $isFreeValue = (bool)$eventData['is_free'];
-        } elseif ($event && isset($event->is_free)) {
-            $isFreeValue = (bool)$event->is_free;
+        if (isset($isFreeEvent) && ($isFreeEvent === true || $isFreeEvent === 1 || $isFreeEvent === '1')) {
+            // Event is explicitly marked as free via parameter (from controller)
+            $isExistingFreeEvent = true;
+        } elseif (isset($event) && is_object($event) && isset($event->is_free) && (bool)$event->is_free === true) {
+            // Event model has is_free set to true
+            $isExistingFreeEvent = true;
+        } elseif (isset($eventData['is_free']) && (bool)$eventData['is_free'] === true) {
+            // EventData array has is_free set to true
+            $isExistingFreeEvent = true;
         }
         
-        $oldIsFree = old('is_free');
-        $isFreeCheckedValue = $oldIsFree !== null ? (bool)$oldIsFree : $isFreeValue;
-        
-        $shouldLockFreeEvent = isset($isFreeEventParam) && ($isFreeEventParam === true || $isFreeEventParam === 1 || $isFreeEventParam === '1');
+        // Determine checkbox checked state (for new events or when not locked)
+        $isFreeChecked = false;
+        if (!$isExistingFreeEvent) {
+            // For new events or paid events, check old input first, then eventData, then event model
+            $oldIsFree = old('is_free');
+            if ($oldIsFree !== null) {
+                $isFreeChecked = (bool)$oldIsFree;
+            } elseif (isset($eventData['is_free'])) {
+                $isFreeChecked = (bool)$eventData['is_free'];
+            } elseif (isset($event) && is_object($event) && isset($event->is_free)) {
+                $isFreeChecked = (bool)$event->is_free;
+            }
+        }
     @endphp
     
-    @if(isset($shouldLockFreeEvent) && $shouldLockFreeEvent === true)
+    @if($isExistingFreeEvent)
         <!-- Event is free and being edited - show read-only display instead of checkbox -->
         <div class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
             <div class="flex items-center space-x-2">
@@ -63,8 +75,8 @@
                     name="is_free" 
                     value="1" 
                     id="is_free_checkbox" 
-                    @if(isset($isFreeCheckedValue) && $isFreeCheckedValue) checked @endif
-                    class="rounded border-gray-300 text-qricket-600"
+                    {{ $isFreeChecked ? 'checked' : '' }}
+                    class="rounded border-gray-300 text-qricket-600 focus:ring-qricket-500"
                 >
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
             </label>
