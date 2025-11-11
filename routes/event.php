@@ -56,7 +56,9 @@ Route::prefix('organizer')->middleware('verified.organizer')->group(function () 
     Route::get('/events/create/certificate/print', [\App\Http\Controllers\Organizer\EventManagement\CertificateController::class, 'certificatePrint'])
         ->name('organizer.events.create.certificate.print');
     Route::post('/events/certificate/upload-logo', [\App\Http\Controllers\Organizer\EventManagement\CertificateController::class, 'uploadLogo']);
+    Route::post('/events/certificate/remove-logo', [\App\Http\Controllers\Organizer\EventManagement\CertificateController::class, 'removeLogo']);
     Route::post('/events/certificate/upload-signature', [\App\Http\Controllers\Organizer\EventManagement\CertificateController::class, 'uploadSignature']);
+    Route::post('/events/certificate/remove-signature', [\App\Http\Controllers\Organizer\EventManagement\CertificateController::class, 'removeSignature']);
 
     // Step 5 - Staff
     Route::get('/events/create/staff', [\App\Http\Controllers\Organizer\EventManagement\StaffController::class, 'step5'])->name('organizer.events.create.staff');

@@ -30,16 +30,35 @@
     </div>
     </div>
 
+    <!-- Informative Note for Design & Layout -->
+    <div class="bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500 dark:border-purple-400 rounded-r-lg p-4 mb-6">
+        <div class="flex items-start">
+            <svg class="w-5 h-5 text-purple-500 dark:text-purple-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+            </svg>
+            <div class="flex-1">
+                <h4 class="text-sm font-semibold text-purple-900 dark:text-purple-100 mb-2">Design & Layout Guide</h4>
+                <ul class="text-sm text-purple-800 dark:text-purple-200 space-y-1.5 list-disc list-inside">
+                    <li><strong>Poster:</strong> Upload a high-quality poster image (landscape orientation recommended). This will be displayed as the main visual on your event page.</li>
+                    <li><strong>Thumbnail:</strong> Upload a square thumbnail image. This appears in event listings, cards, and search results.</li>
+                    <li><strong>Layout Components:</strong> Add custom layout sections to showcase event details, schedules, speakers, sponsors, or any additional information. Click the "Add Layout" button to add components.</li>
+                    <li><strong>Footer Settings:</strong> Configure contact information and social media links that appear at the bottom of your event page.</li>
+                </ul>
+                <p class="text-xs text-purple-700 dark:text-purple-300 mt-3 italic">💡 Tip: Use high-resolution images for best quality. Supported formats: PNG, JPG, WEBP. Maximum file size: 5MB per image.</p>
+            </div>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Poster</label>
             <input id="poster-input" type="file" name="poster" accept="image/*" class="block w-full text-sm text-gray-900 dark:text-gray-100 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-qricket-500 file:text-white hover:file:bg-qricket-600 dark:file:bg-qricket-600 dark:hover:file:bg-qricket-700" onchange="previewPoster(this)">
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, or WEBP • up to 5MB</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG, or WEBP • up to 5MB • Landscape orientation recommended</p>
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thumbnail</label>
             <input id="thumbnail-input" type="file" name="thumbnail" accept="image/*" class="block w-full text-sm text-gray-900 dark:text-gray-100 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-qricket-500 file:text-white hover:file:bg-qricket-600 dark:file:bg-qricket-600 dark:hover:file:bg-qricket-700" onchange="previewThumbnail(this)">
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Square image recommended • up to 5MB</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Square image recommended (1:1 ratio) • up to 5MB</p>
         </div>
     </div>
 
@@ -53,8 +72,14 @@
     <input type="hidden" id="layout_data_input" name="layout_json" value="{{ old('layout_json', isset($layoutData)?json_encode($layoutData):'[]') }}" />
 
     <!-- Layout Builder Surface -->
-    <div id="layoutComponents" class="space-y-4 min-h-[240px] border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
-        <!-- Components will render here; scripts read/write #layout_json -->
+    <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Layout Components</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Add custom sections to enhance your event page. Each component can display different types of content like schedules, speakers, sponsors, or custom information blocks.</p>
+        </div>
+        <div id="layoutComponents" class="space-y-4 min-h-[240px]">
+            <!-- Components will render here; scripts read/write #layout_json -->
+        </div>
     </div>
 
     <!-- Floating Add Layout Button -->
@@ -75,8 +100,8 @@
 
     <!-- Footer Configuration (required) -->
     <div class="mt-10 border-t border-gray-200 dark:border-gray-700 pt-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Footer Settings</h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Configure the footer that appears on your event pages.</p>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Footer Settings</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Configure the footer that appears at the bottom of your event pages. This section helps attendees contact you and find you on social media.</p>
         
         <!-- Basic Information (Title/Description removed) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

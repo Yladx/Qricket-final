@@ -740,6 +740,90 @@ class CertificateController extends Controller
         }
     }
 
+    public function removeLogo(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+            'side' => 'required|in:left,right',
+        ]);
+        
+        $eventId = (int) $request->input('id');
+        $side = $request->input('side');
+        $event = Event::find($eventId);
+        $isAdmin = Auth::guard('admin')->check();
+        $isOwner = $event && $event->user_id === Auth::id();
+        $isAdminEvent = $event && $event->user_id === null && $isAdmin;
+        
+        if (!$event || (!$isOwner && !$isAdminEvent)) {
+            return response()->json(['success' => false, 'message' => 'Not authorized'], 403);
+        }
+        
+        try {
+            // Delete the logo file from R2 storage
+            $filename = $side === 'left' ? 'logo_left.png' : 'logo_right.png';
+            $path = "events/{$eventId}/certificate/{$filename}";
+            if (Storage::disk('r2')->exists($path)) {
+                Storage::disk('r2')->delete($path);
+            }
+            
+            // Update JSON data to remove logo URL
+            $data = $this->loadCertificateDataFromR2($eventId);
+            $logoKey = $side === 'left' ? 'logo_left_url' : 'logo_right_url';
+            unset($data[$logoKey]);
+            $this->storeCertificateDataInR2($eventId, $data);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Logo removed successfully'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Logo removal failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Removal failed'], 500);
+        }
+    }
+
+    public function removeSignature(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+            'signatory_num' => 'required|integer|min:1|max:4',
+        ]);
+        
+        $eventId = (int) $request->input('id');
+        $signatoryNum = (int) $request->input('signatory_num');
+        $event = Event::find($eventId);
+        $isAdmin = Auth::guard('admin')->check();
+        $isOwner = $event && $event->user_id === Auth::id();
+        $isAdminEvent = $event && $event->user_id === null && $isAdmin;
+        
+        if (!$event || (!$isOwner && !$isAdminEvent)) {
+            return response()->json(['success' => false, 'message' => 'Not authorized'], 403);
+        }
+        
+        try {
+            // Delete the signature file from R2 storage
+            $filename = "signature_{$signatoryNum}.enc";
+            $path = "events/{$eventId}/certificate/{$filename}";
+            if (Storage::disk('r2')->exists($path)) {
+                Storage::disk('r2')->delete($path);
+            }
+            
+            // Update JSON data to remove signature path
+            $data = $this->loadCertificateDataFromR2($eventId);
+            $signatureKey = "sig_{$signatoryNum}_signature";
+            unset($data[$signatureKey]);
+            $this->storeCertificateDataInR2($eventId, $data);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Signature removed successfully'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Signature removal failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Removal failed'], 500);
+        }
+    }
+
     // Stream certificate assets (logos/signatures if image) to avoid external DNS issues
     public function serveAsset(Request $request, string $file)
     {
@@ -947,7 +1031,7 @@ class CertificateController extends Controller
         if (!Storage::disk('r2')->exists($path)) {
             abort(404, 'Certificate not found');
         }
-
+ 
         $stream = Storage::disk('r2')->readStream($path);
         return response()->stream(function() use ($stream) {
             fpassthru($stream);

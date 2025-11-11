@@ -471,6 +471,30 @@
                 }
                 // Show remove button
                 showSignatureRemoveButton(signatoryNum);
+                
+                // Update hidden JSON field with new signature path
+                const jsonEl = document.getElementById('certificate_data_json');
+                if (jsonEl && res.signature_path) {
+                    try {
+                        const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
+                        current[`sig_${signatoryNum}_signature`] = res.signature_path;
+                        jsonEl.value = JSON.stringify(current);
+                    } catch (e) {
+                        console.error('Failed to update certificate_data_json:', e);
+                    }
+                }
+                
+                // Update certificate preview signature
+                if (typeof updateSignatoryPreview === 'function') {
+                    updateSignatoryPreview();
+                }
+                
+                // Refresh preview with updated data
+                if (typeof collectPayload === 'function' && typeof refreshPreview === 'function') {
+                    const payload = collectPayload();
+                    refreshPreview(payload);
+                }
+                
                 if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                     autosaveDebounced();
                 }
@@ -503,46 +527,95 @@
                 return;
             }
             
-            // Clear preview
-            const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
-            if (previewEl) {
-                previewEl.src = '';
-                previewEl.classList.add('hidden');
-            }
-            
-            // Reset status
-            const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
-            if (statusEl) {
-                statusEl.textContent = 'No file';
-                statusEl.className = 'text-xs text-gray-500 dark:text-gray-400';
-            }
-            
-            // Clear file input
-            const fileInput = document.getElementById(`sig_${signatoryNum}_file`);
-            if (fileInput) {
-                fileInput.value = '';
-            }
-            
-            // Hide remove button
-            hideSignatureRemoveButton(signatoryNum);
-            
-            // Update certificate data to remove signature path
             try {
-                const jsonEl = document.getElementById('certificate_data_json');
-                if (jsonEl) {
-                    const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
-                    delete current[`sig_${signatoryNum}_signature`];
-                    jsonEl.value = JSON.stringify(current);
-                }
+                // Call backend API to remove signature from R2 and update JSON
+                const formData = new FormData();
+                formData.append('id', eventId);
+                formData.append('signatory_num', signatoryNum);
+                formData.append('_token', csrf);
                 
-                // Trigger autosave
-                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
-                    autosaveDebounced();
-                }
+                const response = await fetch('/organizer/events/certificate/remove-signature', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrf
+                    },
+                    body: formData
+                });
                 
-                showAutosaveIndicator('success');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Clear preview
+                    const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
+                    if (previewEl) {
+                        previewEl.src = '';
+                        previewEl.classList.add('hidden');
+                    }
+                    
+                    // Reset status
+                    const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
+                    if (statusEl) {
+                        statusEl.textContent = 'No file';
+                        statusEl.className = 'text-xs text-gray-500 dark:text-gray-400';
+                    }
+                    
+                    // Clear file input
+                    const fileInput = document.getElementById(`sig_${signatoryNum}_file`);
+                    if (fileInput) {
+                        fileInput.value = '';
+                    }
+                    
+                    // Hide remove button
+                    hideSignatureRemoveButton(signatoryNum);
+                    
+                    // Update certificate data JSON to remove signature path
+                    const jsonEl = document.getElementById('certificate_data_json');
+                    if (jsonEl) {
+                        const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
+                        delete current[`sig_${signatoryNum}_signature`];
+                        jsonEl.value = JSON.stringify(current);
+                    }
+                    
+                    // Update signature image in certificate preview
+                    const previewWrapper = document.getElementById('cert_preview_wrapper');
+                    if (previewWrapper) {
+                        const signatoriesContainer = previewWrapper.querySelector('#signatories-container');
+                        if (signatoriesContainer) {
+                            const nameEl = signatoriesContainer.querySelector(`#sig_${signatoryNum}_name`);
+                            if (nameEl) {
+                                const signatoryItem = nameEl.closest('.text-center');
+                                if (signatoryItem) {
+                                    const relativeContainer = signatoryItem.querySelector('.relative');
+                                    if (relativeContainer) {
+                                        const signatureImg = relativeContainer.querySelector('img');
+                                        if (signatureImg) {
+                                            signatureImg.src = '';
+                                            signatureImg.style.display = 'none';
+                                            signatureImg.removeAttribute('src');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Reload certificate data from R2 to ensure consistency
+                    // Use collectPayload to get current data and refresh preview
+                    if (typeof collectPayload === 'function' && typeof refreshPreview === 'function') {
+                        const payload = collectPayload();
+                        refreshPreview(payload);
+                    } else if (typeof syncCertificateData === 'function') {
+                        await syncCertificateData();
+                    }
+                    
+                    showAutosaveIndicator('success');
+                } else {
+                    throw new Error(data.message || 'Failed to remove signature');
+                }
             } catch (e) {
                 console.error('Failed to remove signature:', e);
+                alert('Failed to remove signature: ' + (e.message || 'Unknown error'));
                 showAutosaveIndicator('error');
             }
         }
@@ -868,6 +941,40 @@
                         };
                     }
                     
+                    // Update hidden JSON field with new logo URL
+                    const jsonEl = document.getElementById('certificate_data_json');
+                    if (jsonEl) {
+                        try {
+                            const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
+                            current[`logo_${side}_url`] = data.url;
+                            jsonEl.value = JSON.stringify(current);
+                        } catch (e) {
+                            console.error('Failed to update certificate_data_json:', e);
+                        }
+                    }
+                    
+                    // Update certificate preview logo image in preview wrapper
+                    const previewWrapper = document.getElementById('cert_preview_wrapper');
+                    if (previewWrapper) {
+                        const previewImg = previewWrapper.querySelector(`#logo_${side}_img`);
+                        if (previewImg) {
+                            previewImg.src = data.url + '?t=' + Date.now();
+                            previewImg.style.display = 'block';
+                            previewImg.onload = function() {
+                                this.style.display = 'block';
+                            };
+                            previewImg.onerror = function() {
+                                this.style.display = 'none';
+                            };
+                        }
+                    }
+                    
+                    // Refresh preview with updated data
+                    if (typeof collectPayload === 'function' && typeof refreshPreview === 'function') {
+                        const payload = collectPayload();
+                        refreshPreview(payload);
+                    }
+                    
                     if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                         autosaveDebounced();
                     }
@@ -921,53 +1028,90 @@
                 return;
             }
             
-            // Clear preview
-            const previewEl = document.getElementById(`logo_${side}_preview`);
-            if (previewEl) {
-                previewEl.src = '';
-                previewEl.classList.add('hidden');
-            }
-            
-            // Reset status
-            const statusEl = document.getElementById(`logo_${side}_status`);
-            if (statusEl) {
-                statusEl.textContent = 'No file';
-                statusEl.className = 'text-xs text-gray-500 dark:text-gray-400';
-            }
-            
-            // Clear file input
-            const fileInput = document.getElementById(`logo_${side}_file`);
-            if (fileInput) {
-                fileInput.value = '';
-            }
-            
-            // Hide remove button
-            hideLogoRemoveButton(side);
-            
-            // Update certificate data to remove logo URL
             try {
-                const jsonEl = document.getElementById('certificate_data_json');
-                if (jsonEl) {
-                    const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
-                    delete current[`logo_${side}_url`];
-                    jsonEl.value = JSON.stringify(current);
-                }
+                // Call backend API to remove logo from R2 and update JSON
+                const formData = new FormData();
+                formData.append('id', eventId);
+                formData.append('side', side);
+                formData.append('_token', csrf);
                 
-                // Update preview image in certificate preview
-                const img = document.getElementById(`logo_${side}_img`);
-                if (img) {
-                    img.src = '';
-                    img.style.display = 'none';
-                }
+                const response = await fetch('/organizer/events/certificate/remove-logo', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrf
+                    },
+                    body: formData
+                });
                 
-                // Trigger autosave
-                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
-                    autosaveDebounced();
-                }
+                const data = await response.json();
                 
-                showAutosaveIndicator('success');
+                if (data.success) {
+                    // Clear preview
+                    const previewEl = document.getElementById(`logo_${side}_preview`);
+                    if (previewEl) {
+                        previewEl.src = '';
+                        previewEl.classList.add('hidden');
+                    }
+                    
+                    // Reset status
+                    const statusEl = document.getElementById(`logo_${side}_status`);
+                    if (statusEl) {
+                        statusEl.textContent = 'No file';
+                        statusEl.className = 'text-xs text-gray-500 dark:text-gray-400';
+                    }
+                    
+                    // Clear file input
+                    const fileInput = document.getElementById(`logo_${side}_file`);
+                    if (fileInput) {
+                        fileInput.value = '';
+                    }
+                    
+                    // Hide remove button
+                    hideLogoRemoveButton(side);
+                    
+                    // Update certificate data JSON to remove logo URL
+                    const jsonEl = document.getElementById('certificate_data_json');
+                    if (jsonEl) {
+                        const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
+                        delete current[`logo_${side}_url`];
+                        jsonEl.value = JSON.stringify(current);
+                    }
+                    
+                    // Update preview image in certificate preview
+                    const previewWrapper = document.getElementById('cert_preview_wrapper');
+                    if (previewWrapper) {
+                        const img = previewWrapper.querySelector(`#logo_${side}_img`);
+                        if (img) {
+                            img.src = '';
+                            img.style.display = 'none';
+                            img.removeAttribute('src');
+                        }
+                    }
+                    // Also check if logo image exists elsewhere on the page
+                    const img = document.getElementById(`logo_${side}_img`);
+                    if (img) {
+                        img.src = '';
+                        img.style.display = 'none';
+                        img.removeAttribute('src');
+                    }
+                    
+                    // Reload certificate data from R2 to ensure consistency
+                    // Use collectPayload to get current data and refresh preview
+                    if (typeof collectPayload === 'function' && typeof refreshPreview === 'function') {
+                        const payload = collectPayload();
+                        refreshPreview(payload);
+                    } else if (typeof syncCertificateData === 'function') {
+                        await syncCertificateData();
+                    }
+                    
+                    showAutosaveIndicator('success');
+                } else {
+                    throw new Error(data.message || 'Failed to remove logo');
+                }
             } catch (e) {
                 console.error('Failed to remove logo:', e);
+                alert('Failed to remove logo: ' + (e.message || 'Unknown error'));
                 showAutosaveIndicator('error');
             }
         }
@@ -1071,10 +1215,32 @@
             // Update logo images in preview
             ['left', 'right'].forEach(side => {
                 const logoUrl = payload[`logo_${side}_url`];
+                // Look for logo image in the certificate preview wrapper
+                const previewWrapper = document.getElementById('cert_preview_wrapper');
+                if (previewWrapper) {
+                    const previewImg = previewWrapper.querySelector(`#logo_${side}_img`);
+                    if (previewImg) {
+                        if (logoUrl && logoUrl.trim() !== '') {
+                            previewImg.src = logoUrl + '?t=' + Date.now(); // Add timestamp to force reload
+                            previewImg.style.display = 'block';
+                            previewImg.onload = function() {
+                                this.style.display = 'block';
+                            };
+                            previewImg.onerror = function() {
+                                this.style.display = 'none';
+                            };
+                        } else {
+                            previewImg.src = '';
+                            previewImg.style.display = 'none';
+                            previewImg.removeAttribute('src');
+                        }
+                    }
+                }
+                // Also update if logo image exists elsewhere on the page
                 const previewImg = document.getElementById(`logo_${side}_img`);
                 if (previewImg) {
-                    if (logoUrl) {
-                        previewImg.src = logoUrl + '?t=' + Date.now(); // Add timestamp to force reload
+                    if (logoUrl && logoUrl.trim() !== '') {
+                        previewImg.src = logoUrl + '?t=' + Date.now();
                         previewImg.style.display = 'block';
                         previewImg.onload = function() {
                             this.style.display = 'block';
@@ -1083,10 +1249,61 @@
                             this.style.display = 'none';
                         };
                     } else {
+                        previewImg.src = '';
                         previewImg.style.display = 'none';
+                        previewImg.removeAttribute('src');
                     }
                 }
             });
+            
+            // Update signature images in preview
+            const signatoryCount = payload.signatory_count || 0;
+            for (let i = 1; i <= signatoryCount; i++) {
+                const signaturePath = payload[`sig_${i}_signature`];
+                const previewWrapper = document.getElementById('cert_preview_wrapper');
+                if (previewWrapper) {
+                    const signatoriesContainer = previewWrapper.querySelector('#signatories-container');
+                    if (signatoriesContainer) {
+                        // Find signatory by matching the name element ID
+                        const nameEl = signatoriesContainer.querySelector(`#sig_${i}_name`);
+                        if (nameEl) {
+                            // Find the parent text-center div
+                            const signatoryItem = nameEl.closest('.text-center');
+                            if (signatoryItem) {
+                                const relativeContainer = signatoryItem.querySelector('.relative');
+                                if (relativeContainer) {
+                                    let signatureImg = relativeContainer.querySelector('img');
+                                    if (signaturePath) {
+                                        // Build the signature URL using the asset route format
+                                        const signatureUrl = `/organizer/events/certificate/asset/signature_${i}.enc?id=${eventId}`;
+                                        if (!signatureImg) {
+                                            // Create img element if it doesn't exist
+                                            signatureImg = document.createElement('img');
+                                            signatureImg.className = 'absolute left-1/2 -translate-x-1/2 h-10 object-contain select-none pointer-events-none certificate-image';
+                                            signatureImg.alt = `Signature ${i}`;
+                                            signatureImg.style.bottom = '2px';
+                                            relativeContainer.appendChild(signatureImg);
+                                        }
+                                        signatureImg.src = signatureUrl + '?t=' + Date.now();
+                                        signatureImg.style.display = 'block';
+                                        signatureImg.onload = function() {
+                                            this.style.display = 'block';
+                                        };
+                                        signatureImg.onerror = function() {
+                                            this.style.display = 'none';
+                                        };
+                                    } else if (signatureImg) {
+                                        // Hide signature if no path
+                                        signatureImg.src = '';
+                                        signatureImg.style.display = 'none';
+                                        signatureImg.removeAttribute('src');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             
             // Apply colors
             const primary = payload.theme_primary;
