@@ -54,41 +54,7 @@
             </div>
         </div>
         
-        <!-- Certificate Details -->
-        <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
-            <h4 class="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-3 flex items-center">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Certificate Information
-            </h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                @if(isset($certificateData['title']))
-                    <div class="flex justify-between">
-                        <span class="text-amber-700 dark:text-amber-300">Certificate Title:</span>
-                        <span class="font-medium text-amber-900 dark:text-amber-100">{{ $certificateData['title'] }}</span>
-                    </div>
-                @endif
-                @if(isset($certificateData['subtitle']))
-                    <div class="flex justify-between">
-                        <span class="text-amber-700 dark:text-amber-300">Subtitle:</span>
-                        <span class="font-medium text-amber-900 dark:text-amber-100">{{ $certificateData['subtitle'] }}</span>
-                    </div>
-                @endif
-                @if(isset($certificateData['signature_name']))
-                    <div class="flex justify-between">
-                        <span class="text-amber-700 dark:text-amber-300">Signature Name:</span>
-                        <span class="font-medium text-amber-900 dark:text-amber-100">{{ $certificateData['signature_name'] }}</span>
-                    </div>
-                @endif
-                @if(isset($certificateData['signature_title']))
-                    <div class="flex justify-between">
-                        <span class="text-amber-700 dark:text-amber-300">Signature Title:</span>
-                        <span class="font-medium text-amber-900 dark:text-amber-100">{{ $certificateData['signature_title'] }}</span>
-                    </div>
-                @endif
-            </div>
-        </div>
+     
     @else
         <!-- Empty State -->
         <div class="text-center py-12">

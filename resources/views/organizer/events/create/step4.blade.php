@@ -93,111 +93,57 @@
     </div>
 
     <script>
-        // Prevent any inline handlers from executing by blocking their execution immediately
-        // This runs as soon as the script tag is parsed, before any inline handlers can fire
-        (function preventInlineHandlers() {
-            // Override confirm to prevent dialogs on load (temporary, will be restored after initialization)
-            const originalConfirm = window.confirm;
-            let confirmBlocked = true;
-            window.confirm = function(message) {
-                if (confirmBlocked && message && message.includes('remove')) {
-                    console.warn('Blocked confirm dialog on page load:', message);
-                    return false; // Block the confirmation
-                }
-                return originalConfirm.call(window, message);
-            };
-            
-            // Restore confirm after a short delay (once initialization is complete)
-            setTimeout(function() {
-                confirmBlocked = false;
-                window.confirm = originalConfirm;
-            }, 2000); // 2 seconds should be enough for initialization
-        })();
-        
-        var csrfEl = document.querySelector('meta[name="csrf-token"]');
-        var csrf = (csrfEl && csrfEl.getAttribute) ? csrfEl.getAttribute('content') : '';
-        var eventId = new URLSearchParams(location.search).get('id');
-        var existingCertificateData = @json($certificateData ?? []);
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const eventId = new URLSearchParams(location.search).get('id');
+        const existingCertificateData = @json($certificateData ?? []);
 
         function syncPreview(idInput, idPreview){
             const elI = document.getElementById(idInput);
             const elP = document.getElementById(idPreview);
             if (!elI || !elP) return;
-            elI.addEventListener('input', function() { 
-                if (elP) elP.textContent = elI.value; 
-            });
+            elI.addEventListener('input', () => { elP.textContent = elI.value; });
         }
-        
         // Sync preview for basic fields
-        (function() {
-            try {
-                var fieldsToSync = ['org_line1','org_line2','org_school','recipient_name','event_title','event_when','event_given'];
-                fieldsToSync.forEach(function(k) {
-                    if (typeof syncPreview === 'function') {
-                        syncPreview(k + '_input', k);
-                    }
-                });
-            } catch(e) {
-                console.error('Error syncing preview fields:', e);
-            }
-        })();
+        ['org_line1','org_line2','org_school','recipient_name','event_title','event_when','event_given']
+            .forEach(k => syncPreview(`${k}_input`, k));
         
         // Sync preview for dynamic signatory fields
         function syncAllSignatories() {
-            try {
-                var signatoryInputs = document.querySelectorAll('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]');
-                for (var si = 0; si < signatoryInputs.length; si++) {
-                    var input = signatoryInputs[si];
-                    if (input && input.name) {
-                        var fieldName = input.name;
-                        var previewId = fieldName.replace('_input', '').replace('sig_', 'sig_');
-                        if (typeof syncPreview === 'function') {
-                            syncPreview(fieldName, previewId);
-                        }
-                    }
-                }
-            } catch(e) {
-                console.error('Error in syncAllSignatories:', e);
-            }
+            document.querySelectorAll('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]').forEach(input => {
+                const fieldName = input.name;
+                const previewId = fieldName.replace('_input', '').replace('sig_', 'sig_');
+                syncPreview(fieldName, previewId);
+            });
         }
         
         // Update preview when signatories change
         function updateSignatoryPreview() {
-            try {
-                // Remove all existing signatory previews
-                var previewElements = document.querySelectorAll('[id^="sig_"][id$="_name"], [id^="sig_"][id$="_title"]');
-                for (var pe = 0; pe < previewElements.length; pe++) {
-                    var el = previewElements[pe];
-                    if (el) {
-                        el.textContent = '';
+            // Remove all existing signatory previews
+            document.querySelectorAll('[id^="sig_"][id$="_name"], [id^="sig_"][id$="_title"]').forEach(el => {
+                el.textContent = '';
+            });
+            
+            // Add current signatories to preview
+            const signatoryItems = document.querySelectorAll('.signatory-item');
+            signatoryItems.forEach((item, index) => {
+                const signatoryNum = index + 1;
+                const nameInput = item.querySelector(`input[name="sig_${signatoryNum}_name"]`);
+                const titleInput = item.querySelector(`input[name="sig_${signatoryNum}_title"]`);
+                
+                if (nameInput) {
+                    const namePreview = document.getElementById(`sig_${signatoryNum}_name`);
+                    if (namePreview) {
+                        namePreview.textContent = nameInput.value || `Signatory ${signatoryNum}`;
                     }
                 }
                 
-                // Add current signatories to preview
-                var signatoryItems = document.querySelectorAll('.signatory-item');
-                for (var idx = 0; idx < signatoryItems.length; idx++) {
-                    var item = signatoryItems[idx];
-                    var signatoryNum = idx + 1;
-                    var nameInput = item.querySelector('input[name="sig_' + signatoryNum + '_name"]');
-                    var titleInput = item.querySelector('input[name="sig_' + signatoryNum + '_title"]');
-                    
-                    if (nameInput) {
-                        var namePreview = document.getElementById('sig_' + signatoryNum + '_name');
-                        if (namePreview) {
-                            namePreview.textContent = nameInput.value || ('Signatory ' + signatoryNum);
-                        }
-                    }
-                    
-                    if (titleInput) {
-                        var titlePreview = document.getElementById('sig_' + signatoryNum + '_title');
-                        if (titlePreview) {
-                            titlePreview.textContent = titleInput.value || 'Signature';
-                        }
+                if (titleInput) {
+                    const titlePreview = document.getElementById(`sig_${signatoryNum}_title`);
+                    if (titlePreview) {
+                        titlePreview.textContent = titleInput.value || 'Signature';
                     }
                 }
-            } catch(e) {
-                console.error('Error in updateSignatoryPreview:', e);
-            }
+            });
         }
         
         // Initial sync
@@ -280,7 +226,7 @@
             newSignatory.innerHTML = 
                 '<div class="flex items-center justify-between mb-2">' +
                     '<h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory ' + sigNum + '</h4>' +
-                    '<button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" data-signatory="' + sigNum + '">' +
+                    '<button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" onclick="window.removeSignatory(' + sigNum + ')">' +
                         '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
                             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
                         '</svg>' +
@@ -328,14 +274,10 @@
                 
                 // Attach event listeners after element is added to DOM (prevents onclick from firing on load)
                 const fileInput = document.getElementById(`sig_${sigNum}_file`);
-                const removeBtn = newSignatory.querySelector('.remove-signatory-btn');
+                const removeBtn = document.getElementById(`sig_${sigNum}_remove_btn`);
                 
                 if (fileInput) {
-                    // Clone to remove any existing handlers
-                    const newFileInput = fileInput.cloneNode(true);
-                    fileInput.parentNode.replaceChild(newFileInput, fileInput);
-                    newFileInput.addEventListener('change', function(e) {
-                        e.stopPropagation();
+                    fileInput.addEventListener('change', function() {
                         if (typeof window.uploadSignature === 'function') {
                             window.uploadSignature(sigNum);
                         }
@@ -343,14 +285,11 @@
                 }
                 
                 if (removeBtn) {
-                    // Remove any onclick attributes and attach event listener
-                    removeBtn.removeAttribute('onclick');
-                    removeBtn.setAttribute('data-signatory', sigNum);
                     removeBtn.addEventListener('click', function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (typeof window.removeSignatory === 'function') {
-                            window.removeSignatory(sigNum);
+                        if (typeof window.removeSignature === 'function') {
+                            window.removeSignature(sigNum);
                         }
                     });
                 }
@@ -371,13 +310,9 @@
             }
             
             // Show remove buttons for all signatories
-            var removeBtns = document.querySelectorAll('.remove-signatory-btn');
-            for (var rb = 0; rb < removeBtns.length; rb++) {
-                var btn = removeBtns[rb];
-                if (btn) {
-                    btn.classList.remove('hidden');
-                }
-            }
+            document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
+                btn.classList.remove('hidden');
+            });
             
             // Sync with preview
             updateSignatoryPreview();
@@ -392,8 +327,6 @@
         
         // Define removeSignatory function
         window.removeSignatory = function removeSignatory(signatoryNum) {
-            console.log('removeSignatory called for signatory:', signatoryNum, 'current count:', signatoryCount);
-            
             if (signatoryCount <= 1) {
                 if (typeof Swal !== 'undefined' && window.Swal) {
                     Swal.fire({
@@ -428,99 +361,77 @@
             
             // Hide remove buttons if only one signatory left
             if (signatoryCount === 1) {
-                var hideBtns = document.querySelectorAll('.remove-signatory-btn');
-                for (var hb = 0; hb < hideBtns.length; hb++) {
-                    var btn = hideBtns[hb];
-                    if (btn) {
-                        btn.classList.add('hidden');
-                    }
-                }
+                document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
+                    btn.classList.add('hidden');
+                });
             }
             
             // Renumber remaining signatories
-            var remainingSignatories = document.querySelectorAll('.signatory-item');
-            for (var remIdx = 0; remIdx < remainingSignatories.length; remIdx++) {
-                var item = remainingSignatories[remIdx];
-                var newNum = remIdx + 1;
+            const remainingSignatories = document.querySelectorAll('.signatory-item');
+            remainingSignatories.forEach((item, index) => {
+                const newNum = index + 1;
                 item.setAttribute('data-signatory', newNum);
                 
                 // Update all input IDs and names
-                var nameInput = item.querySelector('input[name^="sig_"][name$="_name"]');
-                var titleInput = item.querySelector('input[name^="sig_"][name$="_title"]');
-                var fileInput = item.querySelector('input[type="file"][id^="sig_"]');
-                var statusEl = item.querySelector('[id^="sig_"][id$="_status"]');
+                const nameInput = item.querySelector('input[name^="sig_"][name$="_name"]');
+                const titleInput = item.querySelector('input[name^="sig_"][name$="_title"]');
+                const fileInput = item.querySelector('input[type="file"][id^="sig_"]');
+                const statusEl = item.querySelector('[id^="sig_"][id$="_status"]');
                 
                 if (nameInput) {
-                    nameInput.id = 'sig_' + newNum + '_name_input';
-                    nameInput.name = 'sig_' + newNum + '_name';
+                    nameInput.id = `sig_${newNum}_name_input`;
+                    nameInput.name = `sig_${newNum}_name`;
                 }
                 if (titleInput) {
-                    titleInput.id = 'sig_' + newNum + '_title_input';
-                    titleInput.name = 'sig_' + newNum + '_title';
+                    titleInput.id = `sig_${newNum}_title_input`;
+                    titleInput.name = `sig_${newNum}_title`;
                 }
                 if (fileInput) {
-                    fileInput.id = 'sig_' + newNum + '_file';
-                    fileInput.name = 'sig_' + newNum + '_file';
+                    fileInput.id = `sig_${newNum}_file`;
+                    fileInput.name = `sig_${newNum}_file`;
                     // Remove old event listeners and add new one
-                    var newFileInput = fileInput.cloneNode(true);
+                    const newFileInput = fileInput.cloneNode(true);
                     fileInput.parentNode.replaceChild(newFileInput, fileInput);
-                    (function(sigNum) {
-                        newFileInput.addEventListener('change', function() {
-                            if (typeof window.uploadSignature === 'function') {
-                                window.uploadSignature(sigNum);
-                            }
-                        });
-                    })(newNum);
+                    newFileInput.addEventListener('change', function() {
+                        if (typeof window.uploadSignature === 'function') {
+                            window.uploadSignature(newNum);
+                        }
+                    });
                 }
                 if (statusEl) {
-                    statusEl.id = 'sig_' + newNum + '_status';
+                    statusEl.id = `sig_${newNum}_status`;
                 }
-                var previewEl = item.querySelector('[id^="sig_"][id$="_preview"]');
+                const previewEl = item.querySelector(`[id^="sig_"][id$="_preview"]`);
                 if (previewEl) {
-                    previewEl.id = 'sig_' + newNum + '_preview';
+                    previewEl.id = `sig_${newNum}_preview`;
                 }
-                var sigRemoveBtn = document.getElementById('sig_' + newNum + '_remove_btn') || item.querySelector('[id^="sig_"][id$="_remove_btn"]');
+                const sigRemoveBtn = document.getElementById(`sig_${newNum}_remove_btn`) || item.querySelector(`[id^="sig_"][id$="_remove_btn"]`);
                 if (sigRemoveBtn) {
-                    sigRemoveBtn.id = 'sig_' + newNum + '_remove_btn';
+                    sigRemoveBtn.id = `sig_${newNum}_remove_btn`;
                     // Remove old event listeners and add new one
-                    var newRemoveBtn = sigRemoveBtn.cloneNode(true);
+                    const newRemoveBtn = sigRemoveBtn.cloneNode(true);
                     sigRemoveBtn.parentNode.replaceChild(newRemoveBtn, sigRemoveBtn);
-                    (function(sigNum) {
-                        newRemoveBtn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (typeof window.removeSignature === 'function') {
-                                window.removeSignature(sigNum);
-                            }
-                        });
-                    })(newNum);
+                    newRemoveBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof window.removeSignature === 'function') {
+                            window.removeSignature(newNum);
+                        }
+                    });
                 }
                 
-                // Update remove button data attribute and event listener
-                var removeBtn = item.querySelector('.remove-signatory-btn');
+                // Update remove signatory button onclick
+                const removeBtn = item.querySelector('.remove-signatory-btn');
                 if (removeBtn) {
-                    removeBtn.removeAttribute('onclick');
-                    removeBtn.setAttribute('data-signatory', newNum);
-                    // Clone and replace to ensure clean event listener
-                    var newRemoveBtn = removeBtn.cloneNode(true);
-                    removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
-                    (function(sigNum) {
-                        newRemoveBtn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (typeof window.removeSignatory === 'function') {
-                                window.removeSignatory(sigNum);
-                            }
-                        });
-                    })(newNum);
+                    removeBtn.setAttribute('onclick', `window.removeSignatory(${newNum})`);
                 }
                 
                 // Update heading
-                var heading = item.querySelector('h4');
+                const heading = item.querySelector('h4');
                 if (heading) {
-                    heading.textContent = 'Signatory ' + newNum;
+                    heading.textContent = `Signatory ${newNum}`;
                 }
-            }
+            });
             
             // Update preview
             updateSignatoryPreview();
@@ -529,9 +440,119 @@
             if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                 autosaveDebounced();
             }
-            
-            console.log('removeSignatory completed successfully');
         };
+        
+        // Update uploadSignature to handle dynamic signatory numbers
+        const originalUploadSignature = window.uploadSignature;
+        window.uploadSignature = async function(signatoryNum){
+            const file = document.getElementById(`sig_${signatoryNum}_file`)?.files?.[0];
+            if (!file) return;
+            
+            // Show immediate preview using FileReader
+            const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
+            if (previewEl && file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewEl.src = e.target.result;
+                    previewEl.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            const fd = new FormData();
+            fd.append('event_id', eventId);
+            fd.append('signatory_num', String(signatoryNum));
+            fd.append('signature', file);
+            const resp = await fetch('/organizer/events/certificate/upload-signature', { method:'POST', headers:{ 'X-CSRF-TOKEN': csrf }, body: fd });
+            const res = await resp.json();
+            const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
+            if (res && res.success) {
+                if (statusEl) {
+                    statusEl.textContent = 'Uploaded';
+                    statusEl.className = 'text-xs text-green-500 dark:text-green-400';
+                }
+                // Update preview with server URL if provided
+                if (res.url && previewEl) {
+                    previewEl.src = res.url;
+                    previewEl.classList.remove('hidden');
+                }
+                // Show remove button
+                showSignatureRemoveButton(signatoryNum);
+                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
+                    autosaveDebounced();
+                }
+            } else if (statusEl) {
+                statusEl.textContent = 'Upload failed';
+                // Hide preview on failure
+                if (previewEl) {
+                    previewEl.classList.add('hidden');
+                }
+                hideSignatureRemoveButton(signatoryNum);
+            }
+        };
+        
+        function showSignatureRemoveButton(signatoryNum) {
+            const removeBtn = document.getElementById(`sig_${signatoryNum}_remove_btn`);
+            if (removeBtn) {
+                removeBtn.classList.remove('hidden');
+            }
+        }
+        
+        function hideSignatureRemoveButton(signatoryNum) {
+            const removeBtn = document.getElementById(`sig_${signatoryNum}_remove_btn`);
+            if (removeBtn) {
+                removeBtn.classList.add('hidden');
+            }
+        }
+        
+        window.removeSignature = async function(signatoryNum) {
+            if (!confirm('Are you sure you want to remove this signature?')) {
+                return;
+            }
+            
+            // Clear preview
+            const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
+            if (previewEl) {
+                previewEl.src = '';
+                previewEl.classList.add('hidden');
+            }
+            
+            // Reset status
+            const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
+            if (statusEl) {
+                statusEl.textContent = 'No file';
+                statusEl.className = 'text-xs text-gray-500 dark:text-gray-400';
+            }
+            
+            // Clear file input
+            const fileInput = document.getElementById(`sig_${signatoryNum}_file`);
+            if (fileInput) {
+                fileInput.value = '';
+            }
+            
+            // Hide remove button
+            hideSignatureRemoveButton(signatoryNum);
+            
+            // Update certificate data to remove signature path
+            try {
+                const jsonEl = document.getElementById('certificate_data_json');
+                if (jsonEl) {
+                    const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
+                    delete current[`sig_${signatoryNum}_signature`];
+                    jsonEl.value = JSON.stringify(current);
+                }
+                
+                // Trigger autosave
+                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
+                    autosaveDebounced();
+                }
+                
+                showAutosaveIndicator('success');
+            } catch (e) {
+                console.error('Failed to remove signature:', e);
+                showAutosaveIndicator('error');
+            }
+        }
         
         // Attach event listener to add button
         document.addEventListener('DOMContentLoaded', function() {
@@ -568,30 +589,9 @@
                 console.log('Event listener attached to add button in step4 (immediate)');
             }
         }
-        
-        // Apply colors on load
-        (function applyInitialColors(){
-            var themePrimaryEl = document.getElementById('theme_primary');
-            var themeSecondaryEl = document.getElementById('theme_secondary');
-            var orgLine1El = document.getElementById('org_line1_input');
-            var orgLine2El = document.getElementById('org_line2_input');
-            var orgLine3El = document.getElementById('org_line3_input');
-            var orgSchoolEl = document.getElementById('org_school_input');
-            var recipientNameEl = document.getElementById('recipient_name_input');
-            const payload = {
-                theme_primary: (themePrimaryEl && themePrimaryEl.value) ? themePrimaryEl.value : (existingCertificateData.theme_primary || '#0b2f6b'),
-                theme_secondary: (themeSecondaryEl && themeSecondaryEl.value) ? themeSecondaryEl.value : (existingCertificateData.theme_secondary || '#092557'),
-                org_line1: (orgLine1El && orgLine1El.value) ? orgLine1El.value : (existingCertificateData.org_line1 || ''),
-                org_line2: (orgLine2El && orgLine2El.value) ? orgLine2El.value : (existingCertificateData.org_line2 || ''),
-                org_line3: (orgLine3El && orgLine3El.value) ? orgLine3El.value : (existingCertificateData.org_line3 || ''),
-                org_school: (orgSchoolEl && orgSchoolEl.value) ? orgSchoolEl.value : (existingCertificateData.org_school || ''),
-                recipient_name: (recipientNameEl && recipientNameEl.value) ? recipientNameEl.value : (existingCertificateData.recipient_name || '')
-            };
-            refreshPreview(payload);
-        })();
 
-        // Build missing signatory rows from existing data
-        (function inflateSignatoriesFromExisting(){
+        // Load existing signatories
+        (function loadExistingSignatories(){
             if (!existingCertificateData) return;
             
             // Wait for window.addSignatory to be available
@@ -601,7 +601,6 @@
                     return;
                 }
                 
-                // Get current count from DOM
                 const currentSignatories = document.querySelectorAll('.signatory-item');
                 const currentCount = currentSignatories.length;
                 
@@ -626,59 +625,41 @@
                     }
                 }
                 
-                console.log('Loading signatories:', {
+                console.log('Loading signatories (step4):', {
                     currentCount: currentCount,
                     savedCount: savedSignatoryCount,
                     calculatedCount: calculatedSignatoryCount,
                     maxSignatoryWithData: maxSignatoryWithData,
-                    existingData: (function() {
-                        var keys = Object.keys(existingCertificateData);
-                        var filtered = [];
-                        for (var f = 0; f < keys.length; f++) {
-                            if (keys[f] && keys[f].startsWith && keys[f].startsWith('sig_')) {
-                                filtered.push(keys[f]);
-                            }
-                        }
-                        return filtered;
-                    })()
+                    existingData: Object.keys(existingCertificateData).filter(k => k.startsWith('sig_'))
                 });
                 
                 // If we need to add more signatories (use maxSignatoryWithData instead of savedSignatoryCount)
                 if (maxSignatoryWithData > currentCount) {
-                    console.log('Adding', maxSignatoryWithData - currentCount, 'missing signatories');
-                    // Add missing signatories synchronously
+                    console.log('Adding', maxSignatoryWithData - currentCount, 'missing signatories (step4)');
                     for (let i = currentCount + 1; i <= maxSignatoryWithData && i <= 4; i++) {
-                        console.log('Adding signatory', i);
+                        console.log('Adding signatory', i, '(step4)');
                         window.addSignatory();
                     }
                     
                     // Wait longer for DOM to fully update, then populate all values
-                    // Use multiple attempts to ensure DOM is ready
                     setTimeout(() => {
-                        console.log('First populate attempt after', 300, 'ms');
-                        populateSignatoryValues();
-                    }, 300);
+                        console.log('First populate attempt after', 200, 'ms (step4)');
+                        populateAllValues();
+                    }, 200);
                     
                     // Also try again after a longer delay in case first attempt fails
                     setTimeout(() => {
-                        console.log('Second populate attempt after', 600, 'ms');
-                        populateSignatoryValues();
-                    }, 600);
-                    
-                    // Third attempt as backup
-                    setTimeout(() => {
-                        console.log('Third populate attempt after', 1000, 'ms');
-                        populateSignatoryValues();
-                    }, 1000);
+                        console.log('Second populate attempt after', 500, 'ms (step4)');
+                        populateAllValues();
+                    }, 500);
                 } else {
-                    // Just populate existing signatories immediately
-                    console.log('No need to add signatories, just populating values');
-                    populateSignatoryValues();
+                    // Populate existing signatories even if count matches
+                    console.log('No need to add signatories, just populating values (step4)');
+                    populateAllValues();
                 }
             }
             
-            function populateSignatoryValues() {
-                // Get all signatories after potential additions
+            function populateAllValues() {
                 const allSignatories = document.querySelectorAll('.signatory-item');
                 
                 // Calculate max signatory with data (same logic as above)
@@ -698,25 +679,18 @@
                     }
                 }
                 
-                console.log('Populating values for', allSignatories.length, 'signatories. Max signatory with data:', maxSignatoryWithData);
+                console.log('Populating values for', allSignatories.length, 'signatories (step4). Max signatory with data:', maxSignatoryWithData);
                 
-                // Populate values for all signatories - use maxSignatoryWithData to ensure we check all
                 for (let i = 1; i <= maxSignatoryWithData && i <= 4; i++) {
                     const name = existingCertificateData[`sig_${i}_name`];
                     const title = existingCertificateData[`sig_${i}_title`];
                     const sigPath = existingCertificateData[`sig_${i}_signature`];
                     
-                    console.log(`Processing signatory ${i}:`, {
-                        name: name,
-                        title: title,
-                        sigPath: sigPath
-                    });
-                    
                     // Find the signatory item by data attribute
                     const signatoryItem = document.querySelector(`[data-signatory="${i}"]`);
                     
                     if (!signatoryItem) {
-                        console.warn('Signatory item not found for index:', i);
+                        console.warn('Signatory item not found for index (step4):', i);
                         continue;
                     }
                     
@@ -732,7 +706,7 @@
                     const statusEl = signatoryItem.querySelector(`#sig_${i}_status`) || 
                                     document.getElementById(`sig_${i}_status`);
                     
-                    console.log('Signatory', i, 'inputs found:', {
+                    console.log('Signatory', i, 'inputs found (step4):', {
                         nameInput: !!nameInput,
                         titleInput: !!titleInput,
                         statusEl: !!statusEl,
@@ -744,33 +718,27 @@
                     if (nameInput) {
                         if (name !== undefined && name !== null) {
                             nameInput.value = name || '';
-                            nameInput.dispatchEvent(new Event('input', { bubbles: true })); // Trigger input event
+                            nameInput.dispatchEvent(new Event('input', { bubbles: true })); // Trigger input event for autosave
                             console.log('✓ Populated sig_' + i + '_name:', name || '(empty)');
-                        } else {
-                            console.log('Skipping sig_' + i + '_name - value is undefined/null');
                         }
                     } else {
-                        console.warn('❌ Name input not found for signatory', i);
+                        console.warn('❌ Name input not found for signatory (step4)', i);
                     }
                     
                     if (titleInput) {
                         if (title !== undefined && title !== null) {
                             titleInput.value = title || '';
-                            titleInput.dispatchEvent(new Event('input', { bubbles: true })); // Trigger input event
+                            titleInput.dispatchEvent(new Event('input', { bubbles: true })); // Trigger input event for autosave
                             console.log('✓ Populated sig_' + i + '_title:', title || '(empty)');
-                        } else {
-                            console.log('Skipping sig_' + i + '_title - value is undefined/null');
                         }
                     } else {
-                        console.warn('❌ Title input not found for signatory', i);
+                        console.warn('❌ Title input not found for signatory (step4)', i);
                     }
                     
                     if (statusEl && sigPath) {
                         statusEl.textContent = 'Uploaded';
                         statusEl.className = 'text-xs text-green-500 dark:text-green-400';
-                        console.log('✓ Set sig_' + i + ' status to Uploaded');
-                    } else if (sigPath) {
-                        console.warn('Signature path exists but status element not found for signatory', i);
+                        console.log('Set sig_' + i + ' status to Uploaded');
                     }
                     
                     // Show preview image if signature exists
@@ -787,30 +755,24 @@
                     }
                 }
                 
-                // Update signatory count based on actual DOM elements
                 signatoryCount = allSignatories.length;
                 
                 // Show remove buttons if more than one signatory
                 if (allSignatories.length > 1) {
-                    var showBtns = document.querySelectorAll('.remove-signatory-btn');
-                    for (var sb = 0; sb < showBtns.length; sb++) {
-                        var btn = showBtns[sb];
-                        if (btn) {
-                            btn.classList.remove('hidden');
-                        }
-                    }
+                    document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
+                        btn.classList.remove('hidden');
+                    });
                 }
                 
-                // Update preview
                 updateSignatoryPreview();
                 
                 // Trigger autosave after populating all values
                 if (autosaveDebounced && typeof autosaveDebounced === 'function') {
-                    console.log('Triggering autosave after populating signatories');
+                    console.log('Triggering autosave after populating signatories (step4)');
                     autosaveDebounced();
                 }
                 
-                console.log('Finished populating signatory values');
+                console.log('Finished populating signatory values (step4)');
             }
             
             // Start loading process
@@ -819,21 +781,12 @@
         
         // Re-sync when signatories are added/removed
         const observer = new MutationObserver(function(mutations) {
-            try {
-                for (var m = 0; m < mutations.length; m++) {
-                    var mutation = mutations[m];
-                    if (mutation && mutation.type === 'childList') {
-                        if (typeof syncAllSignatories === 'function') {
-                            syncAllSignatories();
-                        }
-                        if (typeof updateSignatoryPreview === 'function') {
-                            updateSignatoryPreview();
-                        }
-                    }
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    syncAllSignatories();
+                    updateSignatoryPreview();
                 }
-            } catch(e) {
-                console.error('Error in MutationObserver:', e);
-            }
+            });
         });
         
         const container = document.getElementById('signatory-details-container');
@@ -852,14 +805,6 @@
             try {
                 if (statusEl) statusEl.textContent = 'Saving…';
                 const payload = collectPayload();
-                
-                // Update the hidden JSON input to keep it in sync with the cleaned payload
-                // This ensures deletions are reflected in the JSON
-                const jsonEl = document.getElementById('certificate_data_json');
-                if (jsonEl) {
-                    jsonEl.value = JSON.stringify(payload);
-                }
-                
                 // Persist JSON to R2 via controller autosave endpoint
                 const autosaveUrl = '{{ route("organizer.events.certificate.autosave", [], false) }}' + '?id=' + encodeURIComponent(eventId);
                 await postJSON(autosaveUrl, { certificate_data_json: JSON.stringify(payload) });
@@ -881,12 +826,11 @@
         }
 
         window.uploadLogo = async function(side){
-            var fileInput = document.getElementById('logo_' + side + '_file');
-            var file = fileInput ? fileInput.files[0] : null;
+            const file = document.getElementById(`logo_${side}_file`).files[0];
             if (!file) return;
             
             // Show immediate preview using FileReader
-            var previewEl = document.getElementById('logo_' + side + '_preview');
+            const previewEl = document.getElementById(`logo_${side}_preview`);
             if (previewEl && file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -931,13 +875,6 @@
                         };
                     }
                     
-                    // Persist in hidden JSON for autosave pipeline
-                    try {
-                        const jsonEl = document.getElementById('certificate_data_json');
-                        const current = (jsonEl && jsonEl.value) ? JSON.parse(jsonEl.value) : {};
-                        current['logo_' + side + '_url'] = data.url;
-                        if (jsonEl) jsonEl.value = JSON.stringify(current);
-                    } catch(_) {}
                     if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                         autosaveDebounced();
                     }
@@ -959,37 +896,11 @@
                     removeBtn = document.createElement('button');
                     removeBtn.type = 'button';
                     removeBtn.id = `logo_${side}_remove_btn`;
-                    removeBtn.setAttribute('data-side', side);
+                    removeBtn.onclick = function() { removeLogo(side); };
                     removeBtn.className = 'ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300';
                     removeBtn.title = 'Remove logo';
                     removeBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
-                    // Attach event listener instead of onclick
-                    removeBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (typeof window.removeLogo === 'function') {
-                            window.removeLogo(side);
-                        }
-                    });
                     statusEl.parentNode.appendChild(removeBtn);
-                }
-            } else {
-                // Ensure event listener is attached (in case button was just shown)
-                if (removeBtn && !removeBtn.hasAttribute('data-listener-attached')) {
-                    removeBtn.removeAttribute('onclick');
-                    removeBtn.setAttribute('data-side', side);
-                    removeBtn.setAttribute('data-listener-attached', 'true');
-                    // Clone to ensure clean event listener
-                    const newRemoveBtn = removeBtn.cloneNode(true);
-                    removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
-                    newRemoveBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (typeof window.removeLogo === 'function') {
-                            window.removeLogo(side);
-                        }
-                    });
-                    removeBtn = newRemoveBtn;
                 }
             }
             if (removeBtn) {
@@ -1060,14 +971,14 @@
             }
         }
 
-            // Dynamic signatory signature upload (1..4)
+        // Update uploadSignature to handle dynamic signatory numbers
+        const originalUploadSignature = window.uploadSignature;
         window.uploadSignature = async function(signatoryNum){
-            var fileInput = document.getElementById('sig_' + signatoryNum + '_file');
-            var file = fileInput && fileInput.files && fileInput.files.length > 0 ? fileInput.files[0] : null;
+            const file = document.getElementById(`sig_${signatoryNum}_file`)?.files?.[0];
             if (!file) return;
             
             // Show immediate preview using FileReader
-            var previewEl = document.getElementById('sig_' + signatoryNum + '_preview');
+            const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
             if (previewEl && file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -1085,14 +996,10 @@
             const res = await resp.json();
             const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
             if (res && res.success) {
-                if (statusEl) statusEl.textContent = 'Uploaded';
-                // Persist path in hidden json so preview + autosave can include it
-                try {
-                    var jsonEl = document.getElementById('certificate_data_json');
-                    var current = (jsonEl && jsonEl.value) ? JSON.parse(jsonEl.value) : {};
-                    current['sig_' + signatoryNum + '_signature'] = res.signature_path || ('events/' + eventId + '/certificate/signature_' + signatoryNum + '.enc');
-                    if (jsonEl) jsonEl.value = JSON.stringify(current);
-                } catch(_) {}
+                if (statusEl) {
+                    statusEl.textContent = 'Uploaded';
+                    statusEl.className = 'text-xs text-green-500 dark:text-green-400';
+                }
                 // Update preview with server URL if provided
                 if (res.url && previewEl) {
                     previewEl.src = res.url;
@@ -1103,13 +1010,6 @@
                 if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                     autosaveDebounced();
                 }
-                // Update inline preview image if present
-                var img = document.querySelector('#cert_preview_wrapper img[src*="signature_' + signatoryNum + '.enc"]');
-                if (img) {
-                    // Force reload
-                    img.src = img.src.split('?')[0] + '?t=' + Date.now();
-                    img.style.display = 'block';
-                }
             } else if (statusEl) {
                 statusEl.textContent = 'Upload failed';
                 // Hide preview on failure
@@ -1118,26 +1018,11 @@
                 }
                 hideSignatureRemoveButton(signatoryNum);
             }
-        }
+        };
         
         function showSignatureRemoveButton(signatoryNum) {
             const removeBtn = document.getElementById(`sig_${signatoryNum}_remove_btn`);
             if (removeBtn) {
-                // Ensure event listener is attached and no inline onclick
-                if (!removeBtn.hasAttribute('data-listener-attached')) {
-                    removeBtn.removeAttribute('onclick');
-                    removeBtn.setAttribute('data-listener-attached', 'true');
-                    // Clone to ensure clean event listener
-                    const newRemoveBtn = removeBtn.cloneNode(true);
-                    removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
-                    newRemoveBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (typeof window.removeSignature === 'function') {
-                            window.removeSignature(signatoryNum);
-                        }
-                    });
-                }
                 removeBtn.classList.remove('hidden');
             }
         }
@@ -1198,76 +1083,211 @@
             }
         }
 
-        // Initialize remove buttons and file inputs for existing logos and signatures on page load
-        // MUST run immediately to prevent inline handlers from executing
-        (function initAllRemoveButtons() {
-            function attachEventListeners() {
+        // uploadSignature is defined later after addSignatory/removeSignatory
+        
+        function collectPayload(){
+            // First, try to get the most up-to-date data from the hidden JSON input
+            let basePayload = {};
+            try {
+                const jsonEl = document.getElementById('certificate_data_json');
+                if (jsonEl && jsonEl.value) {
+                    basePayload = JSON.parse(jsonEl.value);
+                }
+            } catch(e) {
+                console.warn('Failed to parse certificate_data_json:', e);
+            }
+            
+            const payload = {
+                org_line1: document.getElementById('org_line1_input')?.value || basePayload.org_line1 || '',
+                org_line2: document.getElementById('org_line2_input')?.value || basePayload.org_line2 || '',
+                org_line3: document.getElementById('org_line3_input')?.value || basePayload.org_line3 || '',
+                org_school: document.getElementById('org_school_input')?.value || basePayload.org_school || '',
+                recipient_name: document.getElementById('recipient_name_input')?.value || basePayload.recipient_name || '',
+                theme_primary: document.getElementById('theme_primary')?.value || basePayload.theme_primary || '#0b2f6b',
+                theme_secondary: document.getElementById('theme_secondary')?.value || basePayload.theme_secondary || '#092557',
+                theme_border: document.getElementById('theme_border')?.value || basePayload.theme_border || basePayload.theme_primary || '#0b2f6b',
+            };
+            
+            // Copy non-signatory fields from JSON (like logos, event details, etc.)
+            Object.keys(basePayload).forEach(key => {
+                if (!key.startsWith('sig_') && !payload.hasOwnProperty(key)) {
+                    payload[key] = basePayload[key];
+                }
+            });
+            
+            // Dynamic signatories - ONLY include signatories that exist in DOM
+            const items = document.querySelectorAll('.signatory-item');
+            payload.signatory_count = items.length;
+            
+            // First, clear any old signatory data from payload (only keep what exists in DOM)
+            for (let i = 1; i <= 10; i++) {
+                delete payload[`sig_${i}_name`];
+                delete payload[`sig_${i}_title`];
+                delete payload[`sig_${i}_signature`];
+            }
+            
+            // Now only add signatories that exist in DOM
+            items.forEach((item, index)=>{
+                const n = index + 1;
+                const nameInput = item.querySelector(`input[name="sig_${n}_name"]`);
+                const titleInput = item.querySelector(`input[name="sig_${n}_title"]`);
+                
+                payload[`sig_${n}_name`] = nameInput?.value || '';
+                payload[`sig_${n}_title`] = titleInput?.value || '';
+                
+                // Get signature path from JSON if it exists for this signatory
+                const statusEl = document.getElementById(`sig_${n}_status`);
+                if (statusEl && (statusEl.textContent === 'Uploaded' || statusEl.textContent.includes('signature'))) {
+                    try {
+                        const jsonEl = document.getElementById('certificate_data_json');
+                        const current = jsonEl?.value ? JSON.parse(jsonEl.value) : {};
+                        if (current[`sig_${n}_signature`]) {
+                            payload[`sig_${n}_signature`] = current[`sig_${n}_signature`];
+                        }
+                    } catch(_) {}
+                } else {
+                    // Also include signature if it exists in JSON even if status element doesn't show "Uploaded"
+                    try {
+                        const jsonEl = document.getElementById('certificate_data_json');
+                        const current = jsonEl?.value ? JSON.parse(jsonEl.value) : {};
+                        if (current[`sig_${n}_signature`]) {
+                            payload[`sig_${n}_signature`] = current[`sig_${n}_signature`];
+                        }
+                    } catch(_) {}
+                }
+            });
+            
+            return payload;
+        }
+
+        function refreshPreview(payload){
+            // Update text fields inline
+            const map = {
+                org_line1: 'org_line1', org_line2: 'org_line2', org_line3: 'org_line3',
+                org_school: 'org_school', recipient_name: 'recipient_name', event_title: 'event_title'
+            };
+            Object.keys(map).forEach(k=>{
+                const el = document.getElementById(map[k]);
+                if (el && payload[k] !== undefined) el.textContent = payload[k];
+            });
+            // Dynamic signatory names/titles
+            const count = payload.signatory_count || 0;
+            for (let i=1;i<=count;i++){
+                const nEl = document.getElementById(`sig_${i}_name`);
+                const tEl = document.getElementById(`sig_${i}_title`);
+                if (nEl && payload[`sig_${i}_name`] !== undefined) nEl.textContent = payload[`sig_${i}_name`] || `Signatory ${i}`;
+                if (tEl && payload[`sig_${i}_title`] !== undefined) tEl.textContent = payload[`sig_${i}_title`] || 'Signature';
+            }
+            
+            // Update logo images in preview
+            ['left', 'right'].forEach(side => {
+                const logoUrl = payload[`logo_${side}_url`];
+                const previewImg = document.getElementById(`logo_${side}_img`);
+                if (previewImg) {
+                    if (logoUrl) {
+                        previewImg.src = logoUrl + '?t=' + Date.now(); // Add timestamp to force reload
+                        previewImg.style.display = 'block';
+                        previewImg.onload = function() {
+                            this.style.display = 'block';
+                        };
+                        previewImg.onerror = function() {
+                            this.style.display = 'none';
+                        };
+                    } else {
+                        previewImg.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Apply colors
+            const primary = payload.theme_primary;
+            document.querySelectorAll('#cert_preview_wrapper .text-blue-900, #cert_preview_wrapper .text-violet-900, #cert_preview_wrapper .text-emerald-900')
+                .forEach(el=>{ el.style.color = primary; });
+            const bands = document.querySelectorAll('#cert_preview_wrapper .band-top, #cert_preview_wrapper .band-bottom');
+            bands.forEach(el=>{ el.style.backgroundImage = `linear-gradient(to right, ${payload.theme_primary}, ${payload.theme_secondary})`; });
+            // Apply border color
+            const borderColor = payload.theme_border || payload.theme_primary || '#0b2f6b';
+            const pageElement = document.querySelector('#cert_preview_wrapper .page');
+            if (pageElement) {
+                pageElement.style.borderColor = borderColor;
+            }
+        }
+        
+        // Initialize remove buttons for existing logos and signatures on page load
+        // Wrap in DOMContentLoaded to ensure all functions are defined
+        (function() {
+            function initializeLogoDisplay() {
                 try {
-                    // Attach event listeners for logo remove buttons
-                    var logoSides = ['left', 'right'];
-                    for (var ls = 0; ls < logoSides.length; ls++) {
+                    ['left', 'right'].forEach(side => {
+                        // Get logo URL from certificate data
                         try {
-                            var side = logoSides[ls];
-                            var removeBtn = document.getElementById('logo_' + side + '_remove_btn');
-                            var fileInput = document.getElementById('logo_' + side + '_file');
-                            
-                            // Attach event listener for logo remove button
-                            if (removeBtn) {
-                                // Remove any inline onclick
-                                removeBtn.removeAttribute('onclick');
-                                // Clone to remove any existing handlers
-                                var newRemoveBtn = removeBtn.cloneNode(true);
-                                removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
-                                (function(btnSide) {
-                                    newRemoveBtn.addEventListener('click', function(e) {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        if (typeof window.removeLogo === 'function') {
-                                            window.removeLogo(btnSide);
+                            const jsonEl = document.getElementById('certificate_data_json');
+                            if (jsonEl && jsonEl.value) {
+                                const certData = JSON.parse(jsonEl.value);
+                                const logoUrl = certData[`logo_${side}_url`];
+                                
+                                if (logoUrl && typeof logoUrl === 'string' && logoUrl.trim() !== '') {
+                                    // Update preview image in certificate template
+                                    const previewImg = document.getElementById(`logo_${side}_img`);
+                                    if (previewImg) {
+                                        // Only set src if URL is valid (not a placeholder or empty)
+                                        if (logoUrl && !logoUrl.includes('logo_right.png') && !logoUrl.includes('logo_left.png')) {
+                                            previewImg.src = logoUrl + '?t=' + Date.now();
+                                            previewImg.style.display = 'block';
+                                            previewImg.onload = function() {
+                                                this.style.display = 'block';
+                                            };
+                                            previewImg.onerror = function() {
+                                                this.style.display = 'none';
+                                                console.warn('Failed to load logo:', logoUrl);
+                                            };
+                                        } else {
+                                            previewImg.style.display = 'none';
                                         }
-                                    });
-                                })(side);
+                                    }
+                                }
                             }
-                            
-                            // Attach event listener for logo file input
-                            if (fileInput) {
-                                // Remove inline onchange
-                                fileInput.removeAttribute('onchange');
-                                // Clone to remove any existing handlers
-                                var newFileInput = fileInput.cloneNode(true);
-                                fileInput.parentNode.replaceChild(newFileInput, fileInput);
-                                (function(btnSide) {
-                                    newFileInput.addEventListener('change', function(e) {
-                                        e.stopPropagation();
-                                        if (typeof window.uploadLogo === 'function') {
-                                            window.uploadLogo(btnSide);
-                                        }
-                                    });
-                                })(side);
-                            }
-                            
-                            // Show remove button if logo exists
-                            var previewEl = document.getElementById('logo_' + side + '_preview');
-                            var statusEl = document.getElementById('logo_' + side + '_status');
-                            if (previewEl && statusEl && !previewEl.classList.contains('hidden') && (statusEl.textContent === 'Uploaded' || previewEl.src)) {
+                        } catch(e) {
+                            console.error('Error initializing logo display for', side, ':', e);
+                        }
+                        
+                        // Check for existing logos in form and show remove buttons
+                        try {
+                            const previewEl = document.getElementById(`logo_${side}_preview`);
+                            const statusEl = document.getElementById(`logo_${side}_status`);
+                            if (previewEl && statusEl && !previewEl.classList.contains('hidden') && statusEl.textContent === 'Uploaded') {
                                 if (typeof showLogoRemoveButton === 'function') {
                                     showLogoRemoveButton(side);
                                 }
                             }
                         } catch(e) {
-                            console.error('Error initializing logo buttons for', side, ':', e);
+                            console.error('Error showing logo remove button for', side, ':', e);
                         }
-                    }
-                    
-                    // Attach event listeners for signature remove buttons and file inputs
+                    });
+                } catch(e) {
+                    console.error('Error in initializeLogoDisplay:', e);
+                }
+            }
+            
+            function initializeSignatureButtons() {
+                try {
+                    // Also check for existing signatures and show remove buttons
+                    // Also attach event listeners to prevent inline onclick from firing
                     for (let i = 1; i <= 4; i++) {
                         try {
+                            const previewEl = document.getElementById(`sig_${i}_preview`);
+                            const statusEl = document.getElementById(`sig_${i}_status`);
                             const removeBtn = document.getElementById(`sig_${i}_remove_btn`);
                             const fileInput = document.getElementById(`sig_${i}_file`);
-                            const signatoryRemoveBtn = document.querySelector(`.remove-signatory-btn[data-signatory="${i}"]`) || 
-                                                       document.querySelector(`[data-signatory="${i}"] .remove-signatory-btn`);
                             
-                            // Attach event listener for signature remove button (small X button)
+                            // Show remove button if signature exists
+                            if (previewEl && statusEl && !previewEl.classList.contains('hidden') && (statusEl.textContent === 'Uploaded' || previewEl.src)) {
+                                if (typeof showSignatureRemoveButton === 'function') {
+                                    showSignatureRemoveButton(i);
+                                }
+                            }
+                            
+                            // Replace inline onclick with event listener for remove button
                             if (removeBtn) {
                                 removeBtn.removeAttribute('onclick');
                                 const newRemoveBtn = removeBtn.cloneNode(true);
@@ -1281,265 +1301,59 @@
                                 });
                             }
                             
-                            // Attach event listener for signatory remove button (trash icon)
-                            if (signatoryRemoveBtn) {
-                                signatoryRemoveBtn.removeAttribute('onclick');
-                                const newSignatoryRemoveBtn = signatoryRemoveBtn.cloneNode(true);
-                                signatoryRemoveBtn.parentNode.replaceChild(newSignatoryRemoveBtn, signatoryRemoveBtn);
-                                newSignatoryRemoveBtn.setAttribute('data-signatory', i);
-                                newSignatoryRemoveBtn.addEventListener('click', function(e) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    if (typeof window.removeSignatory === 'function') {
-                                        window.removeSignatory(i);
-                                    }
-                                });
-                            }
-                            
-                            // Attach event listener for signature file input
+                            // Replace inline onchange with event listener for file input
+                            // Remove any inline handlers and attach proper event listener
                             if (fileInput) {
+                                // Remove inline onchange attribute if present
                                 fileInput.removeAttribute('onchange');
+                                // Clone node to remove any existing event listeners
                                 const newFileInput = fileInput.cloneNode(true);
                                 fileInput.parentNode.replaceChild(newFileInput, fileInput);
-                                newFileInput.addEventListener('change', function(e) {
-                                    e.stopPropagation();
+                                // Attach proper event listener that won't fire on load
+                                newFileInput.addEventListener('change', function() {
                                     if (typeof window.uploadSignature === 'function') {
                                         window.uploadSignature(i);
                                     }
                                 });
                             }
-                            
-                            // Show remove button if signature exists
-                            const previewEl = document.getElementById(`sig_${i}_preview`);
-                            const statusEl = document.getElementById(`sig_${i}_status`);
-                            if (previewEl && statusEl && !previewEl.classList.contains('hidden') && (statusEl.textContent === 'Uploaded' || previewEl.src)) {
-                                if (typeof showSignatureRemoveButton === 'function') {
-                                    showSignatureRemoveButton(i);
-                                }
-                            }
                         } catch(e) {
-                            console.error('Error initializing signature buttons for', i, ':', e);
+                            console.error('Error showing signature remove button for', i, ':', e);
                         }
-                    }
-                    
-                    // Also attach event listeners using event delegation for dynamically added elements
-                    const container = document.getElementById('signatory-details-container');
-                    if (container) {
-                        // Use event delegation for remove signatory buttons
-                        container.addEventListener('click', function(e) {
-                            const removeBtn = e.target.closest('.remove-signatory-btn');
-                            if (removeBtn && removeBtn.dataset.signatory) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                const signatoryNum = parseInt(removeBtn.dataset.signatory);
-                                if (typeof window.removeSignatory === 'function') {
-                                    window.removeSignatory(signatoryNum);
-                                }
-                            }
-                        });
                     }
                 } catch(e) {
-                    console.error('Error in attachEventListeners:', e);
+                    console.error('Error in initializeSignatureButtons:', e);
                 }
             }
             
-            // Run immediately if DOM is ready, otherwise wait
+            // Initialize after DOM is ready and functions are defined
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', function() {
-                    // Run immediately without setTimeout to prevent inline handlers from firing
-                    attachEventListeners();
+                    setTimeout(function() {
+                        initializeLogoDisplay();
+                        initializeSignatureButtons();
+                    }, 300);
                 });
             } else {
-                // DOM is already ready, run immediately
-                attachEventListeners();
+                setTimeout(function() {
+                    initializeLogoDisplay();
+                    initializeSignatureButtons();
+                }, 300);
             }
         })();
-
-        function collectPayload(){
-            // First, try to get the most up-to-date data from the hidden JSON input
-            let basePayload = {};
-            try {
-                const jsonEl = document.getElementById('certificate_data_json');
-                if (jsonEl && jsonEl.value) {
-                    basePayload = JSON.parse(jsonEl.value);
-                }
-            } catch(e) {
-                console.warn('Failed to parse certificate_data_json:', e);
-            }
-            
-            var orgLine1El2 = document.getElementById('org_line1_input');
-            var orgLine2El2 = document.getElementById('org_line2_input');
-            var orgLine3El2 = document.getElementById('org_line3_input');
-            var orgSchoolEl2 = document.getElementById('org_school_input');
-            var recipientNameEl2 = document.getElementById('recipient_name_input');
-            var themePrimaryEl2 = document.getElementById('theme_primary');
-            var themeSecondaryEl2 = document.getElementById('theme_secondary');
-            var themeBorderEl = document.getElementById('theme_border');
-            const payload = {
-                org_line1: (orgLine1El2 && orgLine1El2.value) ? orgLine1El2.value : (basePayload.org_line1 || ''),
-                org_line2: (orgLine2El2 && orgLine2El2.value) ? orgLine2El2.value : (basePayload.org_line2 || ''),
-                org_line3: (orgLine3El2 && orgLine3El2.value) ? orgLine3El2.value : (basePayload.org_line3 || ''),
-                org_school: (orgSchoolEl2 && orgSchoolEl2.value) ? orgSchoolEl2.value : (basePayload.org_school || ''),
-                recipient_name: (recipientNameEl2 && recipientNameEl2.value) ? recipientNameEl2.value : (basePayload.recipient_name || ''),
-                theme_primary: (themePrimaryEl2 && themePrimaryEl2.value) ? themePrimaryEl2.value : (basePayload.theme_primary || '#0b2f6b'),
-                theme_secondary: (themeSecondaryEl2 && themeSecondaryEl2.value) ? themeSecondaryEl2.value : (basePayload.theme_secondary || '#092557'),
-                theme_border: (themeBorderEl && themeBorderEl.value) ? themeBorderEl.value : (basePayload.theme_border || basePayload.theme_primary || '#0b2f6b'),
-            };
-            
-            // Copy non-signatory fields from JSON (like logos, event details, etc.)
-            var basePayloadKeys = Object.keys(basePayload);
-            for (var keyIdx = 0; keyIdx < basePayloadKeys.length; keyIdx++) {
-                var key = basePayloadKeys[keyIdx];
-                if (key && typeof key === 'string' && !key.startsWith('sig_') && !payload.hasOwnProperty(key)) {
-                    payload[key] = basePayload[key];
-                }
-            }
-            
-            // Dynamic signatories - ONLY include signatories that exist in DOM
-            const items = document.querySelectorAll('.signatory-item');
-            payload.signatory_count = items.length;
-            
-            // First, clear any old signatory data from payload (only keep what exists in DOM)
-            for (let i = 1; i <= 10; i++) {
-                delete payload['sig_' + i + '_name'];
-                delete payload['sig_' + i + '_title'];
-                delete payload['sig_' + i + '_signature'];
-            }
-            
-            // Now only add signatories that exist in DOM
-            for (var itemIdx = 0; itemIdx < items.length; itemIdx++) {
-                var item = items[itemIdx];
-                var n = itemIdx + 1;
-                var nameInput = item.querySelector('input[name="sig_' + n + '_name"]');
-                var titleInput = item.querySelector('input[name="sig_' + n + '_title"]');
-                
-                payload['sig_' + n + '_name'] = (nameInput && nameInput.value) ? nameInput.value : '';
-                payload['sig_' + n + '_title'] = (titleInput && titleInput.value) ? titleInput.value : '';
-                
-                // Get signature path from JSON if it exists for this signatory
-                var statusEl = document.getElementById('sig_' + n + '_status');
-                if (statusEl && (statusEl.textContent === 'Uploaded' || (statusEl.textContent && statusEl.textContent.includes('signature')))) {
-                    try {
-                        var jsonEl = document.getElementById('certificate_data_json');
-                        var current = (jsonEl && jsonEl.value) ? JSON.parse(jsonEl.value) : {};
-                        if (current['sig_' + n + '_signature']) {
-                            payload['sig_' + n + '_signature'] = current['sig_' + n + '_signature'];
-                        }
-                    } catch(e) {
-                        // Ignore parse errors
-                    }
-                }
-            }
-            
-            return payload;
-        }
-
-        function refreshPreview(payload){
-            try {
-                // Update text fields inline
-                const map = {
-                    org_line1: 'org_line1', org_line2: 'org_line2', org_line3: 'org_line3',
-                    org_school: 'org_school', recipient_name: 'recipient_name', event_title: 'event_title'
-                };
-                var mapKeys = Object.keys(map);
-                for (var i = 0; i < mapKeys.length; i++) {
-                    var k = mapKeys[i];
-                    var el = document.getElementById(map[k]);
-                    if (el && payload[k] !== undefined) {
-                        el.textContent = payload[k];
-                    }
-                }
-                
-                // Dynamic signatory names/titles
-                const count = payload.signatory_count || 0;
-                for (let i = 1; i <= count; i++) {
-                    var nEl = document.getElementById('sig_' + i + '_name');
-                    var tEl = document.getElementById('sig_' + i + '_title');
-                    if (nEl && payload['sig_' + i + '_name'] !== undefined) {
-                        nEl.textContent = payload['sig_' + i + '_name'] || ('Signatory ' + i);
-                    }
-                    if (tEl && payload['sig_' + i + '_title'] !== undefined) {
-                        tEl.textContent = payload['sig_' + i + '_title'] || 'Signature';
-                    }
-                }
-                
-                // Update logo images in preview
-                var sides = ['left', 'right'];
-                for (var j = 0; j < sides.length; j++) {
-                    var side = sides[j];
-                    var logoUrl = payload['logo_' + side + '_url'];
-                    var previewImg = document.getElementById('logo_' + side + '_img');
-                    if (previewImg) {
-                        if (logoUrl) {
-                            previewImg.src = logoUrl + '?t=' + Date.now();
-                            previewImg.style.display = 'block';
-                            previewImg.onload = function() {
-                                this.style.display = 'block';
-                            };
-                            previewImg.onerror = function() {
-                                this.style.display = 'none';
-                            };
-                        } else {
-                            previewImg.style.display = 'none';
-                        }
-                    }
-                }
-                
-                // Apply colors
-                const primary = payload.theme_primary;
-                var colorElements = document.querySelectorAll('#cert_preview_wrapper .text-blue-900, #cert_preview_wrapper .text-violet-900, #cert_preview_wrapper .text-emerald-900');
-                if (colorElements) {
-                    for (var c = 0; c < colorElements.length; c++) {
-                        var el = colorElements[c];
-                        if (el && el.style) {
-                            el.style.color = primary;
-                        }
-                    }
-                }
-                
-                var bands = document.querySelectorAll('#cert_preview_wrapper .band-top, #cert_preview_wrapper .band-bottom');
-                if (bands) {
-                    for (var b = 0; b < bands.length; b++) {
-                        var bandEl = bands[b];
-                        if (bandEl && bandEl.style) {
-                            bandEl.style.backgroundImage = 'linear-gradient(to right, ' + payload.theme_primary + ', ' + payload.theme_secondary + ')';
-                        }
-                    }
-                }
-                
-                // Apply border color
-                const borderColor = payload.theme_border || payload.theme_primary || '#0b2f6b';
-                const pageElement = document.querySelector('#cert_preview_wrapper .page');
-                if (pageElement) {
-                    pageElement.style.borderColor = borderColor;
-                }
-            } catch(e) {
-                console.error('Error in refreshPreview:', e);
-            }
-        }
 
         // Wire autosave on inputs
-        (function() {
-            try {
-                var autosaveFieldIds = ['org_line1_input','org_line2_input','org_line3_input','org_school_input','recipient_name_input','theme_primary','theme_secondary','theme_border','theme_primary-hex','theme_secondary-hex','theme_border-hex'];
-                autosaveFieldIds.forEach(function(id) {
-                    var el = document.getElementById(id);
-                    if (el && typeof autosaveDebounced === 'function') {
-                        el.addEventListener('input', autosaveDebounced);
-                        el.addEventListener('change', autosaveDebounced);
-                    }
-                });
-            } catch(e) {
-                console.error('Error wiring autosave inputs:', e);
-            }
-        })();
-        
+        ['org_line1_input','org_line2_input','org_line3_input','org_school_input','recipient_name_input','theme_primary','theme_secondary','theme_border','theme_primary-hex','theme_secondary-hex','theme_border-hex']
+            .forEach(function(id) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', autosaveDebounced);
+                    el.addEventListener('change', autosaveDebounced);
+                }
+            });
         // Dynamic signatory inputs also trigger autosave
         document.addEventListener('input', function(e) {
-            if (e.target && e.target.matches && e.target.matches('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]')) {
-                if (typeof autosaveDebounced === 'function') {
-                    autosaveDebounced();
-                }
+            if (e.target && e.target.matches('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]')) {
+                autosaveDebounced();
             }
         });
 
@@ -1660,19 +1474,19 @@
                     console.error('Failed to persist certificate enabled setting:', error);
                 }
             };
-            box.addEventListener('change', function() {
-                var enableCert = !box.checked;
+            box.addEventListener('change', () => {
+                const enableCert = !box.checked;
                 persist(enableCert);
                 
                 // Update hidden form field
-                var hiddenField = document.getElementById('skip_certificate_hidden');
+                const hiddenField = document.getElementById('skip_certificate_hidden');
                 if (hiddenField) {
                     hiddenField.value = box.checked ? '1' : '0';
                 }
                 
                 // Hide/show certificate form and preview based on checkbox state
-                var formContainer = document.getElementById('certificate-form-container');
-                var previewSection = document.getElementById('cert_section');
+                const formContainer = document.getElementById('certificate-form-container');
+                const previewSection = document.getElementById('cert_section');
                 
                 // Use updateVisibility function for consistency
                 updateVisibility();
@@ -1706,9 +1520,8 @@
                     formData.append('id', eventId);
                     
                     // Collect all form data
-                    var inputs = document.querySelectorAll('#certificate-form-container input, #certificate-form-container select, #certificate-form-container textarea');
-                    for (var inpIdx = 0; inpIdx < inputs.length; inpIdx++) {
-                        var input = inputs[inpIdx];
+                    const inputs = document.querySelectorAll('#certificate-form-container input, #certificate-form-container select, #certificate-form-container textarea');
+                    inputs.forEach(input => {
                         if (input.type === 'checkbox') {
                             formData.append(input.name, input.checked ? '1' : '0');
                         } else if (input.type === 'file') {
@@ -1716,7 +1529,7 @@
                         } else if (input.value !== undefined && input.value !== '') {
                             formData.append(input.name, input.value);
                         }
-                    }
+                    });
                     
                     // Also include the skip certificate setting
                     const skipCheckbox = document.getElementById('skip_certificate_step4');
@@ -1749,16 +1562,15 @@
             }
             
             // Set up autosave listeners
-            var certificateContainer = document.getElementById('certificate-form-container');
+            const certificateContainer = document.getElementById('certificate-form-container');
             if (certificateContainer) {
-                var autosaveInputs = certificateContainer.querySelectorAll('input, select, textarea');
-                for (var ai = 0; ai < autosaveInputs.length; ai++) {
-                    var input = autosaveInputs[ai];
-                    if (input && input.type !== 'file') {
+                const inputs = certificateContainer.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    if (input.type !== 'file') {
                         input.addEventListener('input', queueCertificateAutosave);
                         input.addEventListener('change', queueCertificateAutosave);
                     }
-                }
+                });
             }
             
             // Also autosave when skip certificate checkbox changes
