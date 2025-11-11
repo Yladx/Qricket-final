@@ -1479,10 +1479,11 @@ class TicketsController extends Controller
         ]);
 
         // Check if user can manage tickets
+        // Note: Middleware already validates access, so if we reach here, user has permission
         $user = Auth::user();
         $isOwner = $user && (int)$event->user_id === (int)$user->id;
         $staff = $event->staff()->where('user_id', $user?->id)->first();
-        $canManageTicket = $isOwner || ($staff?->can_manage_ticket ?? false) || ($staff?->role === 'organizer');
+        $canManageTicket = $isAdmin || $isOwner || ($staff?->can_manage_ticket ?? false) || ($staff?->role === 'organizer') || ($staff?->can_manage_event ?? false);
 
         // Check if event has ended - if so, show view-only mode
         $eventEnded = $event->end_date && now()->gt($event->end_date);
@@ -1491,11 +1492,15 @@ class TicketsController extends Controller
         $isUpcoming = !$event->end_date || now()->lt($event->end_date);
         
         // Allow editing for draft, pending_approval, published, and approved statuses if event is upcoming
+        // Staff with can_manage_ticket permission can edit the same way owners can
         $canEdit = in_array($event->status, ['draft', 'pending_approval']) 
-                   || ($isOwner && $isUpcoming && in_array($event->status, ['published', 'approved']));
+                   || ($canManageTicket && $isUpcoming && in_array($event->status, ['published', 'approved']));
         
-        // If admin, staff without ticket access, or event ended, show read-only view
-        if ($isAdmin || !$canManageTicket || $eventEnded || !$canEdit) {
+        // Show read-only view only if:
+        // 1. Event has ended, OR
+        // 2. User doesn't have ticket management permission, OR
+        // 3. Event status doesn't allow editing
+        if (!$canManageTicket || $eventEnded || !$canEdit) {
             \Log::info('Show info view (read-only)', [
                 'is_admin' => $isAdmin,
                 'can_manage_ticket' => $canManageTicket,
