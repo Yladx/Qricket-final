@@ -517,7 +517,10 @@ class EventEditController extends Controller
                   \Carbon\Carbon::parse($event->start_date)->format('F, Y') . '.'
                 : 'Event Date';
             
-            return view('organizer.events.info.certificate', compact('event', 'certificateData', 'fallbackWhen', 'fallbackGiven', 'layoutType'));
+            // Get certificate enabled status from event
+            $certificateEnabled = $event->certificate_enabled ?? false;
+            
+            return view('organizer.events.info.certificate', compact('event', 'certificateData', 'certificateEnabled', 'fallbackWhen', 'fallbackGiven', 'layoutType'));
         }
 
         // Check if event has ended - if so, show view-only mode
@@ -558,8 +561,11 @@ class EventEditController extends Controller
                   \Carbon\Carbon::parse($event->start_date)->format('F, Y') . '.'
                 : 'Event Location';
             
+            // Get certificate enabled status from event
+            $certificateEnabled = $event->certificate_enabled ?? false;
+            
             // Redirect to info view for certificate
-            return view('organizer.events.info.certificate', compact('event', 'layoutType', 'certificateData', 'fallbackWhen', 'fallbackGiven'));
+            return view('organizer.events.info.certificate', compact('event', 'layoutType', 'certificateData', 'certificateEnabled', 'fallbackWhen', 'fallbackGiven'));
         }
 
         // Load certificate data from R2 storage using the same method as CertificateController
@@ -711,31 +717,51 @@ class EventEditController extends Controller
         try {
             $event = Event::findOrFail($eventId);
             
-            // Check if user has access to this event (admin bypass)
-            $hasAccess = Auth::guard('admin')->check() || $event->user_id === Auth::id() || 
-                        $event->staff()->where('user_id', Auth::id())->exists();
+            // Check access permissions - require can_manage_event for staff
+            $isAdmin = Auth::guard('admin')->check();
+            $isOwner = $event->user_id === Auth::id();
+            $isAdminEvent = $event->user_id === null && $isAdmin;
+            $user = Auth::user();
+            $staff = $event->staff()->where('user_id', $user?->id)->first();
+            $staffRole = $staff?->role ?? null;
+            $isOrganizerRole = $staffRole === 'organizer';
             
-            if (!$hasAccess) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized access'], 403);
+            // Check if user can manage event (required for certificate autosave)
+            $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+            
+            if (!$canManageEvent) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized. You need can_manage_event permission to save certificate settings.'], 403);
             }
 
             // Save certificate data to R2 storage
             $disk = \Storage::disk('r2');
             $certificatePath = "events/{$eventId}/certificate/certificate.json";
             
+            // Handle both JSON blob and form data
             $certificateDataJson = $request->get('certificate_data_json');
-            $certificateData = json_decode($certificateDataJson, true);
-            
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return response()->json(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            if ($certificateDataJson) {
+                $certificateData = json_decode($certificateDataJson, true);
+                
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return response()->json(['success' => false, 'message' => 'Invalid JSON data'], 400);
+                }
+                
+                $disk->put($certificatePath, json_encode($certificateData, JSON_PRETTY_PRINT));
             }
             
-            $disk->put($certificatePath, json_encode($certificateData, JSON_PRETTY_PRINT));
+            // Update certificate_enabled in the event table if provided
+            if ($request->has('certificate_enabled')) {
+                $rawValue = $request->input('certificate_enabled');
+                $certificateEnabled = ($rawValue === '1' || $rawValue === 1 || $rawValue === true);
+                
+                $event->certificate_enabled = $certificateEnabled;
+                $event->save();
+            }
             
             return response()->json(['success' => true, 'message' => 'Certificate data saved']);
         } catch (\Throwable $t) {
-            \Log::error('Failed to autosave certificate data', ['event_id' => $eventId, 'error' => $t->getMessage()]);
-            return response()->json(['success' => false, 'message' => 'Failed to save certificate data'], 500);
+            \Log::error('Failed to autosave certificate data', ['event_id' => $eventId, 'error' => $t->getMessage(), 'trace' => $t->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Failed to save certificate data: ' . $t->getMessage()], 500);
         }
     }
 

@@ -249,8 +249,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('organizer.events.info.staff');
         Route::put('/events/{event}/certificate', [\App\Http\Controllers\Organizer\EventManagement\EventEditController::class, 'updateCertificate'])
             ->name('organizer.events.certificate.update');
-        Route::post('/events/certificate/autosave', [\App\Http\Controllers\Organizer\EventManagement\EventEditController::class, 'autosaveCertificate'])
-            ->name('organizer.events.certificate.autosave');
+        // Note: certificate autosave is handled by CertificateController in event.php routes (more comprehensive)
         Route::get('/events/{event}/news/create', [\App\Http\Controllers\Organizer\EventNewsController::class, 'create'])
             ->middleware('event.access:manage_news')
             ->name('organizer.events.news.create');

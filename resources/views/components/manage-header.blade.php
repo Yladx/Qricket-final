@@ -176,12 +176,13 @@
                     <!-- Edit Event / Event Info dropdown -->
                     <div class="relative">
                         @php
-                            // Show "Edit Event" if user has can_manage_event permission (regardless of event end status)
-                            // Show "Event Info" if user doesn't have can_manage_event permission
-                            // Note: Controllers will handle read-only redirect when event has ended,
-                            // but navigation should reflect user's permission level
-                            $dropdownLabel = $canManageEvent ? 'Edit Event' : 'Event Info';
-                            $useInfoRoutes = !$canManageEvent;
+                            // Show "Event Info" (read-only) if:
+                            // 1. Event has ended (even for owners/creators), OR
+                            // 2. User doesn't have can_manage_event permission
+                            // Show "Edit Event" only if event hasn't ended AND user has can_manage_event permission
+                            // This ensures consistency: ended events always show info routes
+                            $dropdownLabel = ($eventEnded || !$canManageEvent) ? 'Event Info' : 'Edit Event';
+                            $useInfoRoutes = $eventEnded || !$canManageEvent;
                         @endphp
                         <button type="button" id="editEventDropdownButton-{{ $event->id }}" class="whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100 px-1 pb-1 text-sm font-medium inline-flex items-center gap-2">
                             {{ $dropdownLabel }}

@@ -873,11 +873,36 @@
                 const payload = collectPayload();
                 // Persist JSON to R2 via controller autosave endpoint
                 const autosaveUrl = '{{ route("organizer.events.certificate.autosave", [], false) }}' + '?id=' + encodeURIComponent(eventId);
-                await postJSON(autosaveUrl, { certificate_data_json: JSON.stringify(payload) });
-                if (statusEl) statusEl.textContent = 'Saved';
-                refreshPreview(payload);
-                showAutosaveIndicator('success');
-                setTimeout(()=>{ if (statusEl) statusEl.textContent=''; }, 1200);
+                const response = await fetch(autosaveUrl, { 
+                    method:'POST', 
+                    headers:{
+                        'Content-Type':'application/json', 
+                        'X-CSRF-TOKEN': csrf,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }, 
+                    body: JSON.stringify({ certificate_data_json: JSON.stringify(payload) }) 
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    if (response.status === 403) {
+                        console.error('Permission denied: User does not have can_manage_event permission');
+                        if (statusEl) statusEl.textContent = 'Permission denied';
+                        showAutosaveIndicator('error');
+                        return;
+                    }
+                    throw new Error(errorData.message || `HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    if (statusEl) statusEl.textContent = 'Saved';
+                    refreshPreview(payload);
+                    showAutosaveIndicator('success');
+                    setTimeout(()=>{ if (statusEl) statusEl.textContent=''; }, 1200);
+                } else {
+                    throw new Error(result.message || 'Autosave failed');
+                }
             } catch(e) {
                 if (statusEl) statusEl.textContent = 'Save failed';
                 showAutosaveIndicator('error');
@@ -885,11 +910,6 @@
             }
         }
         autosaveDebounced = debounce(autosaveCert, 700);
-
-        async function postJSON(url, payload){
-            const resp = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json', 'X-CSRF-TOKEN': csrf }, body: JSON.stringify(payload) });
-            return resp.json();
-        }
 
         window.uploadLogo = async function(side){
             const file = document.getElementById(`logo_${side}_file`).files[0];
@@ -1546,41 +1566,32 @@
                 }
             }
             
-            // Load existing flag if present - check database first, then R2 settings
+            // Load existing flag from database
             async function loadCertificateSetting() {
                 try {
-                    // Try to get from database first
                     const response = await fetch(`/organizer/events/certificate-status?id=${encodeURIComponent(eventId)}`, { 
                         credentials: 'same-origin',
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        headers: { 
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrf
+                        }
                     });
                     
                     if (response.ok) {
                         const data = await response.json();
-                        if (typeof data.certificate_enabled !== 'undefined') {
+                        if (data.success && typeof data.certificate_enabled !== 'undefined') {
                             box.checked = !data.certificate_enabled; // If certificate_enabled is false, checkbox should be checked
                             // Update visibility immediately after setting checkbox state
                             updateVisibility();
-                            return;
                         }
+                    } else if (response.status === 403) {
+                        // User doesn't have permission - disable autosave
+                        console.warn('User does not have permission to manage certificate settings');
+                        box.disabled = true;
+                        if (formContainer) formContainer.style.opacity = '0.6';
                     }
                 } catch (error) {
-                }
-                
-                // Fallback to R2 settings
-                try {
-                    const response = await fetch(`/api/events/${encodeURIComponent(eventId)}/settings`, { 
-                        credentials: 'same-origin' 
-                    });
-                    if (response.ok) {
-                        const cfg = await response.json();
-                        if (cfg && typeof cfg.certificate_enabled !== 'undefined') {
-                            box.checked = !cfg.certificate_enabled; // If certificate_enabled is false, checkbox should be checked
-                            // Update visibility immediately after setting checkbox state
-                            updateVisibility();
-                        }
-                    }
-                } catch (error) {
+                    console.error('Failed to load certificate setting:', error);
                 }
             }
             
@@ -1588,14 +1599,7 @@
 
             const persist = async (enabled) => {
                 try {
-                    // Update both R2 settings and event table
-                    await fetch(`/api/events/${encodeURIComponent(eventId)}/settings`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
-                        body: JSON.stringify({ certificate_enabled: enabled })
-                    });
-                    
-                    // Also update via certificate autosave endpoint
+                    // Update via certificate autosave endpoint (which handles both R2 and database)
                     const formData = new FormData();
                     formData.append('_token', csrf);
                     formData.append('id', eventId);
@@ -1610,15 +1614,41 @@
                         skip_certificate: skipCert
                     });
                     
-                    await fetch('/organizer/events/certificate/autosave', {
+                    const response = await fetch('/organizer/events/certificate/autosave', {
                         method: 'POST',
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        headers: { 
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrf
+                        },
                         body: formData
                     });
                     
-                    console.log('Certificate enabled setting persisted:', enabled);
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        if (response.status === 403) {
+                            console.error('Permission denied: User does not have can_manage_event permission');
+                            showAutosaveIndicator('error');
+                            // Revert checkbox state
+                            box.checked = !enabled;
+                            updateVisibility();
+                            return;
+                        }
+                        throw new Error(errorData.message || `HTTP ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        console.log('Certificate enabled setting persisted:', enabled);
+                        showAutosaveIndicator('success');
+                    } else {
+                        throw new Error(result.message || 'Failed to persist certificate setting');
+                    }
                 } catch (error) {
                     console.error('Failed to persist certificate enabled setting:', error);
+                    showAutosaveIndicator('error');
+                    // Revert checkbox state on error
+                    box.checked = !enabled;
+                    updateVisibility();
                 }
             };
             box.addEventListener('change', () => {
@@ -1692,16 +1722,32 @@
                         });
                     }
                     
-                    await fetch('/organizer/events/certificate/autosave', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    const response = await fetch('/organizer/events/certificate/autosave', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrf
                         },
                         body: formData
                     });
                     
-                    console.log('Certificate autosaved successfully');
-                    showAutosaveIndicator('success');
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        if (response.status === 403) {
+                            console.error('Permission denied: User does not have can_manage_event permission');
+                            showAutosaveIndicator('error');
+                            return;
+                        }
+                        throw new Error(errorData.message || `HTTP ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        console.log('Certificate autosaved successfully');
+                        showAutosaveIndicator('success');
+                    } else {
+                        throw new Error(result.message || 'Autosave failed');
+                    }
                 } catch (error) {
                     console.error('Certificate autosave failed:', error);
                     showAutosaveIndicator('error');

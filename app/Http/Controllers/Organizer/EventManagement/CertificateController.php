@@ -429,20 +429,62 @@ class CertificateController extends Controller
         }
 
         $event = Event::find($eventId);
-        $isAdmin = Auth::guard('admin')->check();
-        $isOwner = $event && $event->user_id === Auth::id();
-        $isAdminEvent = $event && $event->user_id === null && $isAdmin;
-        
-        if (!$event || (!$isOwner && !$isAdminEvent && !$isStaff)) {
-            return response()->json(['success' => false, 'message' => 'Event not found or not authorized.'], 403);
+        if (!$event) {
+            return response()->json(['success' => false, 'message' => 'Event not found.'], 404);
         }
 
-        // Accept either discrete fields or a JSON blob
-        $incoming = $request->has('certificate_data') && is_array($request->certificate_data)
-            ? $request->certificate_data
-            : json_decode($request->input('certificate_data_json', '{}'), true);
+        // Check access permissions
+        $isAdmin = Auth::guard('admin')->check();
+        $isOwner = $event->user_id === Auth::id();
+        $isAdminEvent = $event->user_id === null && $isAdmin;
+        $user = Auth::user();
+        $staff = $event->staff()->where('user_id', $user?->id)->first();
+        $staffRole = $staff?->role ?? null;
+        $isOrganizerRole = $staffRole === 'organizer';
+        
+        // Check if user can manage event (required for certificate autosave)
+        $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+        
+        if (!$canManageEvent) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized. You need can_manage_event permission to save certificate settings.'], 403);
+        }
 
-        if (!is_array($incoming)) { $incoming = []; }
+        // Accept either discrete fields or a JSON blob (or both)
+        $incoming = [];
+        
+        // Try to get JSON blob first
+        if ($request->has('certificate_data') && is_array($request->certificate_data)) {
+            $incoming = $request->certificate_data;
+        } elseif ($request->has('certificate_data_json')) {
+            $decoded = json_decode($request->input('certificate_data_json'), true);
+            if (is_array($decoded)) {
+                $incoming = $decoded;
+            }
+        }
+        
+        // Always merge individual form fields from request (FormData fields take precedence over JSON)
+        // This handles cases where form fields are sent directly or override JSON data
+        $fieldKeys = [
+            'font_family', 'font_size', 'font_color', 'name_x_position', 'name_y_position', 'preview_text',
+            'org_line1', 'org_line2', 'org_line3', 'org_school', 'recipient_name', 'event_title', 'event_when', 'event_given',
+            'theme_primary', 'theme_secondary', 'theme_border',
+            'sig_left_name', 'sig_left_title', 'sig_right_name', 'sig_right_title',
+            'certificate_path', 'certificate_url'
+        ];
+        
+        // Add dynamic signatory fields (1-4)
+        for ($i = 1; $i <= 4; $i++) {
+            $fieldKeys[] = "sig_{$i}_name";
+            $fieldKeys[] = "sig_{$i}_title";
+            $fieldKeys[] = "sig_{$i}_signature";
+        }
+        
+        // Merge individual fields from request (request fields override JSON)
+        foreach ($fieldKeys as $key) {
+            if ($request->has($key) && $request->input($key) !== null && $request->input($key) !== '') {
+                $incoming[$key] = $request->input($key);
+            }
+        }
         
         // Validate signatory names and titles for profanity
         for ($i = 1; $i <= 4; $i++) {
@@ -626,11 +668,18 @@ class CertificateController extends Controller
         }
 
         $event = Event::find($eventId);
+        if (!$event) {
+            return response()->json(['success' => false, 'message' => 'Event not found.'], 404);
+        }
+
+        // Check access permissions
         $isAdmin = Auth::guard('admin')->check();
-        $isOwner = $event && $event->user_id === Auth::id();
-        $isAdminEvent = $event && $event->user_id === null && $isAdmin;
+        $isOwner = $event->user_id === Auth::id();
+        $isAdminEvent = $event->user_id === null && $isAdmin;
+        $isStaff = $event->staff()->where('user_id', Auth::id())->exists();
         
-        if (!$event || (!$isOwner && !$isAdminEvent)) {
+        // Allow access if user is admin, owner, or staff (staff can view status)
+        if (!$isAdmin && !$isOwner && !$isAdminEvent && !$isStaff) {
             return response()->json(['success' => false, 'message' => 'Event not found or not authorized.'], 403);
         }
 
@@ -651,12 +700,23 @@ class CertificateController extends Controller
         }
 
         $event = Event::find($eventId);
+        if (!$event) {
+            return response()->json(['success' => false, 'message' => 'Event not found.'], 404);
+        }
+
+        // Check access permissions - require can_manage_event for updates
         $isAdmin = Auth::guard('admin')->check();
-        $isOwner = $event && $event->user_id === Auth::id();
-        $isAdminEvent = $event && $event->user_id === null && $isAdmin;
+        $isOwner = $event->user_id === Auth::id();
+        $isAdminEvent = $event->user_id === null && $isAdmin;
+        $user = Auth::user();
+        $staff = $event->staff()->where('user_id', $user?->id)->first();
+        $staffRole = $staff?->role ?? null;
+        $isOrganizerRole = $staffRole === 'organizer';
         
-        if (!$event || (!$isOwner && !$isAdminEvent)) {
-            return response()->json(['success' => false, 'message' => 'Event not found or not authorized.'], 403);
+        $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+        
+        if (!$canManageEvent) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized. You need can_manage_event permission to update certificate status.'], 403);
         }
 
         $certificateEnabled = $request->boolean('certificate_enabled', true);
