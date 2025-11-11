@@ -81,13 +81,40 @@
                     @php
                         // Check if event has ended
                         $eventEnded = false;
+                        $eventUpcoming = false;
                         if ($event->end_date) {
                             $eventEnded = \Carbon\Carbon::parse($event->end_date)->isPast();
                         } elseif ($event->start_date) {
                             $eventEnded = \Carbon\Carbon::parse($event->start_date)->isPast();
                         }
+                        
+                        // Check if event is upcoming
+                        if ($event->start_date && !$eventEnded) {
+                            $eventUpcoming = \Carbon\Carbon::parse($event->start_date)->isFuture();
+                        }
+                        
+                        // Determine border class based on status and timing
+                        $borderClass = 'border-2 ';
+                        if ($event->status === 'draft') {
+                            $borderClass .= 'border-gray-300 dark:border-gray-600';
+                        } elseif ($event->status === 'pending_approval') {
+                            $borderClass .= 'border-yellow-400 dark:border-yellow-600';
+                        } elseif ($event->status === 'rejected') {
+                            $borderClass .= 'border-red-400 dark:border-red-600';
+                        } elseif ($event->status === 'published') {
+                            if ($eventEnded) {
+                                $borderClass .= 'border-gray-400 dark:border-gray-600';
+                            } elseif ($eventUpcoming) {
+                                $borderClass .= 'border-green-400 dark:border-green-600';
+                            } else {
+                                $borderClass .= 'border-blue-400 dark:border-blue-600';
+                            }
+                        } else {
+                            // Default border for other statuses
+                            $borderClass .= 'border-gray-300 dark:border-gray-600';
+                        }
                     @endphp
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200 {{ $eventEnded ? 'border-2 border-gray-400 dark:border-gray-600' : '' }}" data-event-id="{{ $event->id }}">
+                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200 {{ $borderClass }}" data-event-id="{{ $event->id }}">
                         <div class="relative">
                             @if($event->thumbnail_url)
                                 <img src="{{ $event->thumbnail_url }}" alt="{{ $event->title ?: 'Event' }}" class="h-36 w-full object-cover">

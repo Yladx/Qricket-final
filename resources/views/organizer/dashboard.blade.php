@@ -487,26 +487,62 @@
         (function(){
             const userId = {{ auth()->id() }};
             
+            // Store initial server-rendered values to preserve them if API fails
+            var initialRevenue = null;
+            var initialTicketsSold = null;
+            var initialThisMonthRevenue = null;
+            
+            // Capture initial values on page load
+            document.addEventListener('DOMContentLoaded', function(){
+                var revenueEl = document.querySelector('[data-stat="totalRevenue"]');
+                if(revenueEl) {
+                    initialRevenue = revenueEl.textContent.trim();
+                }
+                var ticketsEl = document.querySelector('[data-stat="totalTicketsSold"]');
+                if(ticketsEl) {
+                    initialTicketsSold = ticketsEl.textContent.trim();
+                }
+                var thisMonthEl = document.querySelector('[data-stat="thisMonthRevenue"]');
+                if(thisMonthEl) {
+                    initialThisMonthRevenue = thisMonthEl.textContent.trim();
+                }
+            });
+            
             function refreshOrganizerMetrics(){
                 try{
                     var url = new URL('{{ route('realtime.metrics') }}', window.location.origin);
                     url.searchParams.set('scope','organizer_dashboard');
                     fetch(url.toString(), { credentials:'same-origin' })
-                        .then(function(r){ return r.json(); })
+                        .then(function(r){ 
+                            if(!r.ok) {
+                                // If API returns error, don't update - preserve server values
+                                return;
+                            }
+                            return r.json(); 
+                        })
                         .then(function(data){
-                            if(!data) return;
-                            var map = {
-                                totalRevenue: data.net,
-                                thisMonthRevenue: undefined, // not provided by realtime endpoint
-                                unclaimedPayout: undefined // not provided by realtime endpoint
-                            };
-                            Object.keys(map).forEach(function(k){
-                                if(typeof map[k] === 'undefined') return;
-                                var el = document.querySelector('[data-stat="'+k+'"]');
-                                if(el){ el.textContent = '₱' + (Number(map[k]||0)).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2}); }
-                            });
-                        }).catch(function(){});
-                }catch(e){}
+                            // Only update if data is valid and explicitly contains revenue data
+                            // Don't update if data is null, undefined, or doesn't have net property
+                            if(!data || data.net === undefined || data.net === null) {
+                                // API didn't return valid data - preserve server-rendered values
+                                return;
+                            }
+                            
+                            // Update revenue only if API returned a valid number (including 0)
+                            // This ensures we update with real-time data when available
+                            var revenueEl = document.querySelector('[data-stat="totalRevenue"]');
+                            if(revenueEl && typeof data.net === 'number') { 
+                                revenueEl.textContent = '₱' + (Number(data.net)).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2}); 
+                            }
+                        }).catch(function(err){
+                            // On error, preserve initial values - don't overwrite with zero
+                            // Initial values are already set from server, so no action needed
+                            console.debug('Revenue metrics refresh failed, preserving server values:', err);
+                        });
+                }catch(e){
+                    // On exception, preserve initial values - don't overwrite with zero
+                    console.debug('Revenue metrics refresh exception, preserving server values:', e);
+                }
             }
             
             function updateOrganizerMetricsFromEvent(eventData) {
@@ -540,9 +576,16 @@
                 }
             }
             
-            document.addEventListener('visibilitychange', function(){ if(!document.hidden) refreshOrganizerMetrics(); });
-            window.addEventListener('load', refreshOrganizerMetrics);
+            // Only refresh metrics when page becomes visible (not on initial load)
+            // This prevents overwriting server-rendered values on page load
+            document.addEventListener('visibilitychange', function(){ 
+                if(!document.hidden) {
+                    // Small delay to ensure page is fully visible
+                    setTimeout(refreshOrganizerMetrics, 500);
+                }
+            });
             
+            // Don't call refreshOrganizerMetrics on page load - keep server-rendered values
             // Real-time updates are now handled by organizer-dashboard-realtime.js
         })();
     </script>
