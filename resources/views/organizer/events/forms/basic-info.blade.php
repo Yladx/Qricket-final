@@ -22,43 +22,11 @@
     </div>
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
-    @php
-        // Safely get variables with defaults
-        $eventData = isset($eventData) && is_array($eventData) ? $eventData : [];
-        $isFreeEventParam = isset($isFreeEvent) ? $isFreeEvent : false;
-        $eventModel = isset($event) && is_object($event) ? $event : null;
-        
-        // Determine if this is an existing free event that should be locked
-        // Check in order: isFreeEvent parameter (from edit controller), event model, eventData array
-        $isExistingFreeEvent = false;
-        
-        if ($isFreeEventParam === true || $isFreeEventParam === 1 || $isFreeEventParam === '1') {
-            // Event is explicitly marked as free via parameter (from edit controller)
-            $isExistingFreeEvent = true;
-        } elseif ($eventModel && isset($eventModel->is_free) && (bool)$eventModel->is_free === true) {
-            // Event model has is_free set to true (for draft events being continued)
-            $isExistingFreeEvent = true;
-        } elseif (isset($eventData['is_free']) && (bool)$eventData['is_free'] === true) {
-            // EventData array has is_free set to true
-            $isExistingFreeEvent = true;
-        }
-        
-        // Determine checkbox checked state (for new events or when not locked)
-        $isFreeChecked = false;
-        if (!$isExistingFreeEvent) {
-            // For new events or paid events, check old input first, then eventData, then event model
-            $oldIsFree = old('is_free');
-            if ($oldIsFree !== null && $oldIsFree !== '') {
-                $isFreeChecked = (bool)$oldIsFree;
-            } elseif (isset($eventData['is_free']) && $eventData['is_free'] !== null && $eventData['is_free'] !== '') {
-                $isFreeChecked = (bool)$eventData['is_free'];
-            } elseif ($eventModel && isset($eventModel->is_free) && $eventModel->is_free !== null) {
-                $isFreeChecked = (bool)$eventModel->is_free;
-            }
-        }
-    @endphp
-    
-    @if($isExistingFreeEvent)
+    @if(
+        (isset($isFreeEvent) && ($isFreeEvent === true || $isFreeEvent === 1 || $isFreeEvent === '1')) ||
+        (isset($event) && is_object($event) && isset($event->is_free) && (bool)$event->is_free === true) ||
+        (isset($eventData) && is_array($eventData) && isset($eventData['is_free']) && (bool)$eventData['is_free'] === true)
+    )
         <!-- Event is free and being edited - show read-only display instead of checkbox -->
         <div class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
             <div class="flex items-center space-x-2">
@@ -80,7 +48,11 @@
                     name="is_free" 
                     value="1" 
                     id="is_free_checkbox" 
-                    @if($isFreeChecked) checked @endif
+                    @if(
+                        (old('is_free') !== null && old('is_free') !== '' && (bool)old('is_free')) ||
+                        (isset($eventData) && is_array($eventData) && isset($eventData['is_free']) && $eventData['is_free'] !== null && $eventData['is_free'] !== '' && (bool)$eventData['is_free']) ||
+                        (isset($event) && is_object($event) && isset($event->is_free) && $event->is_free !== null && (bool)$event->is_free)
+                    ) checked @endif
                     class="rounded border-gray-300 text-qricket-600 focus:ring-qricket-500"
                 >
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
@@ -128,6 +100,10 @@
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional: Add a Google Maps link for directions.</p>
         </div>
     </div>
+    
+    <!-- Hidden fields for latitude and longitude (used by Google Maps) -->
+    <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $eventData['latitude'] ?? (isset($event) && is_object($event) ? ($event->latitude ?? '') : '')) }}">
+    <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $eventData['longitude'] ?? (isset($event) && is_object($event) ? ($event->longitude ?? '') : '')) }}">
 </div>
 
 <script>

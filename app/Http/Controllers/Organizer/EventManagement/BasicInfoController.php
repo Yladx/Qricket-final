@@ -135,8 +135,12 @@ class BasicInfoController extends Controller
             'existing_poster_url' => $event->poster_url ?? '',
             'existing_thumbnail_url' => $event->thumbnail_url ?? '',
         ];
+        
+        // Determine if event is free (for locking the checkbox in the UI)
+        // If event is already saved as free, lock it to prevent changing to paid
+        $isFreeEvent = (bool)($event->is_free ?? false);
 
-        return view('organizer.events.create.step1', compact('eventData', 'eventId', 'event'));
+        return view('organizer.events.create.step1', compact('eventData', 'eventId', 'event', 'isFreeEvent'));
     }
 
     public function step1Store(Request $request)

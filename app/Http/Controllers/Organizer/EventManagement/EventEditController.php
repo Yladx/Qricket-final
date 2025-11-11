@@ -295,6 +295,8 @@ class EventEditController extends Controller
             'end_date' => $event->end_date ?? '',
             'location' => $event->location ?? '',
             'location_url' => $event->location_url ?? '',
+            'latitude' => $event->latitude ?? '',
+            'longitude' => $event->longitude ?? '',
             'max_participants' => $event->max_participants ?? '',
             'category' => $event->category ?? '',
             'thumbnail_url' => $event->thumbnail_url ?? '',
