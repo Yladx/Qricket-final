@@ -24,15 +24,13 @@
     <!-- Free Event Checkbox (Info moved to sidebar) -->
     @php
         // Initialize ALL variables FIRST with safe defaults - CRITICAL to prevent undefined variable errors
-        $isFreeValue = false;
-        $isEditingFreeEvent = false;
-        $isFreeChecked = false;
-        $eventId = $eventId ?? null;
-        $eventData = $eventData ?? [];
-        $isFreeEvent = $isFreeEvent ?? false;
-        $event = $event ?? null;
+        $eventId = isset($eventId) ? $eventId : null;
+        $eventData = isset($eventData) && is_array($eventData) ? $eventData : [];
+        $isFreeEvent = isset($isFreeEvent) ? $isFreeEvent : false;
+        $event = isset($event) ? $event : null;
         
         // Determine if event is free from eventData or event object
+        $isFreeValue = false;
         if (!empty($eventData) && is_array($eventData) && array_key_exists('is_free', $eventData)) {
             $isFreeValue = (bool)$eventData['is_free'];
         } elseif (!empty($event) && is_object($event) && property_exists($event, 'is_free')) {
@@ -42,15 +40,22 @@
         // ONLY lock if isFreeEvent parameter was explicitly passed (from edit/basic.blade.php for manage/edit)
         // DO NOT lock in step1 (event creation flow), even if eventId exists
         // This ensures step1 always shows the checkbox, and only manage/edit blocks it
+        $isEditingFreeEvent = false;
         if (!empty($isFreeEvent) && ($isFreeEvent === true || $isFreeEvent === 1 || $isFreeEvent === '1')) {
             $isEditingFreeEvent = true;
         }
         
         // Get checkbox checked state (for when checkbox is shown)
-        $isFreeChecked = old('is_free', $isFreeValue);
+        // Use old() helper first, then fallback to isFreeValue
+        $isFreeCheckedValue = old('is_free');
+        if ($isFreeCheckedValue === null) {
+            $isFreeCheckedValue = $isFreeValue;
+        } else {
+            $isFreeCheckedValue = (bool)$isFreeCheckedValue;
+        }
     @endphp
     
-    @if(!empty($isEditingFreeEvent) && $isEditingFreeEvent === true)
+    @if($isEditingFreeEvent === true)
         <!-- Event is free and being edited - show read-only display instead of checkbox -->
         <div class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
             <div class="flex items-center space-x-2">
@@ -72,7 +77,7 @@
                     name="is_free" 
                     value="1" 
                     id="is_free_checkbox" 
-                    {{ $isFreeChecked ? 'checked' : '' }}
+                    {{ $isFreeCheckedValue ? 'checked' : '' }}
                     class="rounded border-gray-300 text-qricket-600"
                 >
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
