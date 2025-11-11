@@ -29,7 +29,7 @@
             </div>
 
             <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
@@ -68,22 +68,6 @@
                         <div class="ml-2">
                             <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Response Rate</p>
                             <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $responseRate }}%</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                            </svg>
-                        </div>
-                        <div class="ml-2">
-                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Avg Rating</p>
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                                {{ isset($averageRatings['overall']) ? $averageRatings['overall'] : 'N/A' }}
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -201,18 +185,22 @@
                                     <div class="flex-1">
                                         <div class="flex items-center mb-2">
                                             <div class="flex-shrink-0">
+                                                @php
+                                                    $userName = $feedback->user->full_name ?? ($feedback->user->first_name . ' ' . $feedback->user->last_name) ?? ($feedback->user->email ?? 'Anonymous');
+                                                    $userInitial = !empty($feedback->user->first_name) ? substr($feedback->user->first_name, 0, 1) : (isset($feedback->user->email) ? substr($feedback->user->email, 0, 1) : 'A');
+                                                @endphp
                                                 @if($feedback->user->profile_picture_url)
-                                                    <img class="w-6 h-6 rounded-full" src="{{ $feedback->user->profile_picture_url }}" alt="{{ $feedback->user->name }}">
+                                                    <img class="w-6 h-6 rounded-full" src="{{ $feedback->user->profile_picture_url }}" alt="{{ $userName }}">
                                                 @else
                                                     <div class="w-6 h-6 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
                                                         <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                                            {{ substr($feedback->user->name, 0, 1) }}
+                                                            {{ strtoupper($userInitial) }}
                                                         </span>
                                                     </div>
                                                 @endif
                                             </div>
                                             <div class="ml-2">
-                                                <p class="text-xs font-medium text-gray-900 dark:text-white">{{ $feedback->user->name }}</p>
+                                                <p class="text-xs font-medium text-gray-900 dark:text-white">{{ $userName }}</p>
                                                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ $feedback->created_at->format('M j, Y g:i A') }}</p>
                                             </div>
                                         </div>
@@ -275,17 +263,13 @@
                                                 </div>
                                             </div>
                                             @endif
-                                            @else
-                                            <div class="text-center py-2 text-xs text-gray-500 dark:text-gray-400">
-                                                Upgrade to Pro to view detailed ratings
-                                            </div>
                                             @endif
                                             
-                                            <!-- Comments Section - Show when NOT Advanced Analytics -->
-                                            @if(!$canViewDetailedFeedback && isset($responses['comments']))
+                                            <!-- Comments Section - Always show regardless of subscription -->
+                                            @if(isset($responses['comments']) && (isset($responses['comments']['liked']) || isset($responses['comments']['improvements']) || isset($responses['comments']['additional'])))
                                             <div class="mt-3 space-y-3">
-                                                @if(!empty($responses['comments']['liked']))
-                                                <div class="flex items-start space-x-3">
+                                                @if(!empty($responses['comments']['liked']) && trim($responses['comments']['liked']) !== '')
+                                                <div class="flex items-start space-x-3 feedback-comment" data-comment-type="liked">
                                                     <div class="flex-shrink-0">
                                                         <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
                                                             <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -295,15 +279,15 @@
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl px-3 py-2">
-                                                            <p class="text-sm text-gray-900 dark:text-white">{{ $responses['comments']['liked'] }}</p>
+                                                            <p class="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{{ $responses['comments']['liked'] }}</p>
                                                         </div>
                                                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-3">What they liked</p>
                                                     </div>
                                                 </div>
                                                 @endif
                                                 
-                                                @if(!empty($responses['comments']['improvements']))
-                                                <div class="flex items-start space-x-3">
+                                                @if(!empty($responses['comments']['improvements']) && trim($responses['comments']['improvements']) !== '')
+                                                <div class="flex items-start space-x-3 feedback-comment" data-comment-type="improvements">
                                                     <div class="flex-shrink-0">
                                                         <div class="w-8 h-8 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
                                                             <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="currentColor" viewBox="0 0 20 20">
@@ -313,15 +297,15 @@
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl px-3 py-2">
-                                                            <p class="text-sm text-gray-900 dark:text-white">{{ $responses['comments']['improvements'] }}</p>
+                                                            <p class="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{{ $responses['comments']['improvements'] }}</p>
                                                         </div>
                                                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-3">Suggestions for improvement</p>
                                                     </div>
                                                 </div>
                                                 @endif
                                                 
-                                                @if(!empty($responses['comments']['additional']))
-                                                <div class="flex items-start space-x-3">
+                                                @if(!empty($responses['comments']['additional']) && trim($responses['comments']['additional']) !== '')
+                                                <div class="flex items-start space-x-3 feedback-comment" data-comment-type="additional">
                                                     <div class="flex-shrink-0">
                                                         <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                                                             <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -331,7 +315,7 @@
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl px-3 py-2">
-                                                            <p class="text-sm text-gray-900 dark:text-white">{{ $responses['comments']['additional'] }}</p>
+                                                            <p class="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{{ $responses['comments']['additional'] }}</p>
                                                         </div>
                                                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-3">Additional thoughts</p>
                                                     </div>
