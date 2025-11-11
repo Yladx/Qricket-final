@@ -53,14 +53,22 @@
                         $isOwner = $user && (int)$event->user_id === (int)$user->id;
                         $isAdminEvent = $event->user_id === null && $isAdmin;
                         $eventEnded = optional($event->end_date)->isPast();
-                        // Admins have full access to all navigation
-                        // Allow staff members to manage events even without explicit permissions
-                        $isStaffMember = $staff !== null;
-                        $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_attendance ?? false) || ($staff?->role === 'organizer');
-                        $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_ticket ?? false) || ($staff?->role === 'organizer');
-                        $canManageEvent = $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
-                        $canManageNews = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_news ?? false) || ($staff?->role === 'organizer');
-                        $canManageSales = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_sales ?? false) || ($staff?->role === 'organizer');
+                        
+                        // Admins and owners always have full access
+                        // Staff members need explicit permissions (no automatic access just for being staff)
+                        $staffRole = $staff?->role ?? null;
+                        $isOrganizerRole = $staffRole === 'organizer';
+                        
+                        // Permission checks - staff members need explicit permissions
+                        $canViewOverview = $isAdmin || $isOwner || $isAdminEvent || ($staff !== null);
+                        $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_attendance ?? false) || $isOrganizerRole;
+                        $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_ticket ?? false) || $isOrganizerRole;
+                        $canManageEvent = $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+                        $canManageStaff = $isOwner || $isAdminEvent || ($staff?->can_manage_staff ?? false) || $isOrganizerRole;
+                        $canManageNews = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_news ?? false) || $isOrganizerRole;
+                        $canManageSales = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_sales ?? false) || $isOrganizerRole;
+                        $canViewActivity = $isAdmin || $isOwner || $isAdminEvent || ($staff !== null);
+                        $canManageFeedback = $isAdmin || $isOwner || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
                         
                         // Route helper function
                         $route = function($name, $params = []) use ($isAdmin, $event) {
@@ -109,7 +117,9 @@
                             }
                         };
                     @endphp
+                    @if($canViewOverview)
                     <a href="{{ $route('manage') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.manage') || request()->routeIs('admin.event.manage') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Overview</a>
+                    @endif
                     @if($canManageAttendance)
                         <a href="{{ $route('attendance') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.attendance') || request()->routeIs('admin.event.attendance') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Attendance</a>
                     @endif
@@ -142,7 +152,7 @@
                             </div>
                         </div>
                     @endif
-                    @if($canManageEvent)
+                    @if($canManageStaff)
                         @php
                             // Resolve Staff URL robustly with fallbacks to avoid accidental '/' redirects
                             try {
@@ -160,15 +170,15 @@
                         @endphp
                         <a href="{{ $staffUrl }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.staff') || request()->routeIs('admin.event.staff') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Staff</a>
                     @endif
-                    @if($canManageEvent || $canManageNews)
+                    @if($canManageEvent)
                     <!-- Edit Event / Event Info dropdown -->
                     <div class="relative">
                         @php
-                            // Reuse variables from earlier definition
-                            $canManageEventForUser = $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false);
-                            // Show "Event Info" if event ended, admin, or user can't manage event
-                            $dropdownLabel = ($eventEnded || $isAdmin || !$canManageEventForUser) ? 'Event Info' : 'Edit Event';
-                            $useInfoRoutes = $eventEnded || !$canManageEvent;
+                            // Check if user can actually edit event info
+                            $canEditEventInfo = $isOwner || $isAdminEvent || ($staff?->can_edit_event_info ?? false) || $isOrganizerRole;
+                            // Show "Event Info" if event ended or user can't edit event info
+                            $dropdownLabel = ($eventEnded || !$canEditEventInfo) ? 'Event Info' : 'Edit Event';
+                            $useInfoRoutes = $eventEnded || !$canEditEventInfo;
                         @endphp
                         <button type="button" id="editEventDropdownButton-{{ $event->id }}" class="whitespace-nowrap border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100 px-1 pb-1 text-sm font-medium inline-flex items-center gap-2">
                             {{ $dropdownLabel }}
@@ -182,9 +192,9 @@
                                 <a href="{{ $route('info.layout') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Layout Info</a>
                                 <a href="{{ $route('info.certificate') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Certificate Info</a>
                             @else
-                                <a href="{{ $route('edit.basic') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">{{ $canManageEventForUser ? 'Basic' : 'Basic Info' }}</a>
-                                <a href="{{ $route('edit.layout') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">{{ $canManageEventForUser ? 'Layout' : 'Layout Info' }}</a>
-                                <a href="{{ $route('edit.certificate') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">{{ $canManageEventForUser ? 'Certificate' : 'Certificate Info' }}</a>
+                                <a href="{{ $route('edit.basic') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Basic</a>
+                                <a href="{{ $route('edit.layout') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Layout</a>
+                                <a href="{{ $route('edit.certificate') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Certificate</a>
                             @endif
                         </div>
                     </div>
@@ -192,11 +202,9 @@
                     @if($canManageNews)
                     <a href="{{ $route('news') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.news.*') || request()->routeIs('admin.event.news.*') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">News</a>
                     @endif
+                    @if($canViewActivity)
                     <a href="{{ $route('activity-log') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.activity-log') || request()->routeIs('admin.event.activity-log') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Activity</a>
-                    @php
-                        // Reuse eventEnded from earlier definition
-                        $canManageFeedback = $isAdmin || $isOwner || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
-                    @endphp
+                    @endif
                     @if($eventEnded && $canManageFeedback)
                     <a href="{{ $route('feedback') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.feedback') || request()->routeIs('admin.event.feedback') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Feedback</a>
                     @endif
