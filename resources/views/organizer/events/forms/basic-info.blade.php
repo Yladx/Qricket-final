@@ -48,7 +48,7 @@
                     type="checkbox" 
                     name="is_free" 
                     value="1" 
-                    id="is_free_checkbox"
+                    id="is_free_checkbox" 
                     data-locked="{{ isset($isFreeEventLocked) && $isFreeEventLocked ? 'true' : 'false' }}"
                     @if(
                         (old('is_free') !== null && old('is_free') !== '' && (bool)old('is_free')) ||

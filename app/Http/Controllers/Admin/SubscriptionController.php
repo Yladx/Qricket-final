@@ -39,13 +39,15 @@ class SubscriptionController extends Controller
         // Route to appropriate view based on section
         switch ($section) {
             case 'ticket-pricing':
+            case 'pricing':
                 return $this->ticketPricing($pricingPlans, $quickStats);
             case 'discounts':
                 return $this->discounts($discounts, $quickStats);
             case 'subscriptions':
                 return $this->subscriptions($subscriptionPlans, $quickStats);
             default:
-                return view('admin.subscriptions.index', compact('subscriptionPlans', 'pricingPlans', 'discounts', 'recentPurchases'));
+                // Default to ticket pricing instead of index page
+                return $this->ticketPricing($pricingPlans, $quickStats);
         }
     }
 

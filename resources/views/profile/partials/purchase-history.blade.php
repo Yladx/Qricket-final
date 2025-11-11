@@ -223,11 +223,11 @@
                                         @if($purchase['has_pending_refund'] && isset($purchase['pending_refund_id']))
                                             <div class="flex items-center gap-2">
                                                 <span class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
-                                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                    </svg>
-                                                    Pending
-                                                </span>
+                                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                Pending
+                                            </span>
                                                 <form method="POST" action="{{ route('refund.cancel', $purchase['pending_refund_id']) }}" class="inline" onsubmit="return confirm('Are you sure you want to cancel this refund request?');">
                                                     @csrf
                                                     @method('POST')

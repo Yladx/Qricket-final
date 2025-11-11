@@ -136,18 +136,45 @@ class ReportsController extends Controller
                 ];
             })
             ->values();
-        
-        // Separate free and paid events - group them cleanly
-        $paidEvents = $allEventsData->filter(function($event) {
+            
+        // Separate free and paid events - group them cleanly with pagination
+        $allPaidEvents = $allEventsData->filter(function($event) {
             return !($event['is_free'] ?? false);
         })->sortByDesc('total_revenue')->values();
         
-        $freeEvents = $allEventsData->filter(function($event) {
+        $allFreeEvents = $allEventsData->filter(function($event) {
             return ($event['is_free'] ?? false);
         })->sortByDesc('orders')->values(); // Sort free events by orders (tickets sold) instead of revenue
         
+        // Paginate paid events (15 per page)
+        $paidEventsPage = request()->get('paid_page', 1);
+        $paidEventsPerPage = 15;
+        $paidEventsOffset = ($paidEventsPage - 1) * $paidEventsPerPage;
+        $paidEventsTotal = $allPaidEvents->count();
+        $paidEventsItems = $allPaidEvents->slice($paidEventsOffset, $paidEventsPerPage)->values();
+        $paidEvents = new \Illuminate\Pagination\LengthAwarePaginator(
+            $paidEventsItems,
+            $paidEventsTotal,
+            $paidEventsPerPage,
+            $paidEventsPage,
+            ['path' => request()->url(), 'pageName' => 'paid_page', 'query' => request()->except('paid_page')]
+        );
+        
+        // Paginate free events (15 per page)
+        $freeEventsPage = request()->get('free_page', 1);
+        $freeEventsPerPage = 15;
+        $freeEventsOffset = ($freeEventsPage - 1) * $freeEventsPerPage;
+        $freeEventsTotal = $allFreeEvents->count();
+        $freeEventsItems = $allFreeEvents->slice($freeEventsOffset, $freeEventsPerPage)->values();
+        $freeEvents = new \Illuminate\Pagination\LengthAwarePaginator(
+            $freeEventsItems,
+            $freeEventsTotal,
+            $freeEventsPerPage,
+            $freeEventsPage,
+            ['path' => request()->url(), 'pageName' => 'free_page', 'query' => request()->except('free_page')]
+        );
+        
         // Keep allEventsRevenue for backward compatibility (used in some places)
-        // But now we'll use paidEvents and freeEvents separately in the view
         $allEventsRevenue = collect(); // Empty collection since we're using separate groups
 
         // Get all subscription plans (even those with no subscriptions)
@@ -205,7 +232,7 @@ class ReportsController extends Controller
 
         // Per-pricing plan aggregates: include all pricing rows, even with zero purchases
         $purchasesByPlanId = $additionalTicketPurchases->groupBy('ticket_limit_pricing_id');
-        $ticketLimitPlans = TicketLimitPricing::all()->map(function($plan) use ($purchasesByPlanId, $adminRevenuePercentage){
+        $allTicketLimitPlans = TicketLimitPricing::all()->map(function($plan) use ($purchasesByPlanId, $adminRevenuePercentage){
             $purchases = $purchasesByPlanId->get($plan->id, collect());
             $totalRevenue = (float) $purchases->sum('amount');
             $netRevenue = (float) $purchases->sum(function ($p) { return $p->net_amount ?? $p->amount; });
@@ -213,6 +240,7 @@ class ReportsController extends Controller
                 'plan_name' => $plan->name,
                 'plan_price' => (float) $plan->price,
                 'currency' => $plan->currency,
+                'type' => $plan->type ?? 'paid', // 'paid' or 'free'
                 'total_revenue' => $totalRevenue,
                 'net_revenue' => $netRevenue,
                 'admin_earnings' => $netRevenue * ($adminRevenuePercentage / 100),
@@ -220,6 +248,18 @@ class ReportsController extends Controller
                 'total_tickets' => (int) $purchases->sum('additional_tickets'),
             ];
         })->sortByDesc('total_revenue')->values();
+        
+        // Separate paid and free additional ticket plans
+        $paidTicketLimitPlans = $allTicketLimitPlans->filter(function($plan) {
+            return ($plan['type'] ?? 'paid') === 'paid';
+        })->values();
+        
+        $freeTicketLimitPlans = $allTicketLimitPlans->filter(function($plan) {
+            return ($plan['type'] ?? 'paid') === 'free';
+        })->values();
+        
+        // Keep all plans for backward compatibility
+        $ticketLimitPlans = $allTicketLimitPlans;
 
         // Additional tickets grouped by event (for tab table) - calculate net amounts
         $ticketLimitByEvent = $additionalTicketPurchases
@@ -326,6 +366,8 @@ class ReportsController extends Controller
             'allEventsRevenue' => $allEventsRevenue,
             'paidEvents' => $paidEvents,
             'freeEvents' => $freeEvents,
+            'paidTicketLimitPlans' => $paidTicketLimitPlans,
+            'freeTicketLimitPlans' => $freeTicketLimitPlans,
             'subscriptionPlans' => $subscriptionPlans,
             'subscriptionUsers' => $subscriptionUsers,
             'subscriptionCount' => $subscriptionCount,
@@ -606,7 +648,7 @@ class ReportsController extends Controller
                     'is_free' => $isFreeEvent,
                 ];
             })->values();
-            
+
             // Separate free and paid events for report generation
             $paidEventsReport = $eventRevenueData->filter(function($event) {
                 return !($event['is_free'] ?? false);

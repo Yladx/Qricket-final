@@ -142,50 +142,50 @@
                                 <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                                     {{ $roleLabels[$role] ?? ucfirst(str_replace('-', ' ', $role)) }}
                                 </h5>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     @foreach($staffByRole->get($role) as $staff)
-                                        @if($staff->user)
-                                            <a href="{{ route('organizer.profile', $staff->user->id) }}?back={{ urlencode(route('events.show', $event->id)) }}" 
-                                                   class="group flex items-center gap-3 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-850 rounded-xl border border-gray-200/60 dark:border-gray-700/60 px-4 py-3 hover:shadow-lg hover:border-qricket-300 dark:hover:border-qricket-700 transition-all duration-300">
-                                                <!-- Staff Avatar -->
-                                                <div class="relative flex-shrink-0">
-                                            @if($staff->user->profile_picture_url)
-                                                        <div class="relative">
-                                                            <div class="absolute inset-0 bg-gradient-to-br from-qricket-400 to-qricket-600 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
-                                                            <img class="relative w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-md ring-1 ring-gray-200 dark:ring-gray-600" 
-                                                     src="{{ $staff->user->profile_picture_url }}" 
-                                                     alt="{{ $staff->user->full_name }}">
-                                                        </div>
-                                            @else
-                                                        <div class="relative">
-                                                            <div class="absolute inset-0 bg-gradient-to-br from-qricket-400 to-qricket-600 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
-                                                            <div class="relative w-10 h-10 bg-gradient-to-br from-qricket-500 to-qricket-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md ring-1 ring-gray-200 dark:ring-gray-600">
-                                                    {{ strtoupper(substr($staff->user->full_name ?? 'S', 0, 1)) }}
-                                                            </div>
+                        @if($staff->user)
+                            <a href="{{ route('organizer.profile', $staff->user->id) }}?back={{ urlencode(route('events.show', $event->id)) }}" 
+                                   class="group flex items-center gap-3 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-850 rounded-xl border border-gray-200/60 dark:border-gray-700/60 px-4 py-3 hover:shadow-lg hover:border-qricket-300 dark:hover:border-qricket-700 transition-all duration-300">
+                                    <!-- Staff Avatar -->
+                                    <div class="relative flex-shrink-0">
+                                @if($staff->user->profile_picture_url)
+                                            <div class="relative">
+                                                <div class="absolute inset-0 bg-gradient-to-br from-qricket-400 to-qricket-600 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                                                <img class="relative w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-md ring-1 ring-gray-200 dark:ring-gray-600" 
+                                         src="{{ $staff->user->profile_picture_url }}" 
+                                         alt="{{ $staff->user->full_name }}">
+                                            </div>
+                                @else
+                                            <div class="relative">
+                                                <div class="absolute inset-0 bg-gradient-to-br from-qricket-400 to-qricket-600 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                                                <div class="relative w-10 h-10 bg-gradient-to-br from-qricket-500 to-qricket-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md ring-1 ring-gray-200 dark:ring-gray-600">
+                                        {{ strtoupper(substr($staff->user->full_name ?? 'S', 0, 1)) }}
                                                 </div>
-                                            @endif
-                                                </div>
-                                                
-                                                <!-- Staff Info -->
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-qricket-500 dark:group-hover:text-qricket-400 transition-colors duration-200 truncate">
-                                                        {{ $staff->user->full_name }}
-                                                    </p>
+                                    </div>
+                                @endif
+                                    </div>
+                                    
+                                    <!-- Staff Info -->
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-qricket-500 dark:group-hover:text-qricket-400 transition-colors duration-200 truncate">
+                                            {{ $staff->user->full_name }}
+                                        </p>
                                                     @if($staff->user->email)
                                                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                                                             {{ $staff->user->email }}
-                                                        </p>
-                                                    @endif
-                                                </div>
-                                                
-                                                <!-- Arrow Icon -->
-                                                <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-qricket-500 dark:group-hover:text-qricket-400 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                                </svg>
-                                            </a>
-                                        @endif
-                                    @endforeach
+                                            </p>
+                                    @endif
                                 </div>
+                                    
+                                    <!-- Arrow Icon -->
+                                                <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-qricket-500 dark:group-hover:text-qricket-400 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                            </a>
+                        @endif
+                    @endforeach
+                </div>
                             </div>
                         @endif
                     @endforeach
@@ -244,7 +244,7 @@
                             </div>
                         @endif
                     @endforeach
-                </div>
+            </div>
             @endif
             </div>
         </div>

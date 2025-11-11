@@ -132,9 +132,9 @@
                     @foreach($events as $event)
                         @php
                             // Always check for staff role (including co-owner) for all events
-                            $staffRole = \App\Models\EventStaff::where('event_id', $event->id)
-                                ->where('user_id', $organizer->id)
-                                ->first();
+                                $staffRole = \App\Models\EventStaff::where('event_id', $event->id)
+                                    ->where('user_id', $organizer->id)
+                                    ->first();
                         @endphp
                         <a href="{{ route('events.show', $event) }}" class="group block bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5">
                             <!-- Event Image -->

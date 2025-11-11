@@ -54,12 +54,12 @@ class TrackEventView {
                 // Trigger Pusher event for real-time updates
                 // Since we always create a new view (after deleting old ones), this will always be a new view
                 if (isset($viewRecord->wasRecentlyCreated) && $viewRecord->wasRecentlyCreated) {
-                    $this->triggerPusherEvent('event-viewed', [
-                        'event_id' => $event->id,
-                        'user_id' => $user->id,
-                        'user_name' => $user->first_name . ' ' . $user->last_name,
-                        'timestamp' => now()->toISOString()
-                    ]);
+                $this->triggerPusherEvent('event-viewed', [
+                    'event_id' => $event->id,
+                    'user_id' => $user->id,
+                    'user_name' => $user->first_name . ' ' . $user->last_name,
+                    'timestamp' => now()->toISOString()
+                ]);
                 }
                 
             } catch (\Exception $e) {

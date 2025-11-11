@@ -109,77 +109,82 @@
         </div>
     </div>
 
-    <!-- Discounts Table -->
+    <!-- Discounts Cards -->
     <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Discount Codes</h3>
         </div>
         <div class="p-6">
             @if($discounts->count())
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Value</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Usage</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Applicable To</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            @foreach($discounts as $discount)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $discount->name }}</div>
-                                        @if($discount->description)
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $discount->description }}</div>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-sm">{{ $discount->code }}</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ ucfirst(str_replace('_', ' ', $discount->type)) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $discount->formatted_value }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $discount->used_count }}/{{ $discount->usage_limit ?: '∞' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ ucfirst(str_replace('_', ' ', $discount->applicable_to)) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ $discount->isValid() ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
-                                            {{ $discount->isValid() ? 'Active' : 'Inactive' }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <button onclick="editDiscount({{ $discount->id }})" class="text-qricket-600 dark:text-qricket-400 hover:text-qricket-800 dark:hover:text-qricket-300">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                </svg>
-                                            </button>
-                                            <button onclick="deleteDiscount({{ $discount->id }})" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                </svg>
-                                            </button>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" style="max-height: none; overflow: visible;">
+                    @foreach($discounts as $discount)
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-5 hover:shadow-md transition-all duration-200">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ $discount->name }}</h4>
+                                    @if($discount->description)
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">{{ $discount->description }}</p>
+                                    @endif
+                                </div>
+                                <span class="px-2 py-1 text-xs font-medium rounded-full ml-2 flex-shrink-0 {{ $discount->isValid() ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
+                                    {{ $discount->isValid() ? 'Active' : 'Inactive' }}
+                                </span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <span class="font-mono bg-gray-200 dark:bg-gray-600 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-900 dark:text-gray-100 block text-center">{{ $discount->code }}</span>
+                            </div>
+                            
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Type:</span>
+                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ ucfirst(str_replace('_', ' ', $discount->type)) }}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Value:</span>
+                                    <span class="font-semibold text-qricket-600 dark:text-qricket-400">{{ $discount->formatted_value }}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Usage:</span>
+                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ $discount->used_count }}/{{ $discount->usage_limit ?: '∞' }}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-gray-400">Applicable To:</span>
+                                    <span class="font-medium text-gray-900 dark:text-gray-100 text-xs">{{ ucfirst(str_replace('_', ' ', $discount->applicable_to)) }}</span>
+                                </div>
+                                @if($discount->starts_at || $discount->expires_at)
+                                <div class="pt-2 border-t border-gray-200 dark:border-gray-600">
+                                    @if($discount->starts_at)
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                            Starts: {{ \Carbon\Carbon::parse($discount->starts_at)->format('M d, Y') }}
                                         </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                                    @endif
+                                    @if($discount->expires_at)
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                            Expires: {{ \Carbon\Carbon::parse($discount->expires_at)->format('M d, Y') }}
+                                        </div>
+                                    @endif
+                                </div>
+                                @endif
+                            </div>
+                            
+                            <div class="flex items-center justify-end pt-3 border-t border-gray-200 dark:border-gray-600 space-x-2">
+                                <button onclick="editDiscount({{ $discount->id }})" class="p-2 text-qricket-600 dark:text-qricket-400 hover:bg-qricket-50 dark:hover:bg-qricket-900/20 rounded-md transition-colors" title="Edit">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="deleteDiscount({{ $discount->id }})" class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Delete">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             @else
-                <div class="text-center py-8">
+                <div class="text-center py-12">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>

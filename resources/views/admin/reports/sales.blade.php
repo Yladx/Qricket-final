@@ -189,70 +189,70 @@
                         <!-- Paid Events Section -->
                         @if($paidEvents->count() > 0)
                         <div>
-                            <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center justify-between mb-3">
                                 <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center">
                                     <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                                     Paid Events
                                     <span class="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400">({{ $paidEvents->count() }} events)</span>
                                 </h3>
-                            </div>
-                            <div class="overflow-x-auto">
+                        </div>
+                        <div class="overflow-x-auto">
                                 <table class="min-w-full text-xs border border-gray-200 dark:border-gray-700 rounded-lg">
                                     <thead class="text-left text-gray-500 dark:text-gray-400 bg-green-50 dark:bg-green-900/20">
-                                        <tr>
+                                    <tr>
                                             <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="title" data-group="paid">
-                                                Event Title <span class="sort-indicator">↕</span>
-                                            </th>
+                                            Event Title <span class="sort-indicator">↕</span>
+                                        </th>
                                             <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="start_date" data-group="paid">
-                                                Event Date <span class="sort-indicator">↕</span>
-                                            </th>
+                                            Event Date <span class="sort-indicator">↕</span>
+                                        </th>
                                             <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="status" data-group="paid">
-                                                Status <span class="sort-indicator">↕</span>
-                                            </th>
+                                            Status <span class="sort-indicator">↕</span>
+                                        </th>
                                             <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="orders" data-group="paid">
-                                                Orders <span class="sort-indicator">↕</span>
-                                            </th>
+                                            Orders <span class="sort-indicator">↕</span>
+                                        </th>
                                             <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="total_revenue" data-group="paid">
-                                                Total Sales <span class="sort-indicator">↕</span>
-                                            </th>
+                                            Total Sales <span class="sort-indicator">↕</span>
+                                        </th>
                                             <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="net_revenue" data-group="paid">
-                                                Net Amount <span class="sort-indicator">↕</span>
-                                            </th>
+                                            Net Amount <span class="sort-indicator">↕</span>
+                                        </th>
                                             <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="admin_earnings" data-group="paid">
-                                                Qricket Earnings <span class="sort-indicator">↕</span>
-                                            </th>
-                                        </tr>
-                                    </thead>
+                                            Qricket Earnings <span class="sort-indicator">↕</span>
+                                        </th>
+                                    </tr>
+                                </thead>
                                     <tbody class="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">
                                         @foreach($paidEvents as $event)
                                             <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/10 event-revenue-row paid-event" data-is-free="0">
                                                 <td class="py-2 px-4 font-medium">
-                                                    <a href="{{ route('admin.events.approval.show', $event['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline">
-                                                        {{ $event['title'] }}
-                                                    </a>
-                                                </td>
+                                                <a href="{{ route('admin.events.approval.show', $event['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline">
+                                                    {{ $event['title'] }}
+                                                </a>
+                                            </td>
                                                 <td class="py-2 px-4">{{ $event['start_date'] }}</td>
                                                 <td class="py-2 px-4">
-                                                    <span class="px-2 py-1 text-xs rounded-full 
-                                                        @if($event['status'] === 'published') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                                        @elseif($event['status'] === 'draft') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                                        @elseif($event['status'] === 'cancelled') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                                        @else bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 @endif">
-                                                        {{ ucfirst($event['status']) }}
-                                                    </span>
-                                                </td>
+                                                <span class="px-2 py-1 text-xs rounded-full 
+                                                    @if($event['status'] === 'published') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                                    @elseif($event['status'] === 'draft') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                                    @elseif($event['status'] === 'cancelled') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                                    @else bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 @endif">
+                                                    {{ ucfirst($event['status']) }}
+                                                </span>
+                                            </td>
                                                 <td class="py-2 px-4">{{ number_format($event['orders']) }}</td>
                                                 <td class="py-2 px-4 font-semibold text-gray-900 dark:text-gray-100">₱{{ number_format($event['total_revenue'] ?? 0, 2) }}</td>
                                                 <td class="py-2 px-4 font-semibold text-blue-600 dark:text-blue-400">₱{{ number_format($event['net_revenue'] ?? 0, 2) }}</td>
                                                 <td class="py-2 px-4 font-semibold text-teal-600 dark:text-teal-400">₱{{ number_format($event['admin_earnings'] ?? 0, 2) }}</td>
-                                            </tr>
+                                        </tr>
                                         @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                </tbody>
+                            </table>
+                        </div>
                         </div>
                         @endif
-
+                        
                         <!-- Free Events Section -->
                         @if($freeEvents->count() > 0)
                         <div>
@@ -262,7 +262,7 @@
                                     Free Events
                                     <span class="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400">({{ $freeEvents->count() }} events)</span>
                                 </h3>
-                            </div>
+                                </div>
                             <div class="overflow-x-auto">
                                 <table class="min-w-full text-xs border border-gray-200 dark:border-gray-700 rounded-lg">
                                     <thead class="text-left text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20">
@@ -316,13 +316,37 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-                            </div>
+                                </div>
                         </div>
                         @endif
 
                         @if($paidEvents->count() === 0 && $freeEvents->count() === 0)
                             <div class="text-center py-8 text-gray-500 dark:text-gray-400">
                                 <p>No events with ticket sales found</p>
+                            </div>
+                        @endif
+                        
+                        <!-- Pagination for Paid Events -->
+                        @if($paidEvents->hasPages())
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="text-sm text-gray-700 dark:text-gray-300">
+                                    Showing {{ $paidEvents->firstItem() }} to {{ $paidEvents->lastItem() }} of {{ $paidEvents->total() }} paid events
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    {{ $paidEvents->links() }}
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <!-- Pagination for Free Events -->
+                        @if($freeEvents->hasPages())
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="text-sm text-gray-700 dark:text-gray-300">
+                                    Showing {{ $freeEvents->firstItem() }} to {{ $freeEvents->lastItem() }} of {{ $freeEvents->total() }} free events
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    {{ $freeEvents->links() }}
+                                </div>
                             </div>
                         @endif
                     </div>
@@ -401,23 +425,58 @@
                     </div>
                     
                     <!-- Additional Tickets Tab Content -->
-                    <div id="additionalTicketsContent" class="tab-content hidden">
-                        @if(!empty($ticketLimitPlans) && count($ticketLimitPlans) > 0)
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                            @foreach($ticketLimitPlans as $p)
-                                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $p['plan_name'] }}</h4>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">₱{{ number_format($p['plan_price'], 2) }} per pack</p>
-                                        </div>
-                                        <div class="text-right">
-                                            <div class="text-lg font-bold text-green-600 dark:text-green-400">₱{{ number_format($p['total_revenue'], 2) }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($p['total_purchases']) }} orders • {{ number_format($p['total_tickets']) }} tix</div>
+                    <div id="additionalTicketsContent" class="tab-content hidden space-y-6">
+                        <!-- Paid Additional Tickets Cards -->
+                        @if(!empty($paidTicketLimitPlans) && count($paidTicketLimitPlans) > 0)
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                                <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                Paid Event Additional Tickets
+                                <span class="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400">({{ count($paidTicketLimitPlans) }} plans)</span>
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                @foreach($paidTicketLimitPlans as $p)
+                                    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-green-200 dark:border-green-800 p-4 hover:shadow-md transition-shadow">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $p['plan_name'] }}</h4>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">₱{{ number_format($p['plan_price'], 2) }} per pack</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-lg font-bold text-green-600 dark:text-green-400">₱{{ number_format($p['total_revenue'], 2) }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($p['total_purchases']) }} orders • {{ number_format($p['total_tickets']) }} tix</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Free Additional Tickets Cards -->
+                        @if(!empty($freeTicketLimitPlans) && count($freeTicketLimitPlans) > 0)
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                                <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                Free Event Additional Tickets
+                                <span class="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400">({{ count($freeTicketLimitPlans) }} plans)</span>
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                @foreach($freeTicketLimitPlans as $p)
+                                    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-blue-200 dark:border-blue-800 p-4 hover:shadow-md transition-shadow">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $p['plan_name'] }}</h4>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">₱{{ number_format($p['plan_price'], 2) }} per pack</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-lg font-bold text-blue-600 dark:text-blue-400">₱{{ number_format($p['total_revenue'], 2) }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($p['total_purchases']) }} orders • {{ number_format($p['total_tickets']) }} tix</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                         @endif
                         <div class="flex items-center justify-between mb-3">
