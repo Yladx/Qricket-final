@@ -9,26 +9,6 @@
 <meta name="event-is-free" content="{{ $isFreeEvent ? '1' : '0' }}">
 <meta name="free-event-ticket-limit" content="{{ $freeEventTicketLimit > 0 ? $freeEventTicketLimit : '' }}">
 
-<!-- Informative Note for Ticket Pricing -->
-<div class="bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-emerald-500 dark:border-emerald-400 rounded-r-lg p-4 mb-6">
-    <div class="flex items-start">
-        <svg class="w-5 h-5 text-emerald-500 dark:text-emerald-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-        </svg>
-        <div class="flex-1">
-            <h4 class="text-sm font-semibold text-emerald-900 dark:text-emerald-100 mb-2">Ticket Pricing Guide</h4>
-            <ul class="text-sm text-emerald-800 dark:text-emerald-200 space-y-1.5 list-disc list-inside">
-                <li><strong>Ticket Types:</strong> Create different ticket types (e.g., General Admission, VIP, Student, Early Bird) with varying prices and quantities.</li>
-                <li><strong>Pricing:</strong> Set the price for each ticket type. For free events, all tickets are automatically set to ₱0.00.</li>
-                <li><strong>Quantity:</strong> Define how many tickets are available for each type. The total quantity across all ticket types cannot exceed your subscription plan limit.</li>
-                <li><strong>Active Status:</strong> Toggle ticket types on/off. Inactive tickets won't be available for purchase but remain in your system.</li>
-                <li><strong>Ticket Limit:</strong> Your subscription plan determines the maximum number of tickets you can sell per event. You can purchase additional tickets if needed.</li>
-                <li><strong>Autosave:</strong> All changes are automatically saved as you type. No need to manually save.</li>
-            </ul>
-            <p class="text-xs text-emerald-700 dark:text-emerald-300 mt-3 italic">💡 Tip: Create multiple ticket types to offer different pricing tiers and increase revenue. You can preview how your tickets will look before publishing.</p>
-        </div>
-    </div>
-</div>
 
 <div>
                 <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">

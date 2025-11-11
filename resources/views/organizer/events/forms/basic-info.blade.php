@@ -43,45 +43,14 @@
         </div>
     </div>
 
-    <!-- Free Event Section with Detailed Explanation -->
-    <div class="space-y-3">
-        <div class="flex items-center space-x-3">
-            @php($isFreeInit = old('is_free', $eventData['is_free'] ?? ($event->is_free ?? false)))
-            <label class="inline-flex items-center space-x-2">
-                <input type="checkbox" name="is_free" value="1" id="is_free_checkbox" {{ $isFreeInit ? 'checked' : '' }} class="rounded border-gray-300 text-qricket-600">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
-            </label>
-        </div>
-        
-        <!-- Free Event Information Box -->
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <div class="flex items-start">
-                <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                </svg>
-                <div class="flex-1">
-                    <h4 class="text-sm font-semibold text-green-900 dark:text-green-100 mb-2">What is a Free Event?</h4>
-                    <div class="text-sm text-green-800 dark:text-green-200 space-y-2">
-                        <p>A <strong>Free Event</strong> is an event where attendees don't pay anything to participate. When you mark your event as free:</p>
-                        <ul class="list-disc list-inside space-y-1 ml-2">
-                            <li><strong>All tickets are automatically set to ₱0.00</strong> - You cannot set prices for tickets in free events</li>
-                            <li><strong>Special ticket limits apply</strong> - Free events have different ticket quantity limits based on your subscription plan</li>
-                            <li><strong>No payment processing</strong> - Attendees can register and get tickets instantly without any payment</li>
-                            <li><strong>Perfect for:</strong> Workshops, seminars, community events, educational sessions, networking events, or any event where you want to offer free access</li>
-                        </ul>
-                        <div class="mt-3 p-2 bg-green-100 dark:bg-green-900/30 rounded border border-green-200 dark:border-green-700">
-                            <p class="text-xs font-medium text-green-900 dark:text-green-100 mb-1">📋 Important Notes:</p>
-                            <ul class="text-xs text-green-800 dark:text-green-200 space-y-0.5 list-disc list-inside ml-2">
-                                <li>Once you create a free event, you cannot change it to a paid event later</li>
-                                <li>Free events are great for building your audience and community engagement</li>
-                                <li>You can still track attendance and generate certificates for free events</li>
-                                <li>Ticket limits for free events may be different from paid events - check your subscription plan details</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Free Event Checkbox (Info moved to sidebar) -->
+    <div class="flex items-center space-x-3">
+        @php($isFreeInit = old('is_free', $eventData['is_free'] ?? ($event->is_free ?? false)))
+        <label class="inline-flex items-center space-x-2">
+            <input type="checkbox" name="is_free" value="1" id="is_free_checkbox" {{ $isFreeInit ? 'checked' : '' }} class="rounded border-gray-300 text-qricket-600">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
+        </label>
+        <span class="text-xs text-gray-500 dark:text-gray-400">(See sidebar for details)</span>
     </div>
 
     <div>

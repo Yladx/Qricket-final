@@ -9,70 +9,73 @@
     </x-slot>
 
     <div class="py-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-            <form method="POST" action="{{ route('organizer.events.certificate.store') }}?id={{ $eventId }}">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Form Column -->
+                <div class="lg:col-span-2 space-y-6">
+                    <form method="POST" action="{{ route('organizer.events.certificate.store') }}?id={{ $eventId }}">
                         @csrf
-                <input type="hidden" name="skip_certificate" id="skip_certificate_hidden" value="0">
-                <input type="hidden" id="certificate_data_json" name="certificate_data_json" value='@json($certificateData ?? [])'>
-                
-                <!-- Top: Form -->
-                <div>
-                <div class="flex items-center justify-between mb-3">
-                    <div class="text-sm text-gray-600 dark:text-gray-300">You can set up a certificate now or skip it and add later.</div>
-                    <label class="inline-flex items-center space-x-2 text-sm">
-                        <input type="checkbox" id="skip_certificate_step4" class="rounded border-gray-300 text-emerald-600">
-                        <span class="text-gray-700 dark:text-gray-300">Skip certificate for this event</span>
-                    </label>
-                </div>
-                @php($cd = $certificateData ?? [])
-                @php(
-                    $fallbackWhen = (isset($event) && ($event->start_date ?? null))
-                        ? ('held on ' . \Carbon\Carbon::parse($event->start_date)->format('F j, Y \a\t g:i A') .
-                           (($event->location ?? null) ? ' at ' . $event->location : '') . '.')
-                        : ''
-                )
-                @php(
-                    $fallbackGiven = (isset($event) && ($event->start_date ?? null))
-                        ? ('Given this ' . \Carbon\Carbon::parse($event->start_date)->format('jS') . ' day of '
-                           . \Carbon\Carbon::parse($event->start_date)->format('F, Y') . '.')
-                        : ''
-                )
-                <div id="certificate-form-container">
-                    @include('organizer.events.forms.certificate', ['certificateData' => $certificateData, 'event' => $event])
-                </div>
-            </div>
-            <!-- Bottom: Live Preview with collapsible toggle -->
-            <details id="cert_section" class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden" open>
-                <summary class="cursor-pointer select-none px-4 py-3 text-sm font-medium flex items-center justify-between">
-                    <span>Certificate Preview</span>
-                    <div class="flex items-center gap-3">
-            <a href="{{ route('organizer.events.create.certificate.print', ['id' => $eventId]) }}" target="_blank" rel="noopener" class="px-3 py-1.5 text-xs rounded bg-qricket-500 text-white hover:bg-qricket-600">Print A4</a>
-                        <span class="text-xs text-gray-500">Click to collapse/expand</span>
-                    </div>
-                </summary>
-                <div class="p-4">
-                    <div id="cert_preview_wrapper">
-                        @include('organizer.events.preview.certificate-template', [
-                            'certificateData' => $certificateData, 
-                            'event' => $event ?? (object)['id' => $eventId], 
-                            'fallbackWhen' => $fallbackWhen, 
-                            'fallbackGiven' => $fallbackGiven
-                        ])
-                    </div>
-                </div>
-            </details>
+                        <input type="hidden" name="skip_certificate" id="skip_certificate_hidden" value="0">
+                        <input type="hidden" id="certificate_data_json" name="certificate_data_json" value='@json($certificateData ?? [])'>
+                        
+                        <!-- Top: Form -->
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="text-sm text-gray-600 dark:text-gray-300">You can set up a certificate now or skip it and add later.</div>
+                                <label class="inline-flex items-center space-x-2 text-sm">
+                                    <input type="checkbox" id="skip_certificate_step4" class="rounded border-gray-300 text-emerald-600">
+                                    <span class="text-gray-700 dark:text-gray-300">Skip certificate for this event</span>
+                                </label>
+                            </div>
+                            @php($cd = $certificateData ?? [])
+                            @php(
+                                $fallbackWhen = (isset($event) && ($event->start_date ?? null))
+                                    ? ('held on ' . \Carbon\Carbon::parse($event->start_date)->format('F j, Y \a\t g:i A') .
+                                       (($event->location ?? null) ? ' at ' . $event->location : '') . '.')
+                                    : ''
+                            )
+                            @php(
+                                $fallbackGiven = (isset($event) && ($event->start_date ?? null))
+                                    ? ('Given this ' . \Carbon\Carbon::parse($event->start_date)->format('jS') . ' day of '
+                                       . \Carbon\Carbon::parse($event->start_date)->format('F, Y') . '.')
+                                    : ''
+                            )
+                            <div id="certificate-form-container">
+                                @include('organizer.events.forms.certificate', ['certificateData' => $certificateData, 'event' => $event])
+                            </div>
+                        </div>
+                        <!-- Bottom: Live Preview with collapsible toggle -->
+                        <details id="cert_section" class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden" open>
+                            <summary class="cursor-pointer select-none px-4 py-3 text-sm font-medium flex items-center justify-between">
+                                <span>Certificate Preview</span>
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('organizer.events.create.certificate.print', ['id' => $eventId]) }}" target="_blank" rel="noopener" class="px-3 py-1.5 text-xs rounded bg-qricket-500 text-white hover:bg-qricket-600">Print A4</a>
+                                    <span class="text-xs text-gray-500">Click to collapse/expand</span>
+                                </div>
+                            </summary>
+                            <div class="p-4">
+                                <div id="cert_preview_wrapper">
+                                    @include('organizer.events.preview.certificate-template', [
+                                        'certificateData' => $certificateData, 
+                                        'event' => $event ?? (object)['id' => $eventId], 
+                                        'fallbackWhen' => $fallbackWhen, 
+                                        'fallbackGiven' => $fallbackGiven
+                                    ])
+                                </div>
+                            </div>
+                        </details>
 
-            <style>
-                /* Print only the certificate preview */
-                @media print {
-                    body * { visibility: hidden !important; }
-                    #cert_preview_wrapper, #cert_preview_wrapper * { visibility: visible !important; }
-                    #cert_preview_wrapper { position: absolute; left: 0; top: 0; width: 100%; }
-                }
-            </style>
+                        <style>
+                            /* Print only the certificate preview */
+                            @media print {
+                                body * { visibility: hidden !important; }
+                                #cert_preview_wrapper, #cert_preview_wrapper * { visibility: visible !important; }
+                                #cert_preview_wrapper { position: absolute; left: 0; top: 0; width: 100%; }
+                            }
+                        </style>
 
                         <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-                    <a href="{{ route('organizer.events.create.ticket') }}?id={{ $eventId }}" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-medium text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-qricket-500">
+                            <a href="{{ route('organizer.events.create.ticket') }}?id={{ $eventId }}" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-medium text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-qricket-500">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                                 </svg>
@@ -80,15 +83,46 @@
                             </a>
 
                             <div class="flex items-center space-x-3">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-qricket-500 text-white rounded-md font-medium text-xs hover:bg-qricket-600 focus:outline-none focus:ring-2 focus:ring-qricket-500">
-                                Next: Staff
-                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
-                            </button>
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-qricket-500 text-white rounded-md font-medium text-xs hover:bg-qricket-600 focus:outline-none focus:ring-2 focus:ring-qricket-500">
+                                    Next: Staff
+                                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </form>
+                </div>
+                
+                <!-- Sidebar Column -->
+                <div class="lg:col-span-1">
+                    <div class="sticky top-6 space-y-4">
+                        <!-- Certificate Template Guide Sidebar -->
+                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 shadow-sm">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-amber-500 dark:text-amber-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-2">Certificate Template Guide</h4>
+                                    <div class="text-sm text-amber-800 dark:text-amber-200 space-y-2">
+                                        <ul class="list-disc list-inside space-y-1.5 ml-2 text-xs">
+                                            <li><strong>Organization Information:</strong> Enter your organization's details (name, address, etc.) that will appear on the certificate.</li>
+                                            <li><strong>Theme & Colors:</strong> Customize the certificate's appearance with primary, secondary, and border colors to match your brand.</li>
+                                            <li><strong>Logos:</strong> Upload left and right logos to personalize your certificate. Supported formats: PNG, JPG, WEBP.</li>
+                                            <li><strong>Recipient Name:</strong> Set the placeholder text for the recipient's name (e.g., "Participant Name" or "Attendee Name").</li>
+                                            <li><strong>Signatories:</strong> Add one or more signatories (e.g., Director, Principal, Coordinator) who will sign the certificates. Each signatory can have a name and title.</li>
+                                            <li><strong>Signatures:</strong> Upload signature images for each signatory. These will appear at the bottom of the certificate.</li>
+                                            <li><strong>Live Preview:</strong> See how your certificate will look in real-time as you make changes. You can print it directly from the preview.</li>
+                                        </ul>
+                                        <p class="text-xs text-amber-700 dark:text-amber-300 mt-3 italic">💡 Tip: You can skip this step and add a certificate later. Certificates are automatically generated for attendees after your event ends.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

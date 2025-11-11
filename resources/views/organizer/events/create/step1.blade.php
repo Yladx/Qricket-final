@@ -10,38 +10,76 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div >
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <form id="step1Form" method="POST" action="{{ route('organizer.events.step1.store') }}{{ $eventId ? '?id=' . $eventId : '' }}" enctype="multipart/form-data" class="space-y-6">
-                        @csrf
-                        @include('organizer.events.forms.basic-info', ['eventId' => $eventId, 'eventData' => $eventData])
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Form Column -->
+                <div class="lg:col-span-2">
+                    <div class="p-6 text-gray-900 dark:text-gray-100">
+                        <form id="step1Form" method="POST" action="{{ route('organizer.events.step1.store') }}{{ $eventId ? '?id=' . $eventId : '' }}" enctype="multipart/form-data" class="space-y-6">
+                            @csrf
+                            @include('organizer.events.forms.basic-info', ['eventId' => $eventId, 'eventData' => $eventData])
 
                         
 
-                        <hr>
-                        <!-- Navigation Buttons -->
-                        <div class="flex items-center justify-between pt-6">
-                            <div class="flex items-center space-x-3">
-                                <button type="button" id="btnCancelDraft" class="inline-flex items-center px-6 py-3 bg-gray-300 dark:bg-gray-700 border border-transparent rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600 focus:bg-gray-400 dark:focus:bg-gray-600 active:bg-gray-500 dark:active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                                    Cancel
-                                </button>
-                                @if($eventId)
-                                <button type="button" id="btnDeleteEvent" class="inline-flex items-center px-6 py-3 bg-red-100 dark:bg-red-900 border border-transparent rounded-lg font-medium text-sm text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    Delete
-                                </button>
-                                @endif
-                            </div>
+                            <hr>
+                            <!-- Navigation Buttons -->
+                            <div class="flex items-center justify-between pt-6">
+                                <div class="flex items-center space-x-3">
+                                    <button type="button" id="btnCancelDraft" class="inline-flex items-center px-6 py-3 bg-gray-300 dark:bg-gray-700 border border-transparent rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600 focus:bg-gray-400 dark:focus:bg-gray-600 active:bg-gray-500 dark:active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                                        Cancel
+                                    </button>
+                                    @if($eventId)
+                                    <button type="button" id="btnDeleteEvent" class="inline-flex items-center px-6 py-3 bg-red-100 dark:bg-red-900 border border-transparent rounded-lg font-medium text-sm text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                        Delete
+                                    </button>
+                                    @endif
+                                </div>
 
-                            <button type="submit" id="submitBtn" class="inline-flex items-center px-6 py-3 bg-qricket-500 border border-transparent rounded-lg font-medium text-sm text-white hover:bg-qricket-600 focus:bg-qricket-600 active:bg-qricket-700 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                <span id="submitText">Next Step</span>
-                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white hidden" id="submitSpinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <button type="submit" id="submitBtn" class="inline-flex items-center px-6 py-3 bg-qricket-500 border border-transparent rounded-lg font-medium text-sm text-white hover:bg-qricket-600 focus:bg-qricket-600 active:bg-qricket-700 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    <span id="submitText">Next Step</span>
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white hidden" id="submitSpinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Sidebar Column -->
+                <div class="lg:col-span-1">
+                    <div class="sticky top-6 space-y-4">
+                        <!-- Free Event Information Sidebar -->
+                        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 shadow-sm">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                                 </svg>
-                            </button>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-semibold text-green-900 dark:text-green-100 mb-2">What is a Free Event?</h4>
+                                    <div class="text-sm text-green-800 dark:text-green-200 space-y-2">
+                                        <p>A <strong>Free Event</strong> is an event where attendees don't pay anything to participate. When you mark your event as free:</p>
+                                        <ul class="list-disc list-inside space-y-1 ml-2 text-xs">
+                                            <li><strong>All tickets are automatically set to ₱0.00</strong> - You cannot set prices for tickets in free events</li>
+                                            <li><strong>Special ticket limits apply</strong> - Free events have different ticket quantity limits based on your subscription plan</li>
+                                            <li><strong>No payment processing</strong> - Attendees can register and get tickets instantly without any payment</li>
+                                            <li><strong>Perfect for:</strong> Workshops, seminars, community events, educational sessions, networking events, or any event where you want to offer free access</li>
+                                        </ul>
+                                        <div class="mt-3 p-2 bg-green-100 dark:bg-green-900/30 rounded border border-green-200 dark:border-green-700">
+                                            <p class="text-xs font-medium text-green-900 dark:text-green-100 mb-1">📋 Important Notes:</p>
+                                            <ul class="text-xs text-green-800 dark:text-green-200 space-y-0.5 list-disc list-inside ml-2">
+                                                <li>Once you create a free event, you cannot change it to a paid event later</li>
+                                                <li>Free events are great for building your audience and community engagement</li>
+                                                <li>You can still track attendance and generate certificates for free events</li>
+                                                <li>Ticket limits for free events may be different from paid events - check your subscription plan details</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

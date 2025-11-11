@@ -30,24 +30,6 @@
     </div>
     </div>
 
-    <!-- Informative Note for Design & Layout -->
-    <div class="bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500 dark:border-purple-400 rounded-r-lg p-4 mb-6">
-        <div class="flex items-start">
-            <svg class="w-5 h-5 text-purple-500 dark:text-purple-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-            </svg>
-            <div class="flex-1">
-                <h4 class="text-sm font-semibold text-purple-900 dark:text-purple-100 mb-2">Design & Layout Guide</h4>
-                <ul class="text-sm text-purple-800 dark:text-purple-200 space-y-1.5 list-disc list-inside">
-                    <li><strong>Poster:</strong> Upload a high-quality poster image (landscape orientation recommended). This will be displayed as the main visual on your event page.</li>
-                    <li><strong>Thumbnail:</strong> Upload a square thumbnail image. This appears in event listings, cards, and search results.</li>
-                    <li><strong>Layout Components:</strong> Add custom layout sections to showcase event details, schedules, speakers, sponsors, or any additional information. Click the "Add Layout" button to add components.</li>
-                    <li><strong>Footer Settings:</strong> Configure contact information and social media links that appear at the bottom of your event page.</li>
-                </ul>
-                <p class="text-xs text-purple-700 dark:text-purple-300 mt-3 italic">💡 Tip: Use high-resolution images for best quality. Supported formats: PNG, JPG, WEBP. Maximum file size: 5MB per image.</p>
-            </div>
-        </div>
-    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div>
