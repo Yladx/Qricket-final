@@ -4,96 +4,30 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Main Form Column -->
-                <div class="lg:col-span-2">
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                        <div class="p-6 text-gray-900 dark:text-gray-100">
-                            <form id="editBasicForm" method="POST" action="{{ route('organizer.events.step1.store') }}?id={{ $event->id }}" enctype="multipart/form-data" class="space-y-6">
-                                @csrf
-                                @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData])
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    <form id="editBasicForm" method="POST" action="{{ route('organizer.events.step1.store') }}?id={{ $event->id }}" enctype="multipart/form-data" class="space-y-6">
+                        @csrf
+                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData])
 
-                                <!-- Navigation Buttons -->
-                                <div class="flex items-center justify-between pt-6">
-                                    <div class="flex items-center space-x-3">
-                                        <a href="{{ route('organizer.events.manage', ['event' => $event->id]) }}" class="inline-flex items-center px-6 py-3 bg-gray-300 dark:bg-gray-700 border border-transparent rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600 focus:bg-gray-400 dark:focus:bg-gray-600 active:bg-gray-500 dark:active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                                            Cancel
-                                        </a>
-                                    </div>
+                        <!-- Navigation Buttons -->
+                        <div class="flex items-center justify-between pt-6">
+                            <div class="flex items-center space-x-3">
+                                <a href="{{ route('organizer.events.manage', ['event' => $event->id]) }}" class="inline-flex items-center px-6 py-3 bg-gray-300 dark:bg-gray-700 border border-transparent rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600 focus:bg-gray-400 dark:focus:bg-gray-600 active:bg-gray-500 dark:active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                                    Cancel
+                                </a>
+                            </div>
 
-                                    <button type="submit" id="submitBtn" class="inline-flex items-center px-6 py-3 bg-emerald-500 border border-transparent rounded-lg font-medium text-sm text-white hover:bg-emerald-600 focus:bg-emerald-600 active:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                        <span id="submitText">Save Changes</span>
-                                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white hidden" id="submitSpinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Sidebar Column -->
-                <div class="lg:col-span-1">
-                    <div class="sticky top-6 space-y-4">
-                        <!-- Event Creation Guide Sidebar -->
-                        <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4 shadow-sm">
-                            <div class="flex items-start">
-                                <svg class="w-5 h-5 text-teal-600 dark:text-teal-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            <button type="submit" id="submitBtn" class="inline-flex items-center px-6 py-3 bg-emerald-500 border border-transparent rounded-lg font-medium text-sm text-white hover:bg-emerald-600 focus:bg-emerald-600 active:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <span id="submitText">Save Changes</span>
+                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white hidden" id="submitSpinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <div class="flex-1">
-                                    <h4 class="text-sm font-semibold text-teal-900 dark:text-teal-100 mb-2">Event Creation Guide</h4>
-                                    <div class="text-sm text-teal-800 dark:text-teal-200 space-y-2">
-                                        <ul class="list-disc list-inside space-y-1.5 ml-2 text-xs">
-                                            <li><strong>Event Title:</strong> Choose a clear, descriptive title that helps attendees understand what your event is about.</li>
-                                            <li><strong>Category:</strong> Select the most appropriate category to help attendees discover your event.</li>
-                                            <li><strong>Description:</strong> Provide detailed information about your event. This helps attendees understand what to expect.</li>
-                                            <li><strong>Tags:</strong> Add relevant tags (required) to help categorize and improve discoverability. Separate multiple tags with commas.</li>
-                                            <li><strong>Date & Time:</strong> Set the start and end dates/times for your event. This helps attendees plan their attendance.</li>
-                                            <li><strong>Location:</strong> Enter the physical venue address or online meeting link. Optionally add a Google Maps URL for directions.</li>
-                                        </ul>
-                                        <div class="mt-3 p-2 bg-teal-100 dark:bg-teal-900/30 rounded border border-teal-200 dark:border-teal-700">
-                                            <p class="text-xs font-medium text-teal-900 dark:text-teal-100 mb-1">💡 Tip:</p>
-                                            <p class="text-xs text-teal-800 dark:text-teal-200">Your event is automatically saved as a draft. You can come back to edit it anytime before publishing.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            </button>
                         </div>
-                        
-                        <!-- Free Event Information Sidebar -->
-                        <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4 shadow-sm">
-                            <div class="flex items-start">
-                                <svg class="w-5 h-5 text-teal-600 dark:text-teal-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                </svg>
-                                <div class="flex-1">
-                                    <h4 class="text-sm font-semibold text-teal-900 dark:text-teal-100 mb-2">What is a Free Event?</h4>
-                                    <div class="text-sm text-teal-800 dark:text-teal-200 space-y-2">
-                                        <p>A <strong>Free Event</strong> is an event where attendees don't pay anything to participate. When you mark your event as free:</p>
-                                        <ul class="list-disc list-inside space-y-1 ml-2 text-xs">
-                                            <li><strong>All tickets are automatically set to ₱0.00</strong> - You cannot set prices for tickets in free events</li>
-                                            <li><strong>Special ticket limits apply</strong> - Free events have different ticket quantity limits based on your subscription plan</li>
-                                            <li><strong>No payment processing</strong> - Attendees can register and get tickets instantly without any payment</li>
-                                            <li><strong>Perfect for:</strong> Workshops, seminars, community events, educational sessions, networking events, or any event where you want to offer free access</li>
-                                        </ul>
-                                        <div class="mt-3 p-2 bg-teal-100 dark:bg-teal-900/30 rounded border border-teal-200 dark:border-teal-700">
-                                            <p class="text-xs font-medium text-teal-900 dark:text-teal-100 mb-1">📋 Important Notes:</p>
-                                            <ul class="text-xs text-teal-800 dark:text-teal-200 space-y-0.5 list-disc list-inside ml-2">
-                                                <li>Once you create a free event, you cannot change it to a paid event later</li>
-                                                <li>Free events are great for building your audience and community engagement</li>
-                                                <li>You can still track attendance and generate certificates for free events</li>
-                                                <li>Ticket limits for free events may be different from paid events - check your subscription plan details</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>

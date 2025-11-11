@@ -11,15 +11,13 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="flex flex-col lg:flex-row lg:items-start gap-6">
                 <!-- Main Form Column -->
-                <div class="lg:col-span-2">
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
+                <div class="flex-1 lg:max-w-2xl">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 text-gray-900 dark:text-gray-100">
                         <form id="step1Form" method="POST" action="{{ route('organizer.events.step1.store') }}{{ $eventId ? '?id=' . $eventId : '' }}" enctype="multipart/form-data" class="space-y-6">
                             @csrf
                             @include('organizer.events.forms.basic-info', ['eventId' => $eventId, 'eventData' => $eventData])
-
-                        
 
                             <hr>
                             <!-- Navigation Buttons -->
@@ -47,9 +45,9 @@
                     </div>
                 </div>
                 
-                <!-- Sidebar Column -->
-                <div class="lg:col-span-1">
-                    <div class="sticky top-6 space-y-4">
+                <!-- Sidebar Column - Always on the right on lg screens and above -->
+                <div class="w-full lg:w-80 lg:flex-shrink-0">
+                    <div class="lg:sticky lg:top-6 space-y-4">
                         <!-- Event Creation Guide Sidebar -->
                         <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4 shadow-sm">
                             <div class="flex items-start">
