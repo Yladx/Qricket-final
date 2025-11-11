@@ -22,14 +22,39 @@
     </div>
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
+    @php
+        $isFreeInit = old('is_free', $eventData['is_free'] ?? ($event->is_free ?? false));
+        $isEditing = isset($event) && $event->exists;
+        $isFreeLocked = $isEditing && $isFreeInit; // Lock if editing an existing free event
+    @endphp
     <div class="flex items-center space-x-3">
-        @php($isFreeInit = old('is_free', $eventData['is_free'] ?? ($event->is_free ?? false)))
-        <label class="inline-flex items-center space-x-2">
-            <input type="checkbox" name="is_free" value="1" id="is_free_checkbox" {{ $isFreeInit ? 'checked' : '' }} class="rounded border-gray-300 text-qricket-600">
+        <label class="inline-flex items-center space-x-2 {{ $isFreeLocked ? 'opacity-60 cursor-not-allowed' : '' }}">
+            <input 
+                type="checkbox" 
+                name="is_free" 
+                value="1" 
+                id="is_free_checkbox" 
+                {{ $isFreeInit ? 'checked' : '' }} 
+                {{ $isFreeLocked ? 'disabled' : '' }}
+                class="rounded border-gray-300 text-qricket-600 {{ $isFreeLocked ? 'cursor-not-allowed' : '' }}"
+            >
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
         </label>
-        <span class="text-xs text-gray-500 dark:text-gray-400">(See sidebar for details)</span>
+        @if($isFreeLocked)
+            <!-- Hidden input to ensure is_free is always submitted as true for locked free events -->
+            <input type="hidden" name="is_free" value="1">
+            <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">(Cannot be changed - Event is already free)</span>
+        @else
+            <span class="text-xs text-gray-500 dark:text-gray-400">(See sidebar for details)</span>
+        @endif
     </div>
+    @if($isFreeLocked)
+        <div class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+            <p class="text-xs text-amber-800 dark:text-amber-200">
+                <strong>Note:</strong> Once an event is created as free, it cannot be changed to a paid event. This ensures consistency for attendees who have already registered.
+            </p>
+        </div>
+    @endif
 
     <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
@@ -70,8 +95,6 @@
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional: Add a Google Maps link for directions.</p>
         </div>
     </div>
-</div>
-
 </div>
 
 <script>
@@ -448,73 +471,93 @@ document.addEventListener('DOMContentLoaded', function() {
     // Free Event checkbox SweetAlert confirmation
     const freeEventCheckbox = document.getElementById('is_free_checkbox');
     if (freeEventCheckbox) {
-        // Store the previous state before any click
-        let previousCheckedState = freeEventCheckbox.checked;
-        
-        freeEventCheckbox.addEventListener('mousedown', function(e) {
-            // Capture state before the click toggles it
-            previousCheckedState = this.checked;
-        });
-        
-        freeEventCheckbox.addEventListener('click', function(e) {
-            // If checkbox is now checked (meaning it was just checked from unchecked)
-            if (this.checked && !previousCheckedState) {
+        // Check if checkbox is disabled (locked) - if so, prevent any changes
+        if (freeEventCheckbox.disabled) {
+            // Prevent any interaction with disabled checkbox
+            freeEventCheckbox.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                // Revert the checkbox state immediately
-                this.checked = false;
-                
-                // Show SweetAlert confirmation
-                const showSweetAlert = () => {
-                    if (window.Swal && typeof window.Swal.fire === 'function') {
-                        window.Swal.fire({
-                            title: 'Free Event Confirmation',
-                            html: 'You are creating this event as <strong>free</strong>. This means:<br><br>' +
-                                  '• All ticket prices will be set to <strong>0</strong> (free)<br>' +
-                                  '• You <strong>cannot</strong> set a price for your tickets<br>' +
-                                  '• Tickets will be free for all attendees',
-                            icon: 'info',
-                            showCancelButton: true,
-                            confirmButtonText: 'Yes, Continue',
-                            cancelButtonText: 'No, Cancel',
-                            confirmButtonColor: '#059669',
-                            cancelButtonColor: '#6b7280',
-                            reverseButtons: true
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // User confirmed - check the checkbox
+                return false;
+            });
+            
+            freeEventCheckbox.addEventListener('change', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Force it to stay checked
+                this.checked = true;
+                return false;
+            });
+        } else {
+            // Only add confirmation dialog for enabled checkboxes (new events or paid events)
+            // Store the previous state before any click
+            let previousCheckedState = freeEventCheckbox.checked;
+            
+            freeEventCheckbox.addEventListener('mousedown', function(e) {
+                // Capture state before the click toggles it
+                previousCheckedState = this.checked;
+            });
+            
+            freeEventCheckbox.addEventListener('click', function(e) {
+                // If checkbox is now checked (meaning it was just checked from unchecked)
+                if (this.checked && !previousCheckedState) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Revert the checkbox state immediately
+                    this.checked = false;
+                    
+                    // Show SweetAlert confirmation
+                    const showSweetAlert = () => {
+                        if (window.Swal && typeof window.Swal.fire === 'function') {
+                            window.Swal.fire({
+                                title: 'Free Event Confirmation',
+                                html: 'You are creating this event as <strong>free</strong>. This means:<br><br>' +
+                                      '• All ticket prices will be set to <strong>0</strong> (free)<br>' +
+                                      '• You <strong>cannot</strong> set a price for your tickets<br>' +
+                                      '• Tickets will be free for all attendees<br><br>' +
+                                      '<strong>Note:</strong> Once created as free, this cannot be changed later.',
+                                icon: 'info',
+                                showCancelButton: true,
+                                confirmButtonText: 'Yes, Continue',
+                                cancelButtonText: 'No, Cancel',
+                                confirmButtonColor: '#059669',
+                                cancelButtonColor: '#6b7280',
+                                reverseButtons: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // User confirmed - check the checkbox
+                                    freeEventCheckbox.checked = true;
+                                    // Trigger change event manually
+                                    freeEventCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+                                } else {
+                                    // User cancelled - keep checkbox unchecked
+                                    freeEventCheckbox.checked = false;
+                                }
+                            });
+                        } else {
+                            // Fallback if SweetAlert is not loaded - use native confirm
+                            const confirmed = confirm('You are creating this event as free. This means all ticket prices will be set to 0 and you cannot set a price for your tickets. Once created as free, this cannot be changed later. Do you want to continue?');
+                            if (confirmed) {
                                 freeEventCheckbox.checked = true;
-                                // Trigger change event manually
                                 freeEventCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
                             } else {
-                                // User cancelled - keep checkbox unchecked
                                 freeEventCheckbox.checked = false;
                             }
-                        });
-                    } else {
-                        // Fallback if SweetAlert is not loaded - use native confirm
-                        const confirmed = confirm('You are creating this event as free. This means all ticket prices will be set to 0 and you cannot set a price for your tickets. Do you want to continue?');
-                        if (confirmed) {
-                            freeEventCheckbox.checked = true;
-                            freeEventCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
-                        } else {
-                            freeEventCheckbox.checked = false;
                         }
-                    }
-                };
+                    };
 
-                // Check if SweetAlert is loaded, if not wait a bit
-                if (window.Swal && typeof window.Swal.fire === 'function') {
-                    showSweetAlert();
-                } else {
-                    // Wait for SweetAlert to load (it's loaded in step1.blade.php and edit pages)
-                    setTimeout(() => {
+                    // Check if SweetAlert is loaded, if not wait a bit
+                    if (window.Swal && typeof window.Swal.fire === 'function') {
                         showSweetAlert();
-                    }, 100);
+                    } else {
+                        // Wait for SweetAlert to load (it's loaded in step1.blade.php and edit pages)
+                        setTimeout(() => {
+                            showSweetAlert();
+                        }, 100);
+                    }
                 }
-            }
-            // If unchecking (was checked), allow it without SweetAlert - do nothing
-        });
+                // If unchecking (was checked), allow it without SweetAlert - do nothing
+            });
+        }
     }
 });
 </script>

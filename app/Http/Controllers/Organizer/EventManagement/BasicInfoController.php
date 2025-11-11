@@ -233,17 +233,38 @@ class BasicInfoController extends Controller
 
         try {
             $step1Data = $request->only(['title','description','category','start_date','end_date','location','location_url','tags','latitude','longitude']);
-            // Normalize boolean for is_free
-            $step1Data['is_free'] = $request->boolean('is_free');
+            
+            $wasExistingEvent = !is_null($eventId);
+            $originalData = $wasExistingEvent ? $event->only(['title','description','category','start_date','end_date','location','location_url','tags','latitude','longitude','is_free']) : null;
+            
+            // Prevent changing a free event to paid event
+            if ($wasExistingEvent && $event->is_free) {
+                // Event is already free - keep it free and ignore any attempt to change it
+                $step1Data['is_free'] = true;
+                
+                // If user tried to uncheck the free event checkbox, show an error
+                if (!$request->boolean('is_free')) {
+                    if ($request->expectsJson() || $request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.',
+                            'errors' => ['is_free' => ['Cannot change free event to paid event.']]
+                        ], 422);
+                    }
+                    return back()->withErrors(['is_free' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.'])->withInput();
+                }
+            } else {
+                // Normalize boolean for is_free (for new events or paid events)
+                $step1Data['is_free'] = $request->boolean('is_free');
+            }
             
             \Log::info('Basic info update request', [
                 'event_id' => $eventId,
                 'request_data' => $step1Data,
-                'user_id' => Auth::id()
+                'user_id' => Auth::id(),
+                'was_free' => $wasExistingEvent ? $event->is_free : false,
+                'is_free_locked' => $wasExistingEvent && $event->is_free
             ]);
-            
-            $wasExistingEvent = !is_null($eventId);
-            $originalData = $wasExistingEvent ? $event->only(['title','description','category','start_date','end_date','location','location_url','tags','latitude','longitude','is_free']) : null;
             
             \Log::info('Original event data', [
                 'event_id' => $eventId,
