@@ -68,13 +68,19 @@ class TicketsController extends Controller
     private function normalizeTicketTypesArray($types): array
     {
         if (!is_array($types)) return [];
-        $normalized = array_map(function($t){ return $this->normalizeTicketType((array)$t); }, $types);
-        // Stable sort
-        usort($normalized, function($a, $b) {
-            $ka = $a['id'] ?? ($a['name'] ?? '');
-            $kb = $b['id'] ?? ($b['name'] ?? '');
-            return strcmp((string)$ka, (string)$kb);
-        });
+        // CRITICAL: Preserve ALL tickets in their original order
+        // Don't filter or sort aggressively - just normalize each ticket
+        // This ensures all 20 tickets are preserved, not just 11
+        $normalized = [];
+        foreach ($types as $index => $t) {
+            $normalizedTicket = $this->normalizeTicketType((array)$t);
+            // Preserve the original array index to ensure uniqueness
+            $normalizedTicket['_array_index'] = $index;
+            $normalized[] = $normalizedTicket;
+        }
+        // Don't sort - maintain exact order as received
+        // Sorting was causing tickets to be reordered and potentially lost
+        // The backend will handle matching by ID for existing tickets
         return $normalized;
     }
 
@@ -842,6 +848,19 @@ class TicketsController extends Controller
                     return response()->json(['success' => false, 'message' => 'Invalid ticket data format'], 400);
                 }
             }
+            
+            // Log the count of incoming tickets for debugging
+            \Log::info('Autosave Step 3: Received ticket types', [
+                'event_id' => $eventId,
+                'ticket_count' => is_array($ticketTypes) ? count($ticketTypes) : 0,
+                'ticket_types' => is_array($ticketTypes) ? array_map(function($t) {
+                    return [
+                        'id' => $t['id'] ?? 'null',
+                        'name' => $t['name'] ?? 'unnamed',
+                        'has_id' => isset($t['id']) && !empty($t['id']) && $t['id'] !== 'null'
+                    ];
+                }, $ticketTypes) : []
+            ]);
 
             // If event is free, force all ticket prices to 0 before processing
             if ($event && $event->is_free && is_array($ticketTypes)) {
@@ -866,26 +885,102 @@ class TicketsController extends Controller
             if (!empty($ticketTypes)) {
                 // Normalize incoming
                 $incoming = $this->normalizeTicketTypesArray($ticketTypes);
+                
+                \Log::info('Autosave Step 3: Normalized incoming tickets', [
+                    'event_id' => $eventId,
+                    'normalized_count' => count($incoming),
+                    'sample_tickets' => array_slice($incoming, 0, 3) // Log first 3 for debugging
+                ]);
+                
                 $existing = $event->eventTickets()->get();
                 $existingByKey = [];
                 foreach ($existing as $row) {
-                    $k = $row->id ? (string)$row->id : strtolower(trim(preg_replace('/\s+/', '-', (string)$row->name)));
+                    // Always use ID for existing tickets (they should all have IDs)
+                    $k = $row->id ? (string)$row->id : 'existing_' . $row->getKey();
                     $existingByKey[$k] = $row;
                 }
+                
+                \Log::info('Autosave Step 3: Existing tickets loaded', [
+                    'event_id' => $eventId,
+                    'existing_count' => count($existingByKey),
+                    'existing_ids' => array_keys($existingByKey)
+                ]);
+                
                 $incomingByKey = [];
-                foreach ($incoming as $t) {
-                    $k = isset($t['id']) ? (string)$t['id'] : strtolower(trim(preg_replace('/\s+/', '-', (string)($t['name'] ?? ''))));
+                // CRITICAL FIX: Use array index to ensure ALL tickets are processed
+                // This prevents tickets with same names from overwriting each other
+                // Even if 20 tickets have the same name, they'll all be saved
+                foreach ($incoming as $index => $t) {
+                    // Remove temporary index field if present
+                    $arrayIndex = $t['_array_index'] ?? $index;
+                    unset($t['_array_index']);
+                    
+                    // For tickets with IDs, use the ID as key (existing tickets)
+                    if (isset($t['id']) && !empty($t['id']) && $t['id'] !== 'null' && $t['id'] !== null && is_numeric($t['id'])) {
+                        $k = (string)$t['id'];
+                    } else {
+                        // For new tickets without IDs, use array index to ensure uniqueness
+                        // This is CRITICAL: prevents multiple tickets with same/empty names from overwriting each other
+                        // Each ticket gets a unique key: new_0, new_1, new_2, etc.
+                        $k = 'new_' . $arrayIndex;
+                    }
+                    
+                    // If key already exists, append index to make it unique (shouldn't happen but safety check)
+                    $originalKey = $k;
+                    $keyIndex = 0;
+                    while (isset($incomingByKey[$k])) {
+                        $keyIndex++;
+                        $k = $originalKey . '_' . $keyIndex;
+                    }
+                    
                     $incomingByKey[$k] = $t;
                 }
+                
+                \Log::info('Autosave Step 3: Incoming tickets keyed', [
+                    'event_id' => $eventId,
+                    'incoming_count' => count($incomingByKey),
+                    'incoming_keys' => array_keys($incomingByKey),
+                    'new_ticket_keys' => array_filter(array_keys($incomingByKey), function($k) { return strpos($k, 'new_') === 0; })
+                ]);
 
-                $added = array_diff(array_keys($incomingByKey), array_keys($existingByKey));
-                $removed = array_diff(array_keys($existingByKey), array_keys($incomingByKey));
+                // Match incoming tickets to existing tickets by ID
+                // For new tickets without IDs, they will all be created
+                $added = [];
+                $removed = [];
+                $ticketMapping = []; // Maps incoming key to existing row (if exists)
+                
+                // Build mapping: match incoming tickets with IDs to existing tickets
+                foreach ($incomingByKey as $k => $t) {
+                    if (isset($t['id']) && !empty($t['id']) && $t['id'] !== 'null' && $t['id'] !== null) {
+                        $idKey = (string)$t['id'];
+                        if (isset($existingByKey[$idKey])) {
+                            $ticketMapping[$k] = $existingByKey[$idKey];
+                            unset($existingByKey[$idKey]); // Remove from existing so it's not considered for removal
+                        } else {
+                            $added[] = $k; // Ticket with ID but doesn't exist in DB (shouldn't happen but handle it)
+                        }
+                    } else {
+                        $added[] = $k; // New ticket without ID - will be created
+                    }
+                }
+                
+                // Any remaining existing tickets that weren't matched should be removed
+                foreach ($existingByKey as $k => $row) {
+                    $removed[] = $k;
+                }
 
                 // Upsert and delete
                 $editChanges = [];
+                $createdCount = 0;
+                $updatedCount = 0;
+                
                 foreach ($incomingByKey as $k => $t) {
-                    if (isset($existingByKey[$k])) {
-                        $row = $existingByKey[$k];
+                    // Check if this ticket matches an existing one (by ID)
+                    $row = $ticketMapping[$k] ?? null;
+                    
+                    if ($row) {
+                        // Update existing ticket
+                        $updatedCount++;
                         $diff = [];
                         $newName = $t['name'] ?? $row->name;
                         if (($t['name'] ?? $row->name) !== $row->name) { $diff['name'] = ['from' => $row->name, 'to' => $t['name']]; }
@@ -936,6 +1031,9 @@ class TicketsController extends Controller
                             'is_active' => $isActive,
                         ]);
                     } else {
+                        // Create new ticket - ALL new tickets should be created
+                        $createdCount++;
+                        
                         // Handle is_active field - convert string '1'/'0' to boolean
                         $isActive = true; // Default to active for new tickets
                         if (isset($t['is_active'])) {
@@ -958,6 +1056,39 @@ class TicketsController extends Controller
                         ]);
                     }
                 }
+                
+                // Verify all tickets were processed by checking final count
+                $finalTicketCount = $event->eventTickets()->count();
+                $expectedCount = count($incomingByKey) - count($removed);
+                
+                \Log::info('Autosave Step 3: Tickets processed', [
+                    'event_id' => $eventId,
+                    'received_raw_count' => is_array($ticketTypes) ? count($ticketTypes) : 0,
+                    'normalized_count' => count($incoming),
+                    'total_incoming_keyed' => count($incomingByKey),
+                    'created_count' => $createdCount,
+                    'updated_count' => $updatedCount,
+                    'removed_count' => count($removed),
+                    'final_db_count' => $finalTicketCount,
+                    'expected_final_count' => $expectedCount,
+                    'match' => $finalTicketCount === $expectedCount ? 'YES' : 'NO - MISMATCH!'
+                ]);
+                
+                // Warn if not all tickets were saved
+                if ($finalTicketCount < $expectedCount) {
+                    \Log::warning('Autosave Step 3: Not all tickets were saved!', [
+                        'event_id' => $eventId,
+                        'expected' => $expectedCount,
+                        'actual' => $finalTicketCount,
+                        'missing' => $expectedCount - $finalTicketCount,
+                        'created' => $createdCount,
+                        'updated' => $updatedCount,
+                        'removed' => count($removed),
+                        'incoming_keys' => array_keys($incomingByKey),
+                        'new_ticket_keys_count' => count(array_filter(array_keys($incomingByKey), function($k) { return strpos($k, 'new_') === 0; }))
+                    ]);
+                }
+                
                 $blockedDeletes = [];
                 foreach ($removed as $k) {
                     $row = $existingByKey[$k];

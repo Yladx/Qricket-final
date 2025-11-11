@@ -623,21 +623,43 @@
     try {
       const url = form?.getAttribute('data-autosave-url') || `/organizer/events/ticket/autosave?id=${encodeURIComponent(getEventId())}`;
       const settings = readSettings();
-      // console.log('Autosaving with settings:', settings);
       // Read all ticket types and include is_active field
       const allTypes = readTypes();
-      // Only send active tickets OR send all tickets but mark inactive ones (backend will handle)
-      // Include is_active field for all tickets
-      const sanitizedTypes = allTypes.map(t => ({
-        id: t.id ?? undefined,
-        name: t.name ?? '',
-        description: t.description ?? '',
-        price: t.price ?? '',
-        quantity: t.quantity ?? '',
-        sale_start: t.sale_start ?? null,
-        sale_end: t.sale_end ?? null,
-        is_active: t.is_active !== undefined ? (String(t.is_active) === '1' || t.is_active === true || t.is_active === 'true' ? '1' : '0') : '1', // Default to active if not set
-      }));
+      
+      // DEBUG: Log the count of tickets being sent
+      if (DEBUG_TICKETS) {
+        console.log('[Autosave] Total tickets to send:', allTypes.length, allTypes);
+      }
+      
+      // Include is_active field for all tickets - SEND ALL TICKETS, NO FILTERING
+      const sanitizedTypes = allTypes.map((t, index) => {
+        const sanitized = {
+          id: t.id ?? undefined,
+          name: t.name ?? '',
+          description: t.description ?? '',
+          price: t.price ?? '',
+          quantity: t.quantity ?? '',
+          sale_start: t.sale_start ?? null,
+          sale_end: t.sale_end ?? null,
+          is_active: t.is_active !== undefined ? (String(t.is_active) === '1' || t.is_active === true || t.is_active === 'true' ? '1' : '0') : '1', // Default to active if not set
+        };
+        // Add debug info in development
+        if (DEBUG_TICKETS && index < 3) {
+          console.log(`[Autosave] Ticket ${index}:`, sanitized);
+        }
+        return sanitized;
+      });
+      
+      // DEBUG: Verify all tickets are included
+      if (DEBUG_TICKETS) {
+        console.log('[Autosave] Sanitized tickets count:', sanitizedTypes.length);
+        if (sanitizedTypes.length !== allTypes.length) {
+          console.error('[Autosave] WARNING: Ticket count mismatch!', {
+            original: allTypes.length,
+            sanitized: sanitizedTypes.length
+          });
+        }
+      }
       
       // Always get ticket colors from current form inputs (most up-to-date)
       const primaryColorEl = document.getElementById('ticket-primary-color');
@@ -675,8 +697,11 @@
         ticket_colors: ticketColors  // Also send directly for backwards compatibility
       };
       
-      // console.log('Autosave payload - ticket_colors:', ticketColors);
-      // console.log('Autosave payload - full settings:', payload.ticket_settings);
+      // DEBUG: Log payload size
+      if (DEBUG_TICKETS) {
+        console.log('[Autosave] Payload ticket_types count:', payload.ticket_types.length);
+        console.log('[Autosave] Payload size (bytes):', JSON.stringify(payload).length);
+      }
       
       const response = await fetch(url, {
         method: 'POST',
