@@ -280,10 +280,10 @@
                         </script>
                     </div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg h-full">
-                    <div class="p-6">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg h-full flex flex-col">
+                    <div class="p-6 flex flex-col flex-1">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Revenue Trend</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Revenue Trend</h3>
                             <form id="revenue-filter" class="text-xs flex items-center gap-2">
                                 <select id="revenue-range" class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded px-2 py-1">
                                     <option value="30">Last 30 days</option>
@@ -292,8 +292,8 @@
                                 </select>
                             </form>
                         </div>
-                        <div class="h-64 md:h-[22rem] lg:h-full min-h-[16rem]">
-                            <canvas id="revenueChart" class="w-full h-full"></canvas>
+                        <div class="flex-1 min-h-0" style="height: 350px;">
+                            <canvas id="revenueChart"></canvas>
                         </div>
                     </div>
                 </div>

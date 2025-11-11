@@ -147,21 +147,21 @@
                 </div>
 
                 <!-- Charts - 3 columns (1.5 each) with bigger height -->
-                <div class="lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-col">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Ticket Sales (30d)</h3>
+                <div class="lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 p-6 flex flex-col">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Ticket Sales (30d)</h3>
                         </div>
-                        <div class="flex-1 min-h-0">
-                            <canvas id="ticketTrendChart" height="200"></canvas>
+                        <div class="flex-1 min-h-0" style="height: 350px;">
+                            <canvas id="ticketTrendChart"></canvas>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-col">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Subscription Revenue (30d)</h3>
+                    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 p-6 flex flex-col">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Subscription Revenue (30d)</h3>
                         </div>
-                        <div class="flex-1 min-h-0">
-                            <canvas id="subTrendChart" height="200"></canvas>
+                        <div class="flex-1 min-h-0" style="height: 350px;">
+                            <canvas id="subTrendChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -819,7 +819,8 @@
                                 data: @json($ticketTrendRevenue),
                                 borderColor: '#10b981',
                                 backgroundColor: 'rgba(16,185,129,0.1)',
-                                tension: 0.3,
+                                tension: 0.4,
+                                fill: true,
                                 yAxisID: 'y',
                             },
                             {
@@ -827,12 +828,66 @@
                                 data: @json($ticketTrendOrders),
                                 borderColor: '#6366f1',
                                 backgroundColor: 'rgba(99,102,241,0.1)',
-                                tension: 0.3,
+                                tension: 0.4,
+                                fill: true,
                                 yAxisID: 'y1',
                             }
                         ]
                     },
-                    options: {responsive:true, scales: {y: {beginAtZero:true}, y1: {beginAtZero:true, position:'right'}}}
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 12 }
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 }
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+                                }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                position: 'right',
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 }
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
+                                    display: false
+                                }
+                            }
+                        }
+                    }
                 });
             }
             const subCtx = document.getElementById('subTrendChart');
@@ -841,9 +896,58 @@
                     type: 'line',
                     data: {
                         labels: @json($subTrendLabels),
-                        datasets: [{ label: 'Revenue', data: @json($subTrendRevenue), borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', tension:0.3 }]
+                        datasets: [{ 
+                            label: 'Revenue', 
+                            data: @json($subTrendRevenue), 
+                            borderColor: '#f59e0b', 
+                            backgroundColor: 'rgba(245,158,11,0.1)', 
+                            tension: 0.4,
+                            fill: true
+                        }]
                     },
-                    options: {responsive:true, scales: {y: {beginAtZero:true}}}
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 12 }
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 }
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
+                                    display: false
+                                }
+                            }
+                        }
+                    }
                 });
             }
 

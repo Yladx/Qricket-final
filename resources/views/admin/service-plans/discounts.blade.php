@@ -95,17 +95,21 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <!-- Usage Chart -->
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Discount Usage Over Time</h3>
-            <canvas id="usageChart" width="400" height="200"></canvas>
+            <div class="flex-1 min-h-0" style="height: 350px;">
+                <canvas id="usageChart"></canvas>
+            </div>
         </div>
 
         <!-- Discount Types Chart -->
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Discount Types Distribution</h3>
-            <canvas id="discountTypesChart" width="400" height="200"></canvas>
+            <div class="flex-1 min-h-0 flex items-center justify-center" style="height: 350px;">
+                <canvas id="discountTypesChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -116,69 +120,74 @@
         </div>
         <div class="p-6">
             @if($discounts->count())
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" style="max-height: none; overflow: visible;">
+                <div class="space-y-4">
                     @foreach($discounts as $discount)
-                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-5 hover:shadow-md transition-all duration-200">
-                            <div class="flex items-start justify-between mb-3">
-                                <div class="flex-1">
-                                    <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ $discount->name }}</h4>
-                                    @if($discount->description)
-                                        <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">{{ $discount->description }}</p>
-                                    @endif
-                                </div>
-                                <span class="px-2 py-1 text-xs font-medium rounded-full ml-2 flex-shrink-0 {{ $discount->isValid() ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
-                                    {{ $discount->isValid() ? 'Active' : 'Inactive' }}
-                                </span>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <span class="font-mono bg-gray-200 dark:bg-gray-600 px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-900 dark:text-gray-100 block text-center">{{ $discount->code }}</span>
-                            </div>
-                            
-                            <div class="space-y-2 mb-4">
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-600 dark:text-gray-400">Type:</span>
-                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ ucfirst(str_replace('_', ' ', $discount->type)) }}</span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-600 dark:text-gray-400">Value:</span>
-                                    <span class="font-semibold text-qricket-600 dark:text-qricket-400">{{ $discount->formatted_value }}</span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-600 dark:text-gray-400">Usage:</span>
-                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ $discount->used_count }}/{{ $discount->usage_limit ?: '∞' }}</span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-600 dark:text-gray-400">Applicable To:</span>
-                                    <span class="font-medium text-gray-900 dark:text-gray-100 text-xs">{{ ucfirst(str_replace('_', ' ', $discount->applicable_to)) }}</span>
-                                </div>
-                                @if($discount->starts_at || $discount->expires_at)
-                                <div class="pt-2 border-t border-gray-200 dark:border-gray-600">
-                                    @if($discount->starts_at)
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                                            Starts: {{ \Carbon\Carbon::parse($discount->starts_at)->format('M d, Y') }}
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-4 md:p-5 hover:shadow-md transition-all duration-200">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <!-- Left Section: Discount Info -->
+                                <div class="flex-1 flex flex-col md:flex-row md:items-center md:space-x-6 gap-4 md:gap-0">
+                                    <div class="flex-shrink-0">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            <h4 class="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $discount->name }}</h4>
+                                            <span class="font-mono bg-gray-200 dark:bg-gray-600 px-2 md:px-3 py-1 rounded-lg text-xs md:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $discount->code }}</span>
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $discount->isValid() ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
+                                                {{ $discount->isValid() ? 'Active' : 'Inactive' }}
+                                            </span>
                                         </div>
-                                    @endif
-                                    @if($discount->expires_at)
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                                            Expires: {{ \Carbon\Carbon::parse($discount->expires_at)->format('M d, Y') }}
+                                        @if($discount->description)
+                                            <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400">{{ $discount->description }}</p>
+                                        @endif
+                                    </div>
+                                    
+                                    <!-- Middle Section: Details -->
+                                    <div class="flex flex-wrap md:flex-nowrap items-center gap-4 md:gap-6 md:space-x-8 border-t md:border-t-0 md:border-l md:border-r border-gray-200 dark:border-gray-600 pt-4 md:pt-0 md:px-6">
+                                        <div class="text-center min-w-[80px]">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Type</div>
+                                            <div class="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">{{ ucfirst(str_replace('_', ' ', $discount->type)) }}</div>
                                         </div>
-                                    @endif
+                                        <div class="text-center min-w-[80px]">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Value</div>
+                                            <div class="text-sm md:text-base font-semibold text-qricket-600 dark:text-qricket-400">{{ $discount->formatted_value }}</div>
+                                        </div>
+                                        <div class="text-center min-w-[80px]">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Usage</div>
+                                            <div class="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">{{ $discount->used_count }}/{{ $discount->usage_limit ?: '∞' }}</div>
+                                        </div>
+                                        <div class="text-center min-w-[100px]">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Applicable To</div>
+                                            <div class="text-xs md:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ ucfirst(str_replace('_', ' ', $discount->applicable_to)) }}</div>
+                                        </div>
+                                        @if($discount->starts_at || $discount->expires_at)
+                                        <div class="text-center min-w-[120px]">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Validity</div>
+                                            <div class="text-xs font-medium text-gray-900 dark:text-gray-100">
+                                                @if($discount->starts_at)
+                                                    {{ \Carbon\Carbon::parse($discount->starts_at)->format('M d') }} -
+                                                @endif
+                                                @if($discount->expires_at)
+                                                    {{ \Carbon\Carbon::parse($discount->expires_at)->format('M d, Y') }}
+                                                @else
+                                                    No expiry
+                                                @endif
+                                            </div>
+                                        </div>
+                                        @endif
+                                    </div>
                                 </div>
-                                @endif
-                            </div>
-                            
-                            <div class="flex items-center justify-end pt-3 border-t border-gray-200 dark:border-gray-600 space-x-2">
-                                <button onclick="editDiscount({{ $discount->id }})" class="p-2 text-qricket-600 dark:text-qricket-400 hover:bg-qricket-50 dark:hover:bg-qricket-900/20 rounded-md transition-colors" title="Edit">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                                <button onclick="deleteDiscount({{ $discount->id }})" class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Delete">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
+                                
+                                <!-- Right Section: Actions -->
+                                <div class="flex-shrink-0 flex items-center justify-end md:justify-start space-x-2 md:ml-4">
+                                    <button onclick="editDiscount({{ $discount->id }})" class="p-2 text-qricket-600 dark:text-qricket-400 hover:bg-qricket-50 dark:hover:bg-qricket-900/20 rounded-md transition-colors" title="Edit">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </button>
+                                    <button onclick="deleteDiscount({{ $discount->id }})" class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Delete">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     @endforeach
@@ -284,23 +293,39 @@
                     data: usageData.values,
                     backgroundColor: 'rgba(59, 130, 246, 0.8)',
                     borderColor: 'rgb(59, 130, 246)',
-                    borderWidth: 1
+                    borderWidth: 1,
+                    borderRadius: 4
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
+                        display: true,
+                        position: 'top',
                         labels: {
-                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
+                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                            font: {
+                                size: 12
+                            }
                         }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        mode: 'index',
+                        intersect: false
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
+                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                            font: {
+                                size: 11
+                            },
+                            stepSize: 1
                         },
                         grid: {
                             color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
@@ -308,10 +333,16 @@
                     },
                     x: {
                         ticks: {
-                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
+                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                            font: {
+                                size: 11
+                            },
+                            maxRotation: 45,
+                            minRotation: 45
                         },
                         grid: {
-                            color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+                            color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
+                            display: false
                         }
                     }
                 }
@@ -321,7 +352,7 @@
         // Discount Types Chart
         const discountTypesCtx = document.getElementById('discountTypesChart').getContext('2d');
         new Chart(discountTypesCtx, {
-            type: 'pie',
+            type: 'doughnut',
             data: {
                 labels: discountTypesData.labels,
                 datasets: [{
@@ -330,19 +361,48 @@
                         'rgba(59, 130, 246, 0.8)',
                         'rgba(16, 185, 129, 0.8)',
                         'rgba(245, 158, 11, 0.8)',
-                        'rgba(239, 68, 68, 0.8)'
-                    ]
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(236, 72, 153, 0.8)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff'
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
+                        display: true,
+                        position: 'right',
                         labels: {
-                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151'
+                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                            font: {
+                                size: 12
+                            },
+                            padding: 15,
+                            boxWidth: 15,
+                            boxHeight: 15
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed;
+                                }
+                                return label;
+                            }
                         }
                     }
-                }
+                },
+                cutout: '60%'
             }
         });
 

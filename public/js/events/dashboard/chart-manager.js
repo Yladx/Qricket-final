@@ -23,13 +23,13 @@
         datasets: [{
           label: 'Revenue',
           data: d.values,
-          tension: 0.35,
-          borderColor: '#22c55e',
-          pointRadius: 2.5,
-          pointHoverRadius: 4,
-          pointBackgroundColor: '#22c55e',
-          pointBorderColor: 'transparent',
-          backgroundColor: 'rgba(34,197,94,.10)',
+          tension: 0.4,
+          borderColor: '#10b981',
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          pointBackgroundColor: '#10b981',
+          pointBorderColor: '#ffffff',
+          backgroundColor: 'rgba(16,185,129,0.1)',
           fill: true,
           borderWidth: 2
         }]
@@ -38,23 +38,46 @@
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false },
-          tooltip: { mode: 'index', intersect: false }
+          legend: { 
+            display: true,
+            position: 'top',
+            labels: {
+              color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+              font: { size: 12 }
+            }
+          },
+          tooltip: { 
+            enabled: true,
+            mode: 'index', 
+            intersect: false 
+          }
         },
-        interaction: { mode: 'nearest', intersect: false },
+        interaction: { mode: 'index', intersect: false },
         scales: {
           x: {
             type: 'category',
             position: 'bottom',
-            grid: { display: false },
-            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--tw-prose-body') || '#9ca3af' }
+            grid: { 
+              display: false,
+              color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+            },
+            ticks: { 
+              color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+              font: { size: 11 },
+              maxRotation: 45,
+              minRotation: 45
+            }
           },
           y: {
             position: 'left',
-            grid: { color: 'rgba(156,163,175,.15)' },
+            beginAtZero: true,
+            grid: { 
+              color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+            },
             ticks: {
               callback: function(v){ return '₱' + Number(v).toLocaleString(); },
-              color: getComputedStyle(document.documentElement).getPropertyValue('--tw-prose-body') || '#9ca3af'
+              color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+              font: { size: 11 }
             }
           }
         }

@@ -101,12 +101,12 @@
 
                     @if($canViewGraphs)
                     <!-- Charts Row -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <!-- Sales Trend Chart -->
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
+                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg flex flex-col">
                             <div class="p-6">
                                 <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Sales Trend</h3>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Sales Trend</h3>
                                     <div class="flex items-center gap-2 text-xs">
                                         <label class="text-gray-600 dark:text-gray-300">Range</label>
                                         <select id="salesTrendRange" class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded px-2 py-1">
@@ -114,19 +114,19 @@
                                             <option value="90">Last 90 days</option>
                                             <option value="365">Last 12 months</option>
                                         </select>
-        </div>
-    </div>
-                                <div class="h-64 md:h-80">
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-h-0" style="height: 350px;">
                                     <canvas id="salesTrendChart"></canvas>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Event Activity Chart -->
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
+                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg flex flex-col">
                             <div class="p-6">
                                 <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Event Activity</h3>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Event Activity</h3>
                                     <div class="flex items-center gap-2 text-xs">
                                         <label class="text-gray-600 dark:text-gray-300">Range</label>
                                         <select id="activityTrendRange" class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded px-2 py-1">
@@ -136,12 +136,12 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="h-64 md:h-80">
+                                <div class="flex-1 min-h-0" style="height: 350px;">
                                     <canvas id="activityTrendChart"></canvas>
                                 </div>
-                </div>
-            </div>
-        </div>
+                            </div>
+                        </div>
+                    </div>
                     @endif
 
                     <!-- Ticket Performance -->
@@ -779,19 +779,23 @@
                                 label: 'Revenue',
                                 data: revenue,
                                 borderColor: '#10b981',
-                                backgroundColor: 'rgba(16,185,129,0.2)',
+                                backgroundColor: 'rgba(16,185,129,0.1)',
                                 yAxisID: 'y',
-                                tension: 0.3,
-                                pointRadius: 2
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
                             },
                             {
                                 label: 'Tickets Sold',
                                 data: tickets,
                                 borderColor: '#3b82f6',
-                                backgroundColor: 'rgba(59,130,246,0.15)',
+                                backgroundColor: 'rgba(59,130,246,0.1)',
                                 yAxisID: 'y1',
-                                tension: 0.3,
-                                pointRadius: 2
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
                             }
                         ]
                     },
@@ -799,18 +803,56 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         interaction: { mode: 'index', intersect: false },
-                        plugins: { legend: { position: 'bottom' } },
+                        plugins: { 
+                            legend: { 
+                                position: 'top',
+                                labels: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 12 }
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
                         scales: {
                             y: {
                                 type: 'linear',
                                 position: 'left',
-                                ticks: { callback: (v) => '₱' + Number(v).toLocaleString() },
-                                grid: { drawOnChartArea: true }
+                                beginAtZero: true,
+                                ticks: { 
+                                    callback: (v) => '₱' + Number(v).toLocaleString(),
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 }
+                                },
+                                grid: { 
+                                    drawOnChartArea: true,
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+                                }
                             },
                             y1: {
                                 type: 'linear',
                                 position: 'right',
+                                beginAtZero: true,
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 }
+                                },
                                 grid: { drawOnChartArea: false }
+                            },
+                            x: {
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
+                                    display: false
+                                }
                             }
                         }
                     }
@@ -843,37 +885,45 @@
                                 label: 'Event Views',
                                 data: views,
                                 borderColor: '#10b981',
-                                backgroundColor: 'rgba(16,185,129,0.2)',
+                                backgroundColor: 'rgba(16,185,129,0.1)',
                                 yAxisID: 'y',
-                                tension: 0.3,
-                                pointRadius: 2
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
                             },
                             {
                                 label: 'Event Saves',
                                 data: saves,
                                 borderColor: '#8b5cf6',
-                                backgroundColor: 'rgba(139,92,246,0.2)',
+                                backgroundColor: 'rgba(139,92,246,0.1)',
                                 yAxisID: 'y',
-                                tension: 0.3,
-                                pointRadius: 2
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
                             },
                             {
                                 label: 'Ticket Purchases',
                                 data: purchases,
                                 borderColor: '#f59e0b',
-                                backgroundColor: 'rgba(245,158,11,0.2)',
+                                backgroundColor: 'rgba(245,158,11,0.1)',
                                 yAxisID: 'y',
-                                tension: 0.3,
-                                pointRadius: 2
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
                             },
                             {
                                 label: 'Activities',
                                 data: activities,
                                 borderColor: '#ef4444',
-                                backgroundColor: 'rgba(239,68,68,0.2)',
+                                backgroundColor: 'rgba(239,68,68,0.1)',
                                 yAxisID: 'y',
-                                tension: 0.3,
-                                pointRadius: 2
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
                             }
                         ]
                     },
@@ -882,10 +932,17 @@
                         maintainAspectRatio: false,
                         interaction: { mode: 'index', intersect: false },
                         plugins: { 
-                            legend: { position: 'bottom' },
-                            title: {
-                                display: true,
-                                text: 'Event Activity Over Time'
+                            legend: { 
+                                position: 'top',
+                                labels: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 12 }
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                                mode: 'index',
+                                intersect: false
                             }
                         },
                         scales: {

@@ -260,14 +260,18 @@
     <!-- Event Approval & Verification Statistics (removed duplicates) -->
 
     <!-- Sales Trends -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Ticket Sales (30d)</h3>
-            <canvas id="ticketTrendChart" height="120"></canvas>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex flex-col">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Ticket Sales (30d)</h3>
+            <div class="flex-1 min-h-0" style="height: 350px;">
+                <canvas id="ticketTrendChart"></canvas>
+            </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Subscription Revenue (30d)</h3>
-            <canvas id="subTrendChart" height="120"></canvas>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex flex-col">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Subscription Revenue (30d)</h3>
+            <div class="flex-1 min-h-0" style="height: 350px;">
+                <canvas id="subTrendChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -477,19 +481,140 @@
                     data: {
                         labels: @json($ticketTrendLabels ?? []),
                         datasets: [
-                            {label:'Revenue', data:@json($ticketTrendRevenue ?? []), borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', tension:0.3, yAxisID:'y'},
-                            {label:'Orders', data:@json($ticketTrendOrders ?? []), borderColor:'#6366f1', backgroundColor:'rgba(99,102,241,0.1)', tension:0.3, yAxisID:'y1'}
+                            {
+                                label:'Revenue', 
+                                data:@json($ticketTrendRevenue ?? []), 
+                                borderColor:'#10b981', 
+                                backgroundColor:'rgba(16,185,129,0.1)', 
+                                tension:0.4, 
+                                fill: true,
+                                yAxisID:'y'
+                            },
+                            {
+                                label:'Orders', 
+                                data:@json($ticketTrendOrders ?? []), 
+                                borderColor:'#6366f1', 
+                                backgroundColor:'rgba(99,102,241,0.1)', 
+                                tension:0.4, 
+                                fill: true,
+                                yAxisID:'y1'
+                            }
                         ]
                     },
-                    options: {responsive:true, scales:{y:{beginAtZero:true}, y1:{beginAtZero:true, position:'right'}}}
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 12 }
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 }
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+                                }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                position: 'right',
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 }
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
+                                    display: false
+                                }
+                            }
+                        }
+                    }
                 });
             }
             const subCtx = document.getElementById('subTrendChart');
             if (subCtx) {
                 new Chart(subCtx, {
                     type: 'line',
-                    data: { labels:@json($subTrendLabels ?? []), datasets:[{label:'Revenue', data:@json($subTrendRevenue ?? []), borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.1)', tension:0.3}] },
-                    options: {responsive:true, scales:{y:{beginAtZero:true}}}
+                    data: { 
+                        labels:@json($subTrendLabels ?? []), 
+                        datasets:[{
+                            label:'Revenue', 
+                            data:@json($subTrendRevenue ?? []), 
+                            borderColor:'#f59e0b', 
+                            backgroundColor:'rgba(245,158,11,0.1)', 
+                            tension:0.4,
+                            fill: true
+                        }] 
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 12 }
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 }
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                    font: { size: 11 },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                },
+                                grid: {
+                                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
+                                    display: false
+                                }
+                            }
+                        }
+                    }
                 });
             }
             // Mini doughnut for approvals vs rejections (today)
