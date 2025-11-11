@@ -63,8 +63,8 @@
         <div>
             <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Logos</label>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <div class="flex items-center gap-2">
+                <div class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <div class="flex items-center gap-2 flex-1">
                         <div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
                         </div>
@@ -84,11 +84,13 @@
                             </div>
                         </div>
                     </div>
-                    <input type="file" id="logo_left_file" accept="image/*" class="hidden">
-                    <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>
-                </label>
-                <label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <div class="flex items-center gap-2">
+                    <label class="cursor-pointer">
+                        <input type="file" id="logo_left_file" accept="image/*" class="hidden">
+                        <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white cursor-pointer">Choose</span>
+                    </label>
+                </div>
+                <div class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <div class="flex items-center gap-2 flex-1">
                         <div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
                         </div>
@@ -108,9 +110,11 @@
                             </div>
                         </div>
                     </div>
-                    <input type="file" id="logo_right_file" accept="image/*" class="hidden">
-                    <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>
-                </label>
+                    <label class="cursor-pointer">
+                        <input type="file" id="logo_right_file" accept="image/*" class="hidden">
+                        <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white cursor-pointer">Choose</span>
+                    </label>
+                </div>
             </div>
         </div>
     </div>
@@ -167,8 +171,8 @@
                 </div>
                 <div class="mt-3">
                     <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>
-            <label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
-                <div class="flex items-center gap-2">
+            <div class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 hover:bg-gray-50 dark:hover:bg-gray-800">
+                <div class="flex items-center gap-2 flex-1">
                     <div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>
                     </div>
@@ -188,9 +192,11 @@
                                 </div>
                     </div>
                 </div>
-                        <input type="file" id="sig_1_file" accept="image/*" class="hidden">
-                <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>
-            </label>
+                        <label class="cursor-pointer">
+                            <input type="file" id="sig_1_file" accept="image/*" class="hidden">
+                            <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white cursor-pointer">Choose</span>
+                        </label>
+            </div>
                 </div>
             </div>
         </div>

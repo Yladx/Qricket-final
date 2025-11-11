@@ -244,8 +244,8 @@
                 '</div>' +
                 '<div class="mt-3">' +
                     '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>' +
-                    '<label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">' +
-                        '<div class="flex items-center gap-2">' +
+                    '<div class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 hover:bg-gray-50 dark:hover:bg-gray-800">' +
+                        '<div class="flex items-center gap-2 flex-1">' +
                             '<div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">' +
                                 '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>' +
                             '</div>' +
@@ -263,9 +263,11 @@
                                 '</div>' +
                             '</div>' +
                         '</div>' +
-                        '<input type="file" id="sig_' + sigNum + '_file" accept="image/*" class="hidden">' +
-                        '<span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>' +
-                    '</label>' +
+                        '<label class="cursor-pointer">' +
+                            '<input type="file" id="sig_' + sigNum + '_file" accept="image/*" class="hidden">' +
+                            '<span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white cursor-pointer">Choose</span>' +
+                        '</label>' +
+                    '</div>' +
                 '</div>';
             
             try {
@@ -277,7 +279,9 @@
                 const removeBtn = document.getElementById(`sig_${sigNum}_remove_btn`);
                 
                 if (fileInput) {
-                    fileInput.addEventListener('change', function() {
+                    // Attach change event listener with stopPropagation
+                    fileInput.addEventListener('change', function(e) {
+                        e.stopPropagation();
                         if (typeof window.uploadSignature === 'function') {
                             window.uploadSignature(sigNum);
                         }
@@ -392,7 +396,9 @@
                     // Remove old event listeners and add new one
                     const newFileInput = fileInput.cloneNode(true);
                     fileInput.parentNode.replaceChild(newFileInput, fileInput);
-                    newFileInput.addEventListener('change', function() {
+                    
+                    newFileInput.addEventListener('change', function(e) {
+                        e.stopPropagation();
                         if (typeof window.uploadSignature === 'function') {
                             window.uploadSignature(newNum);
                         }
@@ -895,11 +901,19 @@
                     removeBtn = document.createElement('button');
                     removeBtn.type = 'button';
                     removeBtn.id = `logo_${side}_remove_btn`;
-                    removeBtn.onclick = function() { removeLogo(side); };
                     removeBtn.className = 'ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300';
                     removeBtn.title = 'Remove logo';
                     removeBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
                     statusEl.parentNode.appendChild(removeBtn);
+                    
+                    // Attach event listener with stopPropagation
+                    removeBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        if (typeof window.removeLogo === 'function') {
+                            window.removeLogo(side);
+                        }
+                    });
                 }
             }
             if (removeBtn) {
@@ -1148,6 +1162,45 @@
                         } catch(e) {
                             console.error('Error showing logo remove button for', side, ':', e);
                         }
+                        
+                        // Initialize file input event listeners
+                        try {
+                            const fileInput = document.getElementById(`logo_${side}_file`);
+                            const removeBtn = document.getElementById(`logo_${side}_remove_btn`);
+                            
+                            // Set up file input change handler
+                            if (fileInput) {
+                                // Remove any existing event listeners by cloning
+                                const newFileInput = fileInput.cloneNode(true);
+                                fileInput.parentNode.replaceChild(newFileInput, fileInput);
+                                
+                                // Attach change event listener
+                                newFileInput.addEventListener('change', function(e) {
+                                    e.stopPropagation();
+                                    if (typeof window.uploadLogo === 'function') {
+                                        window.uploadLogo(side);
+                                    }
+                                });
+                            }
+                            
+                            // Set up remove button click handler with stopPropagation
+                            if (removeBtn) {
+                                // Remove any existing onclick
+                                removeBtn.removeAttribute('onclick');
+                                const newRemoveBtn = removeBtn.cloneNode(true);
+                                removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+                                
+                                newRemoveBtn.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    if (typeof window.removeLogo === 'function') {
+                                        window.removeLogo(side);
+                                    }
+                                });
+                            }
+                        } catch(e) {
+                            console.error('Error initializing logo file input for', side, ':', e);
+                        }
                     });
                 } catch(e) {
                     console.error('Error in initializeLogoDisplay:', e);
@@ -1194,8 +1247,10 @@
                                 // Clone node to remove any existing event listeners
                                 const newFileInput = fileInput.cloneNode(true);
                                 fileInput.parentNode.replaceChild(newFileInput, fileInput);
+                                
                                 // Attach proper event listener that won't fire on load
-                                newFileInput.addEventListener('change', function() {
+                                newFileInput.addEventListener('change', function(e) {
+                                    e.stopPropagation();
                                     if (typeof window.uploadSignature === 'function') {
                                         window.uploadSignature(i);
                                     }
