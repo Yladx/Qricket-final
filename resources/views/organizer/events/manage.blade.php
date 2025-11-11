@@ -114,8 +114,8 @@
                                             <option value="90">Last 90 days</option>
                                             <option value="365">Last 12 months</option>
                                         </select>
-                                    </div>
-                                </div>
+        </div>
+    </div>
                                 <div class="flex-1 min-h-0" style="height: 350px;">
                                     <canvas id="salesTrendChart"></canvas>
                                 </div>
@@ -139,9 +139,9 @@
                                 <div class="flex-1 min-h-0" style="height: 350px;">
                                     <canvas id="activityTrendChart"></canvas>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+            </div>
+        </div>
                     @endif
 
                     <!-- Ticket Performance -->

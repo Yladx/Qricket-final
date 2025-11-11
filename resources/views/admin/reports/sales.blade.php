@@ -437,18 +437,18 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 @foreach($paidTicketLimitPlans as $p)
                                     <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-green-200 dark:border-green-800 p-4 hover:shadow-md transition-shadow">
-                                        <div class="flex items-center justify-between">
-                                            <div>
-                                                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $p['plan_name'] }}</h4>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400">₱{{ number_format($p['plan_price'], 2) }} per pack</p>
-                                            </div>
-                                            <div class="text-right">
-                                                <div class="text-lg font-bold text-green-600 dark:text-green-400">₱{{ number_format($p['total_revenue'], 2) }}</div>
-                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($p['total_purchases']) }} orders • {{ number_format($p['total_tickets']) }} tix</div>
-                                            </div>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $p['plan_name'] }}</h4>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">₱{{ number_format($p['plan_price'], 2) }} per pack</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-lg font-bold text-green-600 dark:text-green-400">₱{{ number_format($p['total_revenue'], 2) }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($p['total_purchases']) }} orders • {{ number_format($p['total_tickets']) }} tix</div>
                                         </div>
                                     </div>
-                                @endforeach
+                                </div>
+                            @endforeach
                             </div>
                         </div>
                         @endif

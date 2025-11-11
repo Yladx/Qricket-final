@@ -27,104 +27,98 @@
         </div>
     @endif
 
-    <!-- Top Row: Quick Stats + Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <!-- Quick Stats Cards (Left Side) -->
-        <div class="lg:col-span-1 grid grid-cols-2 gap-4">
-            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
-                <div class="flex items-center mb-4">
-                    <div class="flex-shrink-0">
-                        <div class="w-10 h-10 bg-qricket-100 dark:bg-qricket-900 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-qricket-600 dark:text-qricket-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                            </svg>
-                        </div>
+    <!-- Analytics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-qricket-100 dark:bg-qricket-900 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-qricket-600 dark:text-qricket-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
                     </div>
                 </div>
-                <div class="flex-1 flex flex-col justify-center">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Total Discounts</p>
-                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $discounts->count() }}</p>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
-                <div class="flex items-center mb-4">
-                    <div class="flex-shrink-0">
-                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-1 flex flex-col justify-center">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Active Discounts</p>
-                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $discounts->where('is_active', true)->count() }}</p>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
-                <div class="flex items-center mb-4">
-                    <div class="flex-shrink-0">
-                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-1 flex flex-col justify-center">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Total Usage</p>
-                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $totalUsage }}</p>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
-                <div class="flex items-center mb-4">
-                    <div class="flex-shrink-0">
-                        <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-1 flex flex-col justify-center">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Total Savings</p>
-                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">₱{{ number_format($totalSavings, 2) }}</p>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Discounts</p>
+                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $discounts->count() }}</p>
                 </div>
             </div>
         </div>
 
-        <!-- Charts (Right Side) -->
-        <div class="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Usage Chart -->
-            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Discount Usage Over Time</h3>
-                <div class="flex-1 min-h-0" style="height: 350px;">
-                    <canvas id="usageChart"></canvas>
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Discounts</p>
+                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $discounts->where('is_active', true)->count() }}</p>
                 </div>
             </div>
+        </div>
 
-            <!-- Discount Types Chart -->
-            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Discount Types Distribution</h3>
-                <div class="flex-1 min-h-0 flex items-center justify-center" style="height: 350px;">
-                    <canvas id="discountTypesChart"></canvas>
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Usage</p>
+                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $totalUsage }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Savings</p>
+                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">₱{{ number_format($totalSavings, 2) }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Row: Discounts Cards on Left Side -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Discounts Cards (Left Side - Full Height) -->
-        <div class="lg:col-span-1">
-            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg h-full flex flex-col">
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Discount Codes</h3>
-                </div>
-                <div class="p-6 flex-1 overflow-y-auto" style="max-height: calc(100vh - 600px); min-height: 400px;">
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Usage Chart -->
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Discount Usage Over Time</h3>
+            <div class="flex-1 min-h-0" style="height: 350px;">
+                <canvas id="usageChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Discount Types Chart -->
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Discount Types Distribution</h3>
+            <div class="flex-1 min-h-0 flex items-center justify-center" style="height: 350px;">
+                <canvas id="discountTypesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discounts Cards -->
+    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Discount Codes</h3>
+        </div>
+        <div class="p-6">
             @if($discounts->count())
                 <div class="space-y-4">
                     @foreach($discounts as $discount)
@@ -207,12 +201,7 @@
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new discount.</p>
                 </div>
             @endif
-                </div>
-            </div>
         </div>
-        
-        <!-- Empty space on right (2 columns) -->
-        <div class="lg:col-span-2 hidden lg:block"></div>
     </div>
 
     <!-- Discount Modal -->
