@@ -22,16 +22,6 @@
     </div>
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
-    @php
-        // Simple initialization - get is_free value from eventData or event object
-        $isFreeValue = false;
-        if (isset($eventData) && is_array($eventData) && array_key_exists('is_free', $eventData)) {
-            $isFreeValue = (bool)$eventData['is_free'];
-        } elseif (isset($event) && is_object($event) && isset($event->is_free)) {
-            $isFreeValue = (bool)$event->is_free;
-        }
-        $isFreeChecked = old('is_free', $isFreeValue);
-    @endphp
     <div class="flex items-center space-x-3">
         <label class="inline-flex items-center space-x-2">
             <input 
@@ -39,7 +29,7 @@
                 name="is_free" 
                 value="1" 
                 id="is_free_checkbox" 
-                {{ $isFreeChecked ? 'checked' : '' }}
+                {{ old('is_free', $eventData['is_free'] ?? (isset($event) && is_object($event) ? ($event->is_free ?? false) : false)) ? 'checked' : '' }}
                 class="rounded border-gray-300 text-qricket-600"
             >
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
