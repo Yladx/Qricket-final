@@ -179,7 +179,7 @@
                                     <img id="sig_1_preview" src="{{ !empty($cd['sig_1_signature']) ? asset('storage/' . $cd['sig_1_signature']) : '' }}" class="w-5 h-5 rounded object-contain border border-gray-200 dark:border-gray-700 {{ empty($cd['sig_1_signature']) ? 'hidden' : '' }}" alt="Signature 1 preview">
                                     <span id="sig_1_status" class="text-xs text-gray-500 dark:text-gray-400">{{ !empty($cd['sig_1_signature']) ? 'Uploaded' : 'No file' }}</span>
                                     @if(!empty($cd['sig_1_signature']))
-                                    <button type="button" onclick="removeSignature(1)" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove signature">
+                                    <button type="button" id="sig_1_remove_btn" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove signature">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                         </svg>
@@ -188,7 +188,7 @@
                                 </div>
                     </div>
                 </div>
-                        <input type="file" id="sig_1_file" accept="image/*" class="hidden" onchange="window.uploadSignature(1)">
+                        <input type="file" id="sig_1_file" accept="image/*" class="hidden">
                 <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>
             </label>
                 </div>

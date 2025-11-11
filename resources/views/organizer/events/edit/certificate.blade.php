@@ -243,7 +243,7 @@
                                 '<div class="mt-0.5 flex items-center gap-1">' +
                                     '<img id="sig_' + sigNum + '_preview" src="" class="w-5 h-5 rounded object-contain border border-gray-200 dark:border-gray-700 hidden" alt="Signature ' + sigNum + ' preview">' +
                                     '<span id="sig_' + sigNum + '_status" class="text-xs text-gray-500 dark:text-gray-400">No file</span>' +
-                                    '<button type="button" id="sig_' + sigNum + '_remove_btn" onclick="removeSignature(' + sigNum + ')" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hidden" title="Remove signature">' +
+                                    '<button type="button" id="sig_' + sigNum + '_remove_btn" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hidden" title="Remove signature">' +
                                         '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
                                             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' +
                                         '</svg>' +
@@ -251,7 +251,7 @@
                                 '</div>' +
                             '</div>' +
                         '</div>' +
-                        '<input type="file" id="sig_' + sigNum + '_file" accept="image/*" class="hidden" onchange="window.uploadSignature(' + sigNum + ')">' +
+                        '<input type="file" id="sig_' + sigNum + '_file" accept="image/*" class="hidden">' +
                         '<span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>' +
                     '</label>' +
                 '</div>';
@@ -259,6 +259,28 @@
             try {
                 container.appendChild(newSignatory);
                 console.log('Successfully appended signatory', sigNum);
+                
+                // Attach event listeners after element is added to DOM (prevents onclick from firing on load)
+                const fileInput = document.getElementById(`sig_${sigNum}_file`);
+                const removeBtn = document.getElementById(`sig_${sigNum}_remove_btn`);
+                
+                if (fileInput) {
+                    fileInput.addEventListener('change', function() {
+                        if (typeof window.uploadSignature === 'function') {
+                            window.uploadSignature(sigNum);
+                        }
+                    });
+                }
+                
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof window.removeSignature === 'function') {
+                            window.removeSignature(sigNum);
+                        }
+                    });
+                }
             } catch (e) {
                 console.error('Error appending signatory:', e);
                 alert('Error adding signatory: ' + e.message);
@@ -341,9 +363,8 @@
                 // Update all input IDs and names
                 const nameInput = item.querySelector('input[name^="sig_"][name$="_name"]');
                 const titleInput = item.querySelector('input[name^="sig_"][name$="_title"]');
-                const fileInput = item.querySelector('input[name^="sig_"][name$="_file"]');
+                const fileInput = item.querySelector('input[type="file"][id^="sig_"]');
                 const statusEl = item.querySelector('[id^="sig_"][id$="_status"]');
-                const chooseBtn = item.querySelector('button[onclick^="window.uploadSignature"]');
                 
                 if (nameInput) {
                     nameInput.id = `sig_${newNum}_name_input`;
@@ -356,7 +377,14 @@
                 if (fileInput) {
                     fileInput.id = `sig_${newNum}_file`;
                     fileInput.name = `sig_${newNum}_file`;
-                    fileInput.setAttribute('onchange', `window.uploadSignature(${newNum})`);
+                    // Remove old event listeners and add new one
+                    const newFileInput = fileInput.cloneNode(true);
+                    fileInput.parentNode.replaceChild(newFileInput, fileInput);
+                    newFileInput.addEventListener('change', function() {
+                        if (typeof window.uploadSignature === 'function') {
+                            window.uploadSignature(newNum);
+                        }
+                    });
                 }
                 if (statusEl) {
                     statusEl.id = `sig_${newNum}_status`;
@@ -365,13 +393,19 @@
                 if (previewEl) {
                     previewEl.id = `sig_${newNum}_preview`;
                 }
-                const sigRemoveBtn = item.querySelector(`[id^="sig_"][id$="_remove_btn"]`);
+                const sigRemoveBtn = document.getElementById(`sig_${newNum}_remove_btn`) || item.querySelector(`[id^="sig_"][id$="_remove_btn"]`);
                 if (sigRemoveBtn) {
                     sigRemoveBtn.id = `sig_${newNum}_remove_btn`;
-                    sigRemoveBtn.setAttribute('onclick', `removeSignature(${newNum})`);
-                }
-                if (chooseBtn) {
-                    chooseBtn.setAttribute('onchange', `window.uploadSignature(${newNum})`);
+                    // Remove old event listeners and add new one
+                    const newRemoveBtn = sigRemoveBtn.cloneNode(true);
+                    sigRemoveBtn.parentNode.replaceChild(newRemoveBtn, sigRemoveBtn);
+                    newRemoveBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof window.removeSignature === 'function') {
+                            window.removeSignature(newNum);
+                        }
+                    });
                 }
                 
                 // Update remove signatory button onclick
@@ -1130,14 +1164,49 @@
             function initializeSignatureButtons() {
                 try {
                     // Also check for existing signatures and show remove buttons
+                    // Also attach event listeners to prevent inline onclick from firing
                     for (let i = 1; i <= 4; i++) {
                         try {
                             const previewEl = document.getElementById(`sig_${i}_preview`);
                             const statusEl = document.getElementById(`sig_${i}_status`);
-                            if (previewEl && statusEl && !previewEl.classList.contains('hidden') && statusEl.textContent === 'Uploaded') {
+                            const removeBtn = document.getElementById(`sig_${i}_remove_btn`);
+                            const fileInput = document.getElementById(`sig_${i}_file`);
+                            
+                            // Show remove button if signature exists
+                            if (previewEl && statusEl && !previewEl.classList.contains('hidden') && (statusEl.textContent === 'Uploaded' || previewEl.src)) {
                                 if (typeof showSignatureRemoveButton === 'function') {
                                     showSignatureRemoveButton(i);
                                 }
+                            }
+                            
+                            // Replace inline onclick with event listener for remove button
+                            if (removeBtn) {
+                                removeBtn.removeAttribute('onclick');
+                                const newRemoveBtn = removeBtn.cloneNode(true);
+                                removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+                                newRemoveBtn.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (typeof window.removeSignature === 'function') {
+                                        window.removeSignature(i);
+                                    }
+                                });
+                            }
+                            
+                            // Replace inline onchange with event listener for file input
+                            // Remove any inline handlers and attach proper event listener
+                            if (fileInput) {
+                                // Remove inline onchange attribute if present
+                                fileInput.removeAttribute('onchange');
+                                // Clone node to remove any existing event listeners
+                                const newFileInput = fileInput.cloneNode(true);
+                                fileInput.parentNode.replaceChild(newFileInput, fileInput);
+                                // Attach proper event listener that won't fire on load
+                                newFileInput.addEventListener('change', function() {
+                                    if (typeof window.uploadSignature === 'function') {
+                                        window.uploadSignature(i);
+                                    }
+                                });
                             }
                         } catch(e) {
                             console.error('Error showing signature remove button for', i, ':', e);
@@ -1154,13 +1223,13 @@
                     setTimeout(function() {
                         initializeLogoDisplay();
                         initializeSignatureButtons();
-                    }, 100);
+                    }, 300);
                 });
             } else {
                 setTimeout(function() {
                     initializeLogoDisplay();
                     initializeSignatureButtons();
-                }, 100);
+                }, 300);
             }
         })();
 
