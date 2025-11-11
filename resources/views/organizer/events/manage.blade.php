@@ -10,16 +10,6 @@
                 $isOwner = $user && (int)$event->user_id === (int)$user->id;
                 $staffWelcome = $staffNotes['staff_welcome_message'] ?? null;
                 $staffInstructions = $staffNotes['staff_instructions'] ?? null;
-                
-                // Check subscription for graph visibility
-                $subscription = $user?->currentSubscription();
-                $plan = $subscription?->getPlan();
-                if (!$plan) {
-                    $plan = \App\Models\SubscriptionPlan::where('slug', 'free')->first();
-                }
-                $hasProSubscription = $plan && in_array($plan->slug, ['professional', 'enterprise', 'starter']);
-                $isAdmin = Auth::guard('admin')->check();
-                $canViewGraphs = $hasProSubscription || $isAdmin;
             @endphp
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <!-- Main Content -->
@@ -86,31 +76,32 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
 
                         <!-- Total Expected Revenue -->
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
+                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                             <div class="p-6">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0">
                                         <div class="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
                                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                </svg>
-                        </div>
-                    </div>
+                                            </svg>
+                                        </div>
+                                    </div>
                                     <div class="ml-4">
                                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expected Revenue</p>
                                         <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100" data-stat="event-expected-revenue">₱{{ number_format(max(0, $salesStats['expectedRevenue'] ?? 0), 2) }}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                    @endif
 
                     @if($canViewGraphs)
-                    <!-- Charts Row -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Charts Row (Advanced Analytics Feature) -->
+                    <div class="grid grid-cols-1 {{ $canManageSales ? 'lg:grid-cols-2' : 'lg:grid-cols-1' }} gap-6">
+                    @if($canManageSales && $canViewGraphs)
                     <!-- Sales Trend Chart -->
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                             <div class="p-6">
@@ -130,7 +121,9 @@
                                 </div>
                             </div>
                         </div>
+                    @endif
 
+                    @if($canViewGraphs)
                         <!-- Event Activity Chart -->
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                             <div class="p-6">
@@ -153,6 +146,7 @@
         </div>
                     @endif
 
+                    @if($canManageSales)
                     <!-- Ticket Performance -->
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                             <div class="p-6">
@@ -219,7 +213,9 @@
                             @endif
                                     </div>
                                 </div>
-                    @else
+                    @endif
+
+                    @if(!$canManageSales && !$canManageEvent)
                         <!-- Limited Overview for non-owner/non-manager -->
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                             <div class="p-6">
@@ -652,8 +648,8 @@
             pusherCluster: '{{ env("PUSHER_APP_CLUSTER") }}',
             eventId: '{{ $event->id }}',
             csrfToken: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-            salesTrendChartData: @json($salesTrend ?? []),
-            activityTrendChartData: @json($activityTrend ?? [])
+            salesTrendChartData: @json($canManageSales && $canViewGraphs && isset($salesTrend) ? $salesTrend : []),
+            activityTrendChartData: @json($canViewGraphs && isset($activityTrend) ? $activityTrend : [])
         };
         
         // Global event management state

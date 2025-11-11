@@ -82,24 +82,26 @@ class EventDashboardController extends Controller
         $staff = $event->staff()->where('user_id', $user?->id)->first();
         // Admins have full capabilities
         // Allow staff members to manage events even without explicit permissions
-        $isStaffMember = $staff !== null;
-        $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_event ?? false) || ($staff?->role === 'organizer');
-        $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_attendance ?? false) || ($staff?->role === 'organizer');
-        $canManageNews = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_news ?? false) || ($staff?->role === 'organizer');
-        $canManageSales = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_sales ?? false) || ($staff?->role === 'organizer');
-        $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || $isStaffMember || ($staff?->can_manage_ticket ?? false) || ($staff?->role === 'organizer');
+        // Permission checks - staff members need explicit permissions (no automatic access just for being staff)
+        $staffRole = $staff?->role ?? null;
+        $isOrganizerRole = $staffRole === 'organizer';
+        $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+        $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_attendance ?? false) || $isOrganizerRole;
+        $canManageNews = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_news ?? false) || $isOrganizerRole;
+        $canManageSales = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_sales ?? false) || $isOrganizerRole;
+        $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_ticket ?? false) || $isOrganizerRole;
 
-        // Sales and revenue metrics (only if owner or can_manage_event)
+        // Sales and revenue metrics (only if user can manage sales)
         $salesStats = $canManageSales ? $this->calculateEventSalesStats($event) : null;
         
-        // Ticket performance metrics (only if owner or can_manage_event)
-        $ticketPerformance = $canManageTicket ? $this->getTicketPerformance($event) : collect();
+        // Ticket performance metrics (only if user can manage sales - it shows revenue)
+        $ticketPerformance = $canManageSales ? $this->getTicketPerformance($event) : collect();
         
-        // Recent sales for this event (only if owner or can_manage_event)
+        // Recent sales for this event (only if user can manage sales)
         $recentSales = $canManageSales ? $this->getRecentEventSales($event) : collect();
         
-        // Sales trend data
-        $salesTrend = $this->getEventSalesTrend($event);
+        // Sales trend data (only if user can manage sales)
+        $salesTrend = $canManageSales ? $this->getEventSalesTrend($event) : null;
         
         // Event activity trend data
         $activityTrend = $this->getEventActivityTrend($event);
@@ -110,6 +112,17 @@ class EventDashboardController extends Controller
 
         $recentActivity = $event->activityLogs()->latest()->limit(10)->with('user')->get();
         $totalActivityCount = $event->activityLogs()->count();
+
+        // Check subscription for graph/analytics visibility
+        $subscription = $user?->currentSubscription();
+        $plan = $subscription?->getPlan();
+        if (!$plan) {
+            $plan = \App\Models\SubscriptionPlan::where('slug', 'free')->first();
+        }
+        // Check if plan has advanced_analytics feature OR is in the legacy pro tier list
+        $hasAdvancedAnalytics = $plan && ($plan->advanced_analytics === true);
+        $hasProSubscription = $plan && in_array($plan->slug, ['professional', 'enterprise', 'starter', 'pro', 'intermediate']);
+        $canViewGraphs = $hasAdvancedAnalytics || $hasProSubscription || $isAdmin;
 
         // Determine layout type
         $layoutType = $isAdmin ? 'admin' : 'organizer';
@@ -135,7 +148,8 @@ class EventDashboardController extends Controller
             'canManageSales',
             'canManageTicket',
             'staffNotes',
-            'layoutType'
+            'layoutType',
+            'canViewGraphs'
         ));
     }
 
@@ -148,10 +162,11 @@ class EventDashboardController extends Controller
         $user = Auth::user();
         $staff = $event->staff()->where('user_id', $user?->id)->first();
         
+        // Check if user can manage sales (only explicit permission, not just being staff)
         $canManageSales = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_sales ?? false) || ($staff?->role === 'organizer');
         
         if (!$canManageSales) {
-            abort(403, 'Unauthorized to view sales report.');
+            abort(403, 'Unauthorized to view sales report. You need can_manage_sales permission.');
         }
 
         // Filters

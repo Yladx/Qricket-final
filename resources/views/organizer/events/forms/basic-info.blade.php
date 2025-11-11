@@ -23,39 +23,22 @@
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
     @php
-        // Initialize ALL variables FIRST with safe defaults - CRITICAL to prevent undefined variable errors
-        $eventId = isset($eventId) ? $eventId : null;
-        $eventData = isset($eventData) && is_array($eventData) ? $eventData : [];
-        $isFreeEventParam = isset($isFreeEvent) ? $isFreeEvent : false;
-        $event = isset($event) ? $event : null;
+        $eventId = $eventId ?? null;
+        $eventData = is_array($eventData ?? null) ? $eventData : [];
+        $isFreeEventParam = $isFreeEvent ?? false;
+        $event = $event ?? null;
         
-        // Determine if event is free from eventData or event object
         $isFreeValue = false;
-        if (!empty($eventData) && is_array($eventData) && array_key_exists('is_free', $eventData)) {
+        if (!empty($eventData['is_free'])) {
             $isFreeValue = (bool)$eventData['is_free'];
-        } elseif (!empty($event) && is_object($event) && property_exists($event, 'is_free')) {
+        } elseif ($event && isset($event->is_free)) {
             $isFreeValue = (bool)$event->is_free;
         }
         
-        // Get checkbox checked state (for when checkbox is shown)
-        // Use old() helper first, then fallback to isFreeValue
         $oldIsFree = old('is_free');
-        $isFreeCheckedValue = false;
-        if ($oldIsFree !== null) {
-            $isFreeCheckedValue = (bool)$oldIsFree;
-        } else {
-            $isFreeCheckedValue = (bool)$isFreeValue;
-        }
+        $isFreeCheckedValue = $oldIsFree !== null ? (bool)$oldIsFree : $isFreeValue;
         
-        // ONLY lock if isFreeEvent parameter was explicitly passed (from edit/basic.blade.php for manage/edit)
-        // DO NOT lock in step1 (event creation flow), even if eventId exists
-        // This ensures step1 always shows the checkbox, and only manage/edit blocks it
-        // Initialize with false first
-        $shouldLockFreeEvent = false;
-        // Only lock if isFreeEvent parameter is explicitly passed AND is true
-        if (isset($isFreeEventParam) && ($isFreeEventParam === true || $isFreeEventParam === 1 || $isFreeEventParam === '1')) {
-            $shouldLockFreeEvent = true;
-        }
+        $shouldLockFreeEvent = isset($isFreeEventParam) && ($isFreeEventParam === true || $isFreeEventParam === 1 || $isFreeEventParam === '1');
     @endphp
     
     @if(isset($shouldLockFreeEvent) && $shouldLockFreeEvent === true)

@@ -63,7 +63,9 @@
                         $canViewOverview = $isAdmin || $isOwner || $isAdminEvent || ($staff !== null);
                         $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_attendance ?? false) || $isOrganizerRole;
                         $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_ticket ?? false) || $isOrganizerRole;
-                        $canManageEvent = $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+                        $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+                        // Event Info should be visible to: admins, owners, staff (even without can_manage_event), but content depends on permissions
+                        $canViewEventInfo = $isAdmin || $isOwner || $isAdminEvent || ($staff !== null);
                         $canManageStaff = $isOwner || $isAdminEvent || ($staff?->can_manage_staff ?? false) || $isOrganizerRole;
                         $canManageNews = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_news ?? false) || $isOrganizerRole;
                         $canManageSales = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_sales ?? false) || $isOrganizerRole;
@@ -170,12 +172,15 @@
                         @endphp
                         <a href="{{ $staffUrl }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.staff') || request()->routeIs('admin.event.staff') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Staff</a>
                     @endif
-                    @if($canManageEvent)
+                    @if($canViewEventInfo)
                     <!-- Edit Event / Event Info dropdown -->
                     <div class="relative">
                         @php
                             // Check if user can actually edit event info
-                            $canEditEventInfo = $isOwner || $isAdminEvent || ($staff?->can_edit_event_info ?? false) || $isOrganizerRole;
+                            // Admins can always edit (unless event ended)
+                            // Owners can edit (unless event ended)
+                            // Staff need can_edit_event_info permission OR organizer role
+                            $canEditEventInfo = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_edit_event_info ?? false) || $isOrganizerRole;
                             // Show "Event Info" if event ended or user can't edit event info
                             $dropdownLabel = ($eventEnded || !$canEditEventInfo) ? 'Event Info' : 'Edit Event';
                             $useInfoRoutes = $eventEnded || !$canEditEventInfo;
