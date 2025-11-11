@@ -23,10 +23,8 @@
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
     @php
-        $shouldLockCheckbox = false;
+        // Determine if event is free (check multiple sources)
         $eventIsFree = false;
-        $eventIsPaidWithSales = false;
-        
         if (isset($isFreeEvent) && ($isFreeEvent === true || $isFreeEvent === 1 || $isFreeEvent === '1')) {
             $eventIsFree = true;
         } elseif (isset($event) && is_object($event) && isset($event->is_free) && (bool)$event->is_free === true) {
@@ -35,16 +33,20 @@
             $eventIsFree = true;
         }
         
+        // Determine if it's paid with sales
+        $eventIsPaidWithSales = false;
+        if (!$eventIsFree && isset($hasSales) && $hasSales === true) {
+            $eventIsPaidWithSales = true;
+        }
+        
+        // Determine if checkbox should be locked
+        $shouldLockCheckbox = false;
         if (isset($isFreeEventLocked) && $isFreeEventLocked === true) {
             $shouldLockCheckbox = true;
-            if (isset($hasSales) && $hasSales === true && !$eventIsFree) {
-                $eventIsPaidWithSales = true;
-            }
         } elseif ($eventIsFree) {
             $shouldLockCheckbox = true;
-        } elseif (isset($hasSales) && $hasSales === true && !$eventIsFree) {
+        } elseif ($eventIsPaidWithSales) {
             $shouldLockCheckbox = true;
-            $eventIsPaidWithSales = true;
         }
     @endphp
     

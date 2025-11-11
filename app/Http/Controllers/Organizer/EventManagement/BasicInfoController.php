@@ -139,8 +139,29 @@ class BasicInfoController extends Controller
         // Determine if event is free (for locking the checkbox in the UI)
         // If event is already saved as free, lock it to prevent changing to paid
         $isFreeEvent = (bool)($event->is_free ?? false);
+        
+        // For step1 (create/edit), check if event has sales (only if event exists)
+        $hasSales = false;
+        $isFreeEventLocked = false;
+        
+        if ($event) {
+            // Check if paid event has sales (to prevent changing to free)
+            if (!$isFreeEvent) {
+                $hasSales = $event->eventTickets()->where('sold_count', '>', 0)->exists() 
+                         || \App\Models\TicketPurchase::whereHas('ticketInformation', function($query) use ($event) {
+                                $query->where('event_id', $event->id);
+                            })
+                            ->where('status', 'paid')
+                            ->exists();
+            }
+            
+            // Lock the checkbox if:
+            // 1. Event is free (can't change to paid), OR
+            // 2. Event is paid and has sales (can't change to free)
+            $isFreeEventLocked = $isFreeEvent || ($hasSales && !$isFreeEvent);
+        }
 
-        return view('organizer.events.create.step1', compact('eventData', 'eventId', 'event', 'isFreeEvent'));
+        return view('organizer.events.create.step1', compact('eventData', 'eventId', 'event', 'isFreeEvent', 'hasSales', 'isFreeEventLocked'));
     }
 
     public function step1Store(Request $request)
