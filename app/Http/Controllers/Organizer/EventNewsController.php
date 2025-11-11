@@ -22,14 +22,21 @@ class EventNewsController extends Controller
     {
         $isAdmin = Auth::guard('admin')->check();
         $isOwner = $event->user_id === Auth::id();
+        $isAdminEvent = $event->user_id === null && $isAdmin;
         
-        if ($isAdmin || $isOwner) {
+        if ($isAdmin || $isOwner || $isAdminEvent) {
             return true;
         }
         
         // Check if user is staff with can_manage_news permission
+        // Only can_manage_news or organizer role can manage news (can_manage_event does NOT include news)
         $staff = $event->staff()->where('user_id', Auth::id())->first();
-        return $staff && ($staff->can_manage_news || $staff->role === 'organizer');
+        if (!$staff) {
+            return false;
+        }
+        
+        // Allow if staff has can_manage_news or organizer role
+        return ($staff->can_manage_news ?? false) || ($staff->role === 'organizer');
     }
 
     /**

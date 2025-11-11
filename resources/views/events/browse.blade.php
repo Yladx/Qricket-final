@@ -17,8 +17,8 @@
                     </div>
                         
                         <!-- Category -->
-                        <div class="order-2 relative z-10 isolate">
-                            <select name="category" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none relative z-10">
+                        <div class="order-2 relative z-10 isolate overflow-hidden">
+                            <select name="category" class="w-full px-3 py-2 pr-10 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 relative z-10">
                                 @php $currentCategory = request('category'); @endphp
                                 <option value="">All Categories</option>
                                 @foreach($categories as $category)
@@ -27,7 +27,7 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none z-20">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none z-30 bg-white dark:bg-gray-900 w-8">
                                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -119,15 +119,15 @@
                         </div>
                         
                                 <!-- Sort -->
-                        <div class="relative z-10 isolate">
+                        <div class="relative z-10 isolate overflow-hidden">
                             <label for="sort" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort By</label>
                             <div class="relative">
-                                <select name="sort" id="sort" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none relative z-10">
+                                <select name="sort" id="sort" class="w-full px-3 py-2 pr-10 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 relative z-10">
                                     <option value="date" {{ request('sort', 'date') == 'date' ? 'selected' : '' }}>Date</option>
                                     <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Name</option>
                                     <option value="created" {{ request('sort') == 'created' ? 'selected' : '' }}>Created</option>
                                 </select>
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none z-20">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none z-30 bg-white dark:bg-gray-900 w-8">
                                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                     </svg>
@@ -136,14 +136,14 @@
                         </div>
                         
                                 <!-- Order -->
-                                <div class="relative z-10 isolate">
+                                <div class="relative z-10 isolate overflow-hidden">
                                     <label for="order" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Order</label>
                                     <div class="relative">
-                                        <select name="order" id="order" class="w-full px-3 py-2 pr-8 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 appearance-none relative z-10">
+                                        <select name="order" id="order" class="w-full px-3 py-2 pr-10 bg-white text-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-900 dark:text-gray-300 relative z-10">
                                             <option value="asc" {{ request('order', 'asc') == 'asc' ? 'selected' : '' }}>Ascending</option>
                             <option value="desc" {{ request('order') == 'desc' ? 'selected' : '' }}>Descending</option>
                         </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none z-20">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none z-30 bg-white dark:bg-gray-900 w-8">
                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
@@ -442,21 +442,53 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Hide native select arrows completely */
-        select.appearance-none {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
+        /* Hide native select arrows completely - Comprehensive fix for all browsers */
+        select {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+            background-image: none !important;
+            text-indent: 0.01px !important;
+            text-overflow: '' !important;
         }
         
-        /* For Firefox */
-        select.appearance-none::-ms-expand {
-            display: none;
+        /* Chrome, Safari, Edge - Hide all webkit dropdown arrows */
+        select::-webkit-inner-spin-button,
+        select::-webkit-outer-spin-button {
+            -webkit-appearance: none !important;
+            margin: 0 !important;
         }
         
-        /* For IE */
-        select.appearance-none::-ms-value {
-            background: transparent;
+        select::-webkit-dropdown-arrow {
+            display: none !important;
+        }
+        
+        select::-webkit-select-arrow {
+            display: none !important;
+        }
+        
+        /* Firefox - Remove dropdown arrow */
+        select::-moz-focus-inner {
+            border: 0 !important;
+        }
+        
+        /* IE and Edge Legacy - Remove dropdown arrow */
+        select::-ms-expand {
+            display: none !important;
+        }
+        
+        select::-ms-value {
+            background: transparent !important;
+        }
+        
+        /* Ensure no background images show through */
+        select option {
+            background: white;
+        }
+        
+        .dark select option {
+            background: rgb(17, 24, 39);
+            color: white;
         }
         
         /* Fix double overlay issue - prevent stacking context conflicts */
@@ -478,6 +510,26 @@
         /* Ensure tag suggestions appear above everything */
         #tag-suggestions:not(.hidden) {
             z-index: 9999 !important;
+        }
+        
+        /* Additional fix to ensure custom arrow is the only one visible and covers native arrow */
+        .relative.overflow-hidden select {
+            padding-right: 2.5rem !important;
+        }
+        
+        select + div[class*="absolute"][class*="pointer-events-none"] {
+            pointer-events: none !important;
+            z-index: 30 !important;
+            right: 0 !important;
+        }
+        
+        /* Ensure arrow container has solid background to cover any native arrow */
+        .dark select + div[class*="absolute"][class*="pointer-events-none"] {
+            background-color: rgb(17, 24, 39) !important;
+        }
+        
+        select + div[class*="absolute"][class*="pointer-events-none"] {
+            background-color: white !important;
         }
     </style>
 

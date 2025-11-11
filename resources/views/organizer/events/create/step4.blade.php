@@ -252,7 +252,10 @@
                             '<div>' +
                                 '<div class="text-xs font-medium">Signature ' + sigNum + '</div>' +
                                 '<div class="text-xs text-gray-500 dark:text-gray-400">PNG/JPG/WebP, up to 2MB</div>' +
-                                '<div class="mt-0.5"><span id="sig_' + sigNum + '_status" class="text-xs text-gray-500 dark:text-gray-400">No file</span></div>' +
+                                '<div class="mt-0.5 flex items-center gap-1">' +
+                                    '<img id="sig_' + sigNum + '_preview" src="" class="w-5 h-5 rounded object-contain border border-gray-200 dark:border-gray-700 hidden" alt="Signature ' + sigNum + ' preview">' +
+                                    '<span id="sig_' + sigNum + '_status" class="text-xs text-gray-500 dark:text-gray-400">No file</span>' +
+                                '</div>' +
                             '</div>' +
                         '</div>' +
                         '<input type="file" id="sig_' + sigNum + '_file" accept="image/*" class="hidden" onchange="window.uploadSignature(' + sigNum + ')">' +
@@ -367,8 +370,17 @@
                 if (statusEl) {
                     statusEl.id = `sig_${newNum}_status`;
                 }
+                const previewEl = item.querySelector(`[id^="sig_"][id$="_preview"]`);
+                if (previewEl) {
+                    previewEl.id = `sig_${newNum}_preview`;
+                }
+                const sigRemoveBtn = item.querySelector(`[id^="sig_"][id$="_remove_btn"]`);
+                if (sigRemoveBtn) {
+                    sigRemoveBtn.id = `sig_${newNum}_remove_btn`;
+                    sigRemoveBtn.setAttribute('onclick', `removeSignature(${newNum})`);
+                }
                 if (chooseBtn) {
-                    chooseBtn.setAttribute('onclick', `window.uploadSignature(${newNum})`);
+                    chooseBtn.setAttribute('onchange', `window.uploadSignature(${newNum})`);
                 }
                 
                 // Update remove button onclick
@@ -618,6 +630,19 @@
                     } else if (sigPath) {
                         console.warn('Signature path exists but status element not found for signatory', i);
                     }
+                    
+                    // Show preview image if signature exists
+                    const previewEl = signatoryItem.querySelector(`#sig_${i}_preview`) || 
+                                     document.getElementById(`sig_${i}_preview`);
+                    if (previewEl && sigPath) {
+                        // Construct URL from signature path
+                        const sigUrl = sigPath.startsWith('http') ? sigPath : `/storage/${sigPath}`;
+                        previewEl.src = sigUrl;
+                        previewEl.classList.remove('hidden');
+                        console.log('Set sig_' + i + ' preview image:', sigUrl);
+                        // Show remove button if signature exists
+                        showSignatureRemoveButton(i);
+                    }
                 }
                 
                 // Update signatory count based on actual DOM elements
@@ -703,6 +728,18 @@
         window.uploadLogo = async function(side){
             const file = document.getElementById(`logo_${side}_file`).files[0];
             if (!file) return;
+            
+            // Show immediate preview using FileReader
+            const previewEl = document.getElementById(`logo_${side}_preview`);
+            if (previewEl && file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewEl.src = e.target.result;
+                    previewEl.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+            
             const fd = new FormData();
             fd.append('id', eventId);
             fd.append('side', side);
@@ -717,11 +754,27 @@
                     rName.disabled = false;
                     rName.placeholder = 'e.g., JUAN DE LA CRUZ';
                 }
-                    // Show small preview/status near inputs
+                    // Show small preview/status near inputs (update with server URL)
                     const pv = document.getElementById(`logo_${side}_preview`);
                     const st = document.getElementById(`logo_${side}_status`);
                     if (pv) { pv.src = data.url; pv.classList.remove('hidden'); }
                     if (st) { st.textContent = 'Uploaded'; }
+                    // Show remove button
+                    showLogoRemoveButton(side);
+                    
+                    // Update certificate preview logo image
+                    const previewImg = document.getElementById(`logo_${side}_img`);
+                    if (previewImg) {
+                        previewImg.src = data.url + '?t=' + Date.now(); // Add timestamp to force reload
+                        previewImg.style.display = 'block';
+                        previewImg.onload = function() {
+                            this.style.display = 'block';
+                        };
+                        previewImg.onerror = function() {
+                            this.style.display = 'none';
+                        };
+                    }
+                    
                     // Persist in hidden JSON for autosave pipeline
                     try {
                         const jsonEl = document.getElementById('certificate_data_json');
@@ -732,6 +785,96 @@
                     if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                         autosaveDebounced();
                     }
+            } else {
+                // Hide preview on failure
+                if (previewEl) {
+                    previewEl.classList.add('hidden');
+                }
+                hideLogoRemoveButton(side);
+            }
+        }
+        
+        function showLogoRemoveButton(side) {
+            // Check if remove button exists, if not create it
+            let removeBtn = document.getElementById(`logo_${side}_remove_btn`);
+            if (!removeBtn) {
+                const statusEl = document.getElementById(`logo_${side}_status`);
+                if (statusEl && statusEl.parentNode) {
+                    removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.id = `logo_${side}_remove_btn`;
+                    removeBtn.onclick = function() { removeLogo(side); };
+                    removeBtn.className = 'ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300';
+                    removeBtn.title = 'Remove logo';
+                    removeBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+                    statusEl.parentNode.appendChild(removeBtn);
+                }
+            }
+            if (removeBtn) {
+                removeBtn.classList.remove('hidden');
+            }
+        }
+        
+        function hideLogoRemoveButton(side) {
+            const removeBtn = document.getElementById(`logo_${side}_remove_btn`);
+            if (removeBtn) {
+                removeBtn.classList.add('hidden');
+            }
+        }
+        
+        window.removeLogo = async function(side) {
+            if (!confirm('Are you sure you want to remove this logo?')) {
+                return;
+            }
+            
+            // Clear preview
+            const previewEl = document.getElementById(`logo_${side}_preview`);
+            if (previewEl) {
+                previewEl.src = '';
+                previewEl.classList.add('hidden');
+            }
+            
+            // Reset status
+            const statusEl = document.getElementById(`logo_${side}_status`);
+            if (statusEl) {
+                statusEl.textContent = 'No file';
+                statusEl.className = 'text-xs text-gray-500 dark:text-gray-400';
+            }
+            
+            // Clear file input
+            const fileInput = document.getElementById(`logo_${side}_file`);
+            if (fileInput) {
+                fileInput.value = '';
+            }
+            
+            // Hide remove button
+            hideLogoRemoveButton(side);
+            
+            // Update certificate data to remove logo URL
+            try {
+                const jsonEl = document.getElementById('certificate_data_json');
+                if (jsonEl) {
+                    const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
+                    delete current[`logo_${side}_url`];
+                    jsonEl.value = JSON.stringify(current);
+                }
+                
+                // Update preview image in certificate preview
+                const img = document.getElementById(`logo_${side}_img`);
+                if (img) {
+                    img.src = '';
+                    img.style.display = 'none';
+                }
+                
+                // Trigger autosave
+                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
+                    autosaveDebounced();
+                }
+                
+                showAutosaveIndicator('success');
+            } catch (e) {
+                console.error('Failed to remove logo:', e);
+                showAutosaveIndicator('error');
             }
         }
 
@@ -739,6 +882,18 @@
         window.uploadSignature = async function(signatoryNum){
             const file = document.getElementById(`sig_${signatoryNum}_file`)?.files?.[0];
             if (!file) return;
+            
+            // Show immediate preview using FileReader
+            const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
+            if (previewEl && file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewEl.src = e.target.result;
+                    previewEl.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+            
             const fd = new FormData();
             fd.append('event_id', eventId);
             fd.append('signatory_num', String(signatoryNum));
@@ -755,6 +910,13 @@
                     current[`sig_${signatoryNum}_signature`] = res.signature_path || `events/${eventId}/certificate/signature_${signatoryNum}.enc`;
                     if (jsonEl) jsonEl.value = JSON.stringify(current);
                 } catch(_) {}
+                // Update preview with server URL if provided
+                if (res.url && previewEl) {
+                    previewEl.src = res.url;
+                    previewEl.classList.remove('hidden');
+                }
+                // Show remove button
+                showSignatureRemoveButton(signatoryNum);
                 if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                     autosaveDebounced();
                 }
@@ -767,8 +929,108 @@
                 }
             } else if (statusEl) {
                 statusEl.textContent = 'Upload failed';
+                // Hide preview on failure
+                if (previewEl) {
+                    previewEl.classList.add('hidden');
+                }
+                hideSignatureRemoveButton(signatoryNum);
             }
         }
+        
+        function showSignatureRemoveButton(signatoryNum) {
+            const removeBtn = document.getElementById(`sig_${signatoryNum}_remove_btn`);
+            if (removeBtn) {
+                removeBtn.classList.remove('hidden');
+            }
+        }
+        
+        function hideSignatureRemoveButton(signatoryNum) {
+            const removeBtn = document.getElementById(`sig_${signatoryNum}_remove_btn`);
+            if (removeBtn) {
+                removeBtn.classList.add('hidden');
+            }
+        }
+        
+        window.removeSignature = async function(signatoryNum) {
+            if (!confirm('Are you sure you want to remove this signature?')) {
+                return;
+            }
+            
+            // Clear preview
+            const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
+            if (previewEl) {
+                previewEl.src = '';
+                previewEl.classList.add('hidden');
+            }
+            
+            // Reset status
+            const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
+            if (statusEl) {
+                statusEl.textContent = 'No file';
+                statusEl.className = 'text-xs text-gray-500 dark:text-gray-400';
+            }
+            
+            // Clear file input
+            const fileInput = document.getElementById(`sig_${signatoryNum}_file`);
+            if (fileInput) {
+                fileInput.value = '';
+            }
+            
+            // Hide remove button
+            hideSignatureRemoveButton(signatoryNum);
+            
+            // Update certificate data to remove signature path
+            try {
+                const jsonEl = document.getElementById('certificate_data_json');
+                if (jsonEl) {
+                    const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
+                    delete current[`sig_${signatoryNum}_signature`];
+                    jsonEl.value = JSON.stringify(current);
+                }
+                
+                // Trigger autosave
+                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
+                    autosaveDebounced();
+                }
+                
+                showAutosaveIndicator('success');
+            } catch (e) {
+                console.error('Failed to remove signature:', e);
+                showAutosaveIndicator('error');
+            }
+        }
+
+        // Initialize remove buttons for existing logos and signatures on page load
+        (function() {
+            // Wait for DOM to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initRemoveButtons);
+            } else {
+                initRemoveButtons();
+            }
+            
+            function initRemoveButtons() {
+                // Check for existing logos and show remove buttons
+                ['left', 'right'].forEach(side => {
+                    const previewEl = document.getElementById(`logo_${side}_preview`);
+                    const statusEl = document.getElementById(`logo_${side}_status`);
+                    if (previewEl && statusEl && !previewEl.classList.contains('hidden') && (statusEl.textContent === 'Uploaded' || previewEl.src)) {
+                        showLogoRemoveButton(side);
+                    }
+                });
+                
+                // Check for existing signatures and show remove buttons (will be handled after signatories are loaded)
+                setTimeout(() => {
+                    for (let i = 1; i <= 4; i++) {
+                        const previewEl = document.getElementById(`sig_${i}_preview`);
+                        const statusEl = document.getElementById(`sig_${i}_status`);
+                        if (previewEl && statusEl && !previewEl.classList.contains('hidden') && (statusEl.textContent === 'Uploaded' || previewEl.src)) {
+                            showSignatureRemoveButton(i);
+                        }
+                    }
+                }, 500);
+            }
+        })();
 
         function collectPayload(){
             // First, try to get the most up-to-date data from the hidden JSON input
@@ -854,6 +1116,27 @@
                 if (nEl && payload[`sig_${i}_name`] !== undefined) nEl.textContent = payload[`sig_${i}_name`] || `Signatory ${i}`;
                 if (tEl && payload[`sig_${i}_title`] !== undefined) tEl.textContent = payload[`sig_${i}_title`] || 'Signature';
             }
+            
+            // Update logo images in preview
+            ['left', 'right'].forEach(side => {
+                const logoUrl = payload[`logo_${side}_url`];
+                const previewImg = document.getElementById(`logo_${side}_img`);
+                if (previewImg) {
+                    if (logoUrl) {
+                        previewImg.src = logoUrl + '?t=' + Date.now(); // Add timestamp to force reload
+                        previewImg.style.display = 'block';
+                        previewImg.onload = function() {
+                            this.style.display = 'block';
+                        };
+                        previewImg.onerror = function() {
+                            this.style.display = 'none';
+                        };
+                    } else {
+                        previewImg.style.display = 'none';
+                    }
+                }
+            });
+            
             // Apply colors
             const primary = payload.theme_primary;
             document.querySelectorAll('#cert_preview_wrapper .text-blue-900, #cert_preview_wrapper .text-violet-900, #cert_preview_wrapper .text-emerald-900')

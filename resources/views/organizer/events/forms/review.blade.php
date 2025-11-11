@@ -398,7 +398,7 @@
 
     <!-- Store event dates for JavaScript validation -->
     <div data-event-start-date="{{ $eventData['start_date'] ?? '' }}" data-event-end-date="{{ $eventData['end_date'] ?? '' }}" style="display: none;"></div>
-    
+
     <script src="{{ asset('js/events/step6.js') }}?v={{ time() }}"></script>
     
     <script>

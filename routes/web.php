@@ -251,10 +251,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('organizer.events.certificate.update');
         Route::post('/events/certificate/autosave', [\App\Http\Controllers\Organizer\EventManagement\EventEditController::class, 'autosaveCertificate'])
             ->name('organizer.events.certificate.autosave');
-        Route::get('/events/{event}/news/create', [\App\Http\Controllers\Organizer\EventNewsController::class, 'create'])->name('organizer.events.news.create');
-        Route::post('/events/{event}/news', [\App\Http\Controllers\Organizer\EventNewsController::class, 'store'])->name('organizer.events.news.store');
-        Route::get('/events/{event}/news/{news}/edit', [\App\Http\Controllers\Organizer\EventNewsController::class, 'edit'])->name('organizer.events.news.edit');
-        Route::put('/events/{event}/news/{news}', [\App\Http\Controllers\Organizer\EventNewsController::class, 'update'])->name('organizer.events.news.update');
+        Route::get('/events/{event}/news/create', [\App\Http\Controllers\Organizer\EventNewsController::class, 'create'])
+            ->middleware('event.access:manage_news')
+            ->name('organizer.events.news.create');
+        Route::post('/events/{event}/news', [\App\Http\Controllers\Organizer\EventNewsController::class, 'store'])
+            ->middleware('event.access:manage_news')
+            ->name('organizer.events.news.store');
+        Route::get('/events/{event}/news/{news}/edit', [\App\Http\Controllers\Organizer\EventNewsController::class, 'edit'])
+            ->middleware('event.access:manage_news')
+            ->name('organizer.events.news.edit');
+        Route::put('/events/{event}/news/{news}', [\App\Http\Controllers\Organizer\EventNewsController::class, 'update'])
+            ->middleware('event.access:manage_news')
+            ->name('organizer.events.news.update');
+        Route::delete('/events/{event}/news/{news}', [\App\Http\Controllers\Organizer\EventNewsController::class, 'destroy'])
+            ->middleware('event.access:manage_news')
+            ->name('organizer.events.news.destroy');
+        Route::post('/events/{event}/news/{news}/publish', [\App\Http\Controllers\Organizer\EventNewsController::class, 'publish'])
+            ->middleware('event.access:manage_news')
+            ->name('organizer.events.news.publish');
+        Route::get('/events/{event}/news/{news}/image/{filename}', [\App\Http\Controllers\Organizer\EventNewsController::class, 'serveImage'])
+            ->middleware('event.access:manage_news')
+            ->name('organizer.events.news.image');
         
     // Event activity trend data for real-time updates
     Route::get('/events/{event}/activity-trend', [\App\Http\Controllers\Organizer\EventManagement\EventDashboardController::class, 'getActivityTrend'])
@@ -265,10 +282,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/events/{event}/feedback', [\App\Http\Controllers\Events\EventFeedbackController::class, 'manage'])
         ->middleware('event.access:manage_event')
         ->name('organizer.events.feedback');
-    
-        Route::delete('/events/{event}/news/{news}', [\App\Http\Controllers\Organizer\EventNewsController::class, 'destroy'])->name('organizer.events.news.destroy');
-        Route::post('/events/{event}/news/{news}/publish', [\App\Http\Controllers\Organizer\EventNewsController::class, 'publish'])->name('organizer.events.news.publish');
-        Route::get('/events/{event}/news/{news}/image/{filename}', [\App\Http\Controllers\Organizer\EventNewsController::class, 'serveImage'])->name('organizer.events.news.image');
         // Update event status (e.g., cancel pending approval back to draft)
         Route::put('/events/{event}/status', [\App\Http\Controllers\Events\EventController::class, 'updateStatus'])->name('organizer.events.update-status');
         

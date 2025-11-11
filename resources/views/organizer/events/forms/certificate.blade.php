@@ -74,6 +74,13 @@
                             <div class="mt-0.5 flex items-center gap-1">
                                 <img id="logo_left_preview" src="{{ $cd['logo_left_url'] ?? '' }}" class="w-5 h-5 rounded object-contain border border-gray-200 dark:border-gray-700 {{ empty($cd['logo_left_url']) ? 'hidden' : '' }}" alt="Left logo preview">
                                 <span id="logo_left_status" class="text-xs text-gray-500 dark:text-gray-400">{{ empty($cd['logo_left_url']) ? 'No file' : 'Uploaded' }}</span>
+                                @if(!empty($cd['logo_left_url']))
+                                <button type="button" onclick="removeLogo('left')" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove logo">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -91,6 +98,13 @@
                             <div class="mt-0.5 flex items-center gap-1">
                                 <img id="logo_right_preview" src="{{ $cd['logo_right_url'] ?? '' }}" class="w-5 h-5 rounded object-contain border border-gray-200 dark:border-gray-700 {{ empty($cd['logo_right_url']) ? 'hidden' : '' }}" alt="Right logo preview">
                                 <span id="logo_right_status" class="text-xs text-gray-500 dark:text-gray-400">{{ empty($cd['logo_right_url']) ? 'No file' : 'Uploaded' }}</span>
+                                @if(!empty($cd['logo_right_url']))
+                                <button type="button" onclick="removeLogo('right')" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove logo">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -161,7 +175,17 @@
                     <div>
                                 <div class="text-xs font-medium">Signature 1</div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">PNG/JPG/WebP, up to 2MB</div>
-                                <div class="mt-0.5"><span id="sig_1_status" class="text-xs text-gray-500 dark:text-gray-400">{{ !empty($cd['sig_1_signature']) ? 'Uploaded' : 'No file' }}</span></div>
+                                <div class="mt-0.5 flex items-center gap-1">
+                                    <img id="sig_1_preview" src="{{ !empty($cd['sig_1_signature']) ? asset('storage/' . $cd['sig_1_signature']) : '' }}" class="w-5 h-5 rounded object-contain border border-gray-200 dark:border-gray-700 {{ empty($cd['sig_1_signature']) ? 'hidden' : '' }}" alt="Signature 1 preview">
+                                    <span id="sig_1_status" class="text-xs text-gray-500 dark:text-gray-400">{{ !empty($cd['sig_1_signature']) ? 'Uploaded' : 'No file' }}</span>
+                                    @if(!empty($cd['sig_1_signature']))
+                                    <button type="button" onclick="removeSignature(1)" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove signature">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                    @endif
+                                </div>
                     </div>
                 </div>
                         <input type="file" id="sig_1_file" accept="image/*" class="hidden" onchange="window.uploadSignature(1)">

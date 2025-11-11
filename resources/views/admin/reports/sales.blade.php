@@ -188,7 +188,13 @@
                     <div id="eventRevenueContent" class="tab-content">
                         <div class="flex items-center justify-between mb-3">
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">All Events Revenue</h3>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $allEventsRevenue->count() }} events</span>
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" id="showFreeEvents" checked class="w-4 h-4 text-qricket-600 focus:ring-qricket-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700">
+                                    <span class="text-xs text-gray-700 dark:text-gray-300">Show Free Events</span>
+                                </label>
+                                <span class="text-xs text-gray-500 dark:text-gray-400"><span id="eventCount">{{ $allEventsRevenue->count() }}</span> events</span>
+                            </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table id="eventRevenueTable" class="min-w-full text-xs">
@@ -219,7 +225,10 @@
                                 </thead>
                                 <tbody class="text-gray-900 dark:text-gray-100">
                                     @forelse($allEventsRevenue as $event)
-                                        <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        @php
+                                            $isFreeEvent = ($event['total_revenue'] ?? $event['revenue'] ?? 0) == 0;
+                                        @endphp
+                                        <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 event-revenue-row {{ $isFreeEvent ? 'free-event' : '' }}" data-is-free="{{ $isFreeEvent ? '1' : '0' }}">
                                             <td class="py-2 pr-4 font-medium">
                                                 <a href="{{ route('admin.events.approval.show', $event['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline">
                                                     {{ $event['title'] }}
@@ -721,6 +730,45 @@
                 });
             }
 
+            // Free events filter functionality
+            const showFreeEventsCheckbox = document.getElementById('showFreeEvents');
+            const eventCountSpan = document.getElementById('eventCount');
+            
+            function updateFreeEventsFilter() {
+                if (!showFreeEventsCheckbox) return;
+                
+                const showFree = showFreeEventsCheckbox.checked;
+                const rows = document.querySelectorAll('#eventRevenueTable tbody tr.event-revenue-row');
+                let visibleCount = 0;
+                
+                rows.forEach(row => {
+                    const isFree = row.dataset.isFree === '1';
+                    if (isFree) {
+                        row.style.display = showFree ? '' : 'none';
+                    } else {
+                        // Ensure non-free events are always visible
+                        row.style.display = '';
+                    }
+                    // Count visible rows (check computed style to be sure)
+                    const computedStyle = window.getComputedStyle(row);
+                    if (computedStyle.display !== 'none') {
+                        visibleCount++;
+                    }
+                });
+                
+                // Update event count display
+                if (eventCountSpan) {
+                    eventCountSpan.textContent = visibleCount;
+                }
+            }
+            
+            if (showFreeEventsCheckbox) {
+                showFreeEventsCheckbox.addEventListener('change', updateFreeEventsFilter);
+                
+                // Trigger initial filter on page load
+                updateFreeEventsFilter();
+            }
+
             // Table sorting functionality
             function initTableSorting() {
                 document.querySelectorAll('.sortable').forEach(header => {
@@ -771,6 +819,9 @@
                         
                         // Re-append sorted rows
                         rows.forEach(row => tbody.appendChild(row));
+                        
+                        // Re-apply filter after sorting
+                        updateFreeEventsFilter();
                     });
                 });
             }

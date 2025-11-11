@@ -324,16 +324,16 @@ class EventTicketShareController extends Controller
             
             // Case 1: shared_ticket_id is set - transfer specific ticket
             if (!is_null($ticketShare->shared_ticket_id)) {
-                $ticketToTransfer = EventTicketInformation::where('id', $ticketShare->shared_ticket_id)
-                    ->where('event_id', $ticketShare->event_id)
-                    ->where('user_id', $ticketShare->sharer_id)
-                    ->first();
+            $ticketToTransfer = EventTicketInformation::where('id', $ticketShare->shared_ticket_id)
+                ->where('event_id', $ticketShare->event_id)
+                ->where('user_id', $ticketShare->sharer_id)
+                ->first();
 
-                if (!$ticketToTransfer) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false, 
-                        'message' => 'The shared ticket is no longer available for transfer.'
+            if (!$ticketToTransfer) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'The shared ticket is no longer available for transfer.'
                     ], 400);
                 }
                 
@@ -417,10 +417,10 @@ class EventTicketShareController extends Controller
             // Keep shared_by_user_id so the sharer can still see they shared it
             foreach ($ticketsToTransfer as $ticket) {
                 $ticket->update([
-                    'user_id' => $ticketShare->recipient_id,
-                    'shared_by_user_id' => $ticketShare->sharer_id, // Track who originally shared it
-                    'shared_at' => now(),
-                ]);
+                'user_id' => $ticketShare->recipient_id,
+                'shared_by_user_id' => $ticketShare->sharer_id, // Track who originally shared it
+                'shared_at' => now(),
+            ]);
             }
 
             // Create notification for the sharer (accepted)

@@ -31,7 +31,7 @@
 
     <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-        <textarea id="description" name="description" rows="5" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" oninput="this.value = this.value.replace(/\n/g, ' ').replace(/\r/g, '')">{{ old('description', $eventData['description'] ?? $event->description ?? '') }}</textarea>
+        <textarea id="description" name="description" rows="5" draggable="false" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" oninput="this.value = this.value.replace(/\n/g, ' ').replace(/\r/g, '')" ondrop="event.preventDefault(); return false;" ondragover="event.preventDefault(); return false;" ondragstart="event.preventDefault(); return false;">{{ old('description', $eventData['description'] ?? $event->description ?? '') }}</textarea>
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Note: Line breaks are automatically converted to spaces to prevent formatting issues.</p>
     </div>
 
@@ -79,6 +79,29 @@ document.addEventListener('DOMContentLoaded', function() {
     if (descriptionField) {
         // Replace any existing newlines with spaces
         descriptionField.value = descriptionField.value.replace(/\r?\n/g, ' ').replace(/\r/g, '');
+        
+        // Ensure drag and drop is prevented (additional safety beyond HTML attributes)
+        descriptionField.setAttribute('draggable', 'false');
+        descriptionField.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+        descriptionField.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+        descriptionField.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+        descriptionField.addEventListener('dragenter', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
     }
     
     const tagsInput = document.getElementById('tags');

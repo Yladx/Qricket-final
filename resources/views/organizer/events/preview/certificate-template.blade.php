@@ -10,31 +10,63 @@
     $leftLogo = $leftLogoRaw;
     $rightLogo = $rightLogoRaw;
     
-    // Check if URLs need to be normalized (R2 URLs, cloudflarestorage.com, or invalid schemes)
-    $leftNeedsRoute = empty($leftLogoRaw) || 
-                      (strpos($leftLogoRaw, 'cloudflarestorage.com') !== false) || 
-                      (strpos($leftLogoRaw, 'r2.dev') !== false) ||
-                      (parse_url($leftLogoRaw, PHP_URL_SCHEME) === null);
-    $rightNeedsRoute = empty($rightLogoRaw) || 
-                       (strpos($rightLogoRaw, 'cloudflarestorage.com') !== false) || 
-                       (strpos($rightLogoRaw, 'r2.dev') !== false) ||
-                       (parse_url($rightLogoRaw, PHP_URL_SCHEME) === null);
+    // Process left logo URL - always try to get logo if eventId exists
+    if ($eventId) {
+        if (!empty($leftLogoRaw)) {
+            // Check if URL is an R2 URL (needs conversion to route)
+            $isR2Url = (strpos($leftLogoRaw, 'cloudflarestorage.com') !== false) || 
+                       (strpos($leftLogoRaw, 'r2.dev') !== false);
+            
+            if ($isR2Url) {
+                // Convert R2 URL to route, then to absolute URL
+                $leftLogo = url(route('organizer.events.certificate.asset', ['file' => 'logo_left.png', 'id' => $eventId]));
+            } else {
+                // Check if it's a relative URL (route) or absolute URL
+                $parsed = parse_url($leftLogoRaw);
+                if (!isset($parsed['scheme'])) {
+                    // It's a relative URL (route), convert to absolute
+                    $leftLogo = url($leftLogoRaw);
+                } else {
+                    // It's already an absolute URL, use as-is
+                    $leftLogo = $leftLogoRaw;
+                }
+            }
+        } else {
+            // No URL in data, but try route anyway (file might exist in storage)
+            $leftLogo = url(route('organizer.events.certificate.asset', ['file' => 'logo_left.png', 'id' => $eventId]));
+        }
+    }
     
-    // Use Laravel route for serving assets (handles R2 storage properly)
-    if ($leftNeedsRoute && $eventId) {
-        $leftLogo = route('organizer.events.certificate.asset', ['file' => 'logo_left.png', 'id' => $eventId]);
-    }
-    if ($rightNeedsRoute && $eventId) {
-        $rightLogo = route('organizer.events.certificate.asset', ['file' => 'logo_right.png', 'id' => $eventId]);
+    // Process right logo URL - always try to get logo if eventId exists
+    if ($eventId) {
+        if (!empty($rightLogoRaw)) {
+            // Check if URL is an R2 URL (needs conversion to route)
+            $isR2Url = (strpos($rightLogoRaw, 'cloudflarestorage.com') !== false) || 
+                       (strpos($rightLogoRaw, 'r2.dev') !== false);
+            
+            if ($isR2Url) {
+                // Convert R2 URL to route, then to absolute URL
+                $rightLogo = url(route('organizer.events.certificate.asset', ['file' => 'logo_right.png', 'id' => $eventId]));
+            } else {
+                // Check if it's a relative URL (route) or absolute URL
+                $parsed = parse_url($rightLogoRaw);
+                if (!isset($parsed['scheme'])) {
+                    // It's a relative URL (route), convert to absolute
+                    $rightLogo = url($rightLogoRaw);
+                } else {
+                    // It's already an absolute URL, use as-is
+                    $rightLogo = $rightLogoRaw;
+                }
+            }
+        } else {
+            // No URL in data, but try route anyway (file might exist in storage)
+            $rightLogo = url(route('organizer.events.certificate.asset', ['file' => 'logo_right.png', 'id' => $eventId]));
+        }
     }
     
-    // Convert routes to absolute URLs for printing (ensure images load when printing)
-    if ($leftLogo && !filter_var($leftLogo, FILTER_VALIDATE_URL)) {
-        $leftLogo = url($leftLogo);
-    }
-    if ($rightLogo && !filter_var($rightLogo, FILTER_VALIDATE_URL)) {
-        $rightLogo = url($rightLogo);
-    }
+    // Determine if logos should be shown (if URL exists and eventId exists, show it)
+    $hasLeftLogo = !empty($leftLogo) && !empty($eventId);
+    $hasRightLogo = !empty($rightLogo) && !empty($eventId);
     
     // Generate absolute URLs for signature assets
     $signatureLeftUrl = null;
@@ -62,8 +94,8 @@
     <div class="px-10 pt-16 pb-8 relative z-10">
             <div class="grid grid-cols-3 items-center">
             <div class="justify-self-start">
-                @if($leftLogo)
-                <img id="logo_left_img" src="{{ $leftLogo }}" alt="" class="w-20 h-20 object-contain certificate-image" onerror="this.style.display='none'" style="display: none;">
+                @if($eventId)
+                <img id="logo_left_img" src="{{ $hasLeftLogo ? $leftLogo : (url(route('organizer.events.certificate.asset', ['file' => 'logo_left.png', 'id' => $eventId]))) }}" alt="Left Logo" class="w-20 h-20 object-contain certificate-image" onload="this.style.display='block';" onerror="this.style.display='none';" style="{{ $hasLeftLogo ? 'display: block;' : 'display: none;' }} max-width: 80px; max-height: 80px;">
                 @endif
             </div>
             <div class="text-center">
@@ -75,8 +107,8 @@
                 <div class="text-sm text-gray-600">Ticket ID: <span id="ticket_id_preview">{{ $certificateData['ticket_id_preview'] ?? '—' }}</span></div>
             </div>
             <div class="justify-self-end">
-                @if($rightLogo)
-                <img id="logo_right_img" src="{{ $rightLogo }}" alt="" class="w-20 h-20 object-contain certificate-image" onerror="this.style.display='none'" style="display: none;">
+                @if($eventId)
+                <img id="logo_right_img" src="{{ $hasRightLogo ? $rightLogo : (url(route('organizer.events.certificate.asset', ['file' => 'logo_right.png', 'id' => $eventId]))) }}" alt="Right Logo" class="w-20 h-20 object-contain certificate-image" onload="this.style.display='block';" onerror="this.style.display='none';" style="{{ $hasRightLogo ? 'display: block;' : 'display: none;' }} max-width: 80px; max-height: 80px;">
                 @endif
             </div>
         </div>

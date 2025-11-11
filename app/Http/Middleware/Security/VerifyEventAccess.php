@@ -50,7 +50,7 @@ class VerifyEventAccess
 
         $granted = match ($ability) {
             'manage_event' => ($staff->can_manage_event ?? false) || ($staff->can_manage_staff ?? false) || ($staff->role === 'organizer'),
-            'manage_news' => ($staff->can_manage_news ?? false) || ($staff->can_manage_event ?? false) || ($staff->role === 'organizer'),
+            'manage_news' => ($staff->can_manage_news ?? false) || ($staff->role === 'organizer'),
             'manage_attendance' => ($staff->can_manage_attendance ?? false) || ($staff->can_manage_event ?? false) || ($staff->role === 'organizer'),
             'manage_sales' => ($staff->can_manage_sales ?? false) || ($staff->can_manage_event ?? false) || ($staff->role === 'organizer'),
             'manage_ticket' => ($staff->can_manage_ticket ?? false) || ($staff->can_manage_event ?? false) || ($staff->role === 'organizer'),
