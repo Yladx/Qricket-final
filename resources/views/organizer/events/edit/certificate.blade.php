@@ -431,7 +431,6 @@
         };
         
         // Update uploadSignature to handle dynamic signatory numbers
-        const originalUploadSignature = window.uploadSignature;
         window.uploadSignature = async function(signatoryNum){
             const file = document.getElementById(`sig_${signatoryNum}_file`)?.files?.[0];
             if (!file) return;

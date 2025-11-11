@@ -443,7 +443,6 @@
         };
         
         // Update uploadSignature to handle dynamic signatory numbers
-        const originalUploadSignature = window.uploadSignature;
         window.uploadSignature = async function(signatoryNum){
             const file = document.getElementById(`sig_${signatoryNum}_file`)?.files?.[0];
             if (!file) return;
@@ -970,120 +969,6 @@
                 showAutosaveIndicator('error');
             }
         }
-
-        // Update uploadSignature to handle dynamic signatory numbers
-        const originalUploadSignature = window.uploadSignature;
-        window.uploadSignature = async function(signatoryNum){
-            const file = document.getElementById(`sig_${signatoryNum}_file`)?.files?.[0];
-            if (!file) return;
-            
-            // Show immediate preview using FileReader
-            const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
-            if (previewEl && file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewEl.src = e.target.result;
-                    previewEl.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-            
-            const fd = new FormData();
-            fd.append('event_id', eventId);
-            fd.append('signatory_num', String(signatoryNum));
-            fd.append('signature', file);
-            const resp = await fetch('/organizer/events/certificate/upload-signature', { method:'POST', headers:{ 'X-CSRF-TOKEN': csrf }, body: fd });
-            const res = await resp.json();
-            const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
-            if (res && res.success) {
-                if (statusEl) {
-                    statusEl.textContent = 'Uploaded';
-                    statusEl.className = 'text-xs text-green-500 dark:text-green-400';
-                }
-                // Update preview with server URL if provided
-                if (res.url && previewEl) {
-                    previewEl.src = res.url;
-                    previewEl.classList.remove('hidden');
-                }
-                // Show remove button
-                showSignatureRemoveButton(signatoryNum);
-                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
-                    autosaveDebounced();
-                }
-            } else if (statusEl) {
-                statusEl.textContent = 'Upload failed';
-                // Hide preview on failure
-                if (previewEl) {
-                    previewEl.classList.add('hidden');
-                }
-                hideSignatureRemoveButton(signatoryNum);
-            }
-        };
-        
-        function showSignatureRemoveButton(signatoryNum) {
-            const removeBtn = document.getElementById(`sig_${signatoryNum}_remove_btn`);
-            if (removeBtn) {
-                removeBtn.classList.remove('hidden');
-            }
-        }
-        
-        function hideSignatureRemoveButton(signatoryNum) {
-            const removeBtn = document.getElementById(`sig_${signatoryNum}_remove_btn`);
-            if (removeBtn) {
-                removeBtn.classList.add('hidden');
-            }
-        }
-        
-        window.removeSignature = async function(signatoryNum) {
-            if (!confirm('Are you sure you want to remove this signature?')) {
-                return;
-            }
-            
-            // Clear preview
-            const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
-            if (previewEl) {
-                previewEl.src = '';
-                previewEl.classList.add('hidden');
-            }
-            
-            // Reset status
-            const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
-            if (statusEl) {
-                statusEl.textContent = 'No file';
-                statusEl.className = 'text-xs text-gray-500 dark:text-gray-400';
-            }
-            
-            // Clear file input
-            const fileInput = document.getElementById(`sig_${signatoryNum}_file`);
-            if (fileInput) {
-                fileInput.value = '';
-            }
-            
-            // Hide remove button
-            hideSignatureRemoveButton(signatoryNum);
-            
-            // Update certificate data to remove signature path
-            try {
-                const jsonEl = document.getElementById('certificate_data_json');
-                if (jsonEl) {
-                    const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
-                    delete current[`sig_${signatoryNum}_signature`];
-                    jsonEl.value = JSON.stringify(current);
-                }
-                
-                // Trigger autosave
-                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
-                    autosaveDebounced();
-                }
-                
-                showAutosaveIndicator('success');
-            } catch (e) {
-                console.error('Failed to remove signature:', e);
-                showAutosaveIndicator('error');
-            }
-        }
-
-        // uploadSignature is defined later after addSignatory/removeSignatory
         
         function collectPayload(){
             // First, try to get the most up-to-date data from the hidden JSON input
