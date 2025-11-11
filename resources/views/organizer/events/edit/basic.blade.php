@@ -148,51 +148,33 @@
     <script src="/js/sweetalert-utils.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Lock free event checkbox if event is already free (only in manage/edit)
+            // Hide and lock free event checkbox if event is already free (only in manage/edit)
             @if($event->is_free === true || (isset($eventData['is_free']) && $eventData['is_free'] === true))
                 const freeEventCheckbox = document.getElementById('is_free_checkbox');
                 const freeEventLabel = freeEventCheckbox ? freeEventCheckbox.closest('label') : null;
                 const freeEventContainer = freeEventCheckbox ? freeEventCheckbox.closest('.flex.items-center.space-x-3') : null;
                 
-                if (freeEventCheckbox) {
-                    // Disable the checkbox completely
-                    freeEventCheckbox.disabled = true;
-                    freeEventCheckbox.checked = true;
-                    freeEventCheckbox.readOnly = true;
+                if (freeEventCheckbox && freeEventContainer) {
+                    // Hide the entire checkbox container
+                    freeEventContainer.style.display = 'none';
                     
-                    // Prevent all interactions with the checkbox
-                    freeEventCheckbox.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
-                    }, true);
+                    // Create a clean read-only display instead
+                    const readOnlyDisplay = document.createElement('div');
+                    readOnlyDisplay.className = 'flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg';
+                    readOnlyDisplay.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">This event is set as <strong>Free</strong></span>
+                        </div>
+                        <span class="text-xs text-amber-600 dark:text-amber-400 font-medium ml-auto">(Cannot be changed)</span>
+                    `;
                     
-                    freeEventCheckbox.addEventListener('change', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        this.checked = true;
-                        return false;
-                    }, true);
-                    
-                    freeEventCheckbox.addEventListener('mousedown', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return false;
-                    }, true);
-                    
-                    // Prevent label clicks from changing the checkbox
-                    if (freeEventLabel) {
-                        freeEventLabel.style.pointerEvents = 'none';
-                        freeEventLabel.classList.add('opacity-60', 'cursor-not-allowed');
-                        freeEventLabel.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            return false;
-                        }, true);
+                    // Insert the read-only display where the checkbox was
+                    if (freeEventContainer.parentNode) {
+                        freeEventContainer.parentNode.insertBefore(readOnlyDisplay, freeEventContainer);
                     }
-                    
-                    // Remove the checkbox from form submission and add hidden input instead
-                    freeEventCheckbox.name = ''; // Remove name so it doesn't submit
                     
                     // Add hidden input to ensure is_free is always submitted as true
                     const hiddenInput = document.createElement('input');
@@ -200,51 +182,13 @@
                     hiddenInput.name = 'is_free';
                     hiddenInput.value = '1';
                     hiddenInput.id = 'is_free_hidden';
-                    if (freeEventCheckbox.parentNode) {
-                        freeEventCheckbox.parentNode.insertBefore(hiddenInput, freeEventCheckbox.nextSibling);
-                    }
                     
-                    // Add warning message after the label
-                    const warningSpan = document.createElement('span');
-                    warningSpan.className = 'text-xs text-amber-600 dark:text-amber-400 font-medium';
-                    warningSpan.textContent = '(Cannot be changed - Event is already free)';
-                    if (freeEventContainer) {
-                        freeEventContainer.insertBefore(warningSpan, freeEventContainer.childNodes[freeEventContainer.childNodes.length - 1]);
-                    }
-                    
-                    // Add info box below the checkbox container
-                    const infoBox = document.createElement('div');
-                    infoBox.className = 'mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg';
-                    infoBox.innerHTML = '<p class="text-xs text-amber-800 dark:text-amber-200"><strong>Note:</strong> Once an event is created as free, it cannot be changed to a paid event. This ensures consistency for attendees who have already registered.</p>';
-                    if (freeEventContainer && freeEventContainer.parentNode) {
-                        freeEventContainer.parentNode.insertBefore(infoBox, freeEventContainer.nextSibling);
-                    }
-                    
-                    // Ensure checkbox stays checked even if someone tries to manipulate it
-                    const observer = new MutationObserver(function(mutations) {
-                        if (!freeEventCheckbox.checked) {
-                            freeEventCheckbox.checked = true;
-                        }
-                        if (!freeEventCheckbox.disabled) {
-                            freeEventCheckbox.disabled = true;
-                        }
-                    });
-                    
-                    observer.observe(freeEventCheckbox, {
-                        attributes: true,
-                        attributeFilter: ['checked', 'disabled']
-                    });
-                    
-                    // Also check before form submission - ensure is_free is always submitted as true
                     const editForm = document.getElementById('editBasicForm');
                     if (editForm) {
-                        const ensureFreeEventLock = function() {
-                            // Ensure checkbox is checked and disabled before submission
-                            freeEventCheckbox.checked = true;
-                            freeEventCheckbox.disabled = true;
-                            freeEventCheckbox.name = ''; // Remove name so it doesn't submit
-                            
-                            // Ensure hidden input exists and has correct value
+                        editForm.appendChild(hiddenInput);
+                        
+                        // Ensure is_free is always submitted as true before form submission
+                        editForm.addEventListener('submit', function(e) {
                             let hiddenInputEl = document.getElementById('is_free_hidden');
                             if (!hiddenInputEl) {
                                 hiddenInputEl = document.createElement('input');
@@ -255,12 +199,8 @@
                                 editForm.appendChild(hiddenInputEl);
                             } else {
                                 hiddenInputEl.value = '1';
-                                hiddenInputEl.name = 'is_free';
                             }
-                        };
-                        
-                        // Add listener with high priority (capture phase)
-                        editForm.addEventListener('submit', ensureFreeEventLock, true);
+                        }, true);
                     }
                 }
             @endif
