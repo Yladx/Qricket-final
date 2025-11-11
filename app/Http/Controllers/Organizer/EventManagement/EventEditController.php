@@ -293,11 +293,14 @@ class EventEditController extends Controller
             'is_free' => (bool)($event->is_free ?? false),
             'tags' => $event->tags ?? '',
         ];
+        
+        // Determine if event is free (for locking the checkbox in edit mode)
+        $isFreeEvent = (bool)($event->is_free ?? false);
 
         // Determine layout type
         $layoutType = $isAdmin ? 'admin' : 'organizer';
 
-        return view('organizer.events.edit.basic', compact('event', 'eventData', 'isAdmin', 'layoutType'));
+        return view('organizer.events.edit.basic', compact('event', 'eventData', 'isAdmin', 'layoutType', 'isFreeEvent'));
     }
 
     /**

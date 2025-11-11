@@ -7,18 +7,9 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    @php
-                        // Check if event is free - be very explicit about the check
-                        $eventIsFree = false;
-                        if (isset($event->is_free)) {
-                            $eventIsFree = ($event->is_free == 1 || $event->is_free === true || $event->is_free === '1');
-                        } elseif (isset($eventData['is_free'])) {
-                            $eventIsFree = ($eventData['is_free'] == 1 || $eventData['is_free'] === true || $eventData['is_free'] === '1');
-                        }
-                    @endphp
                     <form id="editBasicForm" method="POST" action="{{ route('organizer.events.step1.store') }}?id={{ $event->id }}" enctype="multipart/form-data" class="space-y-6">
                         @csrf
-                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event, 'isFreeEvent' => $eventIsFree])
+                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event, 'isFreeEvent' => $isFreeEvent ?? false])
 
                         <!-- Navigation Buttons -->
                         <div class="flex items-center justify-between pt-6">
