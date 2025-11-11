@@ -17,7 +17,7 @@
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 text-gray-900 dark:text-gray-100">
                         <form id="step1Form" method="POST" action="{{ route('organizer.events.step1.store') }}{{ $eventId ? '?id=' . $eventId : '' }}" enctype="multipart/form-data" class="space-y-6">
                             @csrf
-                            @include('organizer.events.forms.basic-info', ['eventId' => $eventId, 'eventData' => $eventData])
+                            @include('organizer.events.forms.basic-info', ['eventId' => $eventId, 'eventData' => $eventData, 'event' => $event ?? null])
 
                             <hr>
                             <!-- Navigation Buttons -->

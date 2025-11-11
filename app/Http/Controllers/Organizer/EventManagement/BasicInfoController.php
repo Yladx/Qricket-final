@@ -57,6 +57,7 @@ class BasicInfoController extends Controller
                 'location' => '',
                 'location_url' => '',
                 'is_free' => false,
+                'tags' => '',
                 'latitude' => '',
                 'longitude' => '',
                 'max_participants' => '',
@@ -93,6 +94,7 @@ class BasicInfoController extends Controller
                 'end_date' => '', 
                 'location' => '',
                 'location_url' => '',
+                'is_free' => false,
                 'tags' => '',
                 'latitude' => '',
                 'longitude' => '',
@@ -116,25 +118,25 @@ class BasicInfoController extends Controller
         }
 
         $eventData = [
-            'title' => $event->title,
-            'description' => $event->description,
-            'category' => $event->category,
-            'start_date' => $event->start_date,
-            'end_date' => $event->end_date,
-            'location' => $event->location,
-            'location_url' => $event->location_url,
-            'is_free' => (bool)$event->is_free,
-            'tags' => $event->tags,
-            'latitude' => $event->latitude,
-            'longitude' => $event->longitude,
-            'max_participants' => $event->max_participants,
-            'poster' => $event->poster,
-            'thumbnail' => $event->thumbnail,
-            'existing_poster_url' => $event->poster_url,
-            'existing_thumbnail_url' => $event->thumbnail_url,
+            'title' => $event->title ?? '',
+            'description' => $event->description ?? '',
+            'category' => $event->category ?? '',
+            'start_date' => $event->start_date ?? '',
+            'end_date' => $event->end_date ?? '',
+            'location' => $event->location ?? '',
+            'location_url' => $event->location_url ?? '',
+            'is_free' => (bool)($event->is_free ?? false),
+            'tags' => $event->tags ?? '',
+            'latitude' => $event->latitude ?? '',
+            'longitude' => $event->longitude ?? '',
+            'max_participants' => $event->max_participants ?? '',
+            'poster' => $event->poster ?? '',
+            'thumbnail' => $event->thumbnail ?? '',
+            'existing_poster_url' => $event->poster_url ?? '',
+            'existing_thumbnail_url' => $event->thumbnail_url ?? '',
         ];
 
-        return view('organizer.events.create.step1', compact('eventData', 'eventId'));
+        return view('organizer.events.create.step1', compact('eventData', 'eventId', 'event'));
     }
 
     public function step1Store(Request $request)

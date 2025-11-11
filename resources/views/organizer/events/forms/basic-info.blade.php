@@ -28,11 +28,11 @@
         $isFreeInitValue = false;
         $isFreeLockedValue = false;
         
-        // Safely get is_free value - prioritize eventData array (always check if it exists first)
+        // Safely get is_free value - prioritize eventData array (controllers should always set this)
         if (isset($eventData) && is_array($eventData) && array_key_exists('is_free', $eventData)) {
             $eventIsFreeValue = (bool)$eventData['is_free'];
-        } elseif (isset($event) && is_object($event)) {
-            // Safely access event property using Laravel model methods
+        } elseif (isset($event) && is_object($event) && !empty($event)) {
+            // Fallback: safely access event property using Laravel model methods
             try {
                 if (method_exists($event, 'getAttribute')) {
                     $attrValue = $event->getAttribute('is_free');
@@ -57,7 +57,25 @@
         
         // ONLY lock in manage/edit context (when eventId exists AND event is free)
         // This ensures it's NOT locked during event creation (when eventId is null/empty)
-        $hasEventId = isset($eventId) && $eventId !== null && $eventId !== '' && $eventId !== '0';
+        // Check both eventId parameter and event object ID to determine if we're editing
+        $hasEventId = false;
+        if (isset($eventId) && $eventId !== null && $eventId !== '' && $eventId !== '0') {
+            $hasEventId = true;
+        } elseif (isset($event) && is_object($event) && !empty($event)) {
+            try {
+                if (method_exists($event, 'getAttribute')) {
+                    $eventIdValue = $event->getAttribute('id');
+                    if ($eventIdValue !== null && $eventIdValue !== '' && $eventIdValue !== '0') {
+                        $hasEventId = true;
+                    }
+                } elseif (property_exists($event, 'id') && !empty($event->id)) {
+                    $hasEventId = true;
+                }
+            } catch (\Exception $e) {
+                // Ignore errors
+            }
+        }
+        
         if ($hasEventId && $eventIsFreeValue === true) {
             $isFreeLockedValue = true;
         }
