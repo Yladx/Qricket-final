@@ -83,14 +83,14 @@
                 <div class="lg:col-span-1">
                     <div class="sticky top-6 space-y-4">
                         <!-- Ticket Pricing Guide Sidebar -->
-                        <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4 shadow-sm">
+                        <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4 shadow-sm">
                             <div class="flex items-start">
-                                <svg class="w-5 h-5 text-emerald-500 dark:text-emerald-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-5 h-5 text-teal-600 dark:text-teal-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                                 </svg>
                                 <div class="flex-1">
-                                    <h4 class="text-sm font-semibold text-emerald-900 dark:text-emerald-100 mb-2">Ticket Pricing Guide</h4>
-                                    <div class="text-sm text-emerald-800 dark:text-emerald-200 space-y-2">
+                                    <h4 class="text-sm font-semibold text-teal-900 dark:text-teal-100 mb-2">Ticket Pricing Guide</h4>
+                                    <div class="text-sm text-teal-800 dark:text-teal-200 space-y-2">
                                         <ul class="list-disc list-inside space-y-1.5 ml-2 text-xs">
                                             <li><strong>Ticket Types:</strong> Create different ticket types (e.g., General Admission, VIP, Student, Early Bird) with varying prices and quantities.</li>
                                             <li><strong>Pricing:</strong> Set the price for each ticket type. For free events, all tickets are automatically set to ₱0.00.</li>
@@ -99,7 +99,10 @@
                                             <li><strong>Ticket Limit:</strong> Your subscription plan determines the maximum number of tickets you can sell per event. You can purchase additional tickets if needed.</li>
                                             <li><strong>Autosave:</strong> All changes are automatically saved as you type. No need to manually save.</li>
                                         </ul>
-                                        <p class="text-xs text-emerald-700 dark:text-emerald-300 mt-3 italic">💡 Tip: Create multiple ticket types to offer different pricing tiers and increase revenue. You can preview how your tickets will look before publishing.</p>
+                                        <div class="mt-3 p-2 bg-teal-100 dark:bg-teal-900/30 rounded border border-teal-200 dark:border-teal-700">
+                                            <p class="text-xs font-medium text-teal-900 dark:text-teal-100 mb-1">💡 Tip:</p>
+                                            <p class="text-xs text-teal-800 dark:text-teal-200">Create multiple ticket types to offer different pricing tiers and increase revenue. You can preview how your tickets will look before publishing.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

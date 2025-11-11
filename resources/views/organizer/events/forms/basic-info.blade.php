@@ -1,30 +1,8 @@
 <div class="space-y-6">
     <!-- Header Section -->
-    <div class="mb-8">
+    <div class="mb-6">
         <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Basic Information</h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-4">Fill out your basic necessary information for the event</p>
-        
-        <!-- Informative Note -->
-        <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 dark:border-blue-400 rounded-r-lg p-4 mb-6">
-            <div class="flex items-start">
-                <svg class="w-5 h-5 text-blue-500 dark:text-blue-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                </svg>
-                <div class="flex-1">
-                    <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">Event Creation Guide</h4>
-                    <ul class="text-sm text-blue-800 dark:text-blue-200 space-y-1.5 list-disc list-inside">
-                        <li><strong>Event Title:</strong> Choose a clear, descriptive title that helps attendees understand what your event is about.</li>
-                        <li><strong>Category:</strong> Select the most appropriate category to help attendees discover your event.</li>
-                        <li><strong>Free Event:</strong> Check this box if your event is completely free for attendees. Free events have special ticket limits and all tickets are automatically set to ₱0.00. See the detailed explanation below for more information.</li>
-                        <li><strong>Description:</strong> Provide detailed information about your event. This helps attendees understand what to expect.</li>
-                        <li><strong>Tags:</strong> Add relevant tags (required) to help categorize and improve discoverability. Separate multiple tags with commas.</li>
-                        <li><strong>Date & Time:</strong> Set the start and end dates/times for your event. This helps attendees plan their attendance.</li>
-                        <li><strong>Location:</strong> Enter the physical venue address or online meeting link. Optionally add a Google Maps URL for directions.</li>
-                    </ul>
-                    <p class="text-xs text-blue-700 dark:text-blue-300 mt-3 italic">💡 Tip: Your event is automatically saved as a draft. You can come back to edit it anytime before publishing.</p>
-                </div>
-            </div>
-        </div>
+        <p class="text-gray-600 dark:text-gray-400">Fill out your basic necessary information for the event</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

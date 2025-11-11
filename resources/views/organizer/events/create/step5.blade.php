@@ -39,14 +39,14 @@
                 <div class="lg:col-span-1">
                     <div class="sticky top-6 space-y-4">
                         <!-- Staff Management Guide Sidebar -->
-                        <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4 shadow-sm">
+                        <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4 shadow-sm">
                             <div class="flex items-start">
-                                <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-5 h-5 text-teal-600 dark:text-teal-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                                 </svg>
                                 <div class="flex-1">
-                                    <h4 class="text-sm font-semibold text-indigo-900 dark:text-indigo-100 mb-2">Staff Management Guide</h4>
-                                    <div class="text-sm text-indigo-800 dark:text-indigo-200 space-y-2">
+                                    <h4 class="text-sm font-semibold text-teal-900 dark:text-teal-100 mb-2">Staff Management Guide</h4>
+                                    <div class="text-sm text-teal-800 dark:text-teal-200 space-y-2">
                                         <ul class="list-disc list-inside space-y-1.5 ml-2 text-xs">
                                             <li><strong>Search & Add Staff:</strong> Search for users by name or email to add them as staff members to your event.</li>
                                             <li><strong>Roles:</strong> Assign roles to staff members (e.g., Organizer, Manager, Staff, Scanner) to define their responsibilities.</li>
@@ -63,7 +63,10 @@
                                             <li><strong>Welcome Message:</strong> Set a custom message that will be sent to staff members when they're added to the event.</li>
                                             <li><strong>Staff Instructions:</strong> Provide detailed instructions and guidelines that staff members will see in their dashboard.</li>
                                         </ul>
-                                        <p class="text-xs text-indigo-700 dark:text-indigo-300 mt-3 italic">💡 Tip: Assign permissions carefully. Staff members will only see and access features based on their assigned permissions. You can always update permissions later.</p>
+                                        <div class="mt-3 p-2 bg-teal-100 dark:bg-teal-900/30 rounded border border-teal-200 dark:border-teal-700">
+                                            <p class="text-xs font-medium text-teal-900 dark:text-teal-100 mb-1">💡 Tip:</p>
+                                            <p class="text-xs text-teal-800 dark:text-teal-200">Assign permissions carefully. Staff members will only see and access features based on their assigned permissions. You can always update permissions later.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

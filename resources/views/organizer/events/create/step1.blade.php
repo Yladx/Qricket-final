@@ -50,15 +50,41 @@
                 <!-- Sidebar Column -->
                 <div class="lg:col-span-1">
                     <div class="sticky top-6 space-y-4">
-                        <!-- Free Event Information Sidebar -->
-                        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 shadow-sm">
+                        <!-- Event Creation Guide Sidebar -->
+                        <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4 shadow-sm">
                             <div class="flex items-start">
-                                <svg class="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-5 h-5 text-teal-600 dark:text-teal-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                                 </svg>
                                 <div class="flex-1">
-                                    <h4 class="text-sm font-semibold text-green-900 dark:text-green-100 mb-2">What is a Free Event?</h4>
-                                    <div class="text-sm text-green-800 dark:text-green-200 space-y-2">
+                                    <h4 class="text-sm font-semibold text-teal-900 dark:text-teal-100 mb-2">Event Creation Guide</h4>
+                                    <div class="text-sm text-teal-800 dark:text-teal-200 space-y-2">
+                                        <ul class="list-disc list-inside space-y-1.5 ml-2 text-xs">
+                                            <li><strong>Event Title:</strong> Choose a clear, descriptive title that helps attendees understand what your event is about.</li>
+                                            <li><strong>Category:</strong> Select the most appropriate category to help attendees discover your event.</li>
+                                            <li><strong>Description:</strong> Provide detailed information about your event. This helps attendees understand what to expect.</li>
+                                            <li><strong>Tags:</strong> Add relevant tags (required) to help categorize and improve discoverability. Separate multiple tags with commas.</li>
+                                            <li><strong>Date & Time:</strong> Set the start and end dates/times for your event. This helps attendees plan their attendance.</li>
+                                            <li><strong>Location:</strong> Enter the physical venue address or online meeting link. Optionally add a Google Maps URL for directions.</li>
+                                        </ul>
+                                        <div class="mt-3 p-2 bg-teal-100 dark:bg-teal-900/30 rounded border border-teal-200 dark:border-teal-700">
+                                            <p class="text-xs font-medium text-teal-900 dark:text-teal-100 mb-1">💡 Tip:</p>
+                                            <p class="text-xs text-teal-800 dark:text-teal-200">Your event is automatically saved as a draft. You can come back to edit it anytime before publishing.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Free Event Information Sidebar -->
+                        <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4 shadow-sm">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-teal-600 dark:text-teal-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-semibold text-teal-900 dark:text-teal-100 mb-2">What is a Free Event?</h4>
+                                    <div class="text-sm text-teal-800 dark:text-teal-200 space-y-2">
                                         <p>A <strong>Free Event</strong> is an event where attendees don't pay anything to participate. When you mark your event as free:</p>
                                         <ul class="list-disc list-inside space-y-1 ml-2 text-xs">
                                             <li><strong>All tickets are automatically set to ₱0.00</strong> - You cannot set prices for tickets in free events</li>
@@ -66,9 +92,9 @@
                                             <li><strong>No payment processing</strong> - Attendees can register and get tickets instantly without any payment</li>
                                             <li><strong>Perfect for:</strong> Workshops, seminars, community events, educational sessions, networking events, or any event where you want to offer free access</li>
                                         </ul>
-                                        <div class="mt-3 p-2 bg-green-100 dark:bg-green-900/30 rounded border border-green-200 dark:border-green-700">
-                                            <p class="text-xs font-medium text-green-900 dark:text-green-100 mb-1">📋 Important Notes:</p>
-                                            <ul class="text-xs text-green-800 dark:text-green-200 space-y-0.5 list-disc list-inside ml-2">
+                                        <div class="mt-3 p-2 bg-teal-100 dark:bg-teal-900/30 rounded border border-teal-200 dark:border-teal-700">
+                                            <p class="text-xs font-medium text-teal-900 dark:text-teal-100 mb-1">📋 Important Notes:</p>
+                                            <ul class="text-xs text-teal-800 dark:text-teal-200 space-y-0.5 list-disc list-inside ml-2">
                                                 <li>Once you create a free event, you cannot change it to a paid event later</li>
                                                 <li>Free events are great for building your audience and community engagement</li>
                                                 <li>You can still track attendance and generate certificates for free events</li>

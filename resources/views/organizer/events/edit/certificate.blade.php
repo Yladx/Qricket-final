@@ -85,14 +85,14 @@
                 <div class="lg:col-span-1">
                     <div class="sticky top-6 space-y-4">
                         <!-- Certificate Template Guide Sidebar -->
-                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 shadow-sm">
+                        <div class="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg p-4 shadow-sm">
                             <div class="flex items-start">
-                                <svg class="w-5 h-5 text-amber-500 dark:text-amber-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-5 h-5 text-teal-600 dark:text-teal-400 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                                 </svg>
                                 <div class="flex-1">
-                                    <h4 class="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-2">Certificate Template Guide</h4>
-                                    <div class="text-sm text-amber-800 dark:text-amber-200 space-y-2">
+                                    <h4 class="text-sm font-semibold text-teal-900 dark:text-teal-100 mb-2">Certificate Template Guide</h4>
+                                    <div class="text-sm text-teal-800 dark:text-teal-200 space-y-2">
                                         <ul class="list-disc list-inside space-y-1.5 ml-2 text-xs">
                                             <li><strong>Organization Information:</strong> Enter your organization's details (name, address, etc.) that will appear on the certificate.</li>
                                             <li><strong>Theme & Colors:</strong> Customize the certificate's appearance with primary, secondary, and border colors to match your brand.</li>
@@ -102,7 +102,10 @@
                                             <li><strong>Signatures:</strong> Upload signature images for each signatory. These will appear at the bottom of the certificate.</li>
                                             <li><strong>Live Preview:</strong> See how your certificate will look in real-time as you make changes. You can print it directly from the preview.</li>
                                         </ul>
-                                        <p class="text-xs text-amber-700 dark:text-amber-300 mt-3 italic">💡 Tip: You can skip this step and add a certificate later. Certificates are automatically generated for attendees after your event ends.</p>
+                                        <div class="mt-3 p-2 bg-teal-100 dark:bg-teal-900/30 rounded border border-teal-200 dark:border-teal-700">
+                                            <p class="text-xs font-medium text-teal-900 dark:text-teal-100 mb-1">💡 Tip:</p>
+                                            <p class="text-xs text-teal-800 dark:text-teal-200">You can skip this step and add a certificate later. Certificates are automatically generated for attendees after your event ends.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
