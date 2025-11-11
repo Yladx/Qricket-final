@@ -75,7 +75,7 @@
                                 <img id="logo_left_preview" src="{{ $cd['logo_left_url'] ?? '' }}" class="w-5 h-5 rounded object-contain border border-gray-200 dark:border-gray-700 {{ empty($cd['logo_left_url']) ? 'hidden' : '' }}" alt="Left logo preview">
                                 <span id="logo_left_status" class="text-xs text-gray-500 dark:text-gray-400">{{ empty($cd['logo_left_url']) ? 'No file' : 'Uploaded' }}</span>
                                 @if(!empty($cd['logo_left_url']))
-                                <button type="button" onclick="removeLogo('left')" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove logo">
+                                <button type="button" id="logo_left_remove_btn" data-side="left" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove logo">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
@@ -84,7 +84,7 @@
                             </div>
                         </div>
                     </div>
-                    <input type="file" id="logo_left_file" accept="image/*" class="hidden" onchange="uploadLogo('left')">
+                    <input type="file" id="logo_left_file" accept="image/*" class="hidden">
                     <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>
                 </label>
                 <label class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -99,7 +99,7 @@
                                 <img id="logo_right_preview" src="{{ $cd['logo_right_url'] ?? '' }}" class="w-5 h-5 rounded object-contain border border-gray-200 dark:border-gray-700 {{ empty($cd['logo_right_url']) ? 'hidden' : '' }}" alt="Right logo preview">
                                 <span id="logo_right_status" class="text-xs text-gray-500 dark:text-gray-400">{{ empty($cd['logo_right_url']) ? 'No file' : 'Uploaded' }}</span>
                                 @if(!empty($cd['logo_right_url']))
-                                <button type="button" onclick="removeLogo('right')" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove logo">
+                                <button type="button" id="logo_right_remove_btn" data-side="right" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" title="Remove logo">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
@@ -108,7 +108,7 @@
                             </div>
                         </div>
                     </div>
-                    <input type="file" id="logo_right_file" accept="image/*" class="hidden" onchange="uploadLogo('right')">
+                    <input type="file" id="logo_right_file" accept="image/*" class="hidden">
                     <span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white">Choose</span>
                 </label>
             </div>
@@ -149,7 +149,7 @@
             <div class="signatory-item border border-gray-200 dark:border-gray-700 rounded-lg p-3" data-signatory="1">
                 <div class="flex items-center justify-between mb-2">
                     <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory 1</h4>
-                    <button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs hidden" onclick="window.removeSignatory(1)">
+                    <button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs hidden" data-signatory="1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>

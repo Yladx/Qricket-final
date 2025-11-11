@@ -93,7 +93,28 @@
     </div>
 
     <script>
-        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        // Prevent any inline handlers from executing by blocking their execution immediately
+        // This runs as soon as the script tag is parsed, before any inline handlers can fire
+        (function preventInlineHandlers() {
+            // Override confirm to prevent dialogs on load (temporary, will be restored after initialization)
+            const originalConfirm = window.confirm;
+            let confirmBlocked = true;
+            window.confirm = function(message) {
+                if (confirmBlocked && message && message.includes('remove')) {
+                    console.warn('Blocked confirm dialog on page load:', message);
+                    return false; // Block the confirmation
+                }
+                return originalConfirm.call(window, message);
+            };
+            
+            // Restore confirm after a short delay (once initialization is complete)
+            setTimeout(function() {
+                confirmBlocked = false;
+                window.confirm = originalConfirm;
+            }, 2000); // 2 seconds should be enough for initialization
+        })();
+        
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         const eventId = new URLSearchParams(location.search).get('id');
         const existingCertificateData = @json($certificateData ?? []);
 
@@ -226,7 +247,7 @@
             newSignatory.innerHTML = 
                 '<div class="flex items-center justify-between mb-2">' +
                     '<h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory ' + sigNum + '</h4>' +
-                    '<button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" onclick="window.removeSignatory(' + sigNum + ')">' +
+                    '<button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" data-signatory="' + sigNum + '">' +
                         '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
                             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
                         '</svg>' +
@@ -274,10 +295,14 @@
                 
                 // Attach event listeners after element is added to DOM (prevents onclick from firing on load)
                 const fileInput = document.getElementById(`sig_${sigNum}_file`);
-                const removeBtn = document.getElementById(`sig_${sigNum}_remove_btn`);
+                const removeBtn = newSignatory.querySelector('.remove-signatory-btn');
                 
                 if (fileInput) {
-                    fileInput.addEventListener('change', function() {
+                    // Clone to remove any existing handlers
+                    const newFileInput = fileInput.cloneNode(true);
+                    fileInput.parentNode.replaceChild(newFileInput, fileInput);
+                    newFileInput.addEventListener('change', function(e) {
+                        e.stopPropagation();
                         if (typeof window.uploadSignature === 'function') {
                             window.uploadSignature(sigNum);
                         }
@@ -285,11 +310,14 @@
                 }
                 
                 if (removeBtn) {
+                    // Remove any onclick attributes and attach event listener
+                    removeBtn.removeAttribute('onclick');
+                    removeBtn.setAttribute('data-signatory', sigNum);
                     removeBtn.addEventListener('click', function(e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (typeof window.removeSignature === 'function') {
-                            window.removeSignature(sigNum);
+                        if (typeof window.removeSignatory === 'function') {
+                            window.removeSignatory(sigNum);
                         }
                     });
                 }
@@ -422,10 +450,21 @@
                     });
                 }
                 
-                // Update remove button onclick
+                // Update remove button data attribute and event listener
                 const removeBtn = item.querySelector('.remove-signatory-btn');
                 if (removeBtn) {
-                    removeBtn.setAttribute('onclick', `window.removeSignatory(${newNum})`);
+                    removeBtn.removeAttribute('onclick');
+                    removeBtn.setAttribute('data-signatory', newNum);
+                    // Clone and replace to ensure clean event listener
+                    const newRemoveBtn = removeBtn.cloneNode(true);
+                    removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+                    newRemoveBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof window.removeSignatory === 'function') {
+                            window.removeSignatory(newNum);
+                        }
+                    });
                 }
                 
                 // Update heading
@@ -842,11 +881,37 @@
                     removeBtn = document.createElement('button');
                     removeBtn.type = 'button';
                     removeBtn.id = `logo_${side}_remove_btn`;
-                    removeBtn.onclick = function() { removeLogo(side); };
+                    removeBtn.setAttribute('data-side', side);
                     removeBtn.className = 'ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300';
                     removeBtn.title = 'Remove logo';
                     removeBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+                    // Attach event listener instead of onclick
+                    removeBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof window.removeLogo === 'function') {
+                            window.removeLogo(side);
+                        }
+                    });
                     statusEl.parentNode.appendChild(removeBtn);
+                }
+            } else {
+                // Ensure event listener is attached (in case button was just shown)
+                if (removeBtn && !removeBtn.hasAttribute('data-listener-attached')) {
+                    removeBtn.removeAttribute('onclick');
+                    removeBtn.setAttribute('data-side', side);
+                    removeBtn.setAttribute('data-listener-attached', 'true');
+                    // Clone to ensure clean event listener
+                    const newRemoveBtn = removeBtn.cloneNode(true);
+                    removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+                    newRemoveBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof window.removeLogo === 'function') {
+                            window.removeLogo(side);
+                        }
+                    });
+                    removeBtn = newRemoveBtn;
                 }
             }
             if (removeBtn) {
@@ -979,6 +1044,21 @@
         function showSignatureRemoveButton(signatoryNum) {
             const removeBtn = document.getElementById(`sig_${signatoryNum}_remove_btn`);
             if (removeBtn) {
+                // Ensure event listener is attached and no inline onclick
+                if (!removeBtn.hasAttribute('data-listener-attached')) {
+                    removeBtn.removeAttribute('onclick');
+                    removeBtn.setAttribute('data-listener-attached', 'true');
+                    // Clone to ensure clean event listener
+                    const newRemoveBtn = removeBtn.cloneNode(true);
+                    removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+                    newRemoveBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof window.removeSignature === 'function') {
+                            window.removeSignature(signatoryNum);
+                        }
+                    });
+                }
                 removeBtn.classList.remove('hidden');
             }
         }
@@ -1039,14 +1119,49 @@
             }
         }
 
-        // Initialize remove buttons for existing logos and signatures on page load
-        // Replace inline onclick handlers with event listeners to prevent firing on load
-        (function() {
-            function initRemoveButtons() {
+        // Initialize remove buttons and file inputs for existing logos and signatures on page load
+        // MUST run immediately to prevent inline handlers from executing
+        (function initAllRemoveButtons() {
+            function attachEventListeners() {
                 try {
-                    // Check for existing logos and show remove buttons
+                    // Attach event listeners for logo remove buttons
                     ['left', 'right'].forEach(side => {
                         try {
+                            const removeBtn = document.getElementById(`logo_${side}_remove_btn`);
+                            const fileInput = document.getElementById(`logo_${side}_file`);
+                            
+                            // Attach event listener for logo remove button
+                            if (removeBtn) {
+                                // Remove any inline onclick
+                                removeBtn.removeAttribute('onclick');
+                                // Clone to remove any existing handlers
+                                const newRemoveBtn = removeBtn.cloneNode(true);
+                                removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+                                newRemoveBtn.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (typeof window.removeLogo === 'function') {
+                                        window.removeLogo(side);
+                                    }
+                                });
+                            }
+                            
+                            // Attach event listener for logo file input
+                            if (fileInput) {
+                                // Remove inline onchange
+                                fileInput.removeAttribute('onchange');
+                                // Clone to remove any existing handlers
+                                const newFileInput = fileInput.cloneNode(true);
+                                fileInput.parentNode.replaceChild(newFileInput, fileInput);
+                                newFileInput.addEventListener('change', function(e) {
+                                    e.stopPropagation();
+                                    if (typeof window.uploadLogo === 'function') {
+                                        window.uploadLogo(side);
+                                    }
+                                });
+                            }
+                            
+                            // Show remove button if logo exists
                             const previewEl = document.getElementById(`logo_${side}_preview`);
                             const statusEl = document.getElementById(`logo_${side}_status`);
                             if (previewEl && statusEl && !previewEl.classList.contains('hidden') && (statusEl.textContent === 'Uploaded' || previewEl.src)) {
@@ -1055,26 +1170,19 @@
                                 }
                             }
                         } catch(e) {
-                            console.error('Error initializing logo remove button for', side, ':', e);
+                            console.error('Error initializing logo buttons for', side, ':', e);
                         }
                     });
                     
-                    // Check for existing signatures and replace inline onclick with event listeners
+                    // Attach event listeners for signature remove buttons and file inputs
                     for (let i = 1; i <= 4; i++) {
                         try {
-                            const previewEl = document.getElementById(`sig_${i}_preview`);
-                            const statusEl = document.getElementById(`sig_${i}_status`);
                             const removeBtn = document.getElementById(`sig_${i}_remove_btn`);
                             const fileInput = document.getElementById(`sig_${i}_file`);
+                            const signatoryRemoveBtn = document.querySelector(`.remove-signatory-btn[data-signatory="${i}"]`) || 
+                                                       document.querySelector(`[data-signatory="${i}"] .remove-signatory-btn`);
                             
-                            // Show remove button if signature exists
-                            if (previewEl && statusEl && !previewEl.classList.contains('hidden') && (statusEl.textContent === 'Uploaded' || previewEl.src)) {
-                                if (typeof showSignatureRemoveButton === 'function') {
-                                    showSignatureRemoveButton(i);
-                                }
-                            }
-                            
-                            // Replace inline onclick with event listener for remove button
+                            // Attach event listener for signature remove button (small X button)
                             if (removeBtn) {
                                 removeBtn.removeAttribute('onclick');
                                 const newRemoveBtn = removeBtn.cloneNode(true);
@@ -1088,37 +1196,77 @@
                                 });
                             }
                             
-                            // Replace inline onchange with event listener for file input
-                            // Remove any inline handlers and attach proper event listener
+                            // Attach event listener for signatory remove button (trash icon)
+                            if (signatoryRemoveBtn) {
+                                signatoryRemoveBtn.removeAttribute('onclick');
+                                const newSignatoryRemoveBtn = signatoryRemoveBtn.cloneNode(true);
+                                signatoryRemoveBtn.parentNode.replaceChild(newSignatoryRemoveBtn, signatoryRemoveBtn);
+                                newSignatoryRemoveBtn.setAttribute('data-signatory', i);
+                                newSignatoryRemoveBtn.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (typeof window.removeSignatory === 'function') {
+                                        window.removeSignatory(i);
+                                    }
+                                });
+                            }
+                            
+                            // Attach event listener for signature file input
                             if (fileInput) {
-                                // Remove inline onchange attribute if present
                                 fileInput.removeAttribute('onchange');
-                                // Clone node to remove any existing event listeners
                                 const newFileInput = fileInput.cloneNode(true);
                                 fileInput.parentNode.replaceChild(newFileInput, fileInput);
-                                // Attach proper event listener that won't fire on load
-                                newFileInput.addEventListener('change', function() {
+                                newFileInput.addEventListener('change', function(e) {
+                                    e.stopPropagation();
                                     if (typeof window.uploadSignature === 'function') {
                                         window.uploadSignature(i);
                                     }
                                 });
                             }
+                            
+                            // Show remove button if signature exists
+                            const previewEl = document.getElementById(`sig_${i}_preview`);
+                            const statusEl = document.getElementById(`sig_${i}_status`);
+                            if (previewEl && statusEl && !previewEl.classList.contains('hidden') && (statusEl.textContent === 'Uploaded' || previewEl.src)) {
+                                if (typeof showSignatureRemoveButton === 'function') {
+                                    showSignatureRemoveButton(i);
+                                }
+                            }
                         } catch(e) {
-                            console.error('Error initializing signature remove button for', i, ':', e);
+                            console.error('Error initializing signature buttons for', i, ':', e);
                         }
                     }
+                    
+                    // Also attach event listeners using event delegation for dynamically added elements
+                    const container = document.getElementById('signatory-details-container');
+                    if (container) {
+                        // Use event delegation for remove signatory buttons
+                        container.addEventListener('click', function(e) {
+                            const removeBtn = e.target.closest('.remove-signatory-btn');
+                            if (removeBtn && removeBtn.dataset.signatory) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const signatoryNum = parseInt(removeBtn.dataset.signatory);
+                                if (typeof window.removeSignatory === 'function') {
+                                    window.removeSignatory(signatoryNum);
+                                }
+                            }
+                        });
+                    }
                 } catch(e) {
-                    console.error('Error in initRemoveButtons:', e);
+                    console.error('Error in attachEventListeners:', e);
                 }
             }
             
-            // Wait for DOM to be ready and all functions to be defined
+            // Run immediately if DOM is ready, otherwise wait
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', function() {
-                    setTimeout(initRemoveButtons, 300);
+                    // Run immediately without setTimeout to prevent inline handlers from firing
+                    attachEventListeners();
                 });
             } else {
-                setTimeout(initRemoveButtons, 300);
+                // DOM is already ready, run immediately
+                attachEventListeners();
             }
         })();
 
