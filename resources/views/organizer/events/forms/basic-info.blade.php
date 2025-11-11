@@ -52,21 +52,24 @@
             $isFreeInit = false;
             $isFreeLocked = false;
         }
+        // Normalize flags for safe use in the markup
+        $__lock = isset($isFreeLocked) ? (bool)$isFreeLocked : false;
+        $__checked = isset($isFreeInit) ? (bool)$isFreeInit : false;
     @endphp
     <div class="flex items-center space-x-3">
-        <label class="inline-flex items-center space-x-2 {{ $isFreeLocked ? 'opacity-60 cursor-not-allowed' : '' }}">
+        <label class="inline-flex items-center space-x-2 {{ $__lock ? 'opacity-60 cursor-not-allowed' : '' }}">
             <input 
                 type="checkbox" 
                 name="is_free" 
                 value="1" 
                 id="is_free_checkbox" 
-                {{ $isFreeInit ? 'checked' : '' }} 
-                {{ $isFreeLocked ? 'disabled' : '' }}
-                class="rounded border-gray-300 text-qricket-600 {{ $isFreeLocked ? 'cursor-not-allowed' : '' }}"
+                {{ $__checked ? 'checked' : '' }} 
+                {{ $__lock ? 'disabled' : '' }}
+                class="rounded border-gray-300 text-qricket-600 {{ $__lock ? 'cursor-not-allowed' : '' }}"
             >
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
         </label>
-        @if($isFreeLocked)
+        @if($__lock)
             <!-- Hidden input to ensure is_free is always submitted as true for locked free events -->
             <input type="hidden" name="is_free" value="1">
             <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">(Cannot be changed - Event is already free)</span>
@@ -74,7 +77,7 @@
             <span class="text-xs text-gray-500 dark:text-gray-400">(See sidebar for details)</span>
         @endif
     </div>
-    @if($isFreeLocked)
+    @if($__lock)
         <div class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
             <p class="text-xs text-amber-800 dark:text-amber-200">
                 <strong>Note:</strong> Once an event is created as free, it cannot be changed to a paid event. This ensures consistency for attendees who have already registered.
