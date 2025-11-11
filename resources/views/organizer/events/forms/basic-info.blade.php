@@ -22,25 +22,58 @@
     </div>
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
-    @if(
-        (isset($isFreeEvent) && ($isFreeEvent === true || $isFreeEvent === 1 || $isFreeEvent === '1')) ||
-        (isset($event) && is_object($event) && isset($event->is_free) && (bool)$event->is_free === true) ||
-        (isset($eventData) && is_array($eventData) && isset($eventData['is_free']) && (bool)$eventData['is_free'] === true)
-    )
-        <!-- Event is free and being edited - show read-only display instead of checkbox -->
+    @php
+        // Determine if event is free (check multiple sources)
+        $eventIsFree = false;
+        if (isset($isFreeEvent) && ($isFreeEvent === true || $isFreeEvent === 1 || $isFreeEvent === '1')) {
+            $eventIsFree = true;
+        } elseif (isset($event) && is_object($event) && isset($event->is_free) && (bool)$event->is_free === true) {
+            $eventIsFree = true;
+        } elseif (isset($eventData) && is_array($eventData) && isset($eventData['is_free']) && (bool)$eventData['is_free'] === true) {
+            $eventIsFree = true;
+        }
+        
+        // Check if checkbox should be locked
+        // Locked if: isFreeEventLocked is passed (from controller), OR event is free, OR event is paid with sales
+        $checkboxLocked = false;
+        $eventIsPaidWithSales = false;
+        
+        if (isset($isFreeEventLocked) && $isFreeEventLocked === true) {
+            $checkboxLocked = true;
+            // Determine if it's paid with sales (hasSales is true and event is not free)
+            if (isset($hasSales) && $hasSales === true && !$eventIsFree) {
+                $eventIsPaidWithSales = true;
+            }
+        } elseif ($eventIsFree) {
+            // Event is free - always locked
+            $checkboxLocked = true;
+        } elseif (isset($hasSales) && $hasSales === true && !$eventIsFree) {
+            // Event is paid and has sales - locked
+            $checkboxLocked = true;
+            $eventIsPaidWithSales = true;
+        }
+    @endphp
+    
+    @if($checkboxLocked)
+        <!-- Event type is locked - show read-only display instead of checkbox -->
         <div class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
             <div class="flex items-center space-x-2">
-                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 {{ $eventIsFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">This event is set as <strong>Free</strong></span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    This event is set as <strong>{{ $eventIsFree ? 'Free' : 'Paid' }}</strong>
+                    @if($eventIsPaidWithSales)
+                        <span class="text-xs text-gray-500 dark:text-gray-400">(has ticket sales)</span>
+                    @endif
+                </span>
             </div>
             <span class="text-xs text-amber-600 dark:text-amber-400 font-medium ml-auto">(Cannot be changed)</span>
         </div>
-        <!-- Hidden input to ensure is_free=1 is always submitted -->
-        <input type="hidden" name="is_free" value="1">
+        <!-- Hidden input to ensure is_free value is always submitted -->
+        <input type="hidden" name="is_free" value="{{ $eventIsFree ? '1' : '0' }}">
     @else
-        <!-- Normal checkbox for event creation or paid events -->
+        <!-- Normal checkbox for event creation or events without restrictions -->
         <div class="flex items-center space-x-3">
             <label class="inline-flex items-center space-x-2">
                 <input 
@@ -100,10 +133,6 @@
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional: Add a Google Maps link for directions.</p>
         </div>
     </div>
-    
-    <!-- Hidden fields for latitude and longitude (used by Google Maps) -->
-    <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $eventData['latitude'] ?? (isset($event) && is_object($event) ? ($event->latitude ?? '') : '')) }}">
-    <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $eventData['longitude'] ?? (isset($event) && is_object($event) ? ($event->longitude ?? '') : '')) }}">
 </div>
 
 <script>

@@ -200,8 +200,6 @@ class BasicInfoController extends Controller
             'end_date' => 'nullable|date|after:start_date',
             'location' => 'required|string|max:500',
             'location_url' => 'nullable|url|max:1000',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
         ], [
             'title.required' => 'Event title is required.',
             'title.max' => 'Event title cannot be longer than 255 characters.',
@@ -218,10 +216,6 @@ class BasicInfoController extends Controller
             'location.max' => 'Location cannot be longer than 500 characters.',
             'location_url.url' => 'Please enter a valid URL for the location.',
             'location_url.max' => 'Location URL cannot be longer than 1000 characters.',
-            'latitude.numeric' => 'Latitude must be a valid number.',
-            'latitude.between' => 'Latitude must be between -90 and 90.',
-            'longitude.numeric' => 'Longitude must be a valid number.',
-            'longitude.between' => 'Longitude must be between -180 and 180.',
         ]);
         
         if ($validator->fails()) {
@@ -238,29 +232,52 @@ class BasicInfoController extends Controller
         }
 
         try {
-            $step1Data = $request->only(['title','description','category','start_date','end_date','location','location_url','tags','latitude','longitude']);
+            $step1Data = $request->only(['title','description','category','start_date','end_date','location','location_url','tags']);
             
             $wasExistingEvent = !is_null($eventId);
-            $originalData = $wasExistingEvent ? $event->only(['title','description','category','start_date','end_date','location','location_url','tags','latitude','longitude','is_free']) : null;
+            $originalData = $wasExistingEvent ? $event->only(['title','description','category','start_date','end_date','location','location_url','tags','is_free']) : null;
             
-            // Prevent changing a free event to paid event
-            if ($wasExistingEvent && $event->is_free) {
-                // Event is already free - keep it free and ignore any attempt to change it
-                $step1Data['is_free'] = true;
+            // Prevent changing event type if it has sales
+            if ($wasExistingEvent) {
+                // Check if event has any ticket sales
+                $hasSales = $event->eventTickets()->where('sold_count', '>', 0)->exists() 
+                         || \App\Models\TicketPurchase::whereHas('ticketInformation', function($query) use ($event) {
+                                $query->where('event_id', $event->id);
+                            })
+                            ->where('status', 'paid')
+                            ->exists();
                 
-                // If user tried to uncheck the free event checkbox, show an error
-                if (!$request->boolean('is_free')) {
+                if ($event->is_free) {
+                    // Event is already free - keep it free and ignore any attempt to change it
+                    $step1Data['is_free'] = true;
+                    
+                    // If user tried to uncheck the free event checkbox, show an error
+                    if (!$request->boolean('is_free')) {
+                        if ($request->expectsJson() || $request->ajax()) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.',
+                                'errors' => ['is_free' => ['Cannot change free event to paid event.']]
+                            ], 422);
+                        }
+                        return back()->withErrors(['is_free' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.'])->withInput();
+                    }
+                } elseif ($hasSales && $request->boolean('is_free')) {
+                    // Event is paid and has sales - prevent changing to free
                     if ($request->expectsJson() || $request->ajax()) {
                         return response()->json([
                             'success' => false,
-                            'message' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.',
-                            'errors' => ['is_free' => ['Cannot change free event to paid event.']]
+                            'message' => 'Cannot change paid event to free event. This event has ticket sales and cannot be changed to a free event.',
+                            'errors' => ['is_free' => ['Cannot change paid event with sales to free event.']]
                         ], 422);
                     }
-                    return back()->withErrors(['is_free' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.'])->withInput();
+                    return back()->withErrors(['is_free' => 'Cannot change paid event to free event. This event has ticket sales and cannot be changed to a free event.'])->withInput();
+                } else {
+                    // Normalize boolean for is_free (paid event without sales can be changed)
+                    $step1Data['is_free'] = $request->boolean('is_free');
                 }
             } else {
-                // Normalize boolean for is_free (for new events or paid events)
+                // Normalize boolean for is_free (for new events)
                 $step1Data['is_free'] = $request->boolean('is_free');
             }
             

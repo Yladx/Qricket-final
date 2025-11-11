@@ -9,7 +9,7 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <form id="editBasicForm" method="POST" action="{{ route('organizer.events.step1.store') }}?id={{ $event->id }}" enctype="multipart/form-data" class="space-y-6">
                         @csrf
-                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event, 'isFreeEvent' => $isFreeEvent ?? false])
+                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event, 'isFreeEvent' => $isFreeEvent ?? false, 'hasSales' => $hasSales ?? false, 'isFreeEventLocked' => $isFreeEventLocked ?? false])
 
                         <!-- Navigation Buttons -->
                         <div class="flex items-center justify-between pt-6">
@@ -32,116 +32,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Google Maps API -->
-    @if(config('services.google_maps.api_key'))
-    <script>
-        let map;
-        let marker;
-        let geocoder;
-        let autocomplete;
-
-        function initMap() {
-            // Initialize map
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 15,
-                center: { lat: -6.200000, lng: 106.816666 }, // Jakarta coordinates
-            });
-
-            // Initialize geocoder
-            geocoder = new google.maps.Geocoder();
-
-            // Initialize marker
-            marker = new google.maps.Marker({
-                position: { lat: -6.199000, lng: 106.816666 },
-                map: map,
-                draggable: true,
-            });
-
-            // Create autocomplete for location input
-            const locationInput = document.getElementById('location');
-            autocomplete = new google.maps.places.Autocomplete(locationInput);
-            autocomplete.bindTo('bounds', map);
-
-            // Listen for place selection
-            autocomplete.addListener('place_changed', () => {
-                const place = autocomplete.getPlace();
-                if (!place.geometry || !place.geometry.location) {
-                    console.log("No details available for input: '" + place.name + "'");
-                    return;
-                }
-
-                // Update map and marker
-                map.setCenter(place.geometry.location);
-                marker.setPosition(place.geometry.location);
-                
-                // Update hidden coordinates
-                document.getElementById('latitude').value = place.geometry.location.lat();
-                document.getElementById('longitude').value = place.geometry.location.lng();
-            });
-
-            // Listen for marker drag
-            marker.addListener('dragend', () => {
-                const position = marker.getPosition();
-                document.getElementById('latitude').value = position.lat();
-                document.getElementById('longitude').value = position.lng();
-
-                // Reverse geocode to update address
-                geocoder.geocode({ location: position }, (results, status) => {
-                    if (status === 'OK' && results[0]) {
-                        document.getElementById('location').value = results[0].formatted_address;
-                    }
-                });
-            });
-
-            // Listen for map click
-            map.addListener('click', (event) => {
-                marker.setPosition(event.latLng);
-                document.getElementById('latitude').value = event.latLng.lat();
-                document.getElementById('longitude').value = event.latLng.lng();
-
-                // Reverse geocode to update address
-                geocoder.geocode({ location: event.latLng }, (results, status) => {
-                    if (status === 'OK' && results[0]) {
-                        document.getElementById('location').value = results[0].formatted_address;
-                    }
-                });
-            });
-
-            // Set initial coordinates if they exist
-            const lat = document.getElementById('latitude').value;
-            const lng = document.getElementById('longitude').value;
-            if (lat && lng) {
-                const position = { lat: parseFloat(lat), lng: parseFloat(lng) };
-                map.setCenter(position);
-                marker.setPosition(position);
-            }
-        }
-
-        // Fallback if Google Maps fails to load
-        function handleMapError() {
-            console.error('Google Maps failed to load');
-            document.getElementById('map').innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">Map could not be loaded. Please enter the location manually.</div>';
-        }
-    </script>
-
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places&callback=initMap" onerror="handleMapError()"></script>
-    @else
-    <script>
-        // Fallback script when no Google Maps API key is available
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Google Maps API key not configured. Using fallback mode.');
-            
-            const locationInput = document.getElementById('location');
-            if (locationInput) {
-                locationInput.addEventListener('input', function() {
-                    // Simple fallback - just store the text location
-                    console.log('Location entered:', this.value);
-                });
-            }
-        });
-    </script>
-    @endif
 
     <!-- SweetAlert2 + Utilities (ensures dark mode theme and shared helpers) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
