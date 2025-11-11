@@ -10,16 +10,7 @@
                 $isOwner = $user && (int)$event->user_id === (int)$user->id;
                 $staffWelcome = $staffNotes['staff_welcome_message'] ?? null;
                 $staffInstructions = $staffNotes['staff_instructions'] ?? null;
-                
-                // Check subscription for graph visibility
-                $subscription = $user?->currentSubscription();
-                $plan = $subscription?->getPlan();
-                if (!$plan) {
-                    $plan = \App\Models\SubscriptionPlan::where('slug', 'free')->first();
-                }
-                $hasProSubscription = $plan && in_array($plan->slug, ['professional', 'enterprise', 'starter']);
-                $isAdmin = Auth::guard('admin')->check();
-                $canViewGraphs = $hasProSubscription || $isAdmin;
+                // Note: $canViewGraphs is already calculated in the controller and includes advanced_analytics check
             @endphp
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <!-- Main Content -->
