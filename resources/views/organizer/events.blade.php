@@ -123,20 +123,38 @@
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 line-clamp-2 min-h-[3.5rem] leading-tight">{{ $event->title ?: 'Untitled Event' }}</h3>
                                 @php
                                     $userRole = null;
-                                    if ($event->user_id === Auth::id()) {
+                                    $roleBadgeColor = 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200';
+                                    $currentUserId = Auth::id();
+                                    $staffMember = $event->staff->where('user_id', $currentUserId)->first();
+                                    
+                                    // Priority: Check staff role first (co-owner takes precedence)
+                                    if ($staffMember) {
+                                        // User is staff member - prioritize staff role over creator
+                                        if ($staffMember->role === 'co-owner') {
+                                            $userRole = 'Co-Owner';
+                                            $roleBadgeColor = 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200';
+                                        } elseif ($staffMember->role === 'manager') {
+                                            $userRole = 'Manager';
+                                            $roleBadgeColor = 'bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200';
+                                        } elseif ($staffMember->role === 'organizer') {
+                                            $userRole = 'Organizer';
+                                            $roleBadgeColor = 'bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200';
+                                        } else {
+                                            $userRole = ucfirst(str_replace('_', ' ', $staffMember->role));
+                                            $roleBadgeColor = 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200';
+                                        }
+                                    } elseif ($event->user_id === $currentUserId) {
+                                        // User is creator but not staff
                                         $userRole = 'Creator';
+                                        $roleBadgeColor = 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200';
                                     } elseif ($event->user_id === null && $isAdmin) {
                                         $userRole = 'Admin';
-                                    } elseif ($event->staff->where('role', 'organizer')->isNotEmpty()) {
-                                        $userRole = 'Organizer';
-                                    } elseif ($event->staff->isNotEmpty()) {
-                                        $staffMember = $event->staff->first();
-                                        $userRole = ucfirst(str_replace('_', ' ', $staffMember->role));
+                                        $roleBadgeColor = 'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200';
                                     }
                                 @endphp
                                 <div class="flex items-center gap-1.5">
                                 @if($userRole)
-                                    <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium">
+                                    <span class="{{ $roleBadgeColor }} px-2 py-1 rounded-full text-xs font-medium">
                                         {{ $userRole }}
                                     </span>
                                 @endif

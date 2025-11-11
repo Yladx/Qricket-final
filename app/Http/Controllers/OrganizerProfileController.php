@@ -21,14 +21,19 @@ class OrganizerProfileController extends Controller
         $type = $request->get('type', 'organized'); // organized, staff, all
         $filter = $request->get('filter', 'all'); // all, upcoming, ended
 
-        // Base query for organized events - show all events regardless of status
-        $organizedQuery = $organizer->organizedEvents();
+        // Base query for organized events - show events where user is the owner
+        // Exclude events where user is also a co-owner (co-owners should show in "Part Of" instead)
+        $organizedQuery = $organizer->organizedEvents()
+            ->whereDoesntHave('staff', function($query) use ($userId) {
+                $query->where('user_id', $userId)
+                      ->where('role', 'co-owner');
+            });
 
-        // Base query for staff events - show all events regardless of status
+        // Base query for staff events - show all events where user is staff (including co-owners)
+        // This includes co-owners even if they also own the event (co-owners always show in "Part Of")
         $staffQuery = Event::whereHas('staff', function($query) use ($userId) {
                 $query->where('user_id', $userId);
-            })
-            ->where('user_id', '!=', $userId); // Exclude events they organized
+            });
 
         // Apply date filter
         $now = now();
@@ -58,12 +63,17 @@ class OrganizerProfileController extends Controller
         }
 
         // Get counts for filters
-        $organizedCount = $organizer->organizedEvents()->where('status', 'published')->count();
+        $organizedCount = $organizer->organizedEvents()
+            ->where('status', 'published')
+            ->whereDoesntHave('staff', function($query) use ($userId) {
+                $query->where('user_id', $userId)
+                      ->where('role', 'co-owner');
+            })
+            ->count();
         $staffCount = Event::whereHas('staff', function($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
             ->where('status', 'published')
-            ->where('user_id', '!=', $userId)
             ->count();
 
         return view('organizer.profile', compact(

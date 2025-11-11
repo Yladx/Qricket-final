@@ -58,19 +58,24 @@
                         // Staff members need explicit permissions (no automatic access just for being staff)
                         $staffRole = $staff?->role ?? null;
                         $isOrganizerRole = $staffRole === 'organizer';
+                        $isCoOwner = $staffRole === 'co-owner';
                         
-                        // Permission checks - staff members need explicit permissions
+                        // Co-owners get all permissions except payout (like owners, but can't access payout)
+                        // Permission checks - staff members need explicit permissions, but co-owners get all except payout
                         $canViewOverview = $isAdmin || $isOwner || $isAdminEvent || ($staff !== null);
-                        $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_attendance ?? false) || $isOrganizerRole;
-                        $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_ticket ?? false) || $isOrganizerRole;
-                        $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+                        $canManageAttendance = $isAdmin || $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_attendance ?? false) || $isOrganizerRole;
+                        $canManageTicket = $isAdmin || $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_ticket ?? false) || $isOrganizerRole;
+                        $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
                         // Event Info should be visible to: admins, owners, staff (even without can_manage_event), but content depends on permissions
                         $canViewEventInfo = $isAdmin || $isOwner || $isAdminEvent || ($staff !== null);
-                        $canManageStaff = $isOwner || $isAdminEvent || ($staff?->can_manage_staff ?? false) || $isOrganizerRole;
-                        $canManageNews = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_news ?? false) || $isOrganizerRole;
-                        $canManageSales = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_sales ?? false) || $isOrganizerRole;
+                        $canManageStaff = $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_staff ?? false) || $isOrganizerRole;
+                        $canManageNews = $isAdmin || $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_news ?? false) || $isOrganizerRole;
+                        $canManageSales = $isAdmin || $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_sales ?? false) || $isOrganizerRole;
                         $canViewActivity = $isAdmin || $isOwner || $isAdminEvent || ($staff !== null);
-                        $canManageFeedback = $isAdmin || $isOwner || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+                        // Co-owners can access feedback (all permissions except payout)
+                        $canManageFeedback = $isAdmin || $isOwner || $isCoOwner || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+                        // Payout is ONLY for owners and admins (NOT co-owners)
+                        $canManagePayout = $isAdmin || $isOwner || $isAdminEvent;
                         
                         // Route helper function
                         $route = function($name, $params = []) use ($isAdmin, $event) {

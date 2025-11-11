@@ -327,7 +327,7 @@
     }
   });
 
-  function addMember(user) {
+  function addMember(user, initialRole = 'staff') {
     if (!user || !user.id) {
       // console.error('[Step5] Invalid user data for adding:', user);
       return;
@@ -350,18 +350,21 @@
       return;
     }
     
+    // Determine if all permissions should be enabled (for co-owner and owner roles)
+    const isCoOwnerOrOwner = initialRole === 'co-owner' || initialRole === 'owner';
+    
     // Add the new member
     const newMember = { 
       id: user.id, 
       name: user.name, 
       email: user.email, 
-      role: 'staff',
-      can_manage_event: false,
-      can_manage_staff: false,
-      can_manage_ticket: false,
-      can_manage_news: false,
-      can_manage_attendance: false,
-      can_manage_sales: false
+      role: initialRole,
+      can_manage_event: isCoOwnerOrOwner,
+      can_manage_staff: isCoOwnerOrOwner,
+      can_manage_ticket: isCoOwnerOrOwner,
+      can_manage_news: isCoOwnerOrOwner,
+      can_manage_attendance: isCoOwnerOrOwner,
+      can_manage_sales: isCoOwnerOrOwner
     };
     
     data.members.push(newMember);
@@ -551,6 +554,32 @@
       data.members[Number(i)][k] = !!e.target.checked;
     } else {
       data.members[Number(i)][k] = e.target.value;
+      
+      // If role changed to co-owner, automatically check all permissions
+      if (k === 'role' && e.target.value === 'co-owner') {
+        const member = data.members[Number(i)];
+        const memberId = member.id;
+        member.can_manage_event = true;
+        member.can_manage_staff = true;
+        member.can_manage_ticket = true;
+        member.can_manage_news = true;
+        member.can_manage_attendance = true;
+        member.can_manage_sales = true;
+        
+        // Update UI checkboxes immediately by finding them by their data attributes
+        requestAnimationFrame(() => {
+          const card = cards.querySelector(`[data-member-id="${memberId}"]`);
+          if (card) {
+            const checkboxes = card.querySelectorAll('input[type="checkbox"][data-k]');
+            checkboxes.forEach(checkbox => {
+              const permKey = checkbox.getAttribute('data-k');
+              if (permKey && member[permKey] !== undefined) {
+                checkbox.checked = member[permKey];
+              }
+            });
+          }
+        });
+      }
     }
     writeData(data);
     queueAutosave();

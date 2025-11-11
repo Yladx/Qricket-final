@@ -109,17 +109,22 @@
                 </div>
             </div>
             
-                <!-- Staff Members (if any) - Premium Design -->
-            @if(method_exists($event, 'staff') && optional($event)->staff && count($event->staff) > 0)
+                <!-- Staff Members (Co-owners and Managers only) - Premium Design -->
+            @php
+                $coOwnersAndManagers = optional($event)->staff ? $event->staff->filter(function($staff) {
+                    return $staff->user && in_array($staff->role, ['co-owner', 'manager']);
+                }) : collect();
+            @endphp
+            @if(method_exists($event, 'staff') && $coOwnersAndManagers->count() > 0)
                 <div class="mt-8 pt-8 border-t border-gray-200/80 dark:border-gray-700/80">
                     <div class="flex items-center gap-2 mb-4">
                         <svg class="w-5 h-5 text-qricket-500 dark:text-qricket-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">Event Staff</h4>
+                        <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">Event Co-Owners & Managers</h4>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    @foreach($event->staff as $staff)
+                    @foreach($coOwnersAndManagers as $staff)
                         @if($staff->user)
                             <a href="{{ route('organizer.profile', $staff->user->id) }}?back={{ urlencode(route('events.show', $event->id)) }}" 
                                    class="group flex items-center gap-3 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-850 rounded-xl border border-gray-200/60 dark:border-gray-700/60 px-4 py-3 hover:shadow-lg hover:border-qricket-300 dark:hover:border-qricket-700 transition-all duration-300">
@@ -149,7 +154,7 @@
                                         </p>
                                     @if($staff->role)
                                             <p class="text-xs text-gray-900 dark:text-gray-400 mt-0.5">
-                                                {{ ucfirst($staff->role) }}
+                                                {{ ucfirst(str_replace('-', ' ', $staff->role)) }}
                                             </p>
                                     @endif
                                 </div>

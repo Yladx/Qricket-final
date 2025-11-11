@@ -131,12 +131,10 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                     @foreach($events as $event)
                         @php
-                            $staffRole = null;
-                            if ($type === 'staff' || $type === 'all') {
-                                $staffRole = \App\Models\EventStaff::where('event_id', $event->id)
-                                    ->where('user_id', $organizer->id)
-                                    ->first();
-                            }
+                            // Always check for staff role (including co-owner) for all events
+                            $staffRole = \App\Models\EventStaff::where('event_id', $event->id)
+                                ->where('user_id', $organizer->id)
+                                ->first();
                         @endphp
                         <a href="{{ route('events.show', $event) }}" class="group block bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5">
                             <!-- Event Image -->
@@ -168,11 +166,20 @@
                                     </span>
                                 </div>
 
-                                <!-- Role Badge (if staff) -->
+                                <!-- Role Badge (if staff/co-owner) -->
                                 @if($staffRole)
                                     <div class="absolute bottom-3 left-3">
-                                        <span class="px-2.5 py-1 text-[11px] font-medium bg-qricket-600 text-white rounded-full shadow-sm">
-                                            {{ ucfirst($staffRole->role) }}
+                                        @php
+                                            $roleColors = [
+                                                'co-owner' => 'bg-purple-600',
+                                                'manager' => 'bg-blue-600',
+                                                'organizer' => 'bg-indigo-600',
+                                                'staff' => 'bg-qricket-600',
+                                            ];
+                                            $badgeColor = $roleColors[$staffRole->role] ?? 'bg-qricket-600';
+                                        @endphp
+                                        <span class="px-2.5 py-1 text-[11px] font-medium {{ $badgeColor }} text-white rounded-full shadow-sm">
+                                            {{ ucfirst(str_replace('-', ' ', $staffRole->role)) }}
                                         </span>
                                     </div>
                                 @endif
