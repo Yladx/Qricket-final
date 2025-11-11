@@ -105,9 +105,10 @@ class ReportsController extends Controller
         $ticketLimitNetRevenue = 0.0;
         $ticketLimitAdminEarnings = 0.0;
 
-        // All events with revenue (for detailed table) - with pagination
+        // All events with revenue (for detailed table) - grouped by free/paid
         // Get all purchases and group by event_id to calculate net amounts and admin earnings
         $allEventsData = TicketPurchase::where('status','paid')
+            ->with('event')
             ->get()
             ->groupBy('event_id')
             ->map(function($purchases, $eventId) use ($adminRevenuePercentage) {
@@ -119,6 +120,9 @@ class ReportsController extends Controller
                 });
                 $adminEarnings = (float) max(0, $netRevenue) * ($adminRevenuePercentage / 100);
                 
+                // Determine if event is free using the event's is_free field
+                $isFreeEvent = $event && ($event->is_free === true || $event->is_free === 1);
+                
                 return [
                     'event_id' => $eventId,
                     'title' => $event?->title ?? ('Event #'.$eventId),
@@ -128,26 +132,23 @@ class ReportsController extends Controller
                     'orders' => (int) $purchases->count(),
                     'start_date' => $event?->start_date?->format('M d, Y') ?? 'N/A',
                     'status' => $event?->status ?? 'unknown',
+                    'is_free' => $isFreeEvent,
                 ];
             })
-            ->sortByDesc('total_revenue')
             ->values();
-            
-        // Convert to paginated collection manually
-        $page = request()->get('page', 1);
-        $perPage = 15;
-        $offset = ($page - 1) * $perPage;
-        $total = $allEventsData->count();
-        $items = $allEventsData->slice($offset, $perPage)->values();
         
-        // Create a LengthAwarePaginator manually
-        $allEventsRevenue = new \Illuminate\Pagination\LengthAwarePaginator(
-            $items,
-            $total,
-            $perPage,
-            $page,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
+        // Separate free and paid events - group them cleanly
+        $paidEvents = $allEventsData->filter(function($event) {
+            return !($event['is_free'] ?? false);
+        })->sortByDesc('total_revenue')->values();
+        
+        $freeEvents = $allEventsData->filter(function($event) {
+            return ($event['is_free'] ?? false);
+        })->sortByDesc('orders')->values(); // Sort free events by orders (tickets sold) instead of revenue
+        
+        // Keep allEventsRevenue for backward compatibility (used in some places)
+        // But now we'll use paidEvents and freeEvents separately in the view
+        $allEventsRevenue = collect(); // Empty collection since we're using separate groups
 
         // Get all subscription plans (even those with no subscriptions)
         $allPlans = \App\Models\SubscriptionPlan::all();
@@ -323,6 +324,8 @@ class ReportsController extends Controller
             'subTrendLabels' => $subTrendLabels,
             'subTrendRevenue' => $subTrendRevenue,
             'allEventsRevenue' => $allEventsRevenue,
+            'paidEvents' => $paidEvents,
+            'freeEvents' => $freeEvents,
             'subscriptionPlans' => $subscriptionPlans,
             'subscriptionUsers' => $subscriptionUsers,
             'subscriptionCount' => $subscriptionCount,
@@ -566,7 +569,7 @@ class ReportsController extends Controller
 
             $data['summary']['tickets'] = $eventSummary;
 
-            // Event revenue summary - group by event
+            // Event revenue summary - group by event and separate free/paid
             $eventRevenueData = $eventData->groupBy('event_id')->map(function ($purchases) use ($adminRevenuePercentage) {
                 $firstPurchase = $purchases->first();
                 $event = $firstPurchase->event;
@@ -578,6 +581,9 @@ class ReportsController extends Controller
                 $totalFees = $purchases->sum(function($purchase) {
                     return ($purchase->transaction_fee ?? 0) + ($purchase->vat_amount ?? 0);
                 });
+                
+                // Determine if event is free using the event's is_free field
+                $isFreeEvent = $event && ($event->is_free === true || $event->is_free === 1);
                 
                 return [
                     'event_id' => $event?->id ?? 0,
@@ -596,11 +602,24 @@ class ReportsController extends Controller
                     'pending_orders' => $purchases->where('status', 'pending')->count(),
                     'average_order_value' => $purchases->avg('total_amount'),
                     'first_sale_date' => $purchases->min('created_at')?->format('Y-m-d H:i:s') ?? '',
-                    'last_sale_date' => $purchases->max('created_at')?->format('Y-m-d H:i:s') ?? ''
+                    'last_sale_date' => $purchases->max('created_at')?->format('Y-m-d H:i:s') ?? '',
+                    'is_free' => $isFreeEvent,
                 ];
             })->values();
+            
+            // Separate free and paid events for report generation
+            $paidEventsReport = $eventRevenueData->filter(function($event) {
+                return !($event['is_free'] ?? false);
+            })->sortByDesc('total_revenue')->values();
+            
+            $freeEventsReport = $eventRevenueData->filter(function($event) {
+                return ($event['is_free'] ?? false);
+            })->sortByDesc('total_orders')->values();
 
+            // Store both groups in report data
             $data['details']['events'] = $eventRevenueData->toArray();
+            $data['details']['paid_events'] = $paidEventsReport->toArray();
+            $data['details']['free_events'] = $freeEventsReport->toArray();
 
             // Ticket sales detail rows (for Ticket Sales worksheet)
             $ticketSalesRows = TicketPurchase::with(['user','event'])

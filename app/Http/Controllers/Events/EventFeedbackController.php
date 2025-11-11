@@ -13,10 +13,13 @@ class EventFeedbackController extends Controller
     public function show(Event $event)
     {
         if (!Auth::check()) { return redirect()->route('login'); }
-        // Only after event ended
-        if ($event->end_date && now()->lt($event->end_date)) {
+        
+        // Only after event ended - use same logic as event-header.blade.php
+        // Check if end_date exists and is in the past
+        if (!optional($event)->end_date || !optional($event)->end_date->isPast()) {
             abort(403, 'Feedback is available after the event ends.');
         }
+        
         // Only attendees or purchasers (basic check)
         $hasTicket = \App\Models\EventTicketInformation::where('event_id', $event->id)
             ->where('user_id', Auth::id())
@@ -32,7 +35,13 @@ class EventFeedbackController extends Controller
     public function submit(Request $request, Event $event)
     {
         if (!Auth::check()) { return redirect()->route('login'); }
-        if ($event->end_date && now()->lt($event->end_date)) { abort(403); }
+        
+        // Only after event ended - use same logic as event-header.blade.php
+        // Check if end_date exists and is in the past
+        if (!optional($event)->end_date || !optional($event)->end_date->isPast()) {
+            abort(403, 'Feedback can only be submitted after the event ends.');
+        }
+        
         $request->validate([
             'responses' => 'required|array',
             'responses.comments.liked' => ['nullable', 'string', new \App\Rules\NoProfanity()],
@@ -57,7 +66,12 @@ class EventFeedbackController extends Controller
         $isOwner = (int)$event->user_id === (int)Auth::id();
         $isAdmin = \Illuminate\Support\Facades\Auth::guard('admin')->check();
         if (!$isOwner && !$isAdmin) { abort(403); }
-        if ($event->end_date && now()->lt($event->end_date)) { abort(403, 'Event not ended yet'); }
+        
+        // Only after event ended - use same logic as event-header.blade.php
+        // Check if end_date exists and is in the past
+        if (!optional($event)->end_date || !optional($event)->end_date->isPast()) {
+            abort(403, 'Event not ended yet');
+        }
 
         $feedbackUrl = route('events.feedback.show', $event);
         $attendeeIds = \App\Models\EventTicketInformation::where('event_id', $event->id)

@@ -85,20 +85,53 @@
             </div>
             
             @php
-                // Calculate average rating for ended events
+                // Calculate average rating for ended events - use same logic as organizer feedback
+                // Only calculate if event has ended (end_date exists and is in the past)
                 $averageRating = null;
                 $ratingCount = 0;
                 if (optional($event)->end_date && optional($event)->end_date->isPast()) {
                     try {
-                        $ratings = \App\Models\EventFeedback::where('event_id', optional($event)->id)
-                            ->whereNotNull('rating')
+                        // Get all feedback for this event (excluding Qricket feedback)
+                        $allFeedback = \App\Models\EventFeedback::where('event_id', optional($event)->id)
+                            ->where(function($query) {
+                                $query->whereNull('responses')
+                                      ->orWhere('responses', 'not like', '%qricket%')
+                                      ->orWhere('responses', 'not like', '%Qricket%')
+                                      ->orWhere('responses', 'not like', '%QRICKET%');
+                            })
                             ->get();
-                        $ratingCount = $ratings->count();
-                        if ($ratingCount > 0) {
-                            $averageRating = round($ratings->avg('rating'), 1);
+                        
+                        if ($allFeedback->count() > 0) {
+                            // Extract ratings from responses JSON - use exact same logic as organizer feedback controller
+                            $allResponses = $allFeedback->map(function($feedback) {
+                                $responses = is_string($feedback->responses) 
+                                    ? json_decode($feedback->responses, true) 
+                                    : $feedback->responses;
+                                return is_array($responses) ? $responses : null;
+                            })->filter();
+                            
+                            // Calculate average for Overall Experience category (same as organizer feedback)
+                            $overallExperienceRatings = $allResponses->pluck('overall_experience')->filter();
+                            if ($overallExperienceRatings->count() > 0) {
+                                $overallSubRatings = collect();
+                                foreach ($overallExperienceRatings as $rating) {
+                                    if (is_array($rating)) {
+                                        // Collect all subcategory ratings (experience, expectations, organization, etc.)
+                                        $overallSubRatings = $overallSubRatings->merge(array_values($rating));
+                                    }
+                                }
+                                
+                                if ($overallSubRatings->count() > 0) {
+                                    // Calculate average rating (same calculation as organizer feedback)
+                                    $averageRating = round($overallSubRatings->avg(), 1);
+                                    // Count is number of feedback submissions that have overall_experience ratings
+                                    $ratingCount = $overallExperienceRatings->count();
+                                }
+                            }
                         }
                     } catch (\Throwable $t) {
                         $averageRating = null;
+                        $ratingCount = 0;
                     }
                 }
             @endphp

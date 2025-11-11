@@ -13,7 +13,7 @@
                 </div>
                 @if(!$isAdmin)
                 <div class="flex items-center gap-2">
-                    @if($event->end_date && $event->end_date->isPast())
+                    @if(optional($event)->end_date && optional($event)->end_date->isPast())
                         <form method="POST" action="{{ route('events.feedback.notify', $event) }}" class="inline">
                             @csrf
                             <button type="submit" class="inline-flex items-center px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-sm transition text-xs">

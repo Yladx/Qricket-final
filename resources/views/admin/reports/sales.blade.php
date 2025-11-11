@@ -185,86 +185,144 @@
                 <!-- Tab Content -->
                 <div class="p-4">
                     <!-- Event Revenue Tab Content -->
-                    <div id="eventRevenueContent" class="tab-content">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">All Events Revenue</h3>
-                            <div class="flex items-center space-x-4">
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input type="checkbox" id="showFreeEvents" checked class="w-4 h-4 text-qricket-600 focus:ring-qricket-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700">
-                                    <span class="text-xs text-gray-700 dark:text-gray-300">Show Free Events</span>
-                                </label>
-                                <span class="text-xs text-gray-500 dark:text-gray-400"><span id="eventCount">{{ $allEventsRevenue->count() }}</span> events</span>
+                    <div id="eventRevenueContent" class="tab-content space-y-6">
+                        <!-- Paid Events Section -->
+                        @if($paidEvents->count() > 0)
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                    Paid Events
+                                    <span class="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400">({{ $paidEvents->count() }} events)</span>
+                                </h3>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-xs border border-gray-200 dark:border-gray-700 rounded-lg">
+                                    <thead class="text-left text-gray-500 dark:text-gray-400 bg-green-50 dark:bg-green-900/20">
+                                        <tr>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="title" data-group="paid">
+                                                Event Title <span class="sort-indicator">↕</span>
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="start_date" data-group="paid">
+                                                Event Date <span class="sort-indicator">↕</span>
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="status" data-group="paid">
+                                                Status <span class="sort-indicator">↕</span>
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="orders" data-group="paid">
+                                                Orders <span class="sort-indicator">↕</span>
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="total_revenue" data-group="paid">
+                                                Total Sales <span class="sort-indicator">↕</span>
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="net_revenue" data-group="paid">
+                                                Net Amount <span class="sort-indicator">↕</span>
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 sortable" data-column="admin_earnings" data-group="paid">
+                                                Qricket Earnings <span class="sort-indicator">↕</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">
+                                        @foreach($paidEvents as $event)
+                                            <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/10 event-revenue-row paid-event" data-is-free="0">
+                                                <td class="py-2 px-4 font-medium">
+                                                    <a href="{{ route('admin.events.approval.show', $event['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline">
+                                                        {{ $event['title'] }}
+                                                    </a>
+                                                </td>
+                                                <td class="py-2 px-4">{{ $event['start_date'] }}</td>
+                                                <td class="py-2 px-4">
+                                                    <span class="px-2 py-1 text-xs rounded-full 
+                                                        @if($event['status'] === 'published') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                                        @elseif($event['status'] === 'draft') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                                        @elseif($event['status'] === 'cancelled') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                                        @else bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 @endif">
+                                                        {{ ucfirst($event['status']) }}
+                                                    </span>
+                                                </td>
+                                                <td class="py-2 px-4">{{ number_format($event['orders']) }}</td>
+                                                <td class="py-2 px-4 font-semibold text-gray-900 dark:text-gray-100">₱{{ number_format($event['total_revenue'] ?? 0, 2) }}</td>
+                                                <td class="py-2 px-4 font-semibold text-blue-600 dark:text-blue-400">₱{{ number_format($event['net_revenue'] ?? 0, 2) }}</td>
+                                                <td class="py-2 px-4 font-semibold text-teal-600 dark:text-teal-400">₱{{ number_format($event['admin_earnings'] ?? 0, 2) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        <div class="overflow-x-auto">
-                            <table id="eventRevenueTable" class="min-w-full text-xs">
-                                <thead class="text-left text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700">
-                                    <tr>
-                                        <th class="py-2 pr-4 font-medium cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 sortable" data-column="title">
-                                            Event Title <span class="sort-indicator">↕</span>
-                                        </th>
-                                        <th class="py-2 pr-4 font-medium cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 sortable" data-column="start_date">
-                                            Event Date <span class="sort-indicator">↕</span>
-                                        </th>
-                                        <th class="py-2 pr-4 font-medium cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 sortable" data-column="status">
-                                            Status <span class="sort-indicator">↕</span>
-                                        </th>
-                                        <th class="py-2 pr-4 font-medium cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 sortable" data-column="orders">
-                                            Orders <span class="sort-indicator">↕</span>
-                                        </th>
-                                        <th class="py-2 pr-4 font-medium cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 sortable" data-column="total_revenue">
-                                            Total Sales <span class="sort-indicator">↕</span>
-                                        </th>
-                                        <th class="py-2 pr-4 font-medium cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 sortable" data-column="net_revenue">
-                                            Net Amount <span class="sort-indicator">↕</span>
-                                        </th>
-                                        <th class="py-2 pr-4 font-medium cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 sortable" data-column="admin_earnings">
-                                            Qricket Earnings <span class="sort-indicator">↕</span>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-gray-900 dark:text-gray-100">
-                                    @forelse($allEventsRevenue as $event)
-                                        @php
-                                            $isFreeEvent = ($event['total_revenue'] ?? $event['revenue'] ?? 0) == 0;
-                                        @endphp
-                                        <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 event-revenue-row {{ $isFreeEvent ? 'free-event' : '' }}" data-is-free="{{ $isFreeEvent ? '1' : '0' }}">
-                                            <td class="py-2 pr-4 font-medium">
-                                                <a href="{{ route('admin.events.approval.show', $event['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline">
-                                                    {{ $event['title'] }}
-                                                </a>
-                                            </td>
-                                            <td class="py-2 pr-4">{{ $event['start_date'] }}</td>
-                                            <td class="py-2 pr-4">
-                                                <span class="px-2 py-1 text-xs rounded-full 
-                                                    @if($event['status'] === 'published') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                                    @elseif($event['status'] === 'draft') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                                    @elseif($event['status'] === 'cancelled') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                                    @else bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 @endif">
-                                                    {{ ucfirst($event['status']) }}
-                                                </span>
-                                            </td>
-                                            <td class="py-2 pr-4">{{ number_format($event['orders']) }}</td>
-                                            <td class="py-2 pr-4 font-semibold text-gray-900 dark:text-gray-100">₱{{ number_format($event['total_revenue'] ?? $event['revenue'] ?? 0, 2) }}</td>
-                                            <td class="py-2 pr-4 font-semibold text-blue-600 dark:text-blue-400">₱{{ number_format($event['net_revenue'] ?? $event['total_revenue'] ?? $event['revenue'] ?? 0, 2) }}</td>
-                                            <td class="py-2 pr-4 font-semibold text-teal-600 dark:text-teal-400">₱{{ number_format($event['admin_earnings'] ?? 0, 2) }}</td>
+                        @endif
+
+                        <!-- Free Events Section -->
+                        @if($freeEvents->count() > 0)
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+                                    <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                    Free Events
+                                    <span class="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400">({{ $freeEvents->count() }} events)</span>
+                                </h3>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-xs border border-gray-200 dark:border-gray-700 rounded-lg">
+                                    <thead class="text-left text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20">
+                                        <tr>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 sortable" data-column="title" data-group="free">
+                                                Event Title <span class="sort-indicator">↕</span>
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 sortable" data-column="start_date" data-group="free">
+                                                Event Date <span class="sort-indicator">↕</span>
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 sortable" data-column="status" data-group="free">
+                                                Status <span class="sort-indicator">↕</span>
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 sortable" data-column="orders" data-group="free">
+                                                Tickets Sold <span class="sort-indicator">↕</span>
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 sortable" data-column="total_revenue" data-group="free">
+                                                Total Sales <span class="sort-indicator">↕</span>
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30">
+                                                Net Amount
+                                            </th>
+                                            <th class="py-2 px-4 font-medium cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30">
+                                                Qricket Earnings
+                                            </th>
                                         </tr>
-                                    @empty
-                                        <tr><td class="py-3 text-gray-500 dark:text-gray-400" colspan="7">No events with revenue found</td></tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody class="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">
+                                        @foreach($freeEvents as $event)
+                                            <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/10 event-revenue-row free-event" data-is-free="1">
+                                                <td class="py-2 px-4 font-medium">
+                                                    <a href="{{ route('admin.events.approval.show', $event['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline">
+                                                        {{ $event['title'] }}
+                                                    </a>
+                                                </td>
+                                                <td class="py-2 px-4">{{ $event['start_date'] }}</td>
+                                                <td class="py-2 px-4">
+                                                    <span class="px-2 py-1 text-xs rounded-full 
+                                                        @if($event['status'] === 'published') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                                        @elseif($event['status'] === 'draft') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                                        @elseif($event['status'] === 'cancelled') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                                        @else bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 @endif">
+                                                        {{ ucfirst($event['status']) }}
+                                                    </span>
+                                                </td>
+                                                <td class="py-2 px-4">{{ number_format($event['orders']) }}</td>
+                                                <td class="py-2 px-4 font-semibold text-gray-900 dark:text-gray-100">₱{{ number_format($event['total_revenue'] ?? 0, 2) }}</td>
+                                                <td class="py-2 px-4 font-semibold text-blue-600 dark:text-blue-400">₱{{ number_format($event['net_revenue'] ?? 0, 2) }}</td>
+                                                <td class="py-2 px-4 font-semibold text-teal-600 dark:text-teal-400">₱{{ number_format($event['admin_earnings'] ?? 0, 2) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        
-                        <!-- Pagination for Event Revenue -->
-                        @if($allEventsRevenue->hasPages())
-                            <div class="mt-4 flex items-center justify-between">
-                                <div class="text-sm text-gray-700 dark:text-gray-300">
-                                    Showing {{ $allEventsRevenue->firstItem() }} to {{ $allEventsRevenue->lastItem() }} of {{ $allEventsRevenue->total() }} events
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    {{ $allEventsRevenue->links() }}
-                                </div>
+                        @endif
+
+                        @if($paidEvents->count() === 0 && $freeEvents->count() === 0)
+                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                <p>No events with ticket sales found</p>
                             </div>
                         @endif
                     </div>
@@ -730,50 +788,12 @@
                 });
             }
 
-            // Free events filter functionality
-            const showFreeEventsCheckbox = document.getElementById('showFreeEvents');
-            const eventCountSpan = document.getElementById('eventCount');
-            
-            function updateFreeEventsFilter() {
-                if (!showFreeEventsCheckbox) return;
-                
-                const showFree = showFreeEventsCheckbox.checked;
-                const rows = document.querySelectorAll('#eventRevenueTable tbody tr.event-revenue-row');
-                let visibleCount = 0;
-                
-                rows.forEach(row => {
-                    const isFree = row.dataset.isFree === '1';
-                    if (isFree) {
-                        row.style.display = showFree ? '' : 'none';
-                    } else {
-                        // Ensure non-free events are always visible
-                        row.style.display = '';
-                    }
-                    // Count visible rows (check computed style to be sure)
-                    const computedStyle = window.getComputedStyle(row);
-                    if (computedStyle.display !== 'none') {
-                        visibleCount++;
-                    }
-                });
-                
-                // Update event count display
-                if (eventCountSpan) {
-                    eventCountSpan.textContent = visibleCount;
-                }
-            }
-            
-            if (showFreeEventsCheckbox) {
-                showFreeEventsCheckbox.addEventListener('change', updateFreeEventsFilter);
-                
-                // Trigger initial filter on page load
-                updateFreeEventsFilter();
-            }
-
-            // Table sorting functionality
+            // Table sorting functionality - separate for paid and free event tables
             function initTableSorting() {
                 document.querySelectorAll('.sortable').forEach(header => {
                     header.addEventListener('click', function() {
                         const column = this.dataset.column;
+                        const group = this.dataset.group; // 'paid' or 'free'
                         const table = this.closest('table');
                         const tbody = table.querySelector('tbody');
                         const rows = Array.from(tbody.querySelectorAll('tr'));
@@ -782,8 +802,8 @@
                         const currentSort = this.dataset.sort || 'asc';
                         const newSort = currentSort === 'asc' ? 'desc' : 'asc';
                         
-                        // Reset all sort indicators
-                        document.querySelectorAll('.sort-indicator').forEach(indicator => {
+                        // Reset sort indicators in this table only
+                        table.querySelectorAll('.sort-indicator').forEach(indicator => {
                             indicator.textContent = '↕';
                         });
                         
@@ -796,11 +816,12 @@
                         
                         // Sort rows
                         rows.sort((a, b) => {
-                            const aValue = a.querySelector(`td:nth-child(${Array.from(this.parentNode.children).indexOf(this) + 1})`).textContent.trim();
-                            const bValue = b.querySelector(`td:nth-child(${Array.from(this.parentNode.children).indexOf(this) + 1})`).textContent.trim();
+                            const colIndex = Array.from(this.parentNode.children).indexOf(this) + 1;
+                            const aValue = a.querySelector(`td:nth-child(${colIndex})`)?.textContent.trim() || '';
+                            const bValue = b.querySelector(`td:nth-child(${colIndex})`)?.textContent.trim() || '';
                             
                             // Handle numeric values
-                            if (column === 'revenue' || column === 'amount' || column === 'orders') {
+                            if (column === 'total_revenue' || column === 'net_revenue' || column === 'admin_earnings' || column === 'amount' || column === 'orders') {
                                 const aNum = parseFloat(aValue.replace(/[₱,]/g, '')) || 0;
                                 const bNum = parseFloat(bValue.replace(/[₱,]/g, '')) || 0;
                                 return newSort === 'asc' ? aNum - bNum : bNum - aNum;
@@ -819,9 +840,6 @@
                         
                         // Re-append sorted rows
                         rows.forEach(row => tbody.appendChild(row));
-                        
-                        // Re-apply filter after sorting
-                        updateFreeEventsFilter();
                     });
                 });
             }
