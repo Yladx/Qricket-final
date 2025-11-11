@@ -135,13 +135,14 @@ class BasicInfoController extends Controller
             'existing_poster_url' => $event->poster_url ?? '',
             'existing_thumbnail_url' => $event->thumbnail_url ?? '',
         ];
-        
+
         // Determine if event is free (for locking the checkbox in the UI)
         // If event is already saved as free, lock it to prevent changing to paid
         $isFreeEvent = (bool)($event->is_free ?? false);
         
         // For step1 (create/edit), check if event has sales (only if event exists)
         $hasSales = false;
+        $eventIsPaidWithSales = false;
         $isFreeEventLocked = false;
         
         if ($event) {
@@ -153,15 +154,16 @@ class BasicInfoController extends Controller
                             })
                             ->where('status', 'paid')
                             ->exists();
+                $eventIsPaidWithSales = $hasSales;
             }
             
             // Lock the checkbox if:
             // 1. Event is free (can't change to paid), OR
             // 2. Event is paid and has sales (can't change to free)
-            $isFreeEventLocked = $isFreeEvent || ($hasSales && !$isFreeEvent);
+            $isFreeEventLocked = $isFreeEvent || $eventIsPaidWithSales;
         }
 
-        return view('organizer.events.create.step1', compact('eventData', 'eventId', 'event', 'isFreeEvent', 'hasSales', 'isFreeEventLocked'));
+        return view('organizer.events.create.step1', compact('eventData', 'eventId', 'event', 'isFreeEvent', 'hasSales', 'isFreeEventLocked', 'eventIsPaidWithSales'));
     }
 
     public function step1Store(Request $request)
@@ -269,19 +271,19 @@ class BasicInfoController extends Controller
                             ->exists();
                 
                 if ($event->is_free) {
-                    // Event is already free - keep it free and ignore any attempt to change it
-                    $step1Data['is_free'] = true;
-                    
-                    // If user tried to uncheck the free event checkbox, show an error
-                    if (!$request->boolean('is_free')) {
-                        if ($request->expectsJson() || $request->ajax()) {
-                            return response()->json([
-                                'success' => false,
-                                'message' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.',
-                                'errors' => ['is_free' => ['Cannot change free event to paid event.']]
-                            ], 422);
-                        }
-                        return back()->withErrors(['is_free' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.'])->withInput();
+                // Event is already free - keep it free and ignore any attempt to change it
+                $step1Data['is_free'] = true;
+                
+                // If user tried to uncheck the free event checkbox, show an error
+                if (!$request->boolean('is_free')) {
+                    if ($request->expectsJson() || $request->ajax()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.',
+                            'errors' => ['is_free' => ['Cannot change free event to paid event.']]
+                        ], 422);
+                    }
+                    return back()->withErrors(['is_free' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.'])->withInput();
                     }
                 } elseif ($hasSales && $request->boolean('is_free')) {
                     // Event is paid and has sales - prevent changing to free

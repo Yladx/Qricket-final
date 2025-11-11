@@ -896,10 +896,10 @@
                 
                 const result = await response.json();
                 if (result.success) {
-                    if (statusEl) statusEl.textContent = 'Saved';
-                    refreshPreview(payload);
-                    showAutosaveIndicator('success');
-                    setTimeout(()=>{ if (statusEl) statusEl.textContent=''; }, 1200);
+                if (statusEl) statusEl.textContent = 'Saved';
+                refreshPreview(payload);
+                showAutosaveIndicator('success');
+                setTimeout(()=>{ if (statusEl) statusEl.textContent=''; }, 1200);
                 } else {
                     throw new Error(result.message || 'Autosave failed');
                 }
@@ -1638,7 +1638,7 @@
                     
                     const result = await response.json();
                     if (result.success) {
-                        console.log('Certificate enabled setting persisted:', enabled);
+                    console.log('Certificate enabled setting persisted:', enabled);
                         showAutosaveIndicator('success');
                     } else {
                         throw new Error(result.message || 'Failed to persist certificate setting');
@@ -1723,8 +1723,8 @@
                     }
                     
                     const response = await fetch('/organizer/events/certificate/autosave', {
-                        method: 'POST',
-                        headers: {
+                method: 'POST',
+                headers: {
                             'X-Requested-With': 'XMLHttpRequest',
                             'X-CSRF-TOKEN': csrf
                         },
@@ -1743,8 +1743,8 @@
                     
                     const result = await response.json();
                     if (result.success) {
-                        console.log('Certificate autosaved successfully');
-                        showAutosaveIndicator('success');
+                    console.log('Certificate autosaved successfully');
+                    showAutosaveIndicator('success');
                     } else {
                         throw new Error(result.message || 'Autosave failed');
                     }

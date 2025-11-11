@@ -305,9 +305,10 @@ class EventEditController extends Controller
         
         // Determine if event is free (for locking the checkbox in edit mode)
         $isFreeEvent = (bool)($event->is_free ?? false);
-        
+
         // Check if paid event has sales (to prevent changing to free)
         $hasSales = false;
+        $eventIsPaidWithSales = false;
         if (!$isFreeEvent) {
             // Check if any ticket type has sales OR if there are any paid ticket purchases
             $hasSales = $event->eventTickets()->where('sold_count', '>', 0)->exists() 
@@ -316,17 +317,18 @@ class EventEditController extends Controller
                         })
                         ->where('status', 'paid')
                         ->exists();
+            $eventIsPaidWithSales = $hasSales;
         }
         
         // Lock the checkbox if:
         // 1. Event is free (can't change to paid), OR
         // 2. Event is paid and has sales (can't change to free)
-        $isFreeEventLocked = $isFreeEvent || ($hasSales && !$isFreeEvent);
+        $isFreeEventLocked = $isFreeEvent || $eventIsPaidWithSales;
 
         // Determine layout type
         $layoutType = $isAdmin ? 'admin' : 'organizer';
 
-        return view('organizer.events.edit.basic', compact('event', 'eventData', 'isAdmin', 'layoutType', 'isFreeEvent', 'hasSales', 'isFreeEventLocked'));
+        return view('organizer.events.edit.basic', compact('event', 'eventData', 'isAdmin', 'layoutType', 'isFreeEvent', 'hasSales', 'isFreeEventLocked', 'eventIsPaidWithSales'));
     }
 
     /**
@@ -757,13 +759,13 @@ class EventEditController extends Controller
             // Handle both JSON blob and form data
             $certificateDataJson = $request->get('certificate_data_json');
             if ($certificateDataJson) {
-                $certificateData = json_decode($certificateDataJson, true);
-                
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    return response()->json(['success' => false, 'message' => 'Invalid JSON data'], 400);
-                }
-                
-                $disk->put($certificatePath, json_encode($certificateData, JSON_PRETTY_PRINT));
+            $certificateData = json_decode($certificateDataJson, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['success' => false, 'message' => 'Invalid JSON data'], 400);
+            }
+            
+            $disk->put($certificatePath, json_encode($certificateData, JSON_PRETTY_PRINT));
             }
             
             // Update certificate_enabled in the event table if provided

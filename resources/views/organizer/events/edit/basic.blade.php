@@ -9,7 +9,7 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <form id="editBasicForm" method="POST" action="{{ route('organizer.events.step1.store') }}?id={{ $event->id }}" enctype="multipart/form-data" class="space-y-6">
                         @csrf
-                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event, 'isFreeEvent' => $isFreeEvent ?? false, 'hasSales' => $hasSales ?? false, 'isFreeEventLocked' => $isFreeEventLocked ?? false])
+                        @include('organizer.events.forms.basic-info', ['eventId' => $event->id, 'eventData' => $eventData, 'event' => $event, 'isFreeEvent' => $isFreeEvent ?? false, 'hasSales' => $hasSales ?? false, 'isFreeEventLocked' => $isFreeEventLocked ?? false, 'eventIsPaidWithSales' => $eventIsPaidWithSales ?? false])
 
                         <!-- Navigation Buttons -->
                         <div class="flex items-center justify-between pt-6">

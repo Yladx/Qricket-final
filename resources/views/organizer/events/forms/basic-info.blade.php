@@ -22,41 +22,16 @@
     </div>
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
-    @php
-        $eventIsFree = false;
-        if (isset($isFreeEvent) && ($isFreeEvent === true || $isFreeEvent === 1 || $isFreeEvent === '1')) {
-            $eventIsFree = true;
-        } elseif (isset($event) && is_object($event) && isset($event->is_free) && (bool)$event->is_free === true) {
-            $eventIsFree = true;
-        } elseif (isset($eventData) && is_array($eventData) && isset($eventData['is_free']) && (bool)$eventData['is_free'] === true) {
-            $eventIsFree = true;
-        }
-        
-        $eventIsPaidWithSales = false;
-        if (!$eventIsFree && isset($hasSales) && $hasSales === true) {
-            $eventIsPaidWithSales = true;
-        }
-        
-        $shouldLock = false;
-        if (isset($isFreeEventLocked) && $isFreeEventLocked === true) {
-            $shouldLock = true;
-        } elseif ($eventIsFree) {
-            $shouldLock = true;
-        } elseif ($eventIsPaidWithSales) {
-            $shouldLock = true;
-        }
-    @endphp
-    
-    @if(isset($shouldLock) && $shouldLock === true)
+    @if(isset($isFreeEventLocked) && $isFreeEventLocked === true)
         <!-- Event type is locked - show read-only display instead of checkbox -->
         <div class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
             <div class="flex items-center space-x-2">
-                <svg class="w-5 h-5 {{ $eventIsFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 {{ (isset($isFreeEvent) && $isFreeEvent) ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    This event is set as <strong>{{ $eventIsFree ? 'Free' : 'Paid' }}</strong>
-                    @if($eventIsPaidWithSales)
+                    This event is set as <strong>{{ (isset($isFreeEvent) && $isFreeEvent) ? 'Free' : 'Paid' }}</strong>
+                    @if(isset($eventIsPaidWithSales) && $eventIsPaidWithSales)
                         <span class="text-xs text-gray-500 dark:text-gray-400">(has ticket sales)</span>
                     @endif
                 </span>
@@ -64,7 +39,7 @@
             <span class="text-xs text-amber-600 dark:text-amber-400 font-medium ml-auto">(Cannot be changed)</span>
         </div>
         <!-- Hidden input to ensure is_free value is always submitted -->
-        <input type="hidden" name="is_free" value="{{ $eventIsFree ? '1' : '0' }}">
+        <input type="hidden" name="is_free" value="{{ (isset($isFreeEvent) && $isFreeEvent) ? '1' : '0' }}">
     @else
         <!-- Normal checkbox for event creation or events without restrictions -->
         <div class="flex items-center space-x-3">
@@ -73,7 +48,8 @@
                     type="checkbox" 
                     name="is_free" 
                     value="1" 
-                    id="is_free_checkbox" 
+                    id="is_free_checkbox"
+                    data-locked="{{ isset($isFreeEventLocked) && $isFreeEventLocked ? 'true' : 'false' }}"
                     @if(
                         (old('is_free') !== null && old('is_free') !== '' && (bool)old('is_free')) ||
                         (isset($eventData) && is_array($eventData) && isset($eventData['is_free']) && $eventData['is_free'] !== null && $eventData['is_free'] !== '' && (bool)$eventData['is_free']) ||
@@ -86,6 +62,21 @@
             <span class="text-xs text-gray-500 dark:text-gray-400">(See sidebar for details)</span>
         </div>
     @endif
+
+    <!-- JavaScript to lock checkbox if needed (fallback) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkbox = document.getElementById('is_free_checkbox');
+            if (checkbox) {
+                const isLocked = checkbox.getAttribute('data-locked') === 'true';
+                if (isLocked) {
+                    checkbox.disabled = true;
+                    checkbox.style.opacity = '0.6';
+                    checkbox.style.cursor = 'not-allowed';
+                }
+            }
+        });
+    </script>
 
     <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
