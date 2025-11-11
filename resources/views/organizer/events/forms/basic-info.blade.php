@@ -8,14 +8,14 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Title</label>
-            <input type="text" name="title" value="{{ old('title', $eventData['title'] ?? $event->title ?? '') }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" required>
+            <input type="text" name="title" value="{{ old('title', $eventData['title'] ?? (isset($event) && is_object($event) ? ($event->title ?? '') : '')) }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" required>
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
             <select name="category" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
                 @php($cats = ['conference','workshop','seminar','meetup','webinar','festival','sports','music','art','technology','business','education','health','charity','other'])
                 @foreach($cats as $c)
-                    <option value="{{ $c }}" {{ (old('category', $eventData['category'] ?? $event->category ?? '')==$c)?'selected':'' }}>{{ ucfirst($c) }}</option>
+                    <option value="{{ $c }}" {{ (old('category', $eventData['category'] ?? (isset($event) && is_object($event) ? ($event->category ?? '') : ''))==$c)?'selected':'' }}>{{ ucfirst($c) }}</option>
                 @endforeach
             </select>
         </div>
@@ -23,61 +23,66 @@
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
     @php
-        // Initialize variables with safe defaults
-        $eventIsFree = false;
-        $isFreeInit = false;
-        $isFreeLocked = false;
+        // Initialize ALL variables first to ensure they always exist - NO EXCEPTIONS
+        $eventIsFreeValue = false;
+        $isFreeInitValue = false;
+        $isFreeLockedValue = false;
         
-        // Safely get is_free value - check eventData first, then event object if available
-        try {
-            if (isset($eventData) && is_array($eventData) && isset($eventData['is_free'])) {
-                $eventIsFree = (bool)$eventData['is_free'];
-            } elseif (isset($event) && is_object($event)) {
-                // Safely access event property
-                if (property_exists($event, 'is_free') || method_exists($event, 'getAttribute')) {
-                    $eventIsFree = (bool)($event->is_free ?? false);
+        // Safely get is_free value - prioritize eventData array (always check if it exists first)
+        if (isset($eventData) && is_array($eventData) && array_key_exists('is_free', $eventData)) {
+            $eventIsFreeValue = (bool)$eventData['is_free'];
+        } elseif (isset($event) && is_object($event)) {
+            // Safely access event property using Laravel model methods
+            try {
+                if (method_exists($event, 'getAttribute')) {
+                    $attrValue = $event->getAttribute('is_free');
+                    if ($attrValue !== null) {
+                        $eventIsFreeValue = (bool)$attrValue;
+                    }
+                } elseif (property_exists($event, 'is_free')) {
+                    $eventIsFreeValue = (bool)$event->is_free;
                 }
+            } catch (\Exception $e) {
+                // Ignore errors and keep default false
             }
-            
-            $isFreeInit = old('is_free', $eventIsFree);
-            
-            // Only lock free event checkbox when editing an existing event in manage/edit context
-            // Lock if: we have an eventId (editing mode) AND the event is free
-            if (isset($eventId) && !empty($eventId) && ($isFreeInit === true || $eventIsFree === true)) {
-                $isFreeLocked = true;
-            }
-        } catch (\Exception $e) {
-            // If any error occurs, use safe defaults
-            $eventIsFree = false;
-            $isFreeInit = false;
-            $isFreeLocked = false;
         }
-        // Normalize flags for safe use in the markup
-        $__lock = isset($isFreeLocked) ? (bool)$isFreeLocked : false;
-        $__checked = isset($isFreeInit) ? (bool)$isFreeInit : false;
+        
+        // Get checkbox value (prioritize old input for form validation errors)
+        $oldIsFree = old('is_free');
+        if ($oldIsFree !== null) {
+            $isFreeInitValue = (bool)$oldIsFree;
+        } else {
+            $isFreeInitValue = $eventIsFreeValue;
+        }
+        
+        // ONLY lock in manage/edit context (when eventId exists AND event is free)
+        // This ensures it's NOT locked during event creation (when eventId is null/empty)
+        $hasEventId = isset($eventId) && $eventId !== null && $eventId !== '' && $eventId !== '0';
+        if ($hasEventId && $eventIsFreeValue === true) {
+            $isFreeLockedValue = true;
+        }
     @endphp
     <div class="flex items-center space-x-3">
-        <label class="inline-flex items-center space-x-2 {{ $__lock ? 'opacity-60 cursor-not-allowed' : '' }}">
+        <label class="inline-flex items-center space-x-2{{ $isFreeLockedValue ? ' opacity-60 cursor-not-allowed' : '' }}">
             <input 
                 type="checkbox" 
                 name="is_free" 
                 value="1" 
                 id="is_free_checkbox" 
-                {{ $__checked ? 'checked' : '' }} 
-                {{ $__lock ? 'disabled' : '' }}
-                class="rounded border-gray-300 text-qricket-600 {{ $__lock ? 'cursor-not-allowed' : '' }}"
+                @if($isFreeInitValue) checked @endif
+                @if($isFreeLockedValue) disabled @endif
+                class="rounded border-gray-300 text-qricket-600{{ $isFreeLockedValue ? ' cursor-not-allowed' : '' }}"
             >
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
         </label>
-        @if($__lock)
-            <!-- Hidden input to ensure is_free is always submitted as true for locked free events -->
+        @if($isFreeLockedValue)
             <input type="hidden" name="is_free" value="1">
             <span class="text-xs text-amber-600 dark:text-amber-400 font-medium">(Cannot be changed - Event is already free)</span>
         @else
             <span class="text-xs text-gray-500 dark:text-gray-400">(See sidebar for details)</span>
         @endif
     </div>
-    @if($__lock)
+    @if($isFreeLockedValue)
         <div class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
             <p class="text-xs text-amber-800 dark:text-amber-200">
                 <strong>Note:</strong> Once an event is created as free, it cannot be changed to a paid event. This ensures consistency for attendees who have already registered.
@@ -94,7 +99,7 @@
     <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags <span class="text-red-500">*</span></label>
         <div class="relative">
-            <input id="tags" type="text" name="tags" value="{{ old('tags', $eventData['tags'] ?? $event->tags ?? '') }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" placeholder="music, conference, workshop (separate with commas)" autocomplete="off" required>
+            <input id="tags" type="text" name="tags" value="{{ old('tags', $eventData['tags'] ?? (isset($event) && is_object($event) ? ($event->tags ?? '') : '')) }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" placeholder="music, conference, workshop (separate with commas)" autocomplete="off" required>
             <div id="tag-suggestions" class="absolute z-50 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg hidden max-h-60 overflow-y-auto"></div>
         </div>
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Required: Add at least one tag to help categorize your event (e.g., music, conference, workshop).</p>
@@ -114,13 +119,13 @@
     <div class="space-y-3">
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
-            <input id="location" type="text" name="location" value="{{ old('location', $eventData['location'] ?? $event->location ?? '') }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" placeholder="Enter event location (e.g., Municipal hall San Jose, Batangas, Philippines)">
+            <input id="location" type="text" name="location" value="{{ old('location', $eventData['location'] ?? (isset($event) && is_object($event) ? ($event->location ?? '') : '')) }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" placeholder="Enter event location (e.g., Municipal hall San Jose, Batangas, Philippines)">
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Enter the event location address.</p>
         </div>
         
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location URL (Optional)</label>
-            <input id="location_url" type="text" name="location_url" value="{{ old('location_url', $eventData['location_url'] ?? $event->location_url ?? '') }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" placeholder="https://maps.google.com/... (optional)">
+            <input id="location_url" type="text" name="location_url" value="{{ old('location_url', $eventData['location_url'] ?? (isset($event) && is_object($event) ? ($event->location_url ?? '') : '')) }}" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" placeholder="https://maps.google.com/... (optional)">
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Optional: Add a Google Maps link for directions.</p>
         </div>
     </div>
