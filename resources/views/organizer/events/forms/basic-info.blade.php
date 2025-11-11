@@ -23,62 +23,69 @@
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
     @php
-        // Initialize ALL variables first to ensure they always exist - NO EXCEPTIONS
-        $eventIsFreeValue = false;
-        $isFreeInitValue = false;
-        $isFreeLockedValue = false;
-        
-        // Safely get is_free value - prioritize eventData array (controllers should always set this)
+    // CRITICAL: Initialize ALL variables FIRST - these MUST exist
+    $eventIsFreeValue = false;
+    $isFreeInitValue = false;
+    $isFreeLockedValue = false;
+    
+    // Safely get is_free value - check eventData array first (controllers should always set this)
+    try {
         if (isset($eventData) && is_array($eventData) && array_key_exists('is_free', $eventData)) {
             $eventIsFreeValue = (bool)$eventData['is_free'];
-        } elseif (isset($event) && is_object($event) && !empty($event)) {
-            // Fallback: safely access event property using Laravel model methods
-            try {
-                if (method_exists($event, 'getAttribute')) {
-                    $attrValue = $event->getAttribute('is_free');
-                    if ($attrValue !== null) {
-                        $eventIsFreeValue = (bool)$attrValue;
-                    }
-                } elseif (property_exists($event, 'is_free')) {
+        }
+    } catch (\Exception $e) {
+        // Keep default false
+    }
+    
+    // Fallback: get from event object if eventData doesn't have it
+    if ($eventIsFreeValue === false) {
+        try {
+            if (isset($event) && is_object($event)) {
+                if (isset($event->is_free)) {
                     $eventIsFreeValue = (bool)$event->is_free;
                 }
-            } catch (\Exception $e) {
-                // Ignore errors and keep default false
             }
+        } catch (\Exception $e) {
+            // Keep default false
         }
-        
-        // Get checkbox value (prioritize old input for form validation errors)
+    }
+    
+    // Get checkbox checked state (prioritize old input for validation errors)
+    try {
         $oldIsFree = old('is_free');
         if ($oldIsFree !== null) {
             $isFreeInitValue = (bool)$oldIsFree;
         } else {
             $isFreeInitValue = $eventIsFreeValue;
         }
-        
-        // ONLY lock in manage/edit context (when eventId exists AND event is free)
-        // This ensures it's NOT locked during event creation (when eventId is null/empty)
-        // Check both eventId parameter and event object ID to determine if we're editing
-        $hasEventId = false;
+    } catch (\Exception $e) {
+        $isFreeInitValue = $eventIsFreeValue;
+    }
+    
+    // Check if we're editing (has eventId) - this determines if we should lock the checkbox
+    $isEditing = false;
+    try {
         if (isset($eventId) && $eventId !== null && $eventId !== '' && $eventId !== '0') {
-            $hasEventId = true;
-        } elseif (isset($event) && is_object($event) && !empty($event)) {
-            try {
-                if (method_exists($event, 'getAttribute')) {
-                    $eventIdValue = $event->getAttribute('id');
-                    if ($eventIdValue !== null && $eventIdValue !== '' && $eventIdValue !== '0') {
-                        $hasEventId = true;
-                    }
-                } elseif (property_exists($event, 'id') && !empty($event->id)) {
-                    $hasEventId = true;
-                }
-            } catch (\Exception $e) {
-                // Ignore errors
+            $isEditing = true;
+        } elseif (isset($event) && is_object($event)) {
+            if (isset($event->id) && $event->id !== null && $event->id !== '' && $event->id !== '0') {
+                $isEditing = true;
             }
         }
-        
-        if ($hasEventId && $eventIsFreeValue === true) {
-            $isFreeLockedValue = true;
-        }
+    } catch (\Exception $e) {
+        // Keep default false
+    }
+    
+    // ONLY lock when editing an existing free event
+    // This ensures it's NOT locked during event creation
+    if ($isEditing === true && $eventIsFreeValue === true) {
+        $isFreeLockedValue = true;
+    }
+    
+    // FINAL SAFETY CHECK: Ensure all variables are defined (should never be needed, but just in case)
+    if (!isset($eventIsFreeValue)) $eventIsFreeValue = false;
+    if (!isset($isFreeInitValue)) $isFreeInitValue = false;
+    if (!isset($isFreeLockedValue)) $isFreeLockedValue = false;
     @endphp
     <div class="flex items-center space-x-3">
         <label class="inline-flex items-center space-x-2{{ $isFreeLockedValue ? ' opacity-60 cursor-not-allowed' : '' }}">
