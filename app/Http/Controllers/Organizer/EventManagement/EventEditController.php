@@ -290,6 +290,8 @@ class EventEditController extends Controller
             'category' => $event->category,
             'thumbnail_url' => $event->thumbnail_url,
             'status' => $event->status,
+            'is_free' => $event->is_free ?? false,
+            'tags' => $event->tags,
         ];
 
         // Determine layout type

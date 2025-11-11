@@ -24,8 +24,19 @@
     <!-- Free Event Checkbox (Info moved to sidebar) -->
     @php
         $isFreeInit = old('is_free', $eventData['is_free'] ?? ($event->is_free ?? false));
-        $isEditing = isset($event) && $event->exists;
-        $isFreeLocked = $isEditing && $isFreeInit; // Lock if editing an existing free event
+        // Only lock free event checkbox when editing an existing event in manage/edit context
+        // Lock if: we have an eventId (editing mode) AND the event is free
+        $isFreeLocked = false;
+        if (isset($eventId) && $eventId) {
+            // We're in edit context - check if event is free
+            if (isset($event) && is_object($event)) {
+                // Event object is available - check if it exists and is free
+                $isFreeLocked = ($event->exists ?? true) && ($isFreeInit === true);
+            } elseif (isset($eventData['is_free']) && $eventData['is_free'] === true) {
+                // Fallback: check eventData if event object is not available
+                $isFreeLocked = true;
+            }
+        }
     @endphp
     <div class="flex items-center space-x-3">
         <label class="inline-flex items-center space-x-2 {{ $isFreeLocked ? 'opacity-60 cursor-not-allowed' : '' }}">
