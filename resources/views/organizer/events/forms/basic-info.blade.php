@@ -23,19 +23,34 @@
 
     <!-- Free Event Checkbox (Info moved to sidebar) -->
     @php
-        $isFreeInit = old('is_free', $eventData['is_free'] ?? ($event->is_free ?? false));
-        // Only lock free event checkbox when editing an existing event in manage/edit context
-        // Lock if: we have an eventId (editing mode) AND the event is free
+        // Initialize variables with safe defaults
+        $eventIsFree = false;
+        $isFreeInit = false;
         $isFreeLocked = false;
-        if (isset($eventId) && $eventId) {
-            // We're in edit context - check if event is free
-            if (isset($event) && is_object($event)) {
-                // Event object is available - check if it exists and is free
-                $isFreeLocked = ($event->exists ?? true) && ($isFreeInit === true);
-            } elseif (isset($eventData['is_free']) && $eventData['is_free'] === true) {
-                // Fallback: check eventData if event object is not available
+        
+        // Safely get is_free value - check eventData first, then event object if available
+        try {
+            if (isset($eventData) && is_array($eventData) && isset($eventData['is_free'])) {
+                $eventIsFree = (bool)$eventData['is_free'];
+            } elseif (isset($event) && is_object($event)) {
+                // Safely access event property
+                if (property_exists($event, 'is_free') || method_exists($event, 'getAttribute')) {
+                    $eventIsFree = (bool)($event->is_free ?? false);
+                }
+            }
+            
+            $isFreeInit = old('is_free', $eventIsFree);
+            
+            // Only lock free event checkbox when editing an existing event in manage/edit context
+            // Lock if: we have an eventId (editing mode) AND the event is free
+            if (isset($eventId) && !empty($eventId) && ($isFreeInit === true || $eventIsFree === true)) {
                 $isFreeLocked = true;
             }
+        } catch (\Exception $e) {
+            // If any error occurs, use safe defaults
+            $eventIsFree = false;
+            $isFreeInit = false;
+            $isFreeLocked = false;
         }
     @endphp
     <div class="flex items-center space-x-3">
@@ -69,7 +84,7 @@
 
     <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-        <textarea id="description" name="description" rows="5" draggable="false" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" oninput="this.value = this.value.replace(/\n/g, ' ').replace(/\r/g, '')" ondrop="event.preventDefault(); return false;" ondragover="event.preventDefault(); return false;" ondragstart="event.preventDefault(); return false;">{{ old('description', $eventData['description'] ?? $event->description ?? '') }}</textarea>
+        <textarea id="description" name="description" rows="5" draggable="false" class="w-full rounded-md bg-white text-gray-900 border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" oninput="this.value = this.value.replace(/\n/g, ' ').replace(/\r/g, '')" ondrop="event.preventDefault(); return false;" ondragover="event.preventDefault(); return false;" ondragstart="event.preventDefault(); return false;">{{ old('description', $eventData['description'] ?? (isset($event) && is_object($event) ? ($event->description ?? '') : '')) }}</textarea>
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Note: Line breaks are automatically converted to spaces to prevent formatting issues.</p>
     </div>
 
