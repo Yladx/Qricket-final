@@ -41,20 +41,40 @@
                 $additionalTickets = \App\Models\TicketLimitPurchase::with(['ticketLimitPricing', 'event'])->where('user_id', auth()->id())->orderByDesc('created_at')->get();
                 $allPurchases = collect();
                 
-                // Get all pending refund requests
-                $pendingRefundRequestIds = \App\Models\RefundRequest::where('user_id', auth()->id())
+                // Get all pending refund requests with their IDs
+                $pendingRefundRequests = \App\Models\RefundRequest::where('user_id', auth()->id())
                     ->where('status', 'pending')
-                    ->pluck('item_id', 'type')
-                    ->toArray();
+                    ->get()
+                    ->keyBy(function($request) {
+                        return $request->type . '_' . $request->item_id;
+                    });
+                
+                // Get all processed/refunded refund requests to get ticket IDs for invoice routes
+                $refundedRequests = \App\Models\RefundRequest::where('user_id', auth()->id())
+                    ->whereIn('status', ['processed', 'approved'])
+                    ->where('type', 'ticket')
+                    ->get()
+                    ->keyBy('item_id');
                 
                 // Add ticket purchases
                 foreach($ticketPurchases as $purchase) {
                     $firstTicketId = $purchase->ticketInformation->first()?->id ?? '';
-                    $hasPendingRefund = isset($pendingRefundRequestIds['ticket']) && in_array($purchase->id, is_array($pendingRefundRequestIds['ticket']) ? $pendingRefundRequestIds['ticket'] : [$pendingRefundRequestIds['ticket']]);
+                    
+                    // If ticket info is deleted (refunded), try to get ticket ID from refund request
+                    if (!$firstTicketId && $purchase->status === 'refunded') {
+                        $refundedRequest = $refundedRequests->get($purchase->id);
+                        if ($refundedRequest && $refundedRequest->refunded_ticket_ids && is_array($refundedRequest->refunded_ticket_ids) && !empty($refundedRequest->refunded_ticket_ids)) {
+                            $firstTicketId = $refundedRequest->refunded_ticket_ids[0];
+                        }
+                    }
+                    
+                    $refundRequestKey = 'ticket_' . $purchase->id;
+                    $pendingRefundRequest = $pendingRefundRequests->get($refundRequestKey);
+                    $hasPendingRefund = $pendingRefundRequest !== null;
                     $purchaseDate = $purchase->paid_at ?? $purchase->created_at;
                     $daysSincePurchase = $purchaseDate->diffInDays(now());
                     
-                    // Get participant info
+                    // Get participant info (may be empty for refunded purchases)
                     $ticketInfo = $purchase->ticketInformation;
                     $participantCount = $ticketInfo->count();
                     $checkedInCount = $ticketInfo->whereNotNull('checked_in_at')->count();
@@ -71,6 +91,7 @@
                         'refund_eligible' => !$hasPendingRefund && $purchase->status === 'paid' && $daysSincePurchase <= 7,
                         'refund_deadline' => $purchaseDate->copy()->addDays(7)->format('Y-m-d'),
                         'has_pending_refund' => $hasPendingRefund,
+                        'pending_refund_id' => $pendingRefundRequest?->id,
                         'participants' => $participantCount,
                         'checked_in' => $checkedInCount,
                         'invoice_route' => $firstTicketId ? route('tickets.invoice', ['purchaseId' => $purchase->purchase_id, 'ticketId' => $firstTicketId]) : null
@@ -79,7 +100,9 @@
                 
                 // Add subscriptions
                 foreach($subscriptions as $subscription) {
-                    $hasPendingRefund = isset($pendingRefundRequestIds['subscription']) && in_array($subscription->id, is_array($pendingRefundRequestIds['subscription']) ? $pendingRefundRequestIds['subscription'] : [$pendingRefundRequestIds['subscription']]);
+                    $refundRequestKey = 'subscription_' . $subscription->id;
+                    $pendingRefundRequest = $pendingRefundRequests->get($refundRequestKey);
+                    $hasPendingRefund = $pendingRefundRequest !== null;
                     $daysSincePurchase = $subscription->created_at->diffInDays(now());
                     $allPurchases->push([
                         'type' => 'subscription',
@@ -93,13 +116,16 @@
                         'refund_eligible' => !$hasPendingRefund && $subscription->status === 'active' && $daysSincePurchase <= 7,
                         'refund_deadline' => $subscription->created_at->copy()->addDays(7)->format('Y-m-d'),
                         'has_pending_refund' => $hasPendingRefund,
+                        'pending_refund_id' => $pendingRefundRequest?->id,
                         'invoice_route' => route('subscription.invoice', $subscription)
                     ]);
                 }
                 
                 // Add additional tickets
                 foreach($additionalTickets as $purchase) {
-                    $hasPendingRefund = isset($pendingRefundRequestIds['additional_ticket']) && in_array($purchase->id, is_array($pendingRefundRequestIds['additional_ticket']) ? $pendingRefundRequestIds['additional_ticket'] : [$pendingRefundRequestIds['additional_ticket']]);
+                    $refundRequestKey = 'additional_ticket_' . $purchase->id;
+                    $pendingRefundRequest = $pendingRefundRequests->get($refundRequestKey);
+                    $hasPendingRefund = $pendingRefundRequest !== null;
                     $purchaseDate = $purchase->paid_at ?? $purchase->created_at;
                     $daysSincePurchase = $purchaseDate->diffInDays(now());
                     $allPurchases->push([
@@ -114,6 +140,7 @@
                         'refund_eligible' => !$hasPendingRefund && $purchase->status === 'paid' && $daysSincePurchase <= 7,
                         'refund_deadline' => $purchaseDate->copy()->addDays(7)->format('Y-m-d'),
                         'has_pending_refund' => $hasPendingRefund,
+                        'pending_refund_id' => $pendingRefundRequest?->id,
                         'invoice_route' => (function() use ($purchase) {
                             try {
                                 return route('additional-tickets.invoice', $purchase->purchase_id);
@@ -180,20 +207,38 @@
                                         </span>
                                     </td>
                                     <td class="py-2 pr-4">
-                                        @if(($status === 'paid' || $status === 'active') && $purchase['invoice_route'])
-                                            <a href="{{ $purchase['invoice_route'] }}?from=profile" class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md bg-qricket-600 text-white hover:bg-qricket-700">View Invoice</a>
+                                        @if($purchase['invoice_route'])
+                                            <a href="{{ $purchase['invoice_route'] }}?from=profile" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md bg-qricket-600 text-white hover:bg-qricket-700 transition-colors">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                </svg>
+                                                Invoice
+                                            </a>
                                         @else
                                             <span class="text-gray-500">—</span>
                                         @endif
                                     </td>
                                     <td class="py-2 pr-4">
-                                        @if($purchase['has_pending_refund'])
-                                            <span class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
-                                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                                Pending
-                                            </span>
+                                        @if($purchase['has_pending_refund'] && isset($purchase['pending_refund_id']))
+                                            <div class="flex items-center gap-2">
+                                                <span class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
+                                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    Pending
+                                                </span>
+                                                <form method="POST" action="{{ route('refund.cancel', $purchase['pending_refund_id']) }}" class="inline" onsubmit="return confirm('Are you sure you want to cancel this refund request?');">
+                                                    @csrf
+                                                    @method('POST')
+                                                    <button type="submit" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-md bg-gray-600 text-white hover:bg-gray-700 transition-colors">
+                                                        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                        Cancel
+                                                    </button>
+                                                </form>
+                                            </div>
                                         @elseif($purchase['refund_eligible'])
                                             <button onclick="openRefundModal('{{ $purchase['type'] }}', '{{ $purchase['id'] }}', '{{ $purchase['purchase_id'] }}', '{{ $purchase['amount'] }}')" class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">
                                                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

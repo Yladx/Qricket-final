@@ -23,7 +23,9 @@ class OrganizerProfileController extends Controller
 
         // Base query for organized events - show events where user is the owner
         // Exclude events where user is also a co-owner (co-owners should show in "Part Of" instead)
+        // Only show published events
         $organizedQuery = $organizer->organizedEvents()
+            ->where('status', 'published')
             ->whereDoesntHave('staff', function($query) use ($userId) {
                 $query->where('user_id', $userId)
                       ->where('role', 'co-owner');
@@ -31,7 +33,9 @@ class OrganizerProfileController extends Controller
 
         // Base query for staff events - show all events where user is staff (including co-owners)
         // This includes co-owners even if they also own the event (co-owners always show in "Part Of")
-        $staffQuery = Event::whereHas('staff', function($query) use ($userId) {
+        // Only show published events
+        $staffQuery = Event::where('status', 'published')
+            ->whereHas('staff', function($query) use ($userId) {
                 $query->where('user_id', $userId);
             });
 
@@ -51,13 +55,12 @@ class OrganizerProfileController extends Controller
         } elseif ($type === 'staff') {
             $events = $staffQuery->orderBy('start_date', 'asc')->paginate(10);
         } else {
-            // All events - combine both
+            // All events - combine both (both queries already filter by published status)
             $organizedIds = $organizedQuery->pluck('id');
             $staffIds = $staffQuery->pluck('id');
             $allIds = $organizedIds->merge($staffIds)->unique();
             
             $events = Event::whereIn('id', $allIds)
-                ->where('status', 'published')
                 ->orderBy('start_date', 'asc')
                 ->paginate(10);
         }

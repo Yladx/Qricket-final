@@ -204,6 +204,39 @@ class RefundController extends Controller
     }
 
     /**
+     * Cancel a pending refund request (User only).
+     */
+    public function cancel(Request $request, RefundRequest $refundRequest)
+    {
+        $user = Auth::user();
+        
+        // Verify the user owns this refund request
+        if ($refundRequest->user_id !== $user->id) {
+            abort(403, 'You do not have permission to cancel this refund request.');
+        }
+        
+        // Only allow canceling pending refund requests
+        if ($refundRequest->status !== 'pending') {
+            return redirect()->back()->with('error', 'Only pending refund requests can be cancelled.');
+        }
+        
+        // Update refund request status to cancelled
+        $refundRequest->update([
+            'status' => 'cancelled',
+        ]);
+        
+        // Log activity
+        Log::info('Refund request cancelled by user', [
+            'refund_request_id' => $refundRequest->id,
+            'user_id' => $user->id,
+            'type' => $refundRequest->type,
+            'amount' => $refundRequest->amount,
+        ]);
+        
+        return redirect()->back()->with('success', 'Refund request cancelled successfully.');
+    }
+
+    /**
      * Process refund through Xendit (Admin only).
      */
     public function processRefund(Request $request, RefundRequest $refundRequest)

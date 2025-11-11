@@ -160,6 +160,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Refund routes
     Route::post('/refund/request', [\App\Http\Controllers\Payment\RefundController::class, 'store'])->name('refund.request');
+    Route::post('/refund/{refundRequest}/cancel', [\App\Http\Controllers\Payment\RefundController::class, 'cancel'])->name('refund.cancel');
     
     // Organizer profile routes (public)
     Route::get('/organizer/{userId}/profile', [\App\Http\Controllers\OrganizerProfileController::class, 'show'])->name('organizer.profile');

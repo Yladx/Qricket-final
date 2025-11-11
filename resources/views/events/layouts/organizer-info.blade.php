@@ -109,65 +109,142 @@
                 </div>
             </div>
             
-                <!-- Staff Members (Co-owners and Managers only) - Premium Design -->
+                <!-- Staff Members (Grouped by Role) - Premium Design -->
             @php
-                $coOwnersAndManagers = optional($event)->staff ? $event->staff->filter(function($staff) {
-                    return $staff->user && in_array($staff->role, ['co-owner', 'manager']);
+                $allStaff = optional($event)->staff ? $event->staff->filter(function($staff) {
+                    return $staff->user !== null;
                 }) : collect();
+                
+                // Group staff by role
+                $staffByRole = $allStaff->groupBy('role');
+                
+                // Define role display order and labels
+                $roleOrder = ['co-owner', 'manager', 'organizer', 'staff'];
+                $roleLabels = [
+                    'co-owner' => 'Co-Owners',
+                    'manager' => 'Managers',
+                    'organizer' => 'Organizers',
+                    'staff' => 'Staff Members'
+                ];
             @endphp
-            @if(method_exists($event, 'staff') && $coOwnersAndManagers->count() > 0)
+            @if(method_exists($event, 'staff') && $allStaff->count() > 0)
                 <div class="mt-8 pt-8 border-t border-gray-200/80 dark:border-gray-700/80">
-                    <div class="flex items-center gap-2 mb-4">
+                    <div class="flex items-center gap-2 mb-6">
                         <svg class="w-5 h-5 text-qricket-500 dark:text-qricket-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">Event Co-Owners & Managers</h4>
+                        <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100">Event Staff</h4>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    @foreach($coOwnersAndManagers as $staff)
-                        @if($staff->user)
-                            <a href="{{ route('organizer.profile', $staff->user->id) }}?back={{ urlencode(route('events.show', $event->id)) }}" 
-                                   class="group flex items-center gap-3 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-850 rounded-xl border border-gray-200/60 dark:border-gray-700/60 px-4 py-3 hover:shadow-lg hover:border-qricket-300 dark:hover:border-qricket-700 transition-all duration-300">
-                                    <!-- Staff Avatar -->
-                                    <div class="relative flex-shrink-0">
-                                @if($staff->user->profile_picture_url)
-                                            <div class="relative">
-                                                <div class="absolute inset-0 bg-gradient-to-br from-qricket-400 to-qricket-600 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
-                                                <img class="relative w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-md ring-1 ring-gray-200 dark:ring-gray-600" 
-                                         src="{{ $staff->user->profile_picture_url }}" 
-                                         alt="{{ $staff->user->full_name }}">
-                                            </div>
-                                @else
-                                            <div class="relative">
-                                                <div class="absolute inset-0 bg-gradient-to-br from-qricket-400 to-qricket-600 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
-                                                <div class="relative w-10 h-10 bg-gradient-to-br from-qricket-500 to-qricket-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md ring-1 ring-gray-200 dark:ring-gray-600">
-                                        {{ strtoupper(substr($staff->user->full_name ?? 'S', 0, 1)) }}
+                    
+                    @foreach($roleOrder as $role)
+                        @if($staffByRole->has($role) && $staffByRole->get($role)->count() > 0)
+                            <div class="mb-6 last:mb-0">
+                                <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                    {{ $roleLabels[$role] ?? ucfirst(str_replace('-', ' ', $role)) }}
+                                </h5>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    @foreach($staffByRole->get($role) as $staff)
+                                        @if($staff->user)
+                                            <a href="{{ route('organizer.profile', $staff->user->id) }}?back={{ urlencode(route('events.show', $event->id)) }}" 
+                                                   class="group flex items-center gap-3 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-850 rounded-xl border border-gray-200/60 dark:border-gray-700/60 px-4 py-3 hover:shadow-lg hover:border-qricket-300 dark:hover:border-qricket-700 transition-all duration-300">
+                                                <!-- Staff Avatar -->
+                                                <div class="relative flex-shrink-0">
+                                            @if($staff->user->profile_picture_url)
+                                                        <div class="relative">
+                                                            <div class="absolute inset-0 bg-gradient-to-br from-qricket-400 to-qricket-600 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                                                            <img class="relative w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-md ring-1 ring-gray-200 dark:ring-gray-600" 
+                                                     src="{{ $staff->user->profile_picture_url }}" 
+                                                     alt="{{ $staff->user->full_name }}">
+                                                        </div>
+                                            @else
+                                                        <div class="relative">
+                                                            <div class="absolute inset-0 bg-gradient-to-br from-qricket-400 to-qricket-600 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                                                            <div class="relative w-10 h-10 bg-gradient-to-br from-qricket-500 to-qricket-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md ring-1 ring-gray-200 dark:ring-gray-600">
+                                                    {{ strtoupper(substr($staff->user->full_name ?? 'S', 0, 1)) }}
+                                                            </div>
                                                 </div>
-                                    </div>
-                                @endif
-                                    </div>
-                                    
-                                    <!-- Staff Info -->
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-qricket-500 dark:group-hover:text-qricket-400 transition-colors duration-200 truncate">
-                                            {{ $staff->user->full_name }}
-                                        </p>
-                                    @if($staff->role)
-                                            <p class="text-xs text-gray-900 dark:text-gray-400 mt-0.5">
-                                                {{ ucfirst(str_replace('-', ' ', $staff->role)) }}
-                                            </p>
-                                    @endif
+                                            @endif
+                                                </div>
+                                                
+                                                <!-- Staff Info -->
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-qricket-500 dark:group-hover:text-qricket-400 transition-colors duration-200 truncate">
+                                                        {{ $staff->user->full_name }}
+                                                    </p>
+                                                    @if($staff->user->email)
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                                            {{ $staff->user->email }}
+                                                        </p>
+                                                    @endif
+                                                </div>
+                                                
+                                                <!-- Arrow Icon -->
+                                                <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-qricket-500 dark:group-hover:text-qricket-400 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </a>
+                                        @endif
+                                    @endforeach
                                 </div>
-                                    
-                                    <!-- Arrow Icon -->
-                                    <svg class="w-4 h-4 text-gray-900 dark:text-gray-500 group-hover:text-qricket-500 dark:group-hover:text-qricket-400 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                            </a>
+                            </div>
+                        @endif
+                    @endforeach
+                    
+                    <!-- Show any staff with roles not in the predefined order -->
+                    @foreach($staffByRole as $role => $staffGroup)
+                        @if(!in_array($role, $roleOrder) && $staffGroup->count() > 0)
+                            <div class="mb-6 last:mb-0">
+                                <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                    {{ ucfirst(str_replace('-', ' ', $role)) }}
+                                </h5>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    @foreach($staffGroup as $staff)
+                                        @if($staff->user)
+                                            <a href="{{ route('organizer.profile', $staff->user->id) }}?back={{ urlencode(route('events.show', $event->id)) }}" 
+                                                   class="group flex items-center gap-3 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-850 rounded-xl border border-gray-200/60 dark:border-gray-700/60 px-4 py-3 hover:shadow-lg hover:border-qricket-300 dark:hover:border-qricket-700 transition-all duration-300">
+                                                <!-- Staff Avatar -->
+                                                <div class="relative flex-shrink-0">
+                                            @if($staff->user->profile_picture_url)
+                                                        <div class="relative">
+                                                            <div class="absolute inset-0 bg-gradient-to-br from-qricket-400 to-qricket-600 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                                                            <img class="relative w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-md ring-1 ring-gray-200 dark:ring-gray-600" 
+                                                     src="{{ $staff->user->profile_picture_url }}" 
+                                                     alt="{{ $staff->user->full_name }}">
+                                                        </div>
+                                            @else
+                                                        <div class="relative">
+                                                            <div class="absolute inset-0 bg-gradient-to-br from-qricket-400 to-qricket-600 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                                                            <div class="relative w-10 h-10 bg-gradient-to-br from-qricket-500 to-qricket-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md ring-1 ring-gray-200 dark:ring-gray-600">
+                                                    {{ strtoupper(substr($staff->user->full_name ?? 'S', 0, 1)) }}
+                                                            </div>
+                                                </div>
+                                            @endif
+                                                </div>
+                                                
+                                                <!-- Staff Info -->
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-qricket-500 dark:group-hover:text-qricket-400 transition-colors duration-200 truncate">
+                                                        {{ $staff->user->full_name }}
+                                                    </p>
+                                                    @if($staff->user->email)
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                                            {{ $staff->user->email }}
+                                                        </p>
+                                                    @endif
+                                                </div>
+                                                
+                                                <!-- Arrow Icon -->
+                                                <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-qricket-500 dark:group-hover:text-qricket-400 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
                         @endif
                     @endforeach
                 </div>
-            </div>
             @endif
             </div>
         </div>

@@ -13,8 +13,8 @@ class EventBrowsingController extends Controller
      */
     public function browse(Request $request)
     {
-        // Base public query - show all events
-        $query = Event::whereIn('status', ['published', 'approved']);
+        // Base public query - show only published events
+        $query = Event::where('status', 'published');
         
         // Apply basic filters first (these apply regardless of upcoming/past filter)
         if ($request->filled('search')) {
@@ -153,7 +153,7 @@ class EventBrowsingController extends Controller
         }
         
         // Get unique tags from events that contain the query
-        $tags = Event::whereIn('status', ['published', 'approved'])
+        $tags = Event::where('status', 'published')
             ->whereNotNull('tags')
             ->where('tags', '!=', '')
             ->pluck('tags')
