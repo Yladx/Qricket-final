@@ -114,9 +114,10 @@
             }, 2000); // 2 seconds should be enough for initialization
         })();
         
-        const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-        const eventId = new URLSearchParams(location.search).get('id');
-        const existingCertificateData = @json($certificateData ?? []);
+        var csrfEl = document.querySelector('meta[name="csrf-token"]');
+        var csrf = (csrfEl && csrfEl.getAttribute) ? csrfEl.getAttribute('content') : '';
+        var eventId = new URLSearchParams(location.search).get('id');
+        var existingCertificateData = @json($certificateData ?? []);
 
         function syncPreview(idInput, idPreview){
             const elI = document.getElementById(idInput);
@@ -570,14 +571,21 @@
         
         // Apply colors on load
         (function applyInitialColors(){
+            var themePrimaryEl = document.getElementById('theme_primary');
+            var themeSecondaryEl = document.getElementById('theme_secondary');
+            var orgLine1El = document.getElementById('org_line1_input');
+            var orgLine2El = document.getElementById('org_line2_input');
+            var orgLine3El = document.getElementById('org_line3_input');
+            var orgSchoolEl = document.getElementById('org_school_input');
+            var recipientNameEl = document.getElementById('recipient_name_input');
             const payload = {
-                theme_primary: document.getElementById('theme_primary')?.value || existingCertificateData.theme_primary || '#0b2f6b',
-                theme_secondary: document.getElementById('theme_secondary')?.value || existingCertificateData.theme_secondary || '#092557',
-                org_line1: document.getElementById('org_line1_input')?.value || existingCertificateData.org_line1 || '',
-                org_line2: document.getElementById('org_line2_input')?.value || existingCertificateData.org_line2 || '',
-                org_line3: document.getElementById('org_line3_input')?.value || existingCertificateData.org_line3 || '',
-                org_school: document.getElementById('org_school_input')?.value || existingCertificateData.org_school || '',
-                recipient_name: document.getElementById('recipient_name_input')?.value || existingCertificateData.recipient_name || ''
+                theme_primary: (themePrimaryEl && themePrimaryEl.value) ? themePrimaryEl.value : (existingCertificateData.theme_primary || '#0b2f6b'),
+                theme_secondary: (themeSecondaryEl && themeSecondaryEl.value) ? themeSecondaryEl.value : (existingCertificateData.theme_secondary || '#092557'),
+                org_line1: (orgLine1El && orgLine1El.value) ? orgLine1El.value : (existingCertificateData.org_line1 || ''),
+                org_line2: (orgLine2El && orgLine2El.value) ? orgLine2El.value : (existingCertificateData.org_line2 || ''),
+                org_line3: (orgLine3El && orgLine3El.value) ? orgLine3El.value : (existingCertificateData.org_line3 || ''),
+                org_school: (orgSchoolEl && orgSchoolEl.value) ? orgSchoolEl.value : (existingCertificateData.org_school || ''),
+                recipient_name: (recipientNameEl && recipientNameEl.value) ? recipientNameEl.value : (existingCertificateData.recipient_name || '')
             };
             refreshPreview(payload);
         })();
@@ -623,7 +631,16 @@
                     savedCount: savedSignatoryCount,
                     calculatedCount: calculatedSignatoryCount,
                     maxSignatoryWithData: maxSignatoryWithData,
-                    existingData: Object.keys(existingCertificateData).filter(k => k.startsWith('sig_'))
+                    existingData: (function() {
+                        var keys = Object.keys(existingCertificateData);
+                        var filtered = [];
+                        for (var f = 0; f < keys.length; f++) {
+                            if (keys[f] && keys[f].startsWith && keys[f].startsWith('sig_')) {
+                                filtered.push(keys[f]);
+                            }
+                        }
+                        return filtered;
+                    })()
                 });
                 
                 // If we need to add more signatories (use maxSignatoryWithData instead of savedSignatoryCount)
@@ -775,9 +792,13 @@
                 
                 // Show remove buttons if more than one signatory
                 if (allSignatories.length > 1) {
-                    document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
-                        btn.classList.remove('hidden');
-                    });
+                    var showBtns = document.querySelectorAll('.remove-signatory-btn');
+                    for (var sb = 0; sb < showBtns.length; sb++) {
+                        var btn = showBtns[sb];
+                        if (btn) {
+                            btn.classList.remove('hidden');
+                        }
+                    }
                 }
                 
                 // Update preview
@@ -860,11 +881,12 @@
         }
 
         window.uploadLogo = async function(side){
-            const file = document.getElementById(`logo_${side}_file`).files[0];
+            var fileInput = document.getElementById('logo_' + side + '_file');
+            var file = fileInput ? fileInput.files[0] : null;
             if (!file) return;
             
             // Show immediate preview using FileReader
-            const previewEl = document.getElementById(`logo_${side}_preview`);
+            var previewEl = document.getElementById('logo_' + side + '_preview');
             if (previewEl && file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -912,8 +934,8 @@
                     // Persist in hidden JSON for autosave pipeline
                     try {
                         const jsonEl = document.getElementById('certificate_data_json');
-                        const current = jsonEl?.value ? JSON.parse(jsonEl.value) : {};
-                        current[`logo_${side}_url`] = data.url;
+                        const current = (jsonEl && jsonEl.value) ? JSON.parse(jsonEl.value) : {};
+                        current['logo_' + side + '_url'] = data.url;
                         if (jsonEl) jsonEl.value = JSON.stringify(current);
                     } catch(_) {}
                     if (autosaveDebounced && typeof autosaveDebounced === 'function') {
@@ -1040,11 +1062,12 @@
 
             // Dynamic signatory signature upload (1..4)
         window.uploadSignature = async function(signatoryNum){
-            const file = document.getElementById(`sig_${signatoryNum}_file`)?.files?.[0];
+            var fileInput = document.getElementById('sig_' + signatoryNum + '_file');
+            var file = fileInput && fileInput.files && fileInput.files.length > 0 ? fileInput.files[0] : null;
             if (!file) return;
             
             // Show immediate preview using FileReader
-            const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
+            var previewEl = document.getElementById('sig_' + signatoryNum + '_preview');
             if (previewEl && file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -1065,9 +1088,9 @@
                 if (statusEl) statusEl.textContent = 'Uploaded';
                 // Persist path in hidden json so preview + autosave can include it
                 try {
-                    const jsonEl = document.getElementById('certificate_data_json');
-                    const current = jsonEl?.value ? JSON.parse(jsonEl.value) : {};
-                    current[`sig_${signatoryNum}_signature`] = res.signature_path || `events/${eventId}/certificate/signature_${signatoryNum}.enc`;
+                    var jsonEl = document.getElementById('certificate_data_json');
+                    var current = (jsonEl && jsonEl.value) ? JSON.parse(jsonEl.value) : {};
+                    current['sig_' + signatoryNum + '_signature'] = res.signature_path || ('events/' + eventId + '/certificate/signature_' + signatoryNum + '.enc');
                     if (jsonEl) jsonEl.value = JSON.stringify(current);
                 } catch(_) {}
                 // Update preview with server URL if provided
@@ -1081,10 +1104,10 @@
                     autosaveDebounced();
                 }
                 // Update inline preview image if present
-                const img = document.querySelector(`#cert_preview_wrapper img[src*="signature_${signatoryNum}.enc"]`);
+                var img = document.querySelector('#cert_preview_wrapper img[src*="signature_' + signatoryNum + '.enc"]');
                 if (img) {
                     // Force reload
-                    img.src = img.src.split('?')[0] + `?t=${Date.now()}`;
+                    img.src = img.src.split('?')[0] + '?t=' + Date.now();
                     img.style.display = 'block';
                 }
             } else if (statusEl) {
@@ -1344,15 +1367,23 @@
                 console.warn('Failed to parse certificate_data_json:', e);
             }
             
+            var orgLine1El2 = document.getElementById('org_line1_input');
+            var orgLine2El2 = document.getElementById('org_line2_input');
+            var orgLine3El2 = document.getElementById('org_line3_input');
+            var orgSchoolEl2 = document.getElementById('org_school_input');
+            var recipientNameEl2 = document.getElementById('recipient_name_input');
+            var themePrimaryEl2 = document.getElementById('theme_primary');
+            var themeSecondaryEl2 = document.getElementById('theme_secondary');
+            var themeBorderEl = document.getElementById('theme_border');
             const payload = {
-                org_line1: document.getElementById('org_line1_input')?.value || basePayload.org_line1 || '',
-                org_line2: document.getElementById('org_line2_input')?.value || basePayload.org_line2 || '',
-                org_line3: document.getElementById('org_line3_input')?.value || basePayload.org_line3 || '',
-                org_school: document.getElementById('org_school_input')?.value || basePayload.org_school || '',
-                recipient_name: document.getElementById('recipient_name_input')?.value || basePayload.recipient_name || '',
-                theme_primary: document.getElementById('theme_primary')?.value || basePayload.theme_primary || '#0b2f6b',
-                theme_secondary: document.getElementById('theme_secondary')?.value || basePayload.theme_secondary || '#092557',
-                theme_border: document.getElementById('theme_border')?.value || basePayload.theme_border || basePayload.theme_primary || '#0b2f6b',
+                org_line1: (orgLine1El2 && orgLine1El2.value) ? orgLine1El2.value : (basePayload.org_line1 || ''),
+                org_line2: (orgLine2El2 && orgLine2El2.value) ? orgLine2El2.value : (basePayload.org_line2 || ''),
+                org_line3: (orgLine3El2 && orgLine3El2.value) ? orgLine3El2.value : (basePayload.org_line3 || ''),
+                org_school: (orgSchoolEl2 && orgSchoolEl2.value) ? orgSchoolEl2.value : (basePayload.org_school || ''),
+                recipient_name: (recipientNameEl2 && recipientNameEl2.value) ? recipientNameEl2.value : (basePayload.recipient_name || ''),
+                theme_primary: (themePrimaryEl2 && themePrimaryEl2.value) ? themePrimaryEl2.value : (basePayload.theme_primary || '#0b2f6b'),
+                theme_secondary: (themeSecondaryEl2 && themeSecondaryEl2.value) ? themeSecondaryEl2.value : (basePayload.theme_secondary || '#092557'),
+                theme_border: (themeBorderEl && themeBorderEl.value) ? themeBorderEl.value : (basePayload.theme_border || basePayload.theme_primary || '#0b2f6b'),
             };
             
             // Copy non-signatory fields from JSON (like logos, event details, etc.)
@@ -1629,19 +1660,19 @@
                     console.error('Failed to persist certificate enabled setting:', error);
                 }
             };
-            box.addEventListener('change', () => {
-                const enableCert = !box.checked;
+            box.addEventListener('change', function() {
+                var enableCert = !box.checked;
                 persist(enableCert);
                 
                 // Update hidden form field
-                const hiddenField = document.getElementById('skip_certificate_hidden');
+                var hiddenField = document.getElementById('skip_certificate_hidden');
                 if (hiddenField) {
                     hiddenField.value = box.checked ? '1' : '0';
                 }
                 
                 // Hide/show certificate form and preview based on checkbox state
-                const formContainer = document.getElementById('certificate-form-container');
-                const previewSection = document.getElementById('cert_section');
+                var formContainer = document.getElementById('certificate-form-container');
+                var previewSection = document.getElementById('cert_section');
                 
                 // Use updateVisibility function for consistency
                 updateVisibility();
@@ -1675,8 +1706,9 @@
                     formData.append('id', eventId);
                     
                     // Collect all form data
-                    const inputs = document.querySelectorAll('#certificate-form-container input, #certificate-form-container select, #certificate-form-container textarea');
-                    inputs.forEach(input => {
+                    var inputs = document.querySelectorAll('#certificate-form-container input, #certificate-form-container select, #certificate-form-container textarea');
+                    for (var inpIdx = 0; inpIdx < inputs.length; inpIdx++) {
+                        var input = inputs[inpIdx];
                         if (input.type === 'checkbox') {
                             formData.append(input.name, input.checked ? '1' : '0');
                         } else if (input.type === 'file') {
@@ -1684,7 +1716,7 @@
                         } else if (input.value !== undefined && input.value !== '') {
                             formData.append(input.name, input.value);
                         }
-                    });
+                    }
                     
                     // Also include the skip certificate setting
                     const skipCheckbox = document.getElementById('skip_certificate_step4');
@@ -1717,15 +1749,16 @@
             }
             
             // Set up autosave listeners
-            const certificateContainer = document.getElementById('certificate-form-container');
+            var certificateContainer = document.getElementById('certificate-form-container');
             if (certificateContainer) {
-                const inputs = certificateContainer.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => {
-                    if (input.type !== 'file') {
+                var autosaveInputs = certificateContainer.querySelectorAll('input, select, textarea');
+                for (var ai = 0; ai < autosaveInputs.length; ai++) {
+                    var input = autosaveInputs[ai];
+                    if (input && input.type !== 'file') {
                         input.addEventListener('input', queueCertificateAutosave);
                         input.addEventListener('change', queueCertificateAutosave);
                     }
-                });
+                }
             }
             
             // Also autosave when skip certificate checkbox changes
