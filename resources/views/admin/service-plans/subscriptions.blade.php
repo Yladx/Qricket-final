@@ -27,179 +27,173 @@
         </div>
     @endif
 
-    <!-- Analytics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-qricket-100 dark:bg-qricket-900 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-qricket-600 dark:text-qricket-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M9 8h6M5 4h14a2 2 0 012 2v12l-4-2-4 2-4-2-4 2V6a2 2 0 012-2z"></path>
-                        </svg>
+    <!-- Top Row: Quick Stats + Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Quick Stats Cards (Left Side) -->
+        <div class="lg:col-span-1 grid grid-cols-2 gap-4">
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-qricket-100 dark:bg-qricket-900 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-qricket-600 dark:text-qricket-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M9 8h6M5 4h14a2 2 0 012 2v12l-4-2-4 2-4-2-4 2V6a2 2 0 012-2z"></path>
+                            </svg>
+                        </div>
                     </div>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Plans</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $subscriptionPlans->count() }}</p>
+                <div class="flex-1 flex flex-col justify-center">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Total Plans</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $subscriptionPlans->count() }}</p>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col justify-center">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Active Plans</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $subscriptionPlans->where('is_active', true)->count() }}</p>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col justify-center">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Total Subscribers</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $totalSubscribers }}</p>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col justify-center">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Monthly Revenue</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">₱{{ number_format($monthlyRevenue, 2) }}</p>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+        <!-- Charts (Right Side) -->
+        <div class="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Subscription Growth Chart -->
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Subscription Growth</h3>
+                    <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                        <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                        <span>New Subscriptions</span>
                     </div>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Plans</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $subscriptionPlans->where('is_active', true)->count() }}</p>
+                <div class="flex-1 min-h-0" style="height: 350px;">
+                    <canvas id="subscriptionGrowthChart"></canvas>
                 </div>
             </div>
-        </div>
 
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                    </div>
+            <!-- Plan Distribution Chart -->
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Plan Distribution</h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">By Subscribers</span>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Subscribers</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $totalSubscribers }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Monthly Revenue</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">₱{{ number_format($monthlyRevenue, 2) }}</p>
+                <div class="flex-1 min-h-0 flex items-center justify-center" style="height: 350px;">
+                    <canvas id="planDistributionChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <!-- Subscription Growth Chart -->
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Subscription Growth</h3>
-                <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                    <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
-                    <span>New Subscriptions</span>
+    <!-- Bottom Row: Subscription Plans on Left Side -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Subscription Plans (Left Side - Full Height) -->
+        <div class="lg:col-span-1">
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg h-full flex flex-col">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Subscription Plans</h3>
                 </div>
-            </div>
-            <div class="relative" style="height: 250px;">
-                <canvas id="subscriptionGrowthChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Plan Distribution Chart -->
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Plan Distribution</h3>
-                <span class="text-sm text-gray-500 dark:text-gray-400">By Subscribers</span>
-            </div>
-            <div class="relative" style="height: 250px;">
-                <canvas id="planDistributionChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Subscription Plans Grid -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Subscription Plans</h3>
-        </div>
-        <div class="p-6">
+                <div class="p-6 flex-1 overflow-y-auto" style="max-height: calc(100vh - 600px); min-height: 400px;">
             @if($subscriptionPlans->count())
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="space-y-4">
                     @foreach($subscriptionPlans as $plan)
-                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-                            <div class="text-center">
-                                <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $plan->name }}</h4>
-                                <div class="mt-2">
-                                    @if($plan->price == 0)
-                                        <span class="text-3xl font-bold text-gray-900 dark:text-gray-100">Free</span>
-                                    @else
-                                        <span class="text-3xl font-bold text-gray-900 dark:text-gray-100">₱{{ number_format($plan->price, 0) }}</span>
-                                        <span class="text-gray-600 dark:text-gray-400">/month</span>
-                                    @endif
-                                </div>
-                                @if($plan->description)
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">{{ $plan->description }}</p>
-                                @endif
-                                
-                                <!-- Subscriber Count -->
-                                <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">Subscribers</p>
-                                    <p class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $plan->subscribers_count ?? 0 }}</p>
-                                </div>
-                                
-                                <!-- Features -->
-                                <div class="mt-4 space-y-2 text-left">
-                                    <div class="flex items-center text-sm">
-                                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                        <span class="text-gray-700 dark:text-gray-300">
-                                            {{ $plan->events_per_month ? $plan->events_per_month . ' events/month' : 'Unlimited events' }}
-                                        </span>
-                                    </div>
-                                    <div class="flex items-center text-sm">
-                                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                        <span class="text-gray-700 dark:text-gray-300">
-                                            {{ $plan->tickets_per_event ? $plan->tickets_per_event . ' tickets/event' : 'Unlimited tickets' }}
-                                        </span>
-                                    </div>
-                                    @if($plan->advanced_layouts)
-                                        <div class="flex items-center text-sm">
-                                            <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                            <span class="text-gray-700 dark:text-gray-300">Advanced layouts</span>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-4 md:p-5 hover:shadow-md transition-all duration-200">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <!-- Left Section: Plan Info -->
+                                <div class="flex-1 flex flex-col md:flex-row md:items-center md:space-x-6 gap-4 md:gap-0">
+                                    <div class="flex-shrink-0">
+                                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                                            <h4 class="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $plan->name }}</h4>
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $plan->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
+                                                {{ $plan->is_active ? 'Active' : 'Inactive' }}
+                                            </span>
                                         </div>
-                                    @endif
-                                    @if($plan->advanced_analytics)
-                                        <div class="flex items-center text-sm">
-                                            <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                            <span class="text-gray-700 dark:text-gray-300">Advanced analytics</span>
+                                        @if($plan->description)
+                                            <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400">{{ $plan->description }}</p>
+                                        @endif
+                                    </div>
+                                    
+                                    <!-- Middle Section: Details -->
+                                    <div class="flex flex-wrap md:flex-nowrap items-center gap-4 md:gap-6 md:space-x-8 border-t md:border-t-0 md:border-l md:border-r border-gray-200 dark:border-gray-600 pt-4 md:pt-0 md:px-6">
+                                        <div class="text-center min-w-[100px]">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Price</div>
+                                            <div class="text-sm md:text-base font-semibold text-qricket-600 dark:text-qricket-400">
+                                                @if($plan->price == 0)
+                                                    Free
+                                                @else
+                                                    ₱{{ number_format($plan->price, 0) }}/mo
+                                                @endif
+                                            </div>
                                         </div>
-                                    @endif
+                                        <div class="text-center min-w-[100px]">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Subscribers</div>
+                                            <div class="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">{{ $plan->subscribers_count ?? 0 }}</div>
+                                        </div>
+                                        <div class="text-center min-w-[120px]">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Events/Month</div>
+                                            <div class="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">
+                                                {{ $plan->events_per_month ? $plan->events_per_month : 'Unlimited' }}
+                                            </div>
+                                        </div>
+                                        <div class="text-center min-w-[120px]">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Tickets/Event</div>
+                                            <div class="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">
+                                                {{ $plan->tickets_per_event ? $plan->tickets_per_event : 'Unlimited' }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 
-                                <!-- Status -->
-                                <div class="mt-4">
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full {{ $plan->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
-                                        {{ $plan->is_active ? 'Active' : 'Inactive' }}
-                                    </span>
-                                </div>
-                                
-                                <!-- Actions -->
-                                <div class="mt-4 flex justify-center space-x-2">
-                                    <button onclick="editSubscriptionPlan({{ $plan->id }})" class="text-qricket-600 dark:text-qricket-400 hover:text-qricket-800 dark:hover:text-qricket-300">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <!-- Right Section: Actions -->
+                                <div class="flex-shrink-0 flex items-center justify-end md:justify-start space-x-2 md:ml-4">
+                                    <button onclick="editSubscriptionPlan({{ $plan->id }})" class="p-2 text-qricket-600 dark:text-qricket-400 hover:bg-qricket-50 dark:hover:bg-qricket-900/20 rounded-md transition-colors" title="Edit">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </button>
+                                    <button onclick="deleteSubscriptionPlan({{ $plan->id }})" class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Delete">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                         </svg>
                                     </button>
                                 </div>
@@ -208,15 +202,20 @@
                     @endforeach
                 </div>
             @else
-                <div class="text-center py-8">
+                <div class="text-center py-12">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M9 8h6M5 4h14a2 2 0 012 2v12l-4-2-4 2-4-2-4 2V6a2 2 0 012-2z"></path>
                     </svg>
                     <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No subscription plans</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating subscription plans.</p>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new subscription plan.</p>
                 </div>
             @endif
+                </div>
+            </div>
         </div>
+        
+        <!-- Empty space on right (2 columns) -->
+        <div class="lg:col-span-2 hidden lg:block"></div>
     </div>
 
     <!-- Subscription Plan Modal -->
@@ -313,14 +312,14 @@
                 datasets: [{
                     label: 'New Subscriptions',
                     data: subscriptionGrowthData.values || [],
-                    borderColor: 'rgb(16, 185, 129)',
-                    backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     tension: 0.4,
                     fill: true,
                     borderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    pointBackgroundColor: 'rgb(16, 185, 129)',
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    pointBackgroundColor: '#10b981',
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     pointHoverBackgroundColor: '#fff',
@@ -333,46 +332,46 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: isDark ? '#e5e7eb' : '#374151',
+                            font: { size: 12 }
+                        }
                     },
                     tooltip: {
+                        enabled: true,
+                        mode: 'index',
+                        intersect: false,
                         backgroundColor: isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                         titleColor: isDark ? '#e5e7eb' : '#374151',
                         bodyColor: isDark ? '#e5e7eb' : '#374151',
                         borderColor: isDark ? '#4b5563' : '#e5e7eb',
                         borderWidth: 1,
-                        padding: 12,
-                        displayColors: false,
-                        callbacks: {
-                            label: function(context) {
-                                return 'Subscriptions: ' + context.parsed.y;
-                            }
-                        }
+                        padding: 12
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            color: isDark ? '#9ca3af' : '#6b7280',
-                            font: {
-                                size: 11
-                            },
+                            color: isDark ? '#e5e7eb' : '#374151',
+                            font: { size: 11 },
                             stepSize: 1
                         },
                         grid: {
-                            color: isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(229, 231, 235, 0.5)',
-                            drawBorder: false
+                            color: isDark ? '#374151' : '#e5e7eb'
                         }
                     },
                     x: {
                         ticks: {
-                            color: isDark ? '#9ca3af' : '#6b7280',
-                            font: {
-                                size: 11
-                            }
+                            color: isDark ? '#e5e7eb' : '#374151',
+                            font: { size: 11 },
+                            maxRotation: 45,
+                            minRotation: 45
                         },
                         grid: {
+                            color: isDark ? '#374151' : '#e5e7eb',
                             display: false
                         }
                     }
@@ -411,24 +410,18 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom',
+                        display: true,
+                        position: 'right',
                         labels: {
-                            color: isDarkMode ? '#d1d5db' : '#4b5563',
-                            font: {
-                                size: 11
-                            },
-                            padding: 12,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
+                            color: isDarkMode ? '#e5e7eb' : '#374151',
+                            font: { size: 12 },
+                            padding: 15,
+                            boxWidth: 15,
+                            boxHeight: 15
                         }
                     },
                     tooltip: {
-                        backgroundColor: isDarkMode ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                        titleColor: isDarkMode ? '#e5e7eb' : '#374151',
-                        bodyColor: isDarkMode ? '#e5e7eb' : '#374151',
-                        borderColor: isDarkMode ? '#4b5563' : '#e5e7eb',
-                        borderWidth: 1,
-                        padding: 12,
+                        enabled: true,
                         callbacks: {
                             label: function(context) {
                                 const label = context.label || '';
@@ -437,7 +430,13 @@
                                 const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
                                 return label + ': ' + value + ' (' + percentage + '%)';
                             }
-                        }
+                        },
+                        backgroundColor: isDarkMode ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                        titleColor: isDarkMode ? '#e5e7eb' : '#374151',
+                        bodyColor: isDarkMode ? '#e5e7eb' : '#374151',
+                        borderColor: isDarkMode ? '#4b5563' : '#e5e7eb',
+                        borderWidth: 1,
+                        padding: 12
                     }
                 },
                 cutout: '60%',

@@ -27,98 +27,104 @@
         </div>
     @endif
 
-    <!-- Analytics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-qricket-100 dark:bg-qricket-900 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-qricket-600 dark:text-qricket-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
+    <!-- Top Row: Quick Stats + Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Quick Stats Cards (Left Side) -->
+        <div class="lg:col-span-1 grid grid-cols-2 gap-4">
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-qricket-100 dark:bg-qricket-900 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-qricket-600 dark:text-qricket-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
+                        </div>
                     </div>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Plans</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $pricingPlans->count() }}</p>
+                <div class="flex-1 flex flex-col justify-center">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Total Plans</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $pricingPlans->count() }}</p>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col justify-center">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Active Plans</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $pricingPlans->where('is_active', true)->count() }}</p>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col justify-center">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Total Purchases</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $totalPurchases }}</p>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col" style="min-height: 438px;">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col justify-center">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Total Revenue</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100">₱{{ number_format($totalRevenue, 2) }}</p>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Plans</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $pricingPlans->where('is_active', true)->count() }}</p>
+        <!-- Charts (Right Side) -->
+        <div class="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Revenue Chart -->
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Revenue Over Time</h3>
+                <div class="flex-1 min-h-0" style="height: 350px;">
+                    <canvas id="revenueChart"></canvas>
                 </div>
             </div>
-        </div>
 
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Purchases</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $totalPurchases }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">₱{{ number_format($totalRevenue, 2) }}</p>
+            <!-- Popular Plans Chart -->
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Most Popular Plans</h3>
+                <div class="flex-1 min-h-0 flex items-center justify-center" style="height: 350px;">
+                    <canvas id="popularPlansChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <!-- Revenue Chart -->
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Revenue Over Time</h3>
-            <div class="flex-1 min-h-0" style="height: 350px;">
-                <canvas id="revenueChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Popular Plans Chart -->
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 flex flex-col">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Most Popular Plans</h3>
-            <div class="flex-1 min-h-0 flex items-center justify-center" style="height: 350px;">
-                <canvas id="popularPlansChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pricing Plans Cards -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Pricing Plans</h3>
-        </div>
-        <div class="p-6">
+    <!-- Bottom Row: Pricing Plans Cards on Left Side -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Pricing Plans Cards (Left Side - Full Height) -->
+        <div class="lg:col-span-1">
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg h-full flex flex-col">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Pricing Plans</h3>
+                </div>
+                <div class="p-6 flex-1 overflow-y-auto" style="max-height: calc(100vh - 600px); min-height: 400px;">
             @if($pricingPlans->count())
                 <div class="space-y-4">
                     @foreach($pricingPlans as $plan)
@@ -188,7 +194,12 @@
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new pricing plan.</p>
                 </div>
             @endif
+                </div>
+            </div>
         </div>
+        
+        <!-- Empty space on right (2 columns) -->
+        <div class="lg:col-span-2 hidden lg:block"></div>
     </div>
 
     <!-- Pricing Plan Modal -->
