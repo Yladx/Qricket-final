@@ -37,6 +37,15 @@
             $isFreeValue = (bool)$event->is_free;
         }
         
+        // Get checkbox checked state (for when checkbox is shown)
+        // Use old() helper first, then fallback to isFreeValue
+        $oldIsFree = old('is_free');
+        if ($oldIsFree !== null) {
+            $isFreeCheckedValue = (bool)$oldIsFree;
+        } else {
+            $isFreeCheckedValue = (bool)$isFreeValue;
+        }
+        
         // ONLY lock if isFreeEvent parameter was explicitly passed (from edit/basic.blade.php for manage/edit)
         // DO NOT lock in step1 (event creation flow), even if eventId exists
         // This ensures step1 always shows the checkbox, and only manage/edit blocks it
@@ -44,18 +53,9 @@
         if (!empty($isFreeEventParam) && ($isFreeEventParam === true || $isFreeEventParam === 1 || $isFreeEventParam === '1')) {
             $shouldLockFreeEvent = true;
         }
-        
-        // Get checkbox checked state (for when checkbox is shown)
-        // Use old() helper first, then fallback to isFreeValue
-        $isFreeCheckedValue = old('is_free');
-        if ($isFreeCheckedValue === null) {
-            $isFreeCheckedValue = $isFreeValue;
-        } else {
-            $isFreeCheckedValue = (bool)$isFreeCheckedValue;
-        }
     @endphp
     
-    @if(isset($shouldLockFreeEvent) && $shouldLockFreeEvent === true)
+    @if($shouldLockFreeEvent === true)
         <!-- Event is free and being edited - show read-only display instead of checkbox -->
         <div class="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
             <div class="flex items-center space-x-2">
@@ -77,7 +77,7 @@
                     name="is_free" 
                     value="1" 
                     id="is_free_checkbox" 
-                    {{ $isFreeCheckedValue ? 'checked' : '' }}
+                    @if(isset($isFreeCheckedValue) && $isFreeCheckedValue) checked @endif
                     class="rounded border-gray-300 text-qricket-600"
                 >
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Is your event free?</span>
