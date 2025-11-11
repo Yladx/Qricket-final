@@ -47,9 +47,19 @@ class TicketsController extends Controller
             'quantity' => isset($type['quantity']) && $type['quantity'] !== '' ? (int)$type['quantity'] : null,
             'sale_start' => $this->normalizeDateMinute($type['sale_start'] ?? null),
             'sale_end' => $this->normalizeDateMinute($type['sale_end'] ?? null),
+            'is_active' => isset($type['is_active']) ? $type['is_active'] : null,
         ];
-        // Remove nulls to avoid noisy diffs
-        return array_filter($normalized, function($v) { return !is_null($v); });
+        // Preserve is_active if it exists (even if false), but remove other nulls
+        $result = [];
+        foreach ($normalized as $key => $value) {
+            // Always include is_active if it exists (even if false/0/'0')
+            if ($key === 'is_active' && array_key_exists('is_active', $normalized)) {
+                $result[$key] = $value;
+            } elseif ($value !== null) {
+                $result[$key] = $value;
+            }
+        }
+        return $result;
     }
 
     /**
@@ -375,6 +385,7 @@ class TicketsController extends Controller
                     'sale_end' => optional($t->sale_end)->format('Y-m-d H:i'),
                     'purchased_count' => $sold,
                     'can_delete' => $sold === 0,
+                    'is_active' => (bool)($t->is_active ?? true), // Default to true if not set
                 ];
             })->toArray(),
             'ticket_settings' => $this->loadTicketSettingsFromR2($event),
@@ -881,6 +892,17 @@ class TicketsController extends Controller
                         if (array_key_exists('description', $t) && (string)($t['description'] ?? '') !== (string)($row->description ?? '')) { $diff['description'] = ['from' => $row->description, 'to' => $t['description']]; }
                         if (array_key_exists('price', $t) && (float)$t['price'] !== (float)$row->price) { $diff['price'] = ['from' => $row->price, 'to' => $t['price']]; }
                         if (array_key_exists('quantity', $t) && (int)$t['quantity'] !== (int)$row->quantity) { $diff['quantity'] = ['from' => $row->quantity, 'to' => $t['quantity']]; }
+                        // Check is_active changes
+                        if (array_key_exists('is_active', $t)) {
+                            $newIsActive = filter_var($t['is_active'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                            if ($newIsActive === null) {
+                                $newIsActive = in_array(strtolower((string)$t['is_active']), ['1', 'true', 'yes'], true);
+                            }
+                            $oldIsActive = (bool)$row->is_active;
+                            if ($newIsActive !== $oldIsActive) {
+                                $diff['is_active'] = ['from' => $oldIsActive ? 'Active' : 'Inactive', 'to' => $newIsActive ? 'Active' : 'Inactive'];
+                            }
+                        }
                         $normDate = function($v){ return $this->normalizeDateMinute($v); };
                         if (array_key_exists('sale_start', $t) && $normDate($t['sale_start'] ?? null) !== $normDate($row->sale_start)) { $diff['sale_start'] = ['from' => optional($row->sale_start)->format('Y-m-d H:i'), 'to' => $t['sale_start']]; }
                         if (array_key_exists('sale_end', $t) && $normDate($t['sale_end'] ?? null) !== $normDate($row->sale_end)) { $diff['sale_end'] = ['from' => optional($row->sale_end)->format('Y-m-d H:i'), 'to' => $t['sale_end']]; }
@@ -893,6 +915,15 @@ class TicketsController extends Controller
                             ];
                         }
 
+                        // Handle is_active field - convert string '1'/'0' to boolean
+                        $isActive = true; // Default to active
+                        if (isset($t['is_active'])) {
+                            $isActive = filter_var($t['is_active'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                            if ($isActive === null) {
+                                $isActive = in_array(strtolower((string)$t['is_active']), ['1', 'true', 'yes'], true);
+                            }
+                        }
+                        
                         $row->update([
                             'name' => $newName,
                             'description' => $t['description'] ?? $row->description,
@@ -902,8 +933,18 @@ class TicketsController extends Controller
                             'sale_start' => $t['sale_start'] ?? $row->sale_start,
                             // Force sale_end to event end
                             'sale_end' => $event->end_date ?? ($t['sale_end'] ?? $row->sale_end),
+                            'is_active' => $isActive,
                         ]);
                     } else {
+                        // Handle is_active field - convert string '1'/'0' to boolean
+                        $isActive = true; // Default to active for new tickets
+                        if (isset($t['is_active'])) {
+                            $isActive = filter_var($t['is_active'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                            if ($isActive === null) {
+                                $isActive = in_array(strtolower((string)$t['is_active']), ['1', 'true', 'yes'], true);
+                            }
+                        }
+                        
                         EventTicket::create([
                             'event_id' => $event->id,
                             'name' => $t['name'] ?? 'Unnamed',
@@ -913,6 +954,7 @@ class TicketsController extends Controller
                             'sale_start' => $t['sale_start'] ?? null,
                             // Force sale_end to event end
                             'sale_end' => $event->end_date ?? ($t['sale_end'] ?? null),
+                            'is_active' => $isActive,
                         ]);
                     }
                 }

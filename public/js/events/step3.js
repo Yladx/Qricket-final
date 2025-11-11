@@ -71,7 +71,12 @@
   }
 
   function getUsedQuantity(list) {
-    return (list || []).reduce((sum, t) => sum + (parseInt(t.quantity, 10) || 0), 0);
+    // Only count quantities from active tickets
+    return (list || []).reduce((sum, t) => {
+      const isActive = t.is_active !== undefined ? (String(t.is_active) === '1' || t.is_active === true || t.is_active === 'true') : true;
+      if (!isActive) return sum; // Skip inactive tickets
+      return sum + (parseInt(t.quantity, 10) || 0);
+    }, 0);
   }
 
   function remainingQuota(list) {
@@ -92,7 +97,25 @@
       const minSold = Number(list[idx]?.purchased_count || 0);
       inp.min = String(minSold);
       if (cap == null) return; // no max constraints if no cap
-      const others = list.reduce((sum, t, j) => sum + (j === idx ? 0 : (parseInt(t.quantity, 10) || 0)), 0);
+      
+      // Only count quantities from active tickets (excluding the current one)
+      const others = list.reduce((sum, t, j) => {
+        if (j === idx) return sum; // Skip current ticket
+        const isActive = t.is_active !== undefined ? (String(t.is_active) === '1' || t.is_active === true || t.is_active === 'true') : true;
+        if (!isActive) return sum; // Skip inactive tickets
+        return sum + (parseInt(t.quantity, 10) || 0);
+      }, 0);
+      
+      // Check if current ticket is active
+      const currentTicket = list[idx];
+      const isCurrentActive = currentTicket?.is_active !== undefined ? (String(currentTicket.is_active) === '1' || currentTicket.is_active === true || currentTicket.is_active === 'true') : true;
+      
+      // If current ticket is inactive, don't enforce max (or set a very high max)
+      if (!isCurrentActive) {
+        inp.removeAttribute('max'); // Remove max constraint for inactive tickets
+        return;
+      }
+      
       const allowedForThis = Math.max(0, cap - others);
       const cur = parseInt(inp.value, 10) || 0;
       // For free events, max is the cap itself (total limit); for others, allow current + remaining
@@ -360,20 +383,36 @@
   function render() {
     let list = readTypes();
     // On initial render, enforce cap across existing quantities so UI shows the exact allowed amount
+    // BUT: Only count quantities from active tickets when enforcing the cap
     const cap = getTicketsPerEventLimit();
     if (cap != null) {
-      let remaining = cap;
-      let changed = false;
-      const normalized = list.map((t) => {
-        const originalQty = parseInt(t.quantity, 10) || 0;
-        const capped = Math.max(0, Math.min(originalQty, remaining));
-        remaining -= capped;
-        if (capped !== originalQty) changed = true;
-        return Object.assign({}, t, { quantity: String(capped) });
+      // Calculate total quantity from active tickets only
+      const activeTickets = list.filter(t => {
+        const isActive = t.is_active !== undefined ? (String(t.is_active) === '1' || t.is_active === true || t.is_active === 'true') : true;
+        return isActive;
       });
-      if (changed) {
-        list = normalized;
-        writeTypes(list);
+      const totalActiveQuantity = activeTickets.reduce((sum, t) => sum + (parseInt(t.quantity, 10) || 0), 0);
+      
+      // Only enforce cap if total active quantity exceeds the cap
+      if (totalActiveQuantity > cap) {
+        let remaining = cap;
+        let changed = false;
+        const normalized = list.map((t) => {
+          const isActive = t.is_active !== undefined ? (String(t.is_active) === '1' || t.is_active === true || t.is_active === 'true') : true;
+          // Only cap active tickets
+          if (!isActive) {
+            return t; // Leave inactive tickets unchanged
+          }
+          const originalQty = parseInt(t.quantity, 10) || 0;
+          const capped = Math.max(0, Math.min(originalQty, remaining));
+          remaining -= capped;
+          if (capped !== originalQty) changed = true;
+          return Object.assign({}, t, { quantity: String(capped) });
+        });
+        if (changed) {
+          list = normalized;
+          writeTypes(list);
+        }
       }
     }
     ticketContainer.innerHTML = '';
@@ -549,6 +588,7 @@
           quantity: t.quantity ?? '',
           sale_start: t.sale_start ?? null,
           sale_end: t.sale_end ?? null,
+          is_active: t.is_active !== undefined ? (String(t.is_active) === '1' || t.is_active === true || t.is_active === 'true' ? '1' : '0') : '1',
         })),
         ticket_settings: {
           ...settings,
@@ -584,7 +624,11 @@
       const url = form?.getAttribute('data-autosave-url') || `/organizer/events/ticket/autosave?id=${encodeURIComponent(getEventId())}`;
       const settings = readSettings();
       // console.log('Autosaving with settings:', settings);
-      const sanitizedTypes = readTypes().map(t => ({
+      // Read all ticket types and include is_active field
+      const allTypes = readTypes();
+      // Only send active tickets OR send all tickets but mark inactive ones (backend will handle)
+      // Include is_active field for all tickets
+      const sanitizedTypes = allTypes.map(t => ({
         id: t.id ?? undefined,
         name: t.name ?? '',
         description: t.description ?? '',
@@ -592,6 +636,7 @@
         quantity: t.quantity ?? '',
         sale_start: t.sale_start ?? null,
         sale_end: t.sale_end ?? null,
+        is_active: t.is_active !== undefined ? (String(t.is_active) === '1' || t.is_active === true || t.is_active === 'true' ? '1' : '0') : '1', // Default to active if not set
       }));
       
       // Always get ticket colors from current form inputs (most up-to-date)
@@ -878,15 +923,36 @@
   function onContainerCommit(e) {
     const k = e.target.getAttribute('data-k');
     const i = e.target.getAttribute('data-i');
-    if (k !== 'quantity' || i == null) return;
+    if (k == null || i == null) return;
     const list = readTypes();
     const idx = Number(i);
+    
+    // If is_active checkbox changed, update quantity maxes for all tickets
+    if (k === 'is_active') {
+      setTimeout(updateQuantityMaxes, 0);
+      queueAutosave();
+      return;
+    }
+    
+    if (k !== 'quantity') return;
     const cap = getTicketsPerEventLimit();
     const minSold = Number(list[idx]?.purchased_count || 0);
     let val = parseInt(e.target.value, 10);
     if (isNaN(val)) val = minSold; // empty or invalid -> snap back to sold count
-    if (cap != null) {
-      const others = list.reduce((sum, t, j) => sum + (j === idx ? 0 : (parseInt(t.quantity, 10) || 0)), 0);
+    
+    // Check if current ticket is active
+    const currentTicket = list[idx];
+    const isActive = currentTicket?.is_active !== undefined ? (String(currentTicket.is_active) === '1' || currentTicket.is_active === true || currentTicket.is_active === 'true') : true;
+    
+    // Only enforce cap for active tickets
+    if (cap != null && isActive) {
+      // Only count quantities from other active tickets
+      const others = list.reduce((sum, t, j) => {
+        if (j === idx) return sum; // Skip current ticket
+        const otherIsActive = t.is_active !== undefined ? (String(t.is_active) === '1' || t.is_active === true || t.is_active === 'true') : true;
+        if (!otherIsActive) return sum; // Skip inactive tickets
+        return sum + (parseInt(t.quantity, 10) || 0);
+      }, 0);
       const allowedForThis = Math.max(0, cap - others);
       if (val > allowedForThis) val = allowedForThis;
     }
