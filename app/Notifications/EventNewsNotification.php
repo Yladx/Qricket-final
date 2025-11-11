@@ -8,7 +8,6 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Event;
 use App\Models\EventNews;
-use App\Models\Notification as CustomNotification;
 
 class EventNewsNotification extends Notification implements ShouldQueue
 {
@@ -50,33 +49,4 @@ class EventNewsNotification extends Notification implements ShouldQueue
             ]);
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
-    {
-        // Store in our custom notifications table
-        CustomNotification::create([
-            'user_id' => $notifiable->id,
-            'type' => 'event',
-            'action' => 'news',
-            'reference_id' => $this->event->id,
-            'title' => 'Event News Update',
-            'message' => 'New news from "' . $this->event->title . '": ' . $this->news->title,
-            'is_read' => false,
-        ]);
-
-        return [
-            'type' => 'event_news',
-            'event_id' => $this->event->id,
-            'event_title' => $this->event->title,
-            'news_id' => $this->news->id,
-            'news_title' => $this->news->title,
-            'news_content' => $this->news->content,
-            'news_image_url' => $this->news->image_url,
-            'message' => 'New news update for ' . $this->event->title . ': ' . $this->news->title,
-        ];
-    }
 }

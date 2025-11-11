@@ -21,7 +21,7 @@
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6 overflow-hidden">
         <!-- Event Header with Thumbnail Background -->
-        <div class="relative p-6 border-b border-gray-200 dark:border-gray-700 overflow-hidden" 
+        <div class="relative p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 overflow-hidden" 
              @if($event->thumbnail_url) 
              style="background-size: cover; background-position: center;"
              @endif>
@@ -32,27 +32,33 @@
                 <!-- Dark overlay for better text contrast -->
                 <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/70 z-0"></div>
             @endif
-            <div class="flex items-center justify-between relative z-10">
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-lg font-semibold {{ $event->thumbnail_url ? 'text-white drop-shadow-lg' : 'text-gray-900 dark:text-white' }} truncate">{{ $event->title }}</h3>
-                    <div class="mt-2 flex items-center text-sm {{ $event->thumbnail_url ? 'text-gray-100 drop-shadow-md' : 'text-gray-500 dark:text-gray-400' }}">
-                        <svg class="flex-shrink-0 mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        <span>{{ \Carbon\Carbon::parse($event->start_date)->format('M d, Y \a\t g:i A') }} - {{ \Carbon\Carbon::parse($event->end_date)->format('M d, Y \a\t g:i A') }}</span>
-                    </div>
-                    <div class="mt-1 flex items-center text-sm {{ $event->thumbnail_url ? 'text-gray-100 drop-shadow-md' : 'text-gray-500 dark:text-gray-400' }}">
-                        <svg class="flex-shrink-0 mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        <span>{{ $event->location }}</span>
+            <div class="flex flex-col relative z-10">
+                <!-- Event Info Section -->
+                <div class="flex-1 min-w-0 mb-4 sm:mb-0">
+                    <h3 class="text-base sm:text-lg font-semibold {{ $event->thumbnail_url ? 'text-white drop-shadow-lg' : 'text-gray-900 dark:text-white' }} truncate mb-2">{{ $event->title }}</h3>
+                    <div class="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm {{ $event->thumbnail_url ? 'text-gray-100 drop-shadow-md' : 'text-gray-500 dark:text-gray-400' }}">
+                        <div class="flex items-center">
+                            <svg class="flex-shrink-0 mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="break-words">{{ \Carbon\Carbon::parse($event->start_date)->format('M d, Y \a\t g:i A') }} -</span>
+                            <span class="break-words ml-1">{{ \Carbon\Carbon::parse($event->end_date)->format('M d, Y \a\t g:i A') }}</span>
+                        </div>
+                        <div class="flex items-start sm:items-center">
+                            <svg class="flex-shrink-0 mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4 mt-0.5 sm:mt-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="break-words">{{ $event->location }}</span>
+                        </div>
                     </div>
                 </div>
-                <div class="ml-4 flex-shrink-0 relative z-10 flex items-center space-x-2">
+                
+                <!-- Action Buttons Section - Bottom on Mobile -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:space-x-2 mt-4 sm:mt-0 sm:ml-4 sm:flex-shrink-0">
                     <!-- View Event Button (Eye Icon) -->
                     <a href="{{ route('events.show', $event->id) }}" 
-                       class="inline-flex items-center px-3 py-2 border {{ $event->thumbnail_url ? 'border-white/30' : 'border-gray-300 dark:border-gray-600' }} text-sm font-medium rounded-md {{ $event->thumbnail_url ? 'text-white bg-white/10 hover:bg-white/20' : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600' }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors shadow-sm"
+                       class="inline-flex items-center justify-center px-3 py-2 border {{ $event->thumbnail_url ? 'border-white/30' : 'border-gray-300 dark:border-gray-600' }} text-sm font-medium rounded-md {{ $event->thumbnail_url ? 'text-white bg-white/10 hover:bg-white/20' : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600' }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors shadow-sm"
                        title="View Event">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -64,29 +70,30 @@
                     @if($hasCertificate)
                         <a href="{{ route('events.certificate.view', $event->id) }}" 
                            target="_blank"
-                           class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors shadow-sm">
+                           class="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors shadow-sm">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            Certificate
+                            <span class="hidden sm:inline">Certificate</span>
+                            <span class="sm:hidden">Cert</span>
                         </a>
                     @endif
                     
                     <!-- Share Tickets Button -->
                     @if(!$eventEnded && $hasAvailableTickets && ($eventSharingSettings[$eventId] ?? false))
                         <button onclick="openShareModal({{ $eventId }})" 
-                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors shadow-lg">
+                                class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors shadow-lg w-full sm:w-auto">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
                             </svg>
                             Share Tickets
                         </button>
                     @elseif($eventEnded && !$hasCertificate)
-                        <span class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700">
+                        <span class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 w-full sm:w-auto">
                             Event Ended
                         </span>
                     @elseif($allTicketsShared && !$hasCertificate)
-                        <span class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700">
+                        <span class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 w-full sm:w-auto">
                             All Tickets Shared
                         </span>
                     @endif
@@ -95,7 +102,7 @@
         </div>
 
         <!-- Tickets by Type - Collapsible -->
-        <div class="p-4">
+        <div class="p-3 sm:p-4">
             @foreach($tickets->groupBy('ticket_type_id') as $ticketTypeId => $ticketsOfType)
                 @php
                     $ticketType = $ticketsOfType->first()->ticketType;
@@ -120,11 +127,11 @@
                 <div class="mb-4 last:mb-0">
                     <!-- Collapsible Ticket Type Header -->
                     <button onclick="toggleTicketType({{ $ticketTypeId }})" 
-                            class="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                        <div class="flex items-center space-x-3">
-                            <div>
-                                <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $ticketType->name }}</h4>
-                                <div class="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            class="w-full flex items-center justify-between p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                        <div class="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white truncate">{{ $ticketType->name }}</h4>
+                                <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-gray-500 dark:text-gray-400 mt-1">
                                     <span>₱{{ number_format($ticketType->price) }}</span>
                                     <span>•</span>
                                     <span>{{ $availableTickets->count() }} available</span>
@@ -146,9 +153,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $ticketsOfType->count() }} tickets</span>
-                            <svg id="chevron-{{ $ticketTypeId }}" class="w-4 h-4 text-gray-400 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="flex items-center space-x-2 ml-2 flex-shrink-0">
+                            <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $ticketsOfType->count() }} tickets</span>
+                            <svg id="chevron-{{ $ticketTypeId }}" class="w-4 h-4 text-gray-400 transform transition-transform duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </div>
@@ -207,54 +214,54 @@
                                     $canShare = !$eventEnded && !$isCheckedIn && !$hasPendingShares && !$isSharedToOthers;
                                 @endphp
 
-                                <div class="flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded-md {{ $wasReceivedThroughShare ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : ($isSharedToOthers ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' : ($isCheckedIn ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : ($eventEnded ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : ($hasPendingShares ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-gray-50 dark:bg-gray-700')))) }}">
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:p-2 border border-gray-200 dark:border-gray-600 rounded-md {{ $wasReceivedThroughShare ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : ($isSharedToOthers ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' : ($isCheckedIn ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : ($eventEnded ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : ($hasPendingShares ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-gray-50 dark:bg-gray-700')))) }}">
+                                    <div class="flex-1 min-w-0 mb-2 sm:mb-0">
+                                        <div class="text-xs font-medium text-gray-900 dark:text-gray-100 break-all sm:truncate mb-1">
                                             {{ $ticket->ticket_id }}
                                         </div>
                                         @if($wasReceivedThroughShare)
-                                            <div class="text-xs text-blue-600 dark:text-blue-400 truncate font-medium">
+                                            <div class="text-xs text-blue-600 dark:text-blue-400 break-words sm:truncate font-medium">
                                                 Received from {{ $sharedFromName }}
                                             </div>
                                             @if($isCheckedIn)
-                                                <div class="text-xs text-green-600 dark:text-green-400 truncate mt-0.5">
+                                                <div class="text-xs text-green-600 dark:text-green-400 break-words sm:truncate mt-0.5">
                                                     Checked In
                                                 </div>
                                             @endif
                                         @elseif($isSharedToOthers)
                                             @if($sentToRecipient)
-                                                <div class="text-xs text-orange-600 dark:text-orange-400 truncate font-medium">
+                                                <div class="text-xs text-orange-600 dark:text-orange-400 break-words sm:truncate font-medium">
                                                     Sent to {{ $sentToRecipient }}
                                                 </div>
                                             @else
-                                                <div class="text-xs text-orange-600 dark:text-orange-400 truncate">
+                                                <div class="text-xs text-orange-600 dark:text-orange-400 break-words sm:truncate">
                                                     Shared to recipients
                                                 </div>
                                             @endif
                                             @if($isCheckedIn)
-                                                <div class="text-xs text-green-600 dark:text-green-400 truncate mt-0.5">
+                                                <div class="text-xs text-green-600 dark:text-green-400 break-words sm:truncate mt-0.5">
                                                     Checked In
                                                 </div>
                                             @endif
                                         @elseif($isCheckedIn)
-                                            <div class="text-xs text-green-600 dark:text-green-400 truncate">
+                                            <div class="text-xs text-green-600 dark:text-green-400 break-words sm:truncate">
                                                 Checked In
                                             </div>
                                         @elseif($eventEnded)
-                                            <div class="text-xs text-red-600 dark:text-red-400 truncate">
+                                            <div class="text-xs text-red-600 dark:text-red-400 break-words sm:truncate">
                                                 Event Ended
                                             </div>
                                         @elseif($hasPendingShares)
                                             @if($pendingShareSent && $pendingShareSent->recipient)
-                                                <div class="text-xs text-yellow-600 dark:text-yellow-400 truncate font-medium">
+                                                <div class="text-xs text-yellow-600 dark:text-yellow-400 break-words sm:truncate font-medium">
                                                     Pending to {{ $pendingShareSent->recipient->first_name }} {{ $pendingShareSent->recipient->last_name }}
                                                 </div>
                                             @elseif($pendingShareReceived && $pendingShareReceived->sharer)
-                                                <div class="text-xs text-yellow-600 dark:text-yellow-400 truncate font-medium">
+                                                <div class="text-xs text-yellow-600 dark:text-yellow-400 break-words sm:truncate font-medium">
                                                     Pending from {{ $pendingShareReceived->sharer->first_name }} {{ $pendingShareReceived->sharer->last_name }}
                                                 </div>
                                             @else
-                                                <div class="text-xs text-yellow-600 dark:text-yellow-400 truncate">
+                                                <div class="text-xs text-yellow-600 dark:text-yellow-400 break-words sm:truncate">
                                                     Pending Share Request
                                                 </div>
                                             @endif
@@ -262,7 +269,7 @@
                                             <div class="text-xs text-gray-500 dark:text-gray-400">Available</div>
                                         @endif
                                     </div>
-                                    <div class="flex items-center space-x-1 ml-2">
+                                    <div class="flex items-center justify-end sm:justify-start space-x-1.5 sm:ml-2 flex-shrink-0">
                                         @php
                                             // User can view ticket if they currently own it (user_id matches auth()->id())
                                             // This includes tickets they purchased and tickets they received through sharing
@@ -271,30 +278,30 @@
                                         
                                         @if($canViewTicket)
                                             <a href="{{ route('tickets.individual', $ticket->id) }}" 
-                                               class="text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors inline-block">
+                                               class="text-xs px-2.5 py-1.5 sm:px-2 sm:py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors inline-block whitespace-nowrap">
                                                 View
                                             </a>
                                         @endif
                                         
                                         @if($isCheckedIn)
-                                            <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-md">
+                                            <span class="text-xs px-2.5 py-1.5 sm:px-2 sm:py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-md whitespace-nowrap">
                                                 Checked
                                             </span>
                                         @elseif($eventEnded && !$canViewTicket)
-                                            <span class="text-xs px-2 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-md">
+                                            <span class="text-xs px-2.5 py-1.5 sm:px-2 sm:py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-md whitespace-nowrap">
                                                 Ended
                                             </span>
                                         @elseif($hasPendingShares && !$canViewTicket)
                                             @if($pendingShareSent)
-                                                <span class="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded-md" title="Pending share sent">
+                                                <span class="text-xs px-2.5 py-1.5 sm:px-2 sm:py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded-md whitespace-nowrap" title="Pending share sent">
                                                     Pending Out
                                                 </span>
                                             @elseif($pendingShareReceived)
-                                                <span class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md" title="Pending share received">
+                                                <span class="text-xs px-2.5 py-1.5 sm:px-2 sm:py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md whitespace-nowrap" title="Pending share received">
                                                     Pending In
                                                 </span>
                                             @else
-                                                <span class="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded-md">
+                                                <span class="text-xs px-2.5 py-1.5 sm:px-2 sm:py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded-md whitespace-nowrap">
                                                     Pending
                                                 </span>
                                             @endif

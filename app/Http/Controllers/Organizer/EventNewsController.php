@@ -104,7 +104,7 @@ class EventNewsController extends Controller
                     ],
                 ]);
                 
-                // Send email notification (this will also store in database via toArray method)
+                // Send email notification
                 $user->notify(new EventNewsNotification($event, $news));
                 
                 // Broadcast real-time notification

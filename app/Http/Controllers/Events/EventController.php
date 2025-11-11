@@ -250,8 +250,13 @@ class EventController extends Controller
             ]);
         } elseif ($section === 'news') {
             // Load news data for news section
+            // Only show published news (published_at <= now())
             $event->load('news');
-            $news = $event->news()->orderBy('created_at', 'desc')->get();
+            $news = $event->news()
+                ->whereNotNull('published_at')
+                ->where('published_at', '<=', now())
+                ->orderBy('published_at', 'desc')
+                ->get();
             
             // Regenerate signed URLs for existing images (same logic as EventNewsController)
             $news->transform(function ($article) use ($event) {

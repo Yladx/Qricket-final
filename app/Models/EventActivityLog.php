@@ -97,6 +97,11 @@ class EventActivityLog extends Model
             $finalUserId = null; // Admin-created events have null user_id
         }
 
+        // For event_viewed action, update existing view if it exists within the same day
+        if ($action === 'event_viewed' && $finalUserId !== null) {
+            return static::logEventView($eventId, $finalUserId, $description, $metadata);
+        }
+
         $row = static::create([
             'event_id' => $eventId,
             'user_id' => $finalUserId,
@@ -109,6 +114,65 @@ class EventActivityLog extends Model
 
         // Broadcast a lightweight metrics ping for admin dashboard real-time updates
         try { event(new \App\Events\AdminMetricsPing('activity:'.$action)); } catch (\Throwable $e) { /* ignore */ }
+
+        return $row;
+    }
+
+    /**
+     * Log event view with update-or-create logic to prevent duplicates.
+     * Updates existing view record for the same user and event within the same day,
+     * or creates a new one if no record exists for today.
+     * 
+     * The returned model will have a 'wasRecentlyCreated' property set to true if it's a new view,
+     * or false if it was an update to an existing view.
+     * 
+     * @return EventActivityLog
+     */
+    public static function logEventView($eventId, $userId, $description = null, $metadata = null)
+    {
+        $today = now()->startOfDay();
+        $tomorrow = now()->copy()->addDay()->startOfDay();
+
+        // Check if a view record exists for this user, event, and today
+        $existingView = static::where('event_id', $eventId)
+            ->where('user_id', $userId)
+            ->where('action', 'event_viewed')
+            ->whereBetween('created_at', [$today, $tomorrow])
+            ->first();
+
+        if ($existingView) {
+            // Update existing view record with new timestamp and metadata
+            $existingView->update([
+                'updated_at' => now(),
+                'metadata' => $metadata ?? $existingView->metadata,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+
+            // Broadcast a lightweight metrics ping for admin dashboard real-time updates
+            try { event(new \App\Events\AdminMetricsPing('activity:event_viewed')); } catch (\Throwable $e) { /* ignore */ }
+
+            // Return the view with a flag indicating it was updated (not new)
+            $existingView->wasRecentlyCreated = false;
+            return $existingView;
+        }
+
+        // Create new view record if none exists for today
+        $row = static::create([
+            'event_id' => $eventId,
+            'user_id' => $userId,
+            'action' => 'event_viewed',
+            'description' => $description ?? 'Event viewed',
+            'metadata' => $metadata,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        // Mark as newly created
+        $row->wasRecentlyCreated = true;
+
+        // Broadcast a lightweight metrics ping for admin dashboard real-time updates
+        try { event(new \App\Events\AdminMetricsPing('activity:event_viewed')); } catch (\Throwable $e) { /* ignore */ }
 
         return $row;
     }

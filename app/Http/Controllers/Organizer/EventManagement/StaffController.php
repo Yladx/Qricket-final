@@ -501,7 +501,40 @@ class StaffController extends Controller
                                         ->exists();
                                     
                                     if (!$notificationExists) {
+                                        // Create in-app notification using custom Notification model
+                                        $perms = array_keys(array_filter($payload));
+                                        $permList = empty($perms) ? 'No special permissions' : implode(', ', array_map(function ($k) {
+                                            return str_replace('can_', '', str_replace('_', ' ', $k));
+                                        }, $perms));
+                                        
+                                        \App\Models\Notification::create([
+                                            'user_id' => $userId,
+                                            'admin_id' => null,
+                                            'type' => 'event',
+                                            'action' => 'staff_added',
+                                            'reference_id' => $eventId,
+                                            'title' => 'Added as Event Staff',
+                                            'message' => "You have been added as {$payload['role']} for the event '{$event->title}'. Permissions: {$permList}",
+                                            'is_read' => false,
+                                            'data' => [
+                                                'event_id' => $eventId,
+                                                'event_title' => $event->title,
+                                                'role' => $payload['role'],
+                                                'permissions' => $payload,
+                                            ],
+                                        ]);
+                                        
+                                        // Send email notification
                                         $u->notify(new StaffAssignedNotification($event, $payload['role'], $payload));
+                                        
+                                        // Send real-time notification
+                                        \App\Services\NotificationService::sendUserNotification(
+                                            $userId,
+                                            "You have been added as {$payload['role']} for the event '{$event->title}'.",
+                                            'info',
+                                            'Added as Event Staff'
+                                        );
+                                        
                                         \Log::info('Staff notification sent via step5Store', [
                                             'event_id' => $eventId,
                                             'user_id' => $userId,
@@ -649,7 +682,40 @@ class StaffController extends Controller
                                 ->exists();
                             
                             if (!$notificationExists) {
+                                // Create in-app notification using custom Notification model
+                                $perms = array_keys(array_filter($payload));
+                                $permList = empty($perms) ? 'No special permissions' : implode(', ', array_map(function ($k) {
+                                    return str_replace('can_', '', str_replace('_', ' ', $k));
+                                }, $perms));
+                                
+                                \App\Models\Notification::create([
+                                    'user_id' => $uid,
+                                    'admin_id' => null,
+                                    'type' => 'event',
+                                    'action' => 'staff_added',
+                                    'reference_id' => $eventId,
+                                    'title' => 'Added as Event Staff',
+                                    'message' => "You have been added as {$payload['role']} for the event '{$event->title}'. Permissions: {$permList}",
+                                    'is_read' => false,
+                                    'data' => [
+                                        'event_id' => $eventId,
+                                        'event_title' => $event->title,
+                                        'role' => $payload['role'],
+                                        'permissions' => $payload,
+                                    ],
+                                ]);
+                                
+                                // Send email notification
                                 $u->notify(new StaffAssignedNotification($event, $payload['role'], $payload));
+                                
+                                // Send real-time notification
+                                \App\Services\NotificationService::sendUserNotification(
+                                    $uid,
+                                    "You have been added as {$payload['role']} for the event '{$event->title}'.",
+                                    'info',
+                                    'Added as Event Staff'
+                                );
+                                
                                 \Log::info('Staff notification sent via autosave', [
                                     'event_id' => $eventId,
                                     'user_id' => $uid,

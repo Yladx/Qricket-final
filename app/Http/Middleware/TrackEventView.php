@@ -38,27 +38,37 @@ class TrackEventView {
             }
             
             try {
-                // Log the event view
-                EventActivityLog::create([
-                    'event_id' => $event->id,
-                    'user_id' => $user->id,
-                    'action' => 'view_event',
-                    'description' => "User viewed event: {$event->title}",
-                    'metadata' => json_encode([
+                // Log the event view (will update existing view if it exists for today)
+                $viewRecord = EventActivityLog::logEventView(
+                    $event->id,
+                    $user->id,
+                    "User viewed event: {$event->title}",
+                    [
                         'ip_address' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                         'referer' => $request->header('referer'),
                         'timestamp' => now()->toISOString()
-                    ])
-                ]);
+                    ]
+                );
                 
-                // Trigger Pusher event for real-time updates
-                $this->triggerPusherEvent('event-viewed', [
-                    'event_id' => $event->id,
-                    'user_id' => $user->id,
-                    'user_name' => $user->first_name . ' ' . $user->last_name,
-                    'timestamp' => now()->toISOString()
-                ]);
+                // Trigger Pusher event for real-time updates (only on new views, not updates)
+                // Check if this view was newly created (not updated)
+                $isNewView = isset($viewRecord->wasRecentlyCreated) && $viewRecord->wasRecentlyCreated;
+                if (!$isNewView) {
+                    // Check if created_at is very recent (within last 5 seconds) to determine if it's new
+                    $isNewView = $viewRecord->created_at->greaterThan(now()->subSeconds(5));
+                }
+                
+                if ($isNewView) {
+                    // Only trigger Pusher if this is a fresh view (newly created)
+                    // This prevents spamming Pusher on every page refresh
+                    $this->triggerPusherEvent('event-viewed', [
+                        'event_id' => $event->id,
+                        'user_id' => $user->id,
+                        'user_name' => $user->first_name . ' ' . $user->last_name,
+                        'timestamp' => now()->toISOString()
+                    ]);
+                }
                 
             } catch (\Exception $e) {
                 Log::error('Error tracking event view: ' . $e->getMessage());

@@ -6,36 +6,36 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">My Tickets</h1>
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage and share your event tickets</p>
+        <div class="mb-4 sm:mb-6">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">My Tickets</h1>
+            <p class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Manage and share your event tickets</p>
         </div>
 
         <!-- Filters -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="flex items-center">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 mb-4 sm:mb-6">
+            <div class="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3">
+                <div class="flex items-center w-full sm:w-auto">
                     <input type="checkbox" id="hide_shared" name="hide_shared" 
-                           class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                           class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded flex-shrink-0"
                            {{ $hideShared ? 'checked' : '' }}>
                     <label for="hide_shared" class="ml-2 text-xs text-gray-700 dark:text-gray-300">
                         Hide shared tickets
                     </label>
                 </div>
                 
-                <div class="flex items-center">
+                <div class="flex items-center w-full sm:w-auto">
                     <input type="checkbox" id="hide_past_events" name="hide_past_events" 
-                           class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                           class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded flex-shrink-0"
                            {{ $hidePastEvents ? 'checked' : '' }}>
                     <label for="hide_past_events" class="ml-2 text-xs text-gray-700 dark:text-gray-300">
                         Hide past events
                     </label>
                 </div>
                 
-                <div class="flex items-center">
-                    <label for="sort_by" class="text-xs text-gray-700 dark:text-gray-300 mr-2">Sort by:</label>
+                <div class="flex items-center w-full sm:w-auto flex-1 sm:flex-none">
+                    <label for="sort_by" class="text-xs text-gray-700 dark:text-gray-300 mr-2 whitespace-nowrap">Sort by:</label>
                     <select id="sort_by" name="sort_by" 
-                            class="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            class="border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white w-full sm:w-auto min-w-[160px]">
                         <option value="date_desc" {{ $sortBy === 'date_desc' ? 'selected' : '' }}>Date (Newest First)</option>
                         <option value="date_asc" {{ $sortBy === 'date_asc' ? 'selected' : '' }}>Date (Oldest First)</option>
                         <option value="title_asc" {{ $sortBy === 'title_asc' ? 'selected' : '' }}>Title (A-Z)</option>

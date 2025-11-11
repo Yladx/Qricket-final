@@ -28,7 +28,7 @@ class StaffAssignedNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -46,22 +46,6 @@ class StaffAssignedNotification extends Notification implements ShouldQueue
             ->line('Permissions: ' . $permList)
             ->action('Open Event', $eventUrl)
             ->line('If this was a mistake, please contact the organizer.');
-    }
-
-    public function toDatabase(object $notifiable): array
-    {
-        $perms = array_keys(array_filter($this->permissions));
-        $permList = empty($perms) ? 'No special permissions' : implode(', ', array_map(function ($k) {
-            return str_replace('can_', '', str_replace('_', ' ', $k));
-        }, $perms));
-
-        return [
-            'type' => 'event',
-            'action' => 'staff_added',
-            'reference_id' => $this->event->id,
-            'title' => 'Added as Event Staff',
-            'message' => "You have been added as {$this->role} for the event '{$this->event->title}'. Permissions: {$permList}",
-        ];
     }
 }
 

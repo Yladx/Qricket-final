@@ -16,14 +16,23 @@ class PreventUserAdminAccess
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Bypass: allow accessing admin routes even if a regular user session exists.
-        // This enables admins to sign in without logging the user out first.
-        // If you want to force logout the user automatically instead, uncomment below:
-        // if (Auth::guard('web')->check()) {
-        //     Auth::guard('web')->logout();
-        //     $request->session()->invalidate();
-        //     $request->session()->regenerateToken();
-        // }
+        // Prevent regular users from accessing admin routes
+        // Check if a regular user is logged in (but NOT an admin)
+        if (Auth::guard('web')->check() && !Auth::guard('admin')->check()) {
+            // Check if the logged-in user is NOT a shadow admin user
+            $user = Auth::guard('web')->user();
+            $isShadowAdmin = $user && str_contains($user->email, '@admin.local');
+            
+            if (!$isShadowAdmin) {
+                // Regular user is logged in - deny access to admin routes
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                
+                return redirect()->route('admin.login')
+                    ->with('error', 'Please log out from your user account before accessing admin area.');
+            }
+        }
 
         return $next($request);
     }

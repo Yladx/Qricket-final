@@ -531,10 +531,11 @@ class EventDashboardController extends Controller
     private function getEventActivityTrend(Event $event)
     {
         // Get event views from event activity logs (viewing event pages)
-        // Count unique user views per day (one view per user)
+        // Count unique user views per day (one view per user per day)
+        // Note: With the update-or-create logic, each user will have at most one view record per day
         $viewsData = DB::table('event_activity_logs')
             ->where('event_id', $event->id)
-            ->where('action', 'view_event')
+            ->where('action', 'event_viewed')
             ->select(
                 DB::raw('DATE(created_at) as date'),
                 DB::raw('COUNT(DISTINCT user_id) as views_count')

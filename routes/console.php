@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\EventFeedbackRequest;
 use App\Mail\EventEndedMail;
 use App\Services\EventEndNotificationService;
+use App\Services\ScheduledEventPublishingService;
 use Illuminate\Support\Facades\Mail;
 
 Artisan::command('inspire', function () {
@@ -33,6 +34,9 @@ Schedule::call(function(){
     
     // Handle event end notifications using the service
     EventEndNotificationService::processEndedEvents();
+    
+    // Handle scheduled event publishing using the service
+    ScheduledEventPublishingService::processScheduledEvents();
     
     // Handle feedback request notifications - DISABLED (replaced with Qricket website feedback system)
     // This command is no longer needed as we now use the Qricket website feedback system
@@ -80,3 +84,17 @@ Schedule::command('events:notify-ended')
 // Schedule the feedback email command to run every 6 hours
 // This will automatically send feedback emails to attendees when events end
 Schedule::command('events:send-feedback-emails --hours=1')->everySixHours();
+
+// Schedule news publishing to run every 5 minutes
+// This will publish scheduled news articles and send notifications
+Schedule::command('news:publish-scheduled')
+    ->everyFiveMinutes()
+    ->withoutOverlapping()
+    ->description('Publish scheduled news articles');
+
+// Schedule event publishing to run every 15 minutes
+// This will auto-publish scheduled events when their publish date arrives (no approval required)
+Schedule::command('events:publish-scheduled')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping()
+    ->description('Auto-publish scheduled events');
