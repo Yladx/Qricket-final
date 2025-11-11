@@ -101,7 +101,7 @@
                     @if($canViewGraphs)
                     <!-- Charts Row (Advanced Analytics Feature) -->
                     <div class="grid grid-cols-1 {{ $canManageSales ? 'lg:grid-cols-2' : 'lg:grid-cols-1' }} gap-6">
-                    @if($canManageSales && $canViewGraphs)
+                    @if($canManageSales)
                     <!-- Sales Trend Chart -->
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                             <div class="p-6">
@@ -123,7 +123,6 @@
                         </div>
                     @endif
 
-                    @if($canViewGraphs)
                         <!-- Event Activity Chart -->
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
                             <div class="p-6">
