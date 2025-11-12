@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\TicketLimitPricing;
 use App\Models\Discount;
+use App\Models\DiscountUsage;
 use App\Models\TicketLimitPurchase;
 use App\Models\SubscriptionPlan;
 use App\Models\AdminActivityLog;
@@ -103,11 +104,11 @@ class SubscriptionController extends Controller
      */
     private function discounts($discounts, $quickStats)
     {
-        // Calculate analytics data
-        $totalUsage = $discounts->sum('used_count');
-        $totalSavings = 0; // This would need to be calculated from actual usage
+        // Calculate analytics data from actual usage records
+        $totalUsage = DiscountUsage::count();
+        $totalSavings = DiscountUsage::sum('discount_amount') ?? 0;
         
-        // Usage over time (last 12 months)
+        // Usage over time (last 12 months) - based on actual DiscountUsage records
         $usageData = [
             'labels' => [],
             'values' => []
@@ -116,15 +117,26 @@ class SubscriptionController extends Controller
         for ($i = 11; $i >= 0; $i--) {
             $date = now()->subMonths($i);
             $usageData['labels'][] = $date->format('M Y');
-            $usageData['values'][] = 0; // This would need actual usage tracking
+            // Count actual usage records for this month
+            $usageData['values'][] = DiscountUsage::whereYear('created_at', $date->year)
+                ->whereMonth('created_at', $date->month)
+                ->count();
         }
 
-        // Discount types distribution
+        // Discount types distribution - based on actual usage, not discount count
+        $percentageUsage = DiscountUsage::whereHas('discount', function($query) {
+            $query->where('type', 'percentage');
+        })->count();
+        
+        $fixedAmountUsage = DiscountUsage::whereHas('discount', function($query) {
+            $query->where('type', 'fixed_amount');
+        })->count();
+
         $discountTypesData = [
             'labels' => ['Percentage', 'Fixed Amount'],
             'values' => [
-                $discounts->where('type', 'percentage')->count(),
-                $discounts->where('type', 'fixed_amount')->count()
+                $percentageUsage,
+                $fixedAmountUsage
             ]
         ];
 
