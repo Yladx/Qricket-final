@@ -116,19 +116,22 @@ class SubscriptionController extends Controller
         
         for ($i = 11; $i >= 0; $i--) {
             $date = now()->subMonths($i);
-            $usageData['labels'][] = $date->format('M Y');
-            // Count actual usage records for this month
-            $usageData['values'][] = DiscountUsage::whereYear('created_at', $date->year)
-                ->whereMonth('created_at', $date->month)
-                ->count();
+            $monthLabel = $date->format('M Y');
+            $monthStart = $date->copy()->startOfMonth();
+            $monthEnd = $date->copy()->endOfMonth();
+            
+            $usageData['labels'][] = $monthLabel;
+            // Count actual usage records for this month using date range for better accuracy
+            $usageCount = DiscountUsage::whereBetween('created_at', [$monthStart, $monthEnd])->count();
+            $usageData['values'][] = (int) $usageCount;
         }
 
         // Discount types distribution - based on actual usage, not discount count
-        $percentageUsage = DiscountUsage::whereHas('discount', function($query) {
+        $percentageUsage = (int) DiscountUsage::whereHas('discount', function($query) {
             $query->where('type', 'percentage');
         })->count();
         
-        $fixedAmountUsage = DiscountUsage::whereHas('discount', function($query) {
+        $fixedAmountUsage = (int) DiscountUsage::whereHas('discount', function($query) {
             $query->where('type', 'fixed_amount');
         })->count();
 
@@ -139,6 +142,17 @@ class SubscriptionController extends Controller
                 $fixedAmountUsage
             ]
         ];
+
+        // Ensure arrays are always populated (Chart.js needs arrays even if empty)
+        if (empty($usageData['labels'])) {
+            $usageData['labels'] = [];
+            $usageData['values'] = [];
+        }
+        
+        if (empty($discountTypesData['labels'])) {
+            $discountTypesData['labels'] = ['Percentage', 'Fixed Amount'];
+            $discountTypesData['values'] = [0, 0];
+        }
 
         return view('admin.service-plans.discounts', compact(
             'discounts', 'totalUsage', 'totalSavings', 'usageData', 'discountTypesData', 'quickStats'

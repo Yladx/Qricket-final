@@ -204,12 +204,9 @@
             </div>
         </div>
     </div>
-@endsection
 
-@section('scripts')
-
-<!-- Discount Modal -->
-<div id="discountModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <!-- Discount Modal -->
+    <div id="discountModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
             <div class="mt-3">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4" id="discountModalTitle">Add Discount</h3>
@@ -279,136 +276,171 @@
             </div>
         </div>
     </div>
+@endsection
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
         // Chart data from backend
-        const usageData = @json($usageData);
-        const discountTypesData = @json($discountTypesData);
+        const usageData = @json($usageData ?? ['labels' => [], 'values' => []]);
+        const discountTypesData = @json($discountTypesData ?? ['labels' => [], 'values' => []]);
 
-        // Usage Chart
-        const usageCtx = document.getElementById('usageChart').getContext('2d');
-        new Chart(usageCtx, {
-            type: 'bar',
-            data: {
-                labels: usageData.labels,
-                datasets: [{
-                    label: 'Usage Count',
-                    data: usageData.values,
-                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                    borderColor: 'rgb(59, 130, 246)',
-                    borderWidth: 1,
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
-                            font: {
-                                size: 12
+        console.log('Usage Data:', usageData);
+        console.log('Discount Types Data:', discountTypesData);
+
+        // Wait a bit to ensure Chart.js is loaded
+        setTimeout(function() {
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js failed to load');
+                return;
+            }
+
+            // Usage Chart
+            const usageCanvas = document.getElementById('usageChart');
+            if (usageCanvas) {
+                try {
+                    const usageCtx = usageCanvas.getContext('2d');
+                    new Chart(usageCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: (usageData && usageData.labels) ? usageData.labels : [],
+                            datasets: [{
+                                label: 'Usage Count',
+                                data: (usageData && usageData.values) ? usageData.values.map(function(v) { return parseInt(v) || 0; }) : [],
+                                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                                borderColor: 'rgb(59, 130, 246)',
+                                borderWidth: 1,
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                        font: {
+                                            size: 12
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    enabled: true,
+                                    mode: 'index',
+                                    intersect: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                        font: {
+                                            size: 11
+                                        },
+                                        stepSize: 1,
+                                        precision: 0
+                                    },
+                                    grid: {
+                                        color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                        font: {
+                                            size: 11
+                                        },
+                                        maxRotation: 45,
+                                        minRotation: 45
+                                    },
+                                    grid: {
+                                        color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
+                                        display: false
+                                    }
+                                }
                             }
                         }
-                    },
-                    tooltip: {
-                        enabled: true,
-                        mode: 'index',
-                        intersect: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
-                            font: {
-                                size: 11
-                            },
-                            stepSize: 1
-                        },
-                        grid: {
-                            color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
-                            font: {
-                                size: 11
-                            },
-                            maxRotation: 45,
-                            minRotation: 45
-                        },
-                        grid: {
-                            color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
-                            display: false
-                        }
-                    }
+                    });
+                    console.log('Usage chart initialized successfully');
+                } catch (error) {
+                    console.error('Error initializing usage chart:', error);
                 }
+            } else {
+                console.error('Usage chart canvas not found');
             }
-        });
 
-        // Discount Types Chart
-        const discountTypesCtx = document.getElementById('discountTypesChart').getContext('2d');
-        new Chart(discountTypesCtx, {
-            type: 'doughnut',
-            data: {
-                labels: discountTypesData.labels,
-                datasets: [{
-                    data: discountTypesData.values,
-                    backgroundColor: [
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(16, 185, 129, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(239, 68, 68, 0.8)',
-                        'rgba(139, 92, 246, 0.8)',
-                        'rgba(236, 72, 153, 0.8)'
-                    ],
-                    borderWidth: 2,
-                    borderColor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'right',
-                        labels: {
-                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
-                            font: {
-                                size: 12
+            // Discount Types Chart
+            const discountTypesCanvas = document.getElementById('discountTypesChart');
+            if (discountTypesCanvas) {
+                try {
+                    const discountTypesCtx = discountTypesCanvas.getContext('2d');
+                    new Chart(discountTypesCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: (discountTypesData && discountTypesData.labels) ? discountTypesData.labels : ['Percentage', 'Fixed Amount'],
+                            datasets: [{
+                                data: (discountTypesData && discountTypesData.values) ? discountTypesData.values.map(function(v) { return parseInt(v) || 0; }) : [0, 0],
+                                backgroundColor: [
+                                    'rgba(59, 130, 246, 0.8)',
+                                    'rgba(16, 185, 129, 0.8)',
+                                    'rgba(245, 158, 11, 0.8)',
+                                    'rgba(239, 68, 68, 0.8)',
+                                    'rgba(139, 92, 246, 0.8)',
+                                    'rgba(236, 72, 153, 0.8)'
+                                ],
+                                borderWidth: 2,
+                                borderColor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'right',
+                                    labels: {
+                                        color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                        font: {
+                                            size: 12
+                                        },
+                                        padding: 15,
+                                        boxWidth: 15,
+                                        boxHeight: 15
+                                    }
+                                },
+                                tooltip: {
+                                    enabled: true,
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            if (context.parsed !== null) {
+                                                label += context.parsed;
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
                             },
-                            padding: 15,
-                            boxWidth: 15,
-                            boxHeight: 15
+                            cutout: '60%'
                         }
-                    },
-                    tooltip: {
-                        enabled: true,
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed !== null) {
-                                    label += context.parsed;
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                },
-                cutout: '60%'
+                    });
+                    console.log('Discount types chart initialized successfully');
+                } catch (error) {
+                    console.error('Error initializing discount types chart:', error);
+                }
+            } else {
+                console.error('Discount types chart canvas not found');
             }
-        });
+        }, 100);
+    });
 
         // Modal Functions
         function openDiscountModal() {
