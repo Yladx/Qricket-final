@@ -163,10 +163,6 @@
                 <label for="ts-allow-refunds" class="text-xs text-gray-600 dark:text-gray-300">Allow refunds</label>
             </div>
             <div class="flex items-center space-x-1">
-                <input id="ts-require-approval" name="require_approval" type="checkbox" class="rounded border-gray-300 text-qricket-600 w-3 h-3">
-                <label for="ts-require-approval" class="text-xs text-gray-600 dark:text-gray-300">Require approval</label>
-            </div>
-            <div class="flex items-center space-x-1">
                 <input id="ts-allow-share" name="allow_share_ticket" type="checkbox" class="rounded border-gray-300 text-qricket-600 w-3 h-3">
                 <label for="ts-allow-share" class="text-xs text-gray-600 dark:text-gray-300">Allow ticket sharing</label>
             </div>

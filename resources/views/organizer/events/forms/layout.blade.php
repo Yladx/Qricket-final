@@ -23,7 +23,7 @@
         ]
     )
     <div class="w-full overflow-hidden">
-        <div class="relative -mx-4 sm:-mx-6 md:mx-0">
+        <div class="relative w-full max-w-full">
             <x-events.event-header :event="$eventObj" :section="'info'" :hideActions="true" :previewPosterUrl="$posterUrl" :previewThumbnailUrl="$thumbUrl" :previewMode="true" />
         </div>
     </div>

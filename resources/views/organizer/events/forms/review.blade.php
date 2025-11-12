@@ -36,7 +36,7 @@
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Event Preview</h3>
            
         </div>
-         <div id="event-preview-content" class="relative">
+         <div id="event-preview-content" class="relative overflow-hidden">
             @php
                 // Create a mock event object for the event-header component
                 $mockEvent = (object) [
@@ -73,18 +73,18 @@
                      @if(!empty($eventData['staff_data']))
                          @foreach($eventData['staff_data'] as $staff)
                              <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                                 <div class="flex items-start justify-between">
-                                     <div class="flex items-center space-x-3">
-                                         <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-800 rounded-full flex items-center justify-center">
+                                 <div class="flex items-start justify-between gap-3">
+                                     <div class="flex items-center space-x-3 min-w-0 flex-1">
+                                         <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-800 rounded-full flex items-center justify-center flex-shrink-0">
                                              <span class="text-emerald-600 dark:text-emerald-300 font-semibold text-sm">
                                                  {{ strtoupper(substr($staff['name'] ?? $staff['email'] ?? 'U', 0, 1)) }}
                                              </span>
                                          </div>
-                                         <div>
-                                             <div class="font-medium text-gray-900 dark:text-gray-100">
+                                         <div class="min-w-0 flex-1">
+                                             <div class="font-medium text-gray-900 dark:text-gray-100 break-words">
                                                  {{ $staff['name'] ?? $staff['email'] ?? 'Unknown' }}
                                              </div>
-                                             <div class="text-sm text-gray-500 dark:text-gray-400">{{ $staff['email'] ?? '' }}</div>
+                                             <div class="text-sm text-gray-500 dark:text-gray-400 break-words">{{ $staff['email'] ?? '' }}</div>
                                              <div class="flex flex-wrap gap-1 mt-2">
                                                  @if($staff['can_manage_event'] ?? false)
                                                      <span class="px-2 py-1 text-xs bg-emerald-50 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded border border-emerald-200 dark:border-emerald-700">Manage Event</span>
@@ -107,8 +107,8 @@
                                              </div>
                                          </div>
                                      </div>
-                                     <div class="flex flex-col items-end space-y-2">
-                                         <span class="px-3 py-1 text-xs font-medium bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-full">
+                                     <div class="flex flex-col items-end space-y-2 flex-shrink-0">
+                                         <span class="px-3 py-1 text-xs font-medium bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-full whitespace-nowrap">
                                              {{ ucfirst($staff['role'] ?? 'staff') }}
                                          </span>
                                      </div>
@@ -130,23 +130,23 @@
                 <div id="review-tickets" class="space-y-3">
                     @if(!empty($eventData['ticket_types']))
                         @foreach($eventData['ticket_types'] as $ticket)
-                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                <div class="flex-1">
-                                    <div class="font-medium text-gray-900 dark:text-gray-100">{{ $ticket['name'] ?? 'Ticket Type' }}</div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $ticket['description'] ?? 'No description' }}</div>
-                                    <div class="flex items-center space-x-4 mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                        <span>Price: ₱{{ number_format($ticket['price'] ?? 0, 2) }}</span>
-                                        <span>Quantity: {{ $ticket['quantity'] ?? 'Unlimited' }}</span>
+                            <div class="flex items-center justify-between gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-medium text-gray-900 dark:text-gray-100 break-words">{{ $ticket['name'] ?? 'Ticket Type' }}</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400 break-words">{{ $ticket['description'] ?? 'No description' }}</div>
+                                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                        <span class="whitespace-nowrap">Price: ₱{{ number_format($ticket['price'] ?? 0, 2) }}</span>
+                                        <span class="whitespace-nowrap">Quantity: {{ $ticket['quantity'] ?? 'Unlimited' }}</span>
                                         @if($ticket['early_bird_price'] ?? false)
-                                            <span class="text-emerald-600">Early Bird: ₱{{ number_format($ticket['early_bird_price'], 2) }}</span>
+                                            <span class="text-emerald-600 whitespace-nowrap">Early Bird: ₱{{ number_format($ticket['early_bird_price'], 2) }}</span>
                                         @endif
                                     </div>
                                 </div>
-                                <div class="flex items-center space-x-2">
+                                <div class="flex items-center space-x-2 flex-shrink-0">
                                     @if($ticket['is_active'] ?? true)
-                                        <span class="px-2 py-1 text-xs bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-full">Active</span>
+                                        <span class="px-2 py-1 text-xs bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-full whitespace-nowrap">Active</span>
                                     @else
-                                        <span class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">Inactive</span>
+                                        <span class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full whitespace-nowrap">Inactive</span>
                                     @endif
                                 </div>
                             </div>
@@ -202,29 +202,29 @@
                     @if(!empty($settings['refund_policy']))
                     <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Refund Policy</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-300">{{ $settings['refund_policy'] }}</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-300 break-words">{{ $settings['refund_policy'] }}</div>
                     </div>
                     @endif
                     @if(!empty($settings['ticket_colors']))
                     <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Ticket Colors</div>
-                        <div class="flex items-center space-x-4">
+                        <div class="flex flex-wrap items-center gap-4">
                             @if(!empty($settings['ticket_colors']['primary']))
                             <div class="flex items-center space-x-2">
-                                <div class="w-6 h-6 rounded-full border border-gray-300" style="background-color: {{ $settings['ticket_colors']['primary'] }}"></div>
-                                <span class="text-sm text-gray-600 dark:text-gray-300">Primary</span>
+                                <div class="w-6 h-6 rounded-full border border-gray-300 flex-shrink-0" style="background-color: {{ $settings['ticket_colors']['primary'] }}"></div>
+                                <span class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">Primary</span>
                             </div>
                             @endif
                             @if(!empty($settings['ticket_colors']['secondary']))
                             <div class="flex items-center space-x-2">
-                                <div class="w-6 h-6 rounded-full border border-gray-300" style="background-color: {{ $settings['ticket_colors']['secondary'] }}"></div>
-                                <span class="text-sm text-gray-600 dark:text-gray-300">Secondary</span>
+                                <div class="w-6 h-6 rounded-full border border-gray-300 flex-shrink-0" style="background-color: {{ $settings['ticket_colors']['secondary'] }}"></div>
+                                <span class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">Secondary</span>
                             </div>
                             @endif
                             @if(!empty($settings['ticket_colors']['accent']))
                             <div class="flex items-center space-x-2">
-                                <div class="w-6 h-6 rounded-full border border-gray-300" style="background-color: {{ $settings['ticket_colors']['accent'] }}"></div>
-                                <span class="text-sm text-gray-600 dark:text-gray-300">Accent</span>
+                                <div class="w-6 h-6 rounded-full border border-gray-300 flex-shrink-0" style="background-color: {{ $settings['ticket_colors']['accent'] }}"></div>
+                                <span class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">Accent</span>
                             </div>
                             @endif
                         </div>
@@ -239,7 +239,7 @@
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Ticket Preview</h3>
                     <span class="text-sm text-gray-500 dark:text-gray-400">Visual Style</span>
                 </div>
-                <div id="review-ticket-preview" class="space-y-4">
+                <div id="review-ticket-preview" class="space-y-4 overflow-hidden">
                     @if(!empty($eventData['ticket_types']) && count($eventData['ticket_types']) > 0)
                         @php($firstTicket = $eventData['ticket_types'][0])
                         @php($ticketColors = $eventData['ticket_settings']['ticket_colors'] ?? [])
@@ -304,8 +304,8 @@
                                 <div class="p-3 border-b border-gray-200 dark:border-gray-700">
                                     <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Certificate Preview</h4>
                                 </div>
-                                <div class="p-3">
-                                    <div class="transform scale-50 origin-top-left" style="width: 200%;">
+                                <div class="p-3 overflow-x-auto">
+                                    <div class="transform scale-50 origin-top-left" style="width: 200%; max-width: 200%;">
                                         @include('organizer.events.preview.certificate-template', [
                                             'certificateData' => $eventData['certificate_data'],
                                             'event' => $event,
