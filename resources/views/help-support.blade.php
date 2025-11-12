@@ -304,39 +304,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- System Status -->
-                    <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-300">
-                        <div class="p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                                <svg class="w-6 h-6 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                System Status
-                            </h3>
-                            
-                            <div class="space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">All Systems</span>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                        Operational
-                                    </span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">API Services</span>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                        Operational
-                                    </span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">File Storage</span>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                                        Operational
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
