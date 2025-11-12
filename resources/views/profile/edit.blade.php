@@ -3,6 +3,12 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Profile</h2>
+            <button id="profile-back-button" type="button" onclick="goBackToDashboard()" class="inline-flex items-center px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md text-xs font-semibold hover:bg-gray-300 dark:hover:bg-gray-600">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back
+            </button>
         </div>
     </x-slot>
     <div class="pt-0 lg:pt-12 pb-12">
@@ -138,15 +144,6 @@
 
                 <!-- Main Content -->
                 <div id="profile-content" class="flex-1 animate-fade-in">
-                    <!-- Mobile Back -->
-                    <div class="lg:hidden mb-2">
-                        <button id="profile-mobile-back" type="button" class="inline-flex items-center text-qricket-600 hover:text-qricket-800 dark:text-qricket-400 dark:hover:text-qricket-300">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                            </svg>
-                            Back
-                        </button>
-                    </div>
                     <!-- Account Settings Section -->
                     <div id="account-settings" class="section-content">
                         <div class="space-y-6">
@@ -329,6 +326,31 @@
                 closeRefundModal();
             }
         });
+
+        // Back button function - navigate to dashboard
+        function goBackToDashboard() {
+            const referrer = document.referrer;
+
+            // Check if coming from dashboard
+            if (referrer.includes('/dashboard')) {
+                window.location.href = '/dashboard';
+                return;
+            }
+
+            // Check if coming from home
+            if (referrer.includes('/home') || referrer === '' || referrer === window.location.origin) {
+                window.location.href = '/dashboard';
+                return;
+            }
+
+            // Default: use browser back
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Fallback to dashboard if no history
+                window.location.href = '/dashboard';
+            }
+        }
     </script>
 
     <script>
@@ -404,19 +426,6 @@
                     showSection(target);
                 });
             });
-
-            // Mobile back button
-            const backBtn = document.getElementById('profile-mobile-back');
-            if (backBtn) {
-                backBtn.addEventListener('click', function() {
-                    const mobileMenu = document.getElementById('profile-mobile-menu');
-                    const profileContent = document.getElementById('profile-content');
-                    if (mobileMenu && profileContent) {
-                        mobileMenu.classList.remove('hidden');
-                        profileContent.classList.add('hidden');
-                    }
-                });
-            }
 
             // Bind sidebar links to use showSection without full navigation
             document.querySelectorAll('nav a[href^="#"]').forEach(link => {
