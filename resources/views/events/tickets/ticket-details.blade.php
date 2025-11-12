@@ -285,11 +285,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Generate QR codes for each ticket using ticket_id
+            // Generate QR codes for each ticket using encrypted ticket_id
             @foreach($purchase->ticketInformation as $index => $ticket)
-                // Use ticket_id for QR code
+                // Use encrypted ticket_id for QR code (compact format)
                 @php
-                    $qrData = $ticket->ticket_id;
+                    $qrData = $ticket->getEncryptedTicketId();
                 @endphp
                 
                 // Mobile QR code for ticket {{ $index }}

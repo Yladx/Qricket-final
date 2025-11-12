@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
 
 /**
  * EventTicketInformation model (individual issued ticket)
@@ -53,7 +54,7 @@ class EventTicketInformation extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($ticket) {
             if (empty($ticket->ticket_id)) {
                 $ticket->ticket_id = static::generateTicketId($ticket->event_id);
@@ -70,7 +71,7 @@ class EventTicketInformation extends Model
             $uniqueId = strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
             $ticketId = $eventId . '_' . $uniqueId;
         } while (static::where('ticket_id', $ticketId)->exists());
-        
+
         return $ticketId;
     }
 
@@ -135,7 +136,7 @@ class EventTicketInformation extends Model
      */
     public function generateQRCodeData(): string
     {
-        \Log::info('Generating encrypted QR code data', [
+        Log::info('Generating encrypted QR code data', [
             'ticket_id' => $this->id,
             'event_id' => $this->event_id,
             'user_id' => $this->user_id,
@@ -143,25 +144,25 @@ class EventTicketInformation extends Model
             'purchase_id' => $this->ticketPurchase->purchase_id ?? 'null',
             'purchase_status' => $this->ticketPurchase->status ?? 'null'
         ]);
-        
+
         // Check if ticket purchase exists and is paid
         if (!$this->ticketPurchase) {
-            \Log::error('Cannot generate QR code - no ticket purchase found', [
+            Log::error('Cannot generate QR code - no ticket purchase found', [
                 'ticket_information_id' => $this->id,
                 'ticket_id' => $this->ticket_id
             ]);
             throw new \Exception('No ticket purchase found for this ticket');
         }
-        
+
         if ($this->ticketPurchase->status !== 'paid') {
-            \Log::error('Cannot generate QR code - ticket purchase not paid', [
+            Log::error('Cannot generate QR code - ticket purchase not paid', [
                 'ticket_information_id' => $this->id,
                 'ticket_id' => $this->ticket_id,
                 'purchase_status' => $this->ticketPurchase->status
             ]);
             throw new \Exception('Ticket purchase is not paid');
         }
-        
+
         // Create encrypted QR data with ticket information
         $qrData = [
             'ticket_id' => $this->ticket_id,
@@ -172,16 +173,16 @@ class EventTicketInformation extends Model
             'generated_at' => now()->timestamp,
             'signature' => $this->generateSignature($this->ticket_id)
         ];
-        
+
         // Encrypt the data using Laravel's encryption
         $encryptedData = encrypt(json_encode($qrData));
-        
-        \Log::info('Encrypted QR code data generated', [
+
+        Log::info('Encrypted QR code data generated', [
             'ticket_id' => $this->ticket_id,
             'encrypted_data_length' => strlen($encryptedData),
             'original_data' => $qrData
         ]);
-        
+
         return $encryptedData;
     }
 
@@ -192,7 +193,7 @@ class EventTicketInformation extends Model
     {
         return self::generateSignatureForValidation($ticketNumber, $this->id);
     }
-    
+
     /**
      * Generate a signature for validation (static method that doesn't require instance).
      */
@@ -203,21 +204,128 @@ class EventTicketInformation extends Model
     }
 
     /**
+     * Generate a compact encrypted ticket ID for QR codes.
+     * Uses a shorter hash-based encoding to keep QR codes simple and scannable.
+     * Format: {event_id}{ticket_hash}{verify_hash} (about 20-25 chars)
+     */
+    public function getEncryptedTicketId(): string
+    {
+        // Create a very short hash-based token
+        // Format: {event_id}{ticket_hash}{verify_hash} (no separators to save space)
+
+        // Generate short hashes (8 chars each - still secure enough)
+        $ticketHash = substr(hash('sha256', $this->ticket_id . config('app.key')), 0, 8);
+        $verifyHash = substr(hash('sha256', $this->ticket_id . $this->event_id . config('app.key')), 0, 8);
+
+        // Build compact token: {event_id}{ticket_hash}{verify_hash}
+        // Example: 42a1b2c3d4e5f6g7h8i9j0k1l2
+        // Total: ~20-25 characters (much shorter!)
+        $compact = $this->event_id . $ticketHash . $verifyHash;
+
+        Log::info('Generated compact ticket ID token', [
+            'ticket_id' => $this->ticket_id,
+            'event_id' => $this->event_id,
+            'token_length' => strlen($compact)
+        ]);
+
+        return $compact;
+    }
+
+    /**
+     * Validate encrypted ticket ID and return ticket information.
+     * This handles the compact hash-based format: {event_id}{ticket_hash}{verify_hash}
+     */
+    public static function validateEncryptedTicketId(string $encryptedTicketId, int $eventId): ?self
+    {
+        try {
+            // Parse the compact format: {event_id}{ticket_hash}{verify_hash}
+            // event_id is 10 digits, so extract it first
+            $eventIdStr = (string)$eventId;
+            $eventIdLength = strlen($eventIdStr);
+
+            if (strlen($encryptedTicketId) < $eventIdLength + 16) {
+                Log::warning('Invalid compact ticket ID format - too short', [
+                    'event_id' => $eventId,
+                    'received_length' => strlen($encryptedTicketId)
+                ]);
+                return null;
+            }
+
+            // Extract parts: event_id (first N digits), ticket_hash (8 chars), verify_hash (8 chars)
+            $qrEventId = (int)substr($encryptedTicketId, 0, $eventIdLength);
+            $ticketHash = substr($encryptedTicketId, $eventIdLength, 8);
+            $verifyHash = substr($encryptedTicketId, $eventIdLength + 8, 8);
+
+            // Verify event ID matches
+            if ($qrEventId != $eventId) {
+                Log::warning('Compact ticket ID event mismatch', [
+                    'expected_event_id' => $eventId,
+                    'provided_event_id' => $qrEventId
+                ]);
+                return null;
+            }
+
+            // Get all paid tickets for this event and verify hash
+            $tickets = self::where('event_id', $eventId)
+                ->whereHas('ticketPurchase', function ($query) {
+                    $query->where('status', 'paid');
+                })
+                ->with('ticketPurchase')
+                ->get();
+
+            foreach ($tickets as $ticket) {
+                // Generate expected hashes for this ticket
+                $expectedTicketHash = substr(hash('sha256', $ticket->ticket_id . config('app.key')), 0, 8);
+                $expectedVerifyHash = substr(hash('sha256', $ticket->ticket_id . $ticket->event_id . config('app.key')), 0, 8);
+
+                // Verify both hashes match
+                if ($ticketHash === $expectedTicketHash && $verifyHash === $expectedVerifyHash) {
+                    Log::info('Compact ticket ID validated successfully', [
+                        'ticket_id' => $ticket->ticket_id,
+                        'event_id' => $eventId
+                    ]);
+                    return $ticket;
+                }
+            }
+
+            Log::warning('Ticket not found for compact ticket ID', [
+                'event_id' => $eventId,
+                'token_preview' => substr($encryptedTicketId, 0, 20) . '...'
+            ]);
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Failed to validate compact ticket ID', [
+                'error' => $e->getMessage(),
+                'event_id' => $eventId
+            ]);
+            return null;
+        }
+    }
+
+    /**
      * Validate encrypted QR code data and return ticket information.
      * Uses QR code data directly instead of looking up by ticket_information_id.
+     * Now also handles compact encrypted ticket IDs.
      */
     public static function validateQRCode(string $qrData, int $eventId): ?self
     {
+        // First, try the compact encrypted ticket ID format
+        $ticket = self::validateEncryptedTicketId($qrData, $eventId);
+        if ($ticket) {
+            return $ticket;
+        }
+
+        // If that fails, try the full encrypted format (backward compatibility)
         try {
             // Decrypt the QR data using Laravel's decryption
             $decryptedJson = decrypt($qrData);
             $decryptedData = json_decode($decryptedJson, true);
-            
+
             // Validate that required fields exist in QR code data
             $requiredFields = ['ticket_id', 'event_id', 'purchase_id', 'user_id', 'signature'];
             foreach ($requiredFields as $field) {
                 if (!isset($decryptedData[$field])) {
-                    \Log::warning('QR code validation failed - missing required field', [
+                    Log::warning('QR code validation failed - missing required field', [
                         'event_id' => $eventId,
                         'missing_field' => $field,
                         'decrypted_data_keys' => array_keys($decryptedData ?? [])
@@ -225,29 +333,29 @@ class EventTicketInformation extends Model
                     return null;
                 }
             }
-            
+
             // Verify event ID matches first
             if ($decryptedData['event_id'] != $eventId) {
-                \Log::warning('QR code validation failed - event ID mismatch', [
+                Log::warning('QR code validation failed - event ID mismatch', [
                     'expected_event_id' => $eventId,
                     'provided_event_id' => $decryptedData['event_id']
                 ]);
                 return null;
             }
-            
+
             // Find ticket using QR code data (ticket_id and event_id)
             $ticket = self::where('ticket_id', $decryptedData['ticket_id'])
                 ->where('event_id', $decryptedData['event_id'])
-                ->whereHas('ticketPurchase', function($query) use ($decryptedData) {
+                ->whereHas('ticketPurchase', function ($query) use ($decryptedData) {
                     $query->where('purchase_id', $decryptedData['purchase_id'])
-                          ->where('status', 'paid');
+                        ->where('status', 'paid');
                 })
                 ->where('user_id', $decryptedData['user_id'])
                 ->with('ticketPurchase')
                 ->first();
-            
+
             if (!$ticket) {
-                \Log::warning('QR code validation failed - ticket not found using QR code data', [
+                Log::warning('QR code validation failed - ticket not found using QR code data', [
                     'ticket_id' => $decryptedData['ticket_id'],
                     'event_id' => $decryptedData['event_id'],
                     'purchase_id' => $decryptedData['purchase_id'],
@@ -255,16 +363,16 @@ class EventTicketInformation extends Model
                 ]);
                 return null;
             }
-            
+
             // Verify the signature matches
             // We need to generate the signature using the ticket's ID and ticket_id from QR data
             $expectedSignature = self::generateSignatureForValidation(
                 $decryptedData['ticket_id'],
                 $ticket->id
             );
-            
+
             if ($decryptedData['signature'] !== $expectedSignature) {
-                \Log::warning('QR code validation failed - invalid signature', [
+                Log::warning('QR code validation failed - invalid signature', [
                     'ticket_id' => $decryptedData['ticket_id'],
                     'ticket_information_id' => $ticket->id,
                     'expected_signature' => $expectedSignature,
@@ -272,39 +380,38 @@ class EventTicketInformation extends Model
                 ]);
                 return null;
             }
-            
+
             // Additional validation: Verify purchase_id matches
             if ($ticket->ticketPurchase->purchase_id !== $decryptedData['purchase_id']) {
-                \Log::warning('QR code validation failed - purchase_id mismatch', [
+                Log::warning('QR code validation failed - purchase_id mismatch', [
                     'ticket_id' => $decryptedData['ticket_id'],
                     'expected_purchase_id' => $ticket->ticketPurchase->purchase_id,
                     'provided_purchase_id' => $decryptedData['purchase_id']
                 ]);
                 return null;
             }
-            
+
             // Additional validation: Verify user_id matches
             if ($ticket->user_id != $decryptedData['user_id']) {
-                \Log::warning('QR code validation failed - user_id mismatch', [
+                Log::warning('QR code validation failed - user_id mismatch', [
                     'ticket_id' => $decryptedData['ticket_id'],
                     'expected_user_id' => $ticket->user_id,
                     'provided_user_id' => $decryptedData['user_id']
                 ]);
                 return null;
             }
-            
-            \Log::info('QR code validation successful using QR code data', [
+
+            Log::info('QR code validation successful using QR code data', [
                 'ticket_id' => $ticket->ticket_id,
                 'event_id' => $eventId,
                 'user_id' => $ticket->user_id,
                 'purchase_id' => $ticket->ticketPurchase->purchase_id,
                 'validated_using' => 'qr_code_data'
             ]);
-            
+
             return $ticket;
-            
         } catch (\Exception $e) {
-            \Log::error('QR code validation failed with exception', [
+            Log::error('QR code validation failed with exception', [
                 'error' => $e->getMessage(),
                 'event_id' => $eventId,
                 'trace' => $e->getTraceAsString()

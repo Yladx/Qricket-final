@@ -49,8 +49,8 @@
         $qrUrl = route('tickets.qr-code', $ticket->id);
         $bgImage = $ticket->event->thumbnail_url ?? null;
         
-        // Use ticket_id for QR code
-        $qrText = $ticket->ticket_id;
+        // Use encrypted ticket_id for QR code (compact format)
+        $qrText = $ticket->getEncryptedTicketId();
         
         // Format date for preview template
         $formattedDateTime = optional($ticket->event->start_date)->format('n/j/Y \\a\\t g:i A') ?? 'Date & Time';

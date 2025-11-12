@@ -928,12 +928,13 @@ class TicketPurchaseController extends Controller
             abort(403, 'This ticket is not valid.');
         }
 
-        // Use ticket_id for QR code
-        $qrData = $ticket->ticket_id;
+        // Use encrypted ticket_id for QR code (compact format)
+        $qrData = $ticket->getEncryptedTicketId();
         
-        \Log::info('Generating QR code using ticket_id', [
+        \Log::info('Generating QR code using encrypted ticket_id', [
             'ticket_id' => $ticketId,
-            'ticket_display_id' => $qrData
+            'ticket_display_id' => $ticket->ticket_id,
+            'encrypted_length' => strlen($qrData)
         ]);
 
         try {
