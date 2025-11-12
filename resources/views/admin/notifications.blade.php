@@ -76,7 +76,8 @@
                         console.log('Received data:', data);
                         if (data.notifications && data.notifications.length > 0) {
                             list.innerHTML = '';
-                            data.notifications.forEach(notification => {
+                            const notificationsInChronologicalOrder = [...data.notifications].reverse();
+                            notificationsInChronologicalOrder.forEach(notification => {
                                 console.log('Adding notification:', notification);
                                 prependItem(
                                     notification.title,
