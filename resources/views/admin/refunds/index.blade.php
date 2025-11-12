@@ -204,9 +204,17 @@
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                                                         </svg>
                                                         @if($refund->type === 'ticket')
-                                                            {{ $refund->ticketPurchase->event?->title ?? 'Event #' . $refund->ticketPurchase->event_id }}
+                                                            @if($refund->ticketPurchase)
+                                                                {{ $refund->ticketPurchase->event?->title ?? ('Event #' . ($refund->ticketPurchase->event_id ?? 'N/A')) }}
+                                                            @else
+                                                                Event (Purchase Deleted)
+                                                            @endif
                                                         @elseif($refund->type === 'additional_ticket')
-                                                            {{ $refund->additionalTicketPurchase->event?->title ?? 'Event #' . $refund->additionalTicketPurchase->event_id }} (Additional Tickets)
+                                                            @if($refund->additionalTicketPurchase)
+                                                                {{ ($refund->additionalTicketPurchase->event?->title ?? ('Event #' . ($refund->additionalTicketPurchase->event_id ?? 'N/A'))) . ' (Additional Tickets)' }}
+                                                            @else
+                                                                Event (Purchase Deleted) - Additional Tickets
+                                                            @endif
                                                         @else
                                                             Organizer Subscription
                                                         @endif
@@ -248,9 +256,14 @@
                                                 $userName = $refund->user->first_name . ' ' . $refund->user->last_name;
                                                 $itemName = 'Organizer Subscription';
                                                 if ($refund->type === 'ticket' && $refund->ticketPurchase) {
-                                                    $itemName = $refund->ticketPurchase->event?->title ?? 'Event #' . $refund->ticketPurchase->event_id;
+                                                    $itemName = $refund->ticketPurchase->event?->title ?? ('Event #' . ($refund->ticketPurchase->event_id ?? 'N/A'));
                                                 } elseif ($refund->type === 'additional_ticket' && $refund->additionalTicketPurchase) {
-                                                    $itemName = ($refund->additionalTicketPurchase->event?->title ?? 'Event #' . $refund->additionalTicketPurchase->event_id) . ' (Additional Tickets)';
+                                                    $eventTitle = $refund->additionalTicketPurchase->event?->title ?? ('Event #' . ($refund->additionalTicketPurchase->event_id ?? 'N/A'));
+                                                    $itemName = $eventTitle . ' (Additional Tickets)';
+                                                } elseif ($refund->type === 'ticket' && !$refund->ticketPurchase) {
+                                                    $itemName = 'Event (Purchase Deleted)';
+                                                } elseif ($refund->type === 'additional_ticket' && !$refund->additionalTicketPurchase) {
+                                                    $itemName = 'Event (Purchase Deleted) - Additional Tickets';
                                                 }
                                             @endphp
                                             <button 

@@ -285,41 +285,55 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Generate QR codes for each ticket
+            // Generate QR codes for each ticket using QR code data
             @foreach($purchase->ticketInformation as $index => $ticket)
-                @if($ticket->qr_code_data)
-                    // Mobile QR code for ticket {{ $index }}
-                    const mobileContainer{{ $index }} = document.getElementById('qr-code-{{ $index }}');
-                    if (mobileContainer{{ $index }}) {
-                        mobileContainer{{ $index }}.innerHTML = '';
+                // Use QR code data (encrypted) if available, otherwise fallback to ticket_id
+                // QR code data contains encrypted ticket information for validation
+                @php
+                    $qrData = $ticket->qr_code_data ?? $ticket->ticket_id;
+                @endphp
+                
+                // Mobile QR code for ticket {{ $index }}
+                const mobileContainer{{ $index }} = document.getElementById('qr-code-{{ $index }}');
+                if (mobileContainer{{ $index }}) {
+                    mobileContainer{{ $index }}.innerHTML = '';
+                    try {
                         new QRCode(mobileContainer{{ $index }}, {
-                            text: @json($ticket->qr_code_data ?? $ticket->ticket_id),
-                            width: 100, // Much smaller for simpler pattern
-                            height: 100, // Much smaller for simpler pattern
+                            text: @json($qrData),
+                            width: 100,
+                            height: 100,
                             colorDark: "#000000",
                             colorLight: "#ffffff",
-                            correctLevel: QRCode.CorrectLevel.L, // Lowest error correction
-                            margin: 0, // No margin for simpler pattern
-                            maskPattern: 0 // Use simplest mask pattern
+                            correctLevel: QRCode.CorrectLevel.M,
+                            margin: 1,
+                            useSVG: false
                         });
+                    } catch (error) {
+                        console.error('Failed to generate mobile QR code for ticket {{ $index }}:', error);
+                        mobileContainer{{ $index }}.innerHTML = '<div class="text-red-500 text-xs text-center p-2">QR Error</div>';
                     }
-                    
-                    // Desktop QR code for ticket {{ $index }}
-                    const desktopContainer{{ $index }} = document.getElementById('qr-code-desktop-{{ $index }}');
-                    if (desktopContainer{{ $index }}) {
-                        desktopContainer{{ $index }}.innerHTML = '';
+                }
+                
+                // Desktop QR code for ticket {{ $index }}
+                const desktopContainer{{ $index }} = document.getElementById('qr-code-desktop-{{ $index }}');
+                if (desktopContainer{{ $index }}) {
+                    desktopContainer{{ $index }}.innerHTML = '';
+                    try {
                         new QRCode(desktopContainer{{ $index }}, {
-                            text: @json($ticket->qr_code_data ?? $ticket->ticket_id),
-                            width: 100, // Much smaller for simpler pattern
-                            height: 100, // Much smaller for simpler pattern
+                            text: @json($qrData),
+                            width: 192,
+                            height: 192,
                             colorDark: "#000000",
                             colorLight: "#ffffff",
-                            correctLevel: QRCode.CorrectLevel.L, // Lowest error correction
-                            margin: 0, // No margin for simpler pattern
-                            maskPattern: 0 // Use simplest mask pattern
+                            correctLevel: QRCode.CorrectLevel.M,
+                            margin: 1,
+                            useSVG: false
                         });
+                    } catch (error) {
+                        console.error('Failed to generate desktop QR code for ticket {{ $index }}:', error);
+                        desktopContainer{{ $index }}.innerHTML = '<div class="text-red-500 text-xs text-center p-2">QR Error</div>';
                     }
-                @endif
+                }
             @endforeach
         });
     </script>

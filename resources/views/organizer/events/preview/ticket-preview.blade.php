@@ -159,23 +159,29 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Generate consistent QR code data - use a simple, consistent format
-        const qrData = '{{ $qrText ?? "QRICKET-" . ($ticketId ?? "TKT-" . time()) }}';
+        // Use QR code data (encrypted) if available, otherwise fallback to ticket ID
+        // QR code data contains encrypted ticket information for validation
+        const qrData = @json($qrText ?? ($ticketId ?? "TKT-" + Date.now()));
         
-        // Function to generate consistent QR code
+        // Function to generate QR code
         function generateQRCode(container, size) {
             if (container && qrData) {
                 container.innerHTML = ''; // Clear loading text
-                new QRCode(container, {
-                    text: qrData,
-                    width: size,
-                    height: size,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.M,
-                    margin: 2,
-                    useSVG: false
-                });
+                try {
+                    new QRCode(container, {
+                        text: qrData,
+                        width: size,
+                        height: size,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.M,
+                        margin: 2,
+                        useSVG: false
+                    });
+                } catch (error) {
+                    console.error('Failed to generate QR code:', error);
+                    container.innerHTML = '<div class="text-red-500 text-xs text-center p-2">QR Code Error</div>';
+                }
             }
         }
         

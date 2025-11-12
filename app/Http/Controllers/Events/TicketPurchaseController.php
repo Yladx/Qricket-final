@@ -794,6 +794,33 @@ class TicketPurchaseController extends Controller
             $purchase->refresh();
         }
 
+        // Ensure all tickets have QR code data generated
+        foreach ($purchase->ticketInformation as $ticket) {
+            if (!$ticket->qr_code_data) {
+                \Log::info('Generating QR code data for ticket in purchase details', [
+                    'ticket_id' => $ticket->id,
+                    'purchase_id' => $purchaseId
+                ]);
+                try {
+                    $qrData = $ticket->generateQRCodeData();
+                    $ticket->update(['qr_code_data' => $qrData]);
+                    \Log::info('QR code data generated and saved for ticket in purchase details', [
+                        'ticket_id' => $ticket->id,
+                        'qr_data_length' => strlen($qrData)
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to generate QR code data for ticket in purchase details', [
+                        'ticket_id' => $ticket->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+        }
+        
+        // Refresh purchase to get updated ticket information
+        $purchase->refresh();
+        $purchase->load('ticketInformation');
+
         // Load ticket settings from R2 for color theming
         $ticketSettings = $this->loadTicketSettingsFromR2($purchase->event);
         $ticketColors = $ticketSettings['ticket_colors'] ?? [];
@@ -823,6 +850,30 @@ class TicketPurchaseController extends Controller
         // If ticket is shared (shared_with_user_id is set), check if current user is the recipient
         if ($ticket->shared_with_user_id && $ticket->shared_with_user_id !== Auth::id()) {
             abort(403, 'This ticket has been shared with another user.');
+        }
+
+        // Ensure ticket belongs to paid purchase
+        if ($ticket->ticketPurchase->status !== 'paid') {
+            abort(403, 'This ticket is not valid.');
+        }
+
+        // Generate QR code data if it doesn't exist
+        if (!$ticket->qr_code_data) {
+            \Log::info('Generating QR code data for ticket view', ['ticket_id' => $ticketId]);
+            try {
+                $qrData = $ticket->generateQRCodeData();
+                $ticket->update(['qr_code_data' => $qrData]);
+                $ticket->refresh();
+                \Log::info('QR code data generated and saved for ticket view', [
+                    'ticket_id' => $ticketId,
+                    'qr_data_length' => strlen($qrData)
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to generate QR code data for ticket view', [
+                    'ticket_id' => $ticketId,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
 
         // Load ticket settings from R2 for color theming
@@ -1137,6 +1188,25 @@ class TicketPurchaseController extends Controller
         // Ensure the ticket belongs to a paid purchase
         if ($ticket->ticketPurchase->status !== 'paid') {
             abort(403, 'This ticket is not valid.');
+        }
+
+        // Generate QR code data if it doesn't exist
+        if (!$ticket->qr_code_data) {
+            \Log::info('Generating QR code data for individual ticket view', ['ticket_id' => $ticketId]);
+            try {
+                $qrData = $ticket->generateQRCodeData();
+                $ticket->update(['qr_code_data' => $qrData]);
+                $ticket->refresh();
+                \Log::info('QR code data generated and saved for individual ticket view', [
+                    'ticket_id' => $ticketId,
+                    'qr_data_length' => strlen($qrData)
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to generate QR code data for individual ticket view', [
+                    'ticket_id' => $ticketId,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
 
         // Load ticket settings from R2 for color theming
