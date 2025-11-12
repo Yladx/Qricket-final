@@ -7,7 +7,7 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-8 lg:px-8">
             <form method="POST" action="{{ route('organizer.events.layout.store') }}?id={{ $event->id }}" class="space-y-8" data-autosave-url="{{ route('organizer.events.layout.autosave') }}?id={{ $event->id }}">
                 @csrf
-                @include('organizer.events.forms.layout', ['eventData' => $eventData])
+                @include('organizer.events.forms.layout', ['eventData' => $eventData, 'event' => $event, 'footerData' => $footerData ?? []])
 
                 <!-- Navigation Buttons - Mobile Responsive -->
                 <div class="pt-0 border-t border-gray-200 dark:border-gray-700">

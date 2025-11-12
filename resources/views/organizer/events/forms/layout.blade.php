@@ -48,7 +48,8 @@
     }
     }
     @endphp
-    <div class="w-full overflow-hidden -mx-4 sm:-mx-6 md:mx-0">
+    <!-- Event Header Preview -->
+    <div class="w-full relative mb-6 -mx-4 sm:-mx-6 md:-mx-8 lg:mx-0">
         <div class="relative w-full">
             <x-events.event-header :event="$eventObj" :section="'info'" :hideActions="true" :previewPosterUrl="$posterUrl" :previewThumbnailUrl="$thumbUrl" :previewMode="true" />
         </div>
@@ -70,14 +71,11 @@
 
     <!-- Current Event ID for JS uploads/hydration -->
     @if(isset($eventObj) && isset($eventObj->id) && $eventObj->id)
-    @php
-    $currentEventId = (int) $eventObj->id;
-    @endphp
     <meta name="event-id" content="{{ $eventObj->id }}">
     <script>
         window.currentEventId = {
             {
-                $currentEventId
+                (int) $eventObj - > id
             }
         };
     </script>

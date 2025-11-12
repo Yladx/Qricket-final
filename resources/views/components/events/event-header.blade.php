@@ -56,11 +56,11 @@ $canBuyTickets = $isEventPublished || $isEventOrganizer || $isEventStaff || $isA
     <div class="absolute inset-0 bg-black bg-opacity-60 backdrop-blur-sm"></div>
 
     <!-- Content -->
-    <div class="relative z-10 flex flex-col sm:flex-row {{ $previewMode ? 'px-0' : '' }}">
+    <div class="relative z-10 flex flex-col sm:flex-row {{ $previewMode ? 'px-4 sm:px-6 md:px-8' : '' }}">
         <!-- Poster on Left Side -->
-        <div class="w-32 h-40 sm:w-40 sm:h-52 md:w-44 md:h-56 lg:w-48 lg:h-64 mx-auto sm:mx-0 flex-shrink-0 {{ $previewMode ? 'p-0' : 'p-1.5 sm:p-2 md:p-3 lg:p-4' }} flex items-center">
+        <div class="w-32 h-40 sm:w-40 sm:h-52 md:w-44 md:h-56 lg:w-48 lg:h-64 mx-auto sm:mx-0 flex-shrink-0 {{ $previewMode ? 'p-2 sm:p-3 md:p-4' : 'p-1.5 sm:p-2 md:p-3 lg:p-4' }} flex items-center">
             @if($computedPosterUrl)
-            <img src="{{ $computedPosterUrl }}" alt="{{ optional($event)->title }} poster" class="w-full h-full object-cover {{ $previewMode ? 'rounded-none' : 'rounded-lg' }} shadow-lg" @if($previewMode) id="step2-header-poster" @endif>
+            <img src="{{ $computedPosterUrl }}" alt="{{ optional($event)->title }} poster" class="w-full h-full object-cover {{ $previewMode ? 'rounded-lg' : 'rounded-lg' }} shadow-lg" @if($previewMode) id="step2-header-poster" @endif>
             @else
             <div class="w-full h-full bg-black rounded-lg flex items-center justify-center shadow-lg" @if($previewMode) id="step2-header-poster" @endif>
                 <div class="flex flex-col items-center justify-center text-white text-center p-3">
@@ -74,7 +74,7 @@ $canBuyTickets = $isEventPublished || $isEventOrganizer || $isEventStaff || $isA
         </div>
 
         <!-- Event Details -->
-        <div class="flex-1 {{ $previewMode ? 'p-3 sm:p-4' : 'p-2 sm:p-3 lg:p-4' }} text-white">
+        <div class="flex-1 {{ $previewMode ? 'px-4 sm:px-6 md:px-8 py-3 sm:py-4' : 'p-2 sm:p-3 lg:p-4' }} text-white">
             <div class="flex flex-col sm:flex-row sm:items-start justify-between mb-3 sm:mb-4 md:mb-6">
                 <div class="mb-2 sm:mb-0 flex-1 min-w-0">
                     <h4 class="mb-1 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold sm:font-extrabold md:font-black" style="font-weight: 900; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); line-height: 1.2; word-wrap: break-word; overflow-wrap: break-word;">{{ optional($event)->title }}</h4>

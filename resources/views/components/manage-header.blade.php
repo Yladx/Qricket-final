@@ -160,13 +160,13 @@
                             @if($canViewSales)
                             <a href="{{ $route('sales') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Sales Report</a>
                             @endif
-                            @if($isOwner || $isAdmin)
+                            @if($isOwner)
                             @php
                             try {
-                            $ticketLimitsRoute = $isAdmin ? route('admin.event.ticket-limits', $event) : route('organizer.events.ticket-limits', $event);
+                            $ticketLimitsRoute = route('organizer.events.ticket-limits', $event);
                             } catch (\Exception $e) {
                             // Fallback if route doesn't exist yet
-                            $ticketLimitsRoute = $isAdmin ? '/admin/event/' . $event->id . '/ticket-limits' : route('organizer.events.ticket-limits', $event);
+                            $ticketLimitsRoute = route('organizer.events.ticket-limits', $event);
                             }
                             @endphp
                             <a href="{{ $ticketLimitsRoute }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Purchase Additional Tickets</a>
