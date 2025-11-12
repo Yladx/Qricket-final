@@ -45,7 +45,8 @@
             @php
                 $eventEnded = isset($event) && $event->end_date && now()->gt($event->end_date);
                 $isCreateFlow = request()->routeIs('organizer.events.create*') || request()->routeIs('organizer.events.create');
-                $showBuyLink = ($canBuyAdditionalTickets ?? true) && !$isCreateFlow && !($isAdmin ?? false) && !$eventEnded;
+                // Only show "Buy Additional Tickets" button to owners, not staff members
+                $showBuyLink = ($canBuyAdditionalTickets ?? true) && !$isCreateFlow && !($isAdmin ?? false) && !$eventEnded && ($isOwner ?? false);
             @endphp
             @if($showBuyLink)
             <a href="{{ route('organizer.events.ticket-limits', $eventId) }}" 

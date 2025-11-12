@@ -9,10 +9,11 @@
                 <div class="p-4 text-gray-900 dark:text-gray-100">
                     @php 
                         $currentUser = auth()->user();
-                        $isOwner = $event->user_id === $currentUser->id;
+                        // Use $isOwner from controller if available, otherwise calculate it
+                        $isOwner = $isOwner ?? ($event->user_id === $currentUser->id);
                         
                         // If staff is managing tickets, use owner's subscription
-                        $subscriptionUserId = $isOwner ? $currentUser->id : $event->user_id;
+                        $subscriptionUserId = ($isOwner ?? false) ? $currentUser->id : $event->user_id;
                         $ownerUser = $subscriptionUserId ? \App\Models\User::find($subscriptionUserId) : null;
                         
                         $subscription = $ownerUser?->currentSubscription();
@@ -96,7 +97,8 @@
                             <div class="text-right">
                                 @php
                                     $eventEnded = $event->end_date && now()->gt($event->end_date);
-                                    $showBuyMore = !$isAdmin && !$eventEnded;
+                                    // Only show "Buy More" button to owners, not staff members
+                                    $showBuyMore = !$isAdmin && !$eventEnded && ($isOwner ?? false);
                                 @endphp
                                 @if(isset($maxTicketsPerEvent) && $maxTicketsPerEvent !== null && $currentTicketCount >= $maxTicketsPerEvent)
                                 <div class="flex items-center space-x-3">
@@ -129,7 +131,7 @@
                     </div>
                     <form method="POST" action="{{ route('organizer.events.ticket.store') }}?id={{ $event->id }}" class="space-y-4" data-autosave-url="{{ route('organizer.events.ticket.autosave') }}?id={{ $event->id }}">
                         @csrf
-                        @include('organizer.events.forms.tickets', ['eventId' => $event->id, 'eventData' => $eventData ?? [], 'event' => $event, 'isAdmin' => $isAdmin ?? false])
+                        @include('organizer.events.forms.tickets', ['eventId' => $event->id, 'eventData' => $eventData ?? [], 'event' => $event, 'isAdmin' => $isAdmin ?? false, 'isOwner' => $isOwner ?? false, 'isStaff' => $isStaff ?? false])
 
                       
                     </form>
@@ -153,7 +155,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             @php
                 $eventEnded = $event->end_date && now()->gt($event->end_date);
-                $showFloatingButton = ($canBuyAdditionalTickets ?? true) && !$isAdmin && !$eventEnded;
+                // Only show floating button to owners, not staff members
+                $showFloatingButton = ($canBuyAdditionalTickets ?? true) && !$isAdmin && !$eventEnded && ($isOwner ?? false);
             @endphp
             @if($showFloatingButton)
             // Add a floating button for purchasing additional tickets
