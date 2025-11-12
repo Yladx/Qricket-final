@@ -32,20 +32,20 @@
                 
                 <div class="relative z-10">
                     <!-- QR Code -->
-                    <div class="flex justify-center mb-5">
-                        <div class="bg-white p-4 rounded-lg shadow-md border border-white/30 relative {{ $isCheckedIn ? 'blur-sm' : '' }}">
+                    <div class="flex justify-center mb-5 relative">
+                        <div class="bg-white p-4 rounded-lg shadow-md border border-white/30 {{ $isCheckedIn ? 'blur-sm' : '' }}">
                             <div id="qr-code-mobile-preview" class="w-40 h-40 flex items-center justify-center bg-white rounded-lg">
                                 <div class="text-gray-500 text-xs">Loading QR Code...</div>
                             </div>
-                            @if($isCheckedIn)
-                            <!-- Checked In Overlay - Centered over QR Code -->
-                            <div class="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
-                                <div class="bg-green-500 text-white px-6 py-3 rounded-full shadow-lg font-bold text-lg">
-                                    ✓ Checked In
-                                </div>
-                            </div>
-                            @endif
                         </div>
+                        @if($isCheckedIn)
+                        <!-- Checked In Overlay - Centered over QR Code (outside blurred container) -->
+                        <div class="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+                            <div class="bg-green-500 text-white px-6 py-3 rounded-full shadow-lg font-bold text-lg">
+                                ✓ Checked In
+                            </div>
+                        </div>
+                        @endif
                     </div>
                     
                     <!-- Holder Name -->
@@ -126,20 +126,20 @@
                     </div>
                     
                     <!-- Right: QR Code -->
-                    <div class="w-56 flex items-center justify-center">
-                        <div class="bg-white p-4 rounded-lg shadow-md border border-white/30 relative {{ $isCheckedIn ? 'blur-sm' : '' }}">
+                    <div class="w-56 flex items-center justify-center relative">
+                        <div class="bg-white p-4 rounded-lg shadow-md border border-white/30 {{ $isCheckedIn ? 'blur-sm' : '' }}">
                             <div id="qr-code-desktop-preview" class="w-52 h-52 flex items-center justify-center bg-white rounded-lg">
                                 <div class="text-gray-500 text-xs">Loading QR Code...</div>
                             </div>
-                            @if($isCheckedIn)
-                            <!-- Checked In Overlay - Centered over QR Code -->
-                            <div class="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
-                                <div class="bg-green-500 text-white px-8 py-4 rounded-full shadow-lg font-bold text-xl">
-                                    ✓ Checked In
-                                </div>
-                            </div>
-                            @endif
                         </div>
+                        @if($isCheckedIn)
+                        <!-- Checked In Overlay - Centered over QR Code (outside blurred container) -->
+                        <div class="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+                            <div class="bg-green-500 text-white px-8 py-4 rounded-full shadow-lg font-bold text-xl">
+                                ✓ Checked In
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
