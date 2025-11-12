@@ -446,21 +446,21 @@ class AdminAuthController extends Controller
 
         // Calculate admin revenue percentage
         $adminRevenuePercentage = config('app.admin_revenue_percentage', 5.0);
-        
-        // Sales & Revenue Statistics (Admin's actual revenue)
+        $ticketNetRevenue = (float) \App\Models\TicketPurchase::where('status','paid')->sum(\DB::raw('COALESCE(net_amount, total_amount)'));
         $totalTicketRevenue = (float) \App\Models\TicketPurchase::where('status','paid')->sum('total_amount');
-        $totalSubscriptionRevenue = (float) \App\Models\Subscription::where('status','active')->sum('amount');
-        $adminTicketRevenue = $totalTicketRevenue * ($adminRevenuePercentage / 100);
-        // Additional ticket revenue (admin keeps net)
-        $additionalTicketRevenueNet = (float) \App\Models\TicketLimitPurchase::where('status','paid')
-            ->sum(DB::raw('COALESCE(net_amount, amount)'));
+        $totalSubscriptionRevenue = (float) \App\Models\Subscription::where('payment_status','paid')->where('status','!=','refunded')->sum('amount');
+        $totalSubscriptionNetRevenue = (float) \App\Models\Subscription::where('payment_status','paid')->where('status','!=','refunded')->sum(\DB::raw('COALESCE(net_amount, amount)'));
+        $adminTicketRevenue = $ticketNetRevenue * ($adminRevenuePercentage / 100);
+        $adminSubscriptionRevenue = $totalSubscriptionNetRevenue;
+        $additionalTicketRevenueGross = (float) \App\Models\TicketLimitPurchase::where('status','paid')->sum('amount');
+        $additionalTicketRevenueNet = (float) \App\Models\TicketLimitPurchase::where('status','paid')->sum(\DB::raw('COALESCE(net_amount, amount)'));
         $additionalTicketPurchases = (int) \App\Models\TicketLimitPurchase::where('status','paid')->count();
         
         $salesStats = [
-            'total_ticket_revenue' => $totalTicketRevenue, // Total platform revenue
-            'admin_ticket_revenue' => $adminTicketRevenue, // Admin's actual revenue from tickets
-            'total_subscription_revenue' => $totalSubscriptionRevenue, // Full subscription revenue (admin keeps all)
-            'admin_total_revenue' => $adminTicketRevenue + $totalSubscriptionRevenue + $additionalTicketRevenueNet, // Admin's total actual revenue
+            'total_ticket_revenue' => $totalTicketRevenue,
+            'admin_ticket_revenue' => $adminTicketRevenue,
+            'total_subscription_revenue' => $totalSubscriptionRevenue,
+            'admin_total_revenue' => $adminTicketRevenue + $adminSubscriptionRevenue + $additionalTicketRevenueNet,
             'ticket_orders_paid' => (int) \App\Models\TicketPurchase::where('status','paid')->count(),
             'ticket_orders_pending' => (int) \App\Models\TicketPurchase::where('status','pending')->count(),
             'ticket_orders_failed' => (int) \App\Models\TicketPurchase::where('status','failed')->count(),
