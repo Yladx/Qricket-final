@@ -304,7 +304,7 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                                 {{ ucfirst(str_replace('_', ' ', $verification->document_type)) }}
                             </span>
-                            <a href="{{ route('admin.organizer-verifications.show', $verification->id) }}" 
+                            <a href="{{ route('admin.verification.show', $verification->id) }}" 
                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-qricket-600 hover:bg-qricket-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qricket-500">
                                 Review
                             </a>
@@ -332,48 +332,7 @@
     </div>
 
     <!-- Recent Feedback Comments -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Website Feedback</h3>
-            <div class="text-sm text-gray-600 dark:text-gray-400">
-                {{ $feedbackStats['recent_feedback'] }} comments in last 30 days
-            </div>
-        </div>
-        
-        @if($feedbackStats['recent_comments']->count() > 0)
-            <div class="space-y-4">
-                @foreach($feedbackStats['recent_comments'] as $comment)
-                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-8 h-8 bg-teal-100 dark:bg-teal-900 rounded-full flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                        {{ $comment->user ? $comment->user->first_name . ' ' . $comment->user->last_name : 'Anonymous User' }}
-                                    </p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                            {{ Str::limit($comment->additional_comments, 200) }}
-                        </p>
-                    </div>
-                @endforeach
-            </div>
-        @else
-            <div class="text-center py-8">
-                <svg class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
-                </svg>
-                <p class="text-gray-500 dark:text-gray-400">No recent feedback comments</p>
-            </div>
-        @endif
-    </div>
+    <!-- Removed by request -->
 
     <!-- Recent Activity & Quick Actions -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
