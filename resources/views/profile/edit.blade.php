@@ -143,7 +143,7 @@
                 </div>
 
                 <!-- Main Content -->
-                <div id="profile-content" class="flex-1 animate-fade-in">
+                <div id="profile-content" class="hidden lg:flex lg:flex-1 animate-fade-in">
                     <!-- Account Settings Section -->
                     <div id="account-settings" class="section-content">
                         <div class="space-y-6">
