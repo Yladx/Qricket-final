@@ -26,8 +26,9 @@ class VerifiedOrganizerMiddleware
 
         $user = auth()->user();
 
-        // Allow access for event owner or staff for routes that carry an {event} parameter
-        $routeEvent = $request->route('event');
+        // Allow access for event owner or staff for routes that carry an {event} or {id} parameter
+        $routeEvent = $request->route('event') ?? $request->route('id');
+
         if ($routeEvent) {
             // Resolve to model if it's an ID
             $event = is_object($routeEvent) ? $routeEvent : \App\Models\Event::find($routeEvent);
@@ -35,6 +36,49 @@ class VerifiedOrganizerMiddleware
                 $isOwner = (int) $event->user_id === (int) $user->id;
                 $isStaff = $event->staff()->where('user_id', $user->id)->exists();
                 if ($isOwner || $isStaff) {
+                    return $next($request);
+                }
+            }
+        }
+
+        // Allow access to edit/save routes for event owners even if not verified
+        // Check if this is an edit route (basic, layout, certificate, tickets) or autosave/store route
+        $routeName = $request->route()->getName() ?? '';
+        $isEditRoute = str_contains($routeName, 'edit.basic') ||
+            str_contains($routeName, 'edit.layout') ||
+            str_contains($routeName, 'edit.certificate') ||
+            str_contains($routeName, 'tickets') ||
+            str_contains($routeName, 'info.basic') ||
+            str_contains($routeName, 'info.layout') ||
+            str_contains($routeName, 'info.certificate') ||
+            str_contains($routeName, 'layout.autosave') ||
+            str_contains($routeName, 'ticket.autosave') ||
+            str_contains($routeName, 'certificate.autosave') ||
+            str_contains($routeName, 'layout.store') ||
+            str_contains($routeName, 'ticket.store') ||
+            str_contains($routeName, 'certificate.store') ||
+            str_contains($routeName, 'certificate.upload') ||
+            str_contains($routeName, 'certificate.remove') ||
+            str_contains($routeName, 'certificate.status') ||
+            str_contains($routeName, 'upload-layout-image') ||
+            str_contains($routeName, 'update-session-layout');
+
+        if ($isEditRoute) {
+            // Try to get event from route parameter first
+            $eventParam = $request->route('event') ?? $request->route('id');
+
+            // If not in route, try to get from request data (for autosave routes that use query string or body)
+            if (!$eventParam) {
+                $eventParam = $request->input('id') ??
+                    $request->input('event_id') ??
+                    $request->query('id') ??
+                    $request->query('event_id');
+            }
+
+            if ($eventParam) {
+                $event = is_object($eventParam) ? $eventParam : \App\Models\Event::find($eventParam);
+                if ($event && (int) $event->user_id === (int) $user->id) {
+                    // Event owner can always access their own events for editing/saving
                     return $next($request);
                 }
             }
@@ -59,7 +103,7 @@ class VerifiedOrganizerMiddleware
                     'redirect_url' => route('organizer.verification')
                 ], 403);
             }
-            
+
             // For regular requests, redirect with SweetAlert session data
             return redirect()->route('dashboard')->with('sweetalert', [
                 'title' => 'Verification Required',

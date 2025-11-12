@@ -252,16 +252,29 @@
 
             let isOpen = false;
 
+            function closeAllDropdowns() {
+                // Close all dropdowns
+                document.querySelectorAll('[id$="DropdownMenu"]').forEach(otherMenu => {
+                    otherMenu.classList.add('hidden');
+                    otherMenu.style.display = 'none';
+                });
+                isOpen = false;
+            }
+
             function closeDropdown() {
                 menu.classList.add('hidden');
+                menu.style.display = 'none';
                 isOpen = false;
-                document.removeEventListener('click', handleOutsideClick);
-                document.removeEventListener('touchstart', handleOutsideClick);
             }
 
             function openDropdown() {
+                // Close all other dropdowns first
+                closeAllDropdowns();
+
                 menu.classList.remove('hidden');
+                menu.style.display = 'block';
                 isOpen = true;
+
                 // Position dropdown to avoid clipping
                 const rect = btn.getBoundingClientRect();
                 const menuRect = menu.getBoundingClientRect();
@@ -275,11 +288,6 @@
                     menu.style.left = '0';
                     menu.style.right = 'auto';
                 }
-
-                setTimeout(() => {
-                    document.addEventListener('click', handleOutsideClick);
-                    document.addEventListener('touchstart', handleOutsideClick);
-                }, 0);
             }
 
             function handleOutsideClick(e) {
@@ -289,36 +297,42 @@
             }
 
             function toggleDropdown(e) {
+                e.preventDefault();
                 e.stopPropagation();
 
                 if (isOpen) {
                     closeDropdown();
                 } else {
                     openDropdown();
+                    // Add outside click listener after opening
+                    setTimeout(() => {
+                        document.addEventListener('click', handleOutsideClick, true);
+                        document.addEventListener('touchstart', handleOutsideClick, true);
+                    }, 0);
                 }
             }
 
-            // Enhanced mobile touch handling
+            // Simple click handler - works on both mobile and desktop
             btn.addEventListener('click', toggleDropdown);
+
+            // Touch handling for mobile
             btn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
                 e.stopPropagation();
                 toggleDropdown(e);
             }, {
-                passive: true
-            });
-
-            // Additional mobile touch handling
-            btn.addEventListener('touchend', function(e) {
-                e.stopPropagation();
-            }, {
-                passive: true
+                passive: false
             });
 
             // Handle touch on the button itself
-            btn.style.touchAction = 'manipulation';
+            btn.style.touchAction = 'auto';
 
             // Prevent dropdown from closing when clicking inside it
             menu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            menu.addEventListener('touchstart', function(e) {
                 e.stopPropagation();
             });
 
@@ -358,16 +372,29 @@
 
             let isOpen = false;
 
+            function closeAllDropdowns() {
+                // Close all dropdowns
+                document.querySelectorAll('[id$="DropdownMenu"]').forEach(otherMenu => {
+                    otherMenu.classList.add('hidden');
+                    otherMenu.style.display = 'none';
+                });
+                isOpen = false;
+            }
+
             function closeDropdown() {
                 menuTS.classList.add('hidden');
+                menuTS.style.display = 'none';
                 isOpen = false;
-                document.removeEventListener('click', handleOutsideClick);
-                document.removeEventListener('touchstart', handleOutsideClick);
             }
 
             function openDropdown() {
+                // Close all other dropdowns first
+                closeAllDropdowns();
+
                 menuTS.classList.remove('hidden');
+                menuTS.style.display = 'block';
                 isOpen = true;
+
                 // Position dropdown to avoid clipping
                 const rect = btnTS.getBoundingClientRect();
                 const menuRect = menuTS.getBoundingClientRect();
@@ -381,11 +408,6 @@
                     menuTS.style.left = '0';
                     menuTS.style.right = 'auto';
                 }
-
-                setTimeout(() => {
-                    document.addEventListener('click', handleOutsideClick);
-                    document.addEventListener('touchstart', handleOutsideClick);
-                }, 0);
             }
 
             function handleOutsideClick(e) {
@@ -395,36 +417,42 @@
             }
 
             function toggleDropdown(e) {
+                e.preventDefault();
                 e.stopPropagation();
 
                 if (isOpen) {
                     closeDropdown();
                 } else {
                     openDropdown();
+                    // Add outside click listener after opening
+                    setTimeout(() => {
+                        document.addEventListener('click', handleOutsideClick, true);
+                        document.addEventListener('touchstart', handleOutsideClick, true);
+                    }, 0);
                 }
             }
 
-            // Enhanced mobile touch handling
+            // Simple click handler - works on both mobile and desktop
             btnTS.addEventListener('click', toggleDropdown);
+
+            // Touch handling for mobile
             btnTS.addEventListener('touchstart', function(e) {
+                e.preventDefault();
                 e.stopPropagation();
                 toggleDropdown(e);
             }, {
-                passive: true
-            });
-
-            // Additional mobile touch handling
-            btnTS.addEventListener('touchend', function(e) {
-                e.stopPropagation();
-            }, {
-                passive: true
+                passive: false
             });
 
             // Handle touch on the button itself
-            btnTS.style.touchAction = 'manipulation';
+            btnTS.style.touchAction = 'auto';
 
             // Prevent dropdown from closing when clicking inside it
             menuTS.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            menuTS.addEventListener('touchstart', function(e) {
                 e.stopPropagation();
             });
 
@@ -440,59 +468,4 @@
             });
         });
     })();
-</script>
-
-<script>
-    // Simple dropdown solution for mobile
-    document.addEventListener('DOMContentLoaded', function() {
-        // Find all dropdown buttons and menus
-        const dropdownButtons = document.querySelectorAll('[id$="DropdownButton"]');
-
-        dropdownButtons.forEach(button => {
-            const buttonId = button.id;
-            const menuId = buttonId.replace('Button', 'Menu');
-            const menu = document.getElementById(menuId);
-
-            if (!menu) return;
-
-            // Add click event listener
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                // Close all other dropdowns
-                document.querySelectorAll('[id$="DropdownMenu"]').forEach(otherMenu => {
-                    if (otherMenu !== menu) {
-                        otherMenu.style.display = 'none';
-                        otherMenu.classList.add('hidden');
-                    }
-                });
-
-                // Toggle current dropdown
-                if (menu.style.display === 'block' || !menu.classList.contains('hidden')) {
-                    menu.style.display = 'none';
-                    menu.classList.add('hidden');
-                } else {
-                    menu.style.display = 'block';
-                    menu.classList.remove('hidden');
-                }
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!button.contains(e.target) && !menu.contains(e.target)) {
-                    menu.style.display = 'none';
-                    menu.classList.add('hidden');
-                }
-            });
-
-            // Close dropdown on scroll
-            window.addEventListener('scroll', function() {
-                menu.style.display = 'none';
-                menu.classList.add('hidden');
-            }, {
-                passive: true
-            });
-        });
-    });
 </script>

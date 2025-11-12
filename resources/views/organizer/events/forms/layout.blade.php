@@ -1,29 +1,58 @@
 <div class="space-y-8">
     <!-- Event Header Preview (matches event header design) -->
     @php(
-        $thumbUrl = $eventData['existing_thumbnail_url'] ?? ($event->thumbnail_url ?? null)
+    $thumbUrl = $eventData['existing_thumbnail_url'] ?? ($event->thumbnail_url ?? null)
     )
     @php(
-        $posterUrl = $eventData['existing_poster_url'] ?? ($event->poster_url ?? null)
+    $posterUrl = $eventData['existing_poster_url'] ?? ($event->poster_url ?? null)
     )
-    @php(
-        $eventObj = (object) [
-            'id' => $eventData['id'] ?? ($event->id ?? null),
-            'title' => $eventData['title'] ?? ($event->title ?? 'Untitled Event'),
-            'thumbnail_url' => $thumbUrl,
-            'poster_url' => $posterUrl,
-            'category' => $eventData['category'] ?? ($event->category ?? 'event'),
-            'start_date' => $eventData['start_date'] ?? ($event->start_date ?? null),
-            'end_date' => $eventData['end_date'] ?? ($event->end_date ?? null),
-            'location' => $eventData['location'] ?? ($event->location ?? null),
-            'description' => $eventData['description'] ?? ($event->description ?? ''),
-            'status' => $eventData['status'] ?? ($event->status ?? null),
-            'user_id' => $eventData['user_id'] ?? ($event->user_id ?? null),
-            'user' => $event->user ?? null, // Add user relationship for event-header component
-        ]
-    )
-    <div class="w-full overflow-hidden">
-        <div class="relative w-full max-w-full">
+    @php
+    // Handle tags - can be string or array
+    $tagsValue = $eventData['tags'] ?? ($event->tags ?? null);
+    $tagsArray = null;
+    if ($tagsValue) {
+    if (is_array($tagsValue)) {
+    $tagsArray = $tagsValue;
+    } elseif (is_string($tagsValue)) {
+    $tagsArray = array_filter(array_map('trim', explode(',', $tagsValue)));
+    }
+    }
+
+    $eventObj = (object) [
+    'id' => $eventData['id'] ?? ($event->id ?? null),
+    'title' => $eventData['title'] ?? ($event->title ?? 'Untitled Event'),
+    'thumbnail_url' => $thumbUrl,
+    'poster_url' => $posterUrl,
+    'category' => $eventData['category'] ?? ($event->category ?? 'event'),
+    'start_date' => $eventData['start_date'] ?? ($event->start_date ?? null),
+    'end_date' => $eventData['end_date'] ?? ($event->end_date ?? null),
+    'location' => $eventData['location'] ?? ($event->location ?? null),
+    'description' => $eventData['description'] ?? ($event->description ?? ''),
+    'status' => $eventData['status'] ?? ($event->status ?? null),
+    'user_id' => $eventData['user_id'] ?? ($event->user_id ?? null),
+    'user' => $event->user ?? null, // Add user relationship for event-header component
+    'tags' => $tagsValue, // String format
+    'tags_array' => $tagsArray, // Array format for event-header component
+    ];
+
+    // Ensure start_date and end_date are Carbon instances if they exist
+    if ($eventObj->start_date && is_string($eventObj->start_date)) {
+    try {
+    $eventObj->start_date = \Carbon\Carbon::parse($eventObj->start_date);
+    } catch (\Exception $e) {
+    // Keep as string if parsing fails
+    }
+    }
+    if ($eventObj->end_date && is_string($eventObj->end_date)) {
+    try {
+    $eventObj->end_date = \Carbon\Carbon::parse($eventObj->end_date);
+    } catch (\Exception $e) {
+    // Keep as string if parsing fails
+    }
+    }
+    @endphp
+    <div class="w-full overflow-hidden -mx-4 sm:-mx-6 md:mx-0">
+        <div class="relative w-full">
             <x-events.event-header :event="$eventObj" :section="'info'" :hideActions="true" :previewPosterUrl="$posterUrl" :previewThumbnailUrl="$thumbUrl" :previewMode="true" />
         </div>
     </div>
@@ -45,7 +74,13 @@
     <!-- Current Event ID for JS uploads/hydration -->
     @if(isset($eventObj->id) && $eventObj->id)
     <meta name="event-id" content="{{ $eventObj->id }}">
-    <script>window.currentEventId = {{ (int)$eventObj->id }};</script>
+    <script>
+        window.currentEventId = {
+            {
+                (int) $eventObj - > id
+            }
+        };
+    </script>
     @endif
 
     <!-- Hidden layout JSON field for submission/autosave -->
@@ -82,7 +117,7 @@
     <div class="mt-10 border-t border-gray-200 dark:border-gray-700 pt-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Footer Settings</h3>
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Configure the footer that appears at the bottom of your event pages. This section helps attendees contact you and find you on social media.</p>
-        
+
         <!-- Basic Information (Title/Description removed) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
@@ -124,5 +159,3 @@
         </div>
     </div>
 </div>
-
-
