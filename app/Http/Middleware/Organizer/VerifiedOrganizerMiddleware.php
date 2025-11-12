@@ -36,6 +36,7 @@ class VerifiedOrganizerMiddleware
                 $isOwner = (int) $event->user_id === (int) $user->id;
                 $isStaff = $event->staff()->where('user_id', $user->id)->exists();
                 if ($isOwner || $isStaff) {
+                    // Event owners and staff can always access their events, even if not verified
                     return $next($request);
                 }
             }
@@ -76,10 +77,23 @@ class VerifiedOrganizerMiddleware
             }
 
             if ($eventParam) {
-                $event = is_object($eventParam) ? $eventParam : \App\Models\Event::find($eventParam);
-                if ($event && (int) $event->user_id === (int) $user->id) {
-                    // Event owner can always access their own events for editing/saving
-                    return $next($request);
+                try {
+                    $event = is_object($eventParam) ? $eventParam : \App\Models\Event::find($eventParam);
+                    if ($event) {
+                        $isOwner = (int) $event->user_id === (int) $user->id;
+                        $isStaff = $event->staff()->where('user_id', $user->id)->exists();
+                        if ($isOwner || $isStaff) {
+                            // Event owner and staff can always access their events for editing/saving, even if not verified
+                            return $next($request);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // Log error but continue to verification check
+                    \Log::warning('Error checking event ownership in VerifiedOrganizerMiddleware', [
+                        'error' => $e->getMessage(),
+                        'route' => $routeName,
+                        'user_id' => $user->id
+                    ]);
                 }
             }
         }
