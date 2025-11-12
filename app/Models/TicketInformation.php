@@ -27,7 +27,7 @@ class TicketInformation extends Model
     ];
 
     protected $casts = [
-        'qr_code_data' => 'encrypted',
+        // qr_code_data is manually encrypted/decrypted, so no cast needed
         'checked_in_at' => 'datetime',
         'certificate_given' => 'boolean',
     ];
