@@ -15,14 +15,16 @@
     'primaryColor' => '#10b981',
     'secondaryColor' => '#f59e0b',
     'accentColor' => '#059669',
+    // Check-in status
+    'isCheckedIn' => false,
 ])
 
 <div class="w-full">
     <!-- Mobile ticket -->
     <div class="md:hidden">
-        <div class="rounded-xl overflow-hidden shadow-lg">
+        <div class="rounded-xl overflow-hidden shadow-lg relative">
             <!-- Top section: Colored gradient with holder info -->
-            <div class="p-5 relative ticket-mobile-header" style="background: linear-gradient(to bottom right, {{ $primaryColor }}, {{ $secondaryColor }});">
+            <div class="p-5 relative ticket-mobile-header {{ $isCheckedIn ? 'blur-sm' : '' }}" style="background: linear-gradient(to bottom right, {{ $primaryColor }}, {{ $secondaryColor }});">
                 @if($bgImage)
                     <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('{{ $bgImage }}');"></div>
                     <div class="absolute inset-0 ticket-mobile-overlay" style="background: linear-gradient(to bottom right, {{ $primaryColor }}dd, {{ $secondaryColor }}dd);"></div>
@@ -59,7 +61,7 @@
             </div>
 
             <!-- Bottom section: Black with event details -->
-            <div class="bg-black text-white p-5">
+            <div class="bg-black text-white p-5 {{ $isCheckedIn ? 'blur-sm' : '' }}">
                 <div class="text-2xl font-extrabold tracking-tight mb-4">{{ $eventTitle }}</div>
 
                 <div class="grid grid-cols-2 gap-4 text-sm mb-4">
@@ -85,13 +87,21 @@
                 </div>
             </div>
         </div>
+        @if($isCheckedIn)
+        <!-- Checked In Overlay for Mobile -->
+        <div class="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div class="bg-green-500 text-white px-6 py-3 rounded-full shadow-lg font-bold text-lg">
+                ✓ Checked In
+            </div>
+        </div>
+        @endif
     </div>
 
     <!-- Desktop ticket -->
     <div class="hidden md:block">
-        <div class="rounded-xl shadow-lg overflow-hidden">
+        <div class="rounded-xl shadow-lg overflow-hidden relative">
             <!-- Top section: Colored gradient -->
-            <div class="relative ticket-desktop-header" style="background: linear-gradient(to bottom right, {{ $primaryColor }}, {{ $secondaryColor }});">
+            <div class="relative ticket-desktop-header {{ $isCheckedIn ? 'blur-sm' : '' }}" style="background: linear-gradient(to bottom right, {{ $primaryColor }}, {{ $secondaryColor }});">
                 @if($bgImage)
                     <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('{{ $bgImage }}');"></div>
                     <div class="absolute inset-0 ticket-desktop-overlay" style="background: linear-gradient(to bottom right, {{ $primaryColor }}dd, {{ $secondaryColor }}dd);"></div>
@@ -127,7 +137,7 @@
             </div>
 
             <!-- Bottom section: Black with event details -->
-            <div class="bg-black text-white p-6">
+            <div class="bg-black text-white p-6 {{ $isCheckedIn ? 'blur-sm' : '' }}">
                 <div class="text-3xl font-extrabold tracking-tight mb-4">{{ $eventTitle }}</div>
                 
                 <div class="grid grid-cols-3 gap-6 text-sm mb-4">
@@ -152,6 +162,14 @@
                 </div>
             </div>
         </div>
+        @if($isCheckedIn)
+        <!-- Checked In Overlay for Desktop -->
+        <div class="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div class="bg-green-500 text-white px-8 py-4 rounded-full shadow-lg font-bold text-xl">
+                ✓ Checked In
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 

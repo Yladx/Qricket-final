@@ -71,7 +71,8 @@
                 'bgImage' => $bgImage,
                 'primaryColor' => $primaryColor ?? '#10b981',
                 'secondaryColor' => $secondaryColor ?? '#f59e0b',
-                'accentColor' => $accentColor ?? '#059669'
+                'accentColor' => $accentColor ?? '#059669',
+                'isCheckedIn' => $ticket->checked_in_at !== null
             ])
 
             <div class="mt-6 flex items-center justify-end">

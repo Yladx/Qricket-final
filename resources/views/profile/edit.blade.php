@@ -9,6 +9,7 @@
                 </svg>
                 Back
             </button>
+
         </div>
     </x-slot>
     <div class="pt-0 lg:pt-12 pb-12">
