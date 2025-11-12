@@ -66,19 +66,24 @@
                     $isAdminViewingOthersEvent = $isAdmin && !$isOwner && !$isAdminEvent;
 
                     $canViewOverview = $isAdmin || $isOwner || $isAdminEvent || ($staff !== null);
-                    // Admins viewing others' events cannot manage attendance (view-only)
+                    // Admins can view attendance (show tab), but cannot manage if viewing others' events
+                    $canViewAttendance = $isAdmin || $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_attendance ?? false) || $isOrganizerRole;
                     $canManageAttendance = (!$isAdminViewingOthersEvent) && ($isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_attendance ?? false) || $isOrganizerRole);
-                    // Admins viewing others' events cannot manage tickets (view-only)
+                    // Admins can view tickets (show tab), but cannot manage if viewing others' events
+                    $canViewTicket = $isAdmin || $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_ticket ?? false) || $isOrganizerRole;
                     $canManageTicket = (!$isAdminViewingOthersEvent) && ($isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_ticket ?? false) || $isOrganizerRole);
                     // Admins viewing others' events cannot manage/edit event (view-only)
                     $canManageEvent = (!$isAdminViewingOthersEvent) && ($isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_event ?? false) || $isOrganizerRole);
                     // Event Info should be visible to: admins, owners, staff (even without can_manage_event), but content depends on permissions
                     $canViewEventInfo = $isAdmin || $isOwner || $isAdminEvent || ($staff !== null);
-                    // Admins viewing others' events cannot manage staff (view-only)
+                    // Admins can view staff (show tab), but cannot manage if viewing others' events
+                    $canViewStaff = $isAdmin || $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_staff ?? false) || $isOrganizerRole;
                     $canManageStaff = (!$isAdminViewingOthersEvent) && ($isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_staff ?? false) || $isOrganizerRole);
-                    // Admins viewing others' events cannot manage news (view-only)
+                    // Admins can view news (show tab), but cannot manage if viewing others' events
+                    $canViewNews = $isAdmin || $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_news ?? false) || $isOrganizerRole;
                     $canManageNews = (!$isAdminViewingOthersEvent) && ($isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_news ?? false) || $isOrganizerRole);
-                    // Admins viewing others' events cannot manage sales (view-only)
+                    // Admins can view sales (show tab), but cannot manage if viewing others' events
+                    $canViewSales = $isAdmin || $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_sales ?? false) || $isOrganizerRole;
                     $canManageSales = (!$isAdminViewingOthersEvent) && ($isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_sales ?? false) || $isOrganizerRole);
                     $canViewActivity = $isAdmin || $isOwner || $isAdminEvent || ($staff !== null);
                     // Co-owners can access feedback (all permissions except payout)
@@ -137,10 +142,10 @@
                     @if($canViewOverview)
                     <a href="{{ $route('manage') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.manage') || request()->routeIs('admin.event.manage') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Overview</a>
                     @endif
-                    @if($canManageAttendance)
+                    @if($canViewAttendance)
                     <a href="{{ $route('attendance') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.attendance') || request()->routeIs('admin.event.attendance') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Attendance</a>
                     @endif
-                    @if($canManageTicket || $canManageSales)
+                    @if($canViewTicket || $canViewSales)
                     <div class="relative">
                         <button type="button" id="ticketSalesDropdownButton-{{ $event->id }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.tickets') || request()->routeIs('organizer.events.manage') || request()->routeIs('admin.event.tickets') || request()->routeIs('admin.event.manage') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium inline-flex items-center gap-2">
                             Ticket & Sales
@@ -149,10 +154,10 @@
                             </svg>
                         </button>
                         <div id="ticketSalesDropdownMenu-{{ $event->id }}" class="absolute hidden mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50 min-w-[200px] right-0">
-                            @if($canManageTicket)
+                            @if($canViewTicket)
                             <a href="{{ $route('tickets') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Ticket Information</a>
                             @endif
-                            @if($canManageSales)
+                            @if($canViewSales)
                             <a href="{{ $route('sales') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Sales Report</a>
                             @endif
                             @if($isOwner || $isAdmin)
@@ -169,7 +174,7 @@
                         </div>
                     </div>
                     @endif
-                    @if($canManageStaff)
+                    @if($canViewStaff)
                     @php
                     // Resolve Staff URL robustly with fallbacks to avoid accidental '/' redirects
                     try {
@@ -219,13 +224,17 @@
                         </div>
                     </div>
                     @endif
-                    @if($canManageNews)
+                    @if($canViewNews)
                     <a href="{{ $route('news') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.news.*') || request()->routeIs('admin.event.news.*') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">News</a>
                     @endif
                     @if($canViewActivity)
                     <a href="{{ $route('activity-log') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.activity-log') || request()->routeIs('admin.event.activity-log') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Activity</a>
                     @endif
-                    @if($eventEnded && $canManageFeedback)
+                    @php
+                    // Admins can view feedback (show tab), but cannot manage if viewing others' events
+                    $canViewFeedback = $isAdmin || $isOwner || $isAdminEvent || $isCoOwner || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+                    @endphp
+                    @if($eventEnded && $canViewFeedback)
                     <a href="{{ $route('feedback') }}" class="whitespace-nowrap border-b-2 {{ request()->routeIs('organizer.events.feedback') || request()->routeIs('admin.event.feedback') ? 'border-qricket-600 text-qricket-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100' }} px-1 pb-1 text-sm font-medium">Feedback</a>
                     @endif
                 </nav>
