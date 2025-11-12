@@ -242,6 +242,7 @@ Route::prefix('admin')->name('admin.')->middleware('prevent.user.admin')->group(
         // Admin Notifications page
         Route::get('/notifications', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'index'])->name('notifications');
         Route::get('/notifications/data', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'data'])->name('notifications.data');
+        Route::get('/notifications/{id}/go', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'go'])->name('notifications.go');
         Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'markAsRead'])->name('notifications.mark-read');
         Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
         

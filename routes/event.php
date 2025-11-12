@@ -7,6 +7,11 @@ Route::post('/events/{event}/feedback/notify', [\App\Http\Controllers\Events\Eve
     ->middleware(['auth'])
     ->name('events.feedback.notify');
 
+// Event deletion - allow even if not verified
+Route::prefix('organizer')->middleware('auth')->group(function () {
+    Route::delete('/events/{id}', [\App\Http\Controllers\Organizer\EventManagement\BasicInfoController::class, 'destroy'])->name('organizer.events.destroy');
+});
+
 Route::prefix('organizer')->middleware('verified.organizer')->group(function () {
     // Step 1 - Basic Info
     Route::get('/events/create', [\App\Http\Controllers\Organizer\EventManagement\BasicInfoController::class, 'step1'])->name('organizer.events.step1');
@@ -15,7 +20,6 @@ Route::prefix('organizer')->middleware('verified.organizer')->group(function () 
     Route::get('/events/tag-category-mappings', [\App\Http\Controllers\Organizer\EventManagement\BasicInfoController::class, 'getTagCategoryMappings'])->name('organizer.events.tag-category-mappings');
     Route::get('/events/existing-tags', [\App\Http\Controllers\Organizer\EventManagement\BasicInfoController::class, 'getExistingTags'])->name('organizer.events.existing-tags');
     Route::post('/events/{id}/cancel', [\App\Http\Controllers\Organizer\EventManagement\BasicInfoController::class, 'cancel'])->name('organizer.events.cancel');
-    Route::delete('/events/{id}', [\App\Http\Controllers\Organizer\EventManagement\BasicInfoController::class, 'destroy'])->name('organizer.events.destroy');
 
     // Step 2 - Layout
     Route::get('/events/create/layout', [\App\Http\Controllers\Organizer\EventManagement\LayoutController::class, 'step2'])->name('organizer.events.create.layout');

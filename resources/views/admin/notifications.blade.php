@@ -84,7 +84,9 @@
                                     notification.type || 'info',
                                     notification.created_at,
                                     notification.is_read,
-                                    notification.id
+                                    notification.id,
+                                    notification.action || null,
+                                    notification.reference_id || null
                                 );
                             });
                             updateUnreadCount();
@@ -98,8 +100,8 @@
                     });
             }
 
-            function prependItem(title, message, type, timestamp, isRead = false, notificationId = null) {
-                console.log('prependItem called with:', { title, message, type, timestamp, isRead });
+            function prependItem(title, message, type, timestamp, isRead = false, notificationId = null, action = null, referenceId = null) {
+                console.log('prependItem called with:', { title, message, type, timestamp, isRead, notificationId, action, referenceId });
                 
                 // Check if list element exists
                 if (!list) {
@@ -107,13 +109,22 @@
                     return;
                 }
                 
+                // Generate route URL based on notification type and action
+                const notificationUrl = generateNotificationUrl(type, action, referenceId, notificationId);
+                const isClickable = notificationUrl !== null;
+                const cursorClass = isClickable ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50' : '';
+                
                 const li = document.createElement('li');
-                li.className = 'py-3';
+                li.className = `py-3 ${cursorClass}`;
                 li.setAttribute('data-read', isRead);
-                li.setAttribute('data-id', notificationId || Date.now()); // Use actual ID or fallback
+                li.setAttribute('data-id', notificationId || Date.now());
+                if (isClickable) {
+                    li.setAttribute('data-url', notificationUrl);
+                }
                 const timeAgo = timestamp ? new Date(timestamp).toLocaleString() : 'Just now';
                 const readClass = isRead ? 'opacity-60' : '';
                 const unreadDot = !isRead ? '<div class="w-2 h-2 bg-red-500 rounded-full mt-1"></div>' : '';
+                const clickHint = isClickable ? '<div class="text-xs text-blue-500 dark:text-blue-400 mt-1 font-medium">Click to view →</div>' : '';
                 
                 li.innerHTML = `
                     <div class="flex items-start justify-between ${readClass}">
@@ -123,18 +134,28 @@
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${title || 'Notification'}</div>
                                     <div class="text-sm text-gray-700 dark:text-gray-300">${message || ''}</div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${timeAgo}</div>
+                                    ${clickHint}
                                 </div>
                                 ${unreadDot}
                             </div>
                         </div>
-                        <span class="text-xs px-2 py-0.5 rounded-full ${type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : type === 'error' ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' : type === 'warning' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'}">${type || 'info'}</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full ${type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : type === 'error' ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' : type === 'warning' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' : type === 'refund' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' : type === 'payout' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'}">${type || 'info'}</span>
                     </div>
                 `;
                 
-                // Add click handler to mark individual notification as read
-                li.addEventListener('click', function() {
-                    markAsRead(li);
-                });
+                // Add click handler
+                if (isClickable) {
+                    li.addEventListener('click', function() {
+                        markAsRead(li);
+                        // Navigate to the notification URL
+                        window.location.href = notificationUrl;
+                    });
+                } else {
+                    // Just mark as read if not clickable
+                    li.addEventListener('click', function() {
+                        markAsRead(li);
+                    });
+                }
                 
                 // Safely check and remove existing placeholder messages
                 if (list.firstElementChild) {
@@ -146,6 +167,13 @@
                 
                 list.prepend(li);
                 console.log('Notification added to list');
+            }
+
+            function generateNotificationUrl(type, action, referenceId, notificationId) {
+                if (!notificationId) return null;
+                
+                // Build the go route URL
+                return `/admin/notifications/${notificationId}/go`;
             }
 
             function markAsRead(li) {
@@ -284,8 +312,8 @@
 
             // Listen for admin-specific notifications
             window.addEventListener('notification:received', (e) => {
-                const { title, message, options, type, receivedAt, id } = (e.detail || {});
-                prependItem(title, message, (options && options.icon) || type || 'info', receivedAt, false, id);
+                const { title, message, options, type, receivedAt, id, action, reference_id } = (e.detail || {});
+                prependItem(title, message, (options && options.icon) || type || 'info', receivedAt, false, id, action, reference_id);
                 updateUnreadCount();
                 
                 // Show desktop notification
@@ -298,21 +326,21 @@
 
             // Listen for admin notification events from global handler
             window.addEventListener('admin-notification:received', function(e) {
-                const { title, message, type, receivedAt, id } = (e.detail || {});
+                const { title, message, type, receivedAt, id, action, reference_id } = (e.detail || {});
                 
                 // Add to list if we're on the notifications page
                 if (typeof prependItem === 'function') {
-                    prependItem(title, message, type || 'info', receivedAt, false, id);
+                    prependItem(title, message, type || 'info', receivedAt, false, id, action, reference_id);
                     updateUnreadCount();
                 }
             });
 
             // Also listen for legacy event name (backwards compatibility)
             window.addEventListener('notification:received', function(e) {
-                const { title, message, options, type, receivedAt, id } = (e.detail || {});
+                const { title, message, options, type, receivedAt, id, action, reference_id } = (e.detail || {});
                 
                 if (typeof prependItem === 'function') {
-                    prependItem(title, message, (options && options.icon) || type || 'info', receivedAt, false, id);
+                    prependItem(title, message, (options && options.icon) || type || 'info', receivedAt, false, id, action, reference_id);
                     updateUnreadCount();
                 }
             });

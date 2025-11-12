@@ -76,6 +76,7 @@ class AdminNotificationController extends Controller
                         'message' => $this->generateNotificationMessage($notification),
                         'type' => $displayType,
                         'action' => $notification->action,
+                        'reference_id' => $notification->reference_id,
                         'created_at' => $notification->created_at->toISOString(),
                         'is_read' => (bool) $notification->is_read,
                     ];
@@ -269,6 +270,106 @@ class AdminNotificationController extends Controller
         } catch (\Exception $e) {
             \Log::error('Error marking all admin notifications as read:', ['error' => $e->getMessage()]);
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function go($id)
+    {
+        try {
+            $currentAdminId = Auth::guard('admin')->id();
+            $notification = Notification::whereNull('user_id')
+                ->where(function($q) use ($currentAdminId) {
+                    $q->whereNull('admin_id');
+                    if ($currentAdminId) {
+                        $q->orWhere('admin_id', $currentAdminId);
+                    }
+                })
+                ->findOrFail($id);
+
+            // Mark notification as read when clicked
+            if (!$notification->is_read) {
+                $notification->update(['is_read' => true]);
+            }
+
+            \Log::info('Admin notification redirect', [
+                'notification_id' => $id,
+                'type' => $notification->type,
+                'action' => $notification->action,
+                'reference_id' => $notification->reference_id,
+                'admin_id' => $currentAdminId
+            ]);
+
+            // Handle organizer verification notifications
+            if ($notification->type === 'organizer' && $notification->reference_id) {
+                if ($notification->action === 'verified') {
+                    return redirect()->route('admin.organizer-verifications.show', ['verification' => $notification->reference_id]);
+                }
+                return redirect()->route('admin.organizer-verifications.index');
+            }
+
+            // Handle event notifications
+            if ($notification->type === 'event' && $notification->reference_id) {
+                if (in_array($notification->action, ['accept', 'reject', 'pending'])) {
+                    // Event approval/rejection - go to event approval page
+                    return redirect()->route('admin.events.approval.show', ['event' => $notification->reference_id]);
+                } elseif ($notification->action === 'payout_processed' || isset($notification->data['payout_request_id'])) {
+                    // Payout request - go to payouts page
+                    return redirect()->route('admin.payouts.index');
+                }
+                // Default: go to event approval page or event management dashboard
+                try {
+                    return redirect()->route('admin.events.approval.show', ['event' => $notification->reference_id]);
+                } catch (\Exception $e) {
+                    // Fallback to events list if event not found
+                    return redirect()->route('admin.events.approval.index');
+                }
+            }
+
+            // Handle ticket/refund notifications
+            if ($notification->type === 'ticket' && $notification->reference_id) {
+                if (isset($notification->data['refund_request_id']) || in_array($notification->action, ['refund_requested', 'refund_completed', 'refund_rejected'])) {
+                    // Refund request - go to refunds page
+                    return redirect()->route('admin.refunds.index');
+                }
+                // Support ticket reply
+                if ($notification->action === 'reply') {
+                    $supportTicket = \App\Models\SupportTicket::find($notification->reference_id);
+                    if ($supportTicket) {
+                        return redirect()->route('admin.support.show', ['ticket' => $supportTicket->id]);
+                    }
+                }
+                return redirect()->route('admin.support');
+            }
+
+            // Handle support notifications
+            if ($notification->type === 'support' && $notification->reference_id) {
+                $supportTicket = \App\Models\SupportTicket::find($notification->reference_id);
+                if ($supportTicket) {
+                    return redirect()->route('admin.support.show', ['ticket' => $supportTicket->id]);
+                }
+                return redirect()->route('admin.support');
+            }
+
+            // Fallback routing based on notification type
+            switch ($notification->type) {
+                case 'organizer':
+                    return redirect()->route('admin.organizer-verifications.index');
+                case 'ticket':
+                    // Check if it's a refund or support ticket
+                    if (isset($notification->data['refund_request_id']) || in_array($notification->action, ['refund_requested', 'refund_completed', 'refund_rejected'])) {
+                        return redirect()->route('admin.refunds.index');
+                    }
+                    return redirect()->route('admin.support');
+                case 'event':
+                    return redirect()->route('admin.events.approval.index');
+                case 'support':
+                    return redirect()->route('admin.support');
+                default:
+                    return redirect()->route('admin.notifications');
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error in admin notification redirect:', ['error' => $e->getMessage(), 'notification_id' => $id]);
+            return redirect()->route('admin.notifications')->with('error', 'Notification not found or invalid.');
         }
     }
 }

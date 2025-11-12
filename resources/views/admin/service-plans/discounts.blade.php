@@ -113,99 +113,106 @@
         </div>
     </div>
 
-    <!-- Discounts Cards -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Discount Codes</h3>
-        </div>
-        <div class="p-6">
-            @if($discounts->count())
-                <div class="space-y-4">
-                    @foreach($discounts as $discount)
-                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-4 md:p-5 hover:shadow-md transition-all duration-200">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <!-- Left Section: Discount Info -->
-                                <div class="flex-1 flex flex-col md:flex-row md:items-center md:space-x-6 gap-4 md:gap-0">
-                                    <div class="flex-shrink-0">
-                                        <div class="flex flex-wrap items-center gap-2 mb-2">
-                                            <h4 class="text-base md:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $discount->name }}</h4>
-                                            <span class="font-mono bg-gray-200 dark:bg-gray-600 px-2 md:px-3 py-1 rounded-lg text-xs md:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $discount->code }}</span>
-                                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $discount->isValid() ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
-                                                {{ $discount->isValid() ? 'Active' : 'Inactive' }}
-                                            </span>
-                                        </div>
-                                        @if($discount->description)
-                                            <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400">{{ $discount->description }}</p>
-                                        @endif
-                                    </div>
-                                    
-                                    <!-- Middle Section: Details -->
-                                    <div class="flex flex-wrap md:flex-nowrap items-center gap-4 md:gap-6 md:space-x-8 border-t md:border-t-0 md:border-l md:border-r border-gray-200 dark:border-gray-600 pt-4 md:pt-0 md:px-6">
-                                        <div class="text-center min-w-[80px]">
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Type</div>
-                                            <div class="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">{{ ucfirst(str_replace('_', ' ', $discount->type)) }}</div>
-                                        </div>
-                                        <div class="text-center min-w-[80px]">
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Value</div>
-                                            <div class="text-sm md:text-base font-semibold text-qricket-600 dark:text-qricket-400">{{ $discount->formatted_value }}</div>
-                                        </div>
-                                        <div class="text-center min-w-[80px]">
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Usage</div>
-                                            <div class="text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100">{{ $discount->used_count }}/{{ $discount->usage_limit ?: '∞' }}</div>
-                                        </div>
-                                        <div class="text-center min-w-[100px]">
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Applicable To</div>
-                                            <div class="text-xs md:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ ucfirst(str_replace('_', ' ', $discount->applicable_to)) }}</div>
-                                        </div>
-                                        @if($discount->starts_at || $discount->expires_at)
-                                        <div class="text-center min-w-[120px]">
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Validity</div>
-                                            <div class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                                                @if($discount->starts_at)
-                                                    {{ \Carbon\Carbon::parse($discount->starts_at)->format('M d') }} -
+    <!-- Full-width Discount Codes Section -->
+    <div class="mt-8 -mx-6 sm:-mx-6 lg:-mx-8">
+        <div class="px-6 sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Discount Codes</h3>
+                </div>
+                <div class="p-6">
+                    @if($discounts->count())
+                        <div class="space-y-4">
+                            @foreach($discounts as $discount)
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-4 lg:p-5 hover:shadow-md transition-all duration-200">
+                                    <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+                                        <!-- Left Section: Discount Info -->
+                                        <div class="flex-1 flex flex-col xl:flex-row xl:items-center xl:gap-6 min-w-0">
+                                            <div class="flex-shrink-0 min-w-0">
+                                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                                    <h4 class="text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ $discount->name }}</h4>
+                                                    <span class="font-mono bg-gray-200 dark:bg-gray-600 px-2 lg:px-3 py-1 rounded-lg text-xs lg:text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ $discount->code }}</span>
+                                                    <span class="px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap {{ $discount->isValid() ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
+                                                        {{ $discount->isValid() ? 'Active' : 'Inactive' }}
+                                                    </span>
+                                                </div>
+                                                @if($discount->description)
+                                                    <p class="text-xs lg:text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{{ $discount->description }}</p>
                                                 @endif
-                                                @if($discount->expires_at)
-                                                    {{ \Carbon\Carbon::parse($discount->expires_at)->format('M d, Y') }}
-                                                @else
-                                                    No expiry
+                                            </div>
+                                            
+                                            <!-- Middle Section: Details -->
+                                            <div class="flex flex-wrap xl:flex-nowrap items-center gap-4 xl:gap-6 xl:space-x-6 border-t xl:border-t-0 xl:border-l xl:border-r border-gray-200 dark:border-gray-600 pt-4 xl:pt-0 xl:px-6 flex-1 min-w-0">
+                                                <div class="text-center min-w-[80px] flex-shrink-0">
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Type</div>
+                                                    <div class="text-sm lg:text-base font-semibold text-gray-900 dark:text-gray-100 truncate">{{ ucfirst(str_replace('_', ' ', $discount->type)) }}</div>
+                                                </div>
+                                                <div class="text-center min-w-[80px] flex-shrink-0">
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Value</div>
+                                                    <div class="text-sm lg:text-base font-semibold text-qricket-600 dark:text-qricket-400 truncate">{{ $discount->formatted_value }}</div>
+                                                </div>
+                                                <div class="text-center min-w-[80px] flex-shrink-0">
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Usage</div>
+                                                    <div class="text-sm lg:text-base font-semibold text-gray-900 dark:text-gray-100">{{ $discount->used_count }}/{{ $discount->usage_limit ?: '∞' }}</div>
+                                                </div>
+                                                <div class="text-center min-w-[100px] flex-shrink-0">
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Applicable To</div>
+                                                    <div class="text-xs lg:text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ ucfirst(str_replace('_', ' ', $discount->applicable_to)) }}</div>
+                                                </div>
+                                                @if($discount->starts_at || $discount->expires_at)
+                                                <div class="text-center min-w-[140px] flex-shrink-0">
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Validity</div>
+                                                    <div class="text-xs font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                                                        @if($discount->starts_at)
+                                                            {{ \Carbon\Carbon::parse($discount->starts_at)->format('M d') }} -
+                                                        @endif
+                                                        @if($discount->expires_at)
+                                                            {{ \Carbon\Carbon::parse($discount->expires_at)->format('M d, Y') }}
+                                                        @else
+                                                            No expiry
+                                                        @endif
+                                                    </div>
+                                                </div>
                                                 @endif
                                             </div>
                                         </div>
-                                        @endif
+                                        
+                                        <!-- Right Section: Actions -->
+                                        <div class="flex-shrink-0 flex items-center justify-end xl:justify-start space-x-2 xl:ml-4">
+                                            <button onclick="editDiscount({{ $discount->id }})" class="p-2 text-qricket-600 dark:text-qricket-400 hover:bg-qricket-50 dark:hover:bg-qricket-900/20 rounded-md transition-colors" title="Edit">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                            </button>
+                                            <button onclick="deleteDiscount({{ $discount->id }})" class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Delete">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <!-- Right Section: Actions -->
-                                <div class="flex-shrink-0 flex items-center justify-end md:justify-start space-x-2 md:ml-4">
-                                    <button onclick="editDiscount({{ $discount->id }})" class="p-2 text-qricket-600 dark:text-qricket-400 hover:bg-qricket-50 dark:hover:bg-qricket-900/20 rounded-md transition-colors" title="Edit">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                    </button>
-                                    <button onclick="deleteDiscount({{ $discount->id }})" class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Delete">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
-                    @endforeach
+                    @else
+                        <div class="text-center py-12">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No discounts</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new discount.</p>
+                        </div>
+                    @endif
                 </div>
-            @else
-                <div class="text-center py-12">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No discounts</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new discount.</p>
-                </div>
-            @endif
+            </div>
         </div>
     </div>
+@endsection
 
-    <!-- Discount Modal -->
-    <div id="discountModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+@section('scripts')
+
+<!-- Discount Modal -->
+<div id="discountModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
             <div class="mt-3">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4" id="discountModalTitle">Add Discount</h3>
@@ -276,8 +283,8 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
         // Chart data from backend
         const usageData = @json($usageData);
         const discountTypesData = @json($discountTypesData);

@@ -41,8 +41,36 @@ class VerifiedOrganizerMiddleware
         }
 
         if (!$user->isVerifiedOrganizer()) {
-            // If user is not verified and not owner/staff on the target event, block
-            return redirect()->route('dashboard')->with('error', 'You must be a verified organizer to access this area.');
+            // For AJAX requests, return JSON response with SweetAlert notification
+            if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'requires_verification' => true,
+                    'message' => 'You must be a verified organizer to access this feature.',
+                    'sweetalert' => [
+                        'title' => 'Verification Required',
+                        'text' => 'Please verify as organizer to access this functionality.',
+                        'icon' => 'warning',
+                        'confirmButtonText' => 'Verify Now',
+                        'showCancelButton' => true,
+                        'cancelButtonText' => 'Cancel',
+                        'confirmButtonColor' => '#10b981',
+                    ],
+                    'redirect_url' => route('organizer.verification')
+                ], 403);
+            }
+            
+            // For regular requests, redirect with SweetAlert session data
+            return redirect()->route('dashboard')->with('sweetalert', [
+                'title' => 'Verification Required',
+                'text' => 'Please verify as organizer to access this functionality.',
+                'icon' => 'warning',
+                'confirmButtonText' => 'Verify Now',
+                'showCancelButton' => true,
+                'cancelButtonText' => 'Cancel',
+                'confirmButtonColor' => '#10b981',
+                'redirect_url' => route('organizer.verification')
+            ]);
         }
 
         return $next($request);

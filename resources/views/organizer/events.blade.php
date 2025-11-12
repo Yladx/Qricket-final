@@ -471,8 +471,26 @@
             })
             .then(response => {
                 console.log('Delete response status:', response.status);
+                
+                // Check if response is a verification requirement (handled by global handler)
+                if (response.status === 403) {
+                    return response.json().then(data => {
+                        // If it's a verification requirement, the global handler will show SweetAlert
+                        // Just reset button state here
+                        button.textContent = originalText;
+                        button.disabled = false;
+                        button.classList.remove('opacity-50', 'cursor-not-allowed');
+                        throw new Error('Verification required');
+                    });
+                }
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    // For other errors, try to parse JSON for error message
+                    return response.json().then(data => {
+                        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                    }).catch(() => {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    });
                 }
                 return response.json();
             })

@@ -173,5 +173,107 @@
                 Swal.fire(Object.assign({}, common, { icon: 'info', title: 'Information', text: info }));
             }
         }
-});
+
+        // Handle SweetAlert session data (e.g., verification required)
+        const sweetalert = {!! json_encode($sweetalert) !!};
+        if (sweetalert && !isVerificationPage) {
+            const alertOptions = {
+                title: sweetalert.title || 'Notification',
+                text: sweetalert.text || '',
+                icon: sweetalert.icon || 'info',
+                confirmButtonText: sweetalert.confirmButtonText || 'OK',
+                confirmButtonColor: sweetalert.confirmButtonColor || '#10b981',
+                showCancelButton: sweetalert.showCancelButton || false,
+                cancelButtonText: sweetalert.cancelButtonText || 'Cancel',
+                ...common
+            };
+
+            Swal.fire(alertOptions).then((result) => {
+                if (result.isConfirmed && sweetalert.redirect_url) {
+                    window.location.href = sweetalert.redirect_url;
+                }
+            });
+        }
+    });
+
+    // Global AJAX error handler for verification requirements
+    (function() {
+        // Intercept fetch requests
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            return originalFetch.apply(this, args)
+                .then(async response => {
+                    // Check if response is a 403 with verification requirement
+                    if (response.status === 403) {
+                        try {
+                            const clonedResponse = response.clone();
+                            const data = await clonedResponse.json();
+                            if (data.requires_verification && data.sweetalert) {
+                                // Show SweetAlert with verification prompt
+                                if (typeof Swal !== 'undefined' && window.Swal) {
+                                    const alertOptions = {
+                                        title: data.sweetalert.title || 'Verification Required',
+                                        text: data.sweetalert.text || 'Please verify as organizer to access this functionality.',
+                                        icon: data.sweetalert.icon || 'warning',
+                                        confirmButtonText: data.sweetalert.confirmButtonText || 'Verify Now',
+                                        confirmButtonColor: data.sweetalert.confirmButtonColor || '#10b981',
+                                        showCancelButton: data.sweetalert.showCancelButton !== false,
+                                        cancelButtonText: data.sweetalert.cancelButtonText || 'Cancel',
+                                    };
+
+                                    Swal.fire(alertOptions).then((result) => {
+                                        if (result.isConfirmed && data.redirect_url) {
+                                            window.location.href = data.redirect_url;
+                                        }
+                                    });
+                                }
+                                // Return a rejected promise to prevent further processing
+                                throw new Error('Verification required');
+                            }
+                        } catch (e) {
+                            // If JSON parsing fails or it's not a verification error, continue with original response
+                            if (e.message === 'Verification required') {
+                                throw e;
+                            }
+                        }
+                    }
+                    return response;
+                });
+        };
+
+        // Intercept jQuery AJAX requests (if jQuery is available)
+        if (typeof jQuery !== 'undefined' && jQuery.ajaxSetup) {
+            jQuery(document).ajaxError(function(event, xhr, settings, thrownError) {
+                if (xhr.status === 403) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.requires_verification && data.sweetalert) {
+                            if (typeof Swal !== 'undefined' && window.Swal) {
+                                const alertOptions = {
+                                    title: data.sweetalert.title || 'Verification Required',
+                                    text: data.sweetalert.text || 'Please verify as organizer to access this functionality.',
+                                    icon: data.sweetalert.icon || 'warning',
+                                    confirmButtonText: data.sweetalert.confirmButtonText || 'Verify Now',
+                                    confirmButtonColor: data.sweetalert.confirmButtonColor || '#10b981',
+                                    showCancelButton: data.sweetalert.showCancelButton !== false,
+                                    cancelButtonText: data.sweetalert.cancelButtonText || 'Cancel',
+                                };
+
+                                Swal.fire(alertOptions).then((result) => {
+                                    if (result.isConfirmed && data.redirect_url) {
+                                        window.location.href = data.redirect_url;
+                                    }
+                                });
+                            }
+                            // Prevent default error handling
+                            event.preventDefault();
+                            return false;
+                        }
+                    } catch (e) {
+                        // Not JSON or verification error, let default handler process it
+                    }
+                }
+            });
+        }
+    })();
 </script>
