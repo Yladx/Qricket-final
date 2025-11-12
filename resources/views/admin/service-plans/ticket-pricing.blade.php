@@ -114,58 +114,35 @@
     </div>
 
     <!-- Full-width Pricing Plans Cards Section -->
-    <div class="mt-8 -mx-6 sm:-mx-6 lg:-mx-8">
+    <div class="mt-8 -mx-6 sm:-mx-6 lg:-mx-8 overflow-x-hidden">
         <div class="px-6 sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Pricing Plans</h3>
                 </div>
-                <div class="p-6">
+                <div class="p-6 overflow-x-hidden">
                     @if($pricingPlans->count())
                         <div class="space-y-4">
                             @foreach($pricingPlans as $plan)
-                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-4 lg:p-5 hover:shadow-md transition-all duration-200">
-                                    <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-                                        <!-- Left Section: Plan Info -->
-                                        <div class="flex-1 flex flex-col xl:flex-row xl:items-center xl:gap-6 min-w-0">
-                                            <div class="flex-shrink-0 min-w-0">
-                                                <div class="flex flex-wrap items-center gap-2 mb-2">
-                                                    <h4 class="text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ $plan->name }}</h4>
-                                                    <span class="px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap {{ $plan->type === 'free' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' }}">
-                                                        {{ ucfirst($plan->type) }}
-                                                    </span>
-                                                    <span class="px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap {{ $plan->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
-                                                        {{ $plan->is_active ? 'Active' : 'Inactive' }}
-                                                    </span>
-                                                </div>
-                                                @if($plan->description)
-                                                    <p class="text-xs lg:text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{{ $plan->description }}</p>
-                                                @endif
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-4 lg:p-5 hover:shadow-md transition-all duration-200 overflow-hidden">
+                                    <!-- Header: Name, Badges, Actions -->
+                                    <div class="flex flex-wrap items-start justify-between gap-3 mb-4 pb-4 border-b border-gray-200 dark:border-gray-600">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                                <h4 class="text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100 break-words">{{ $plan->name }}</h4>
+                                                <span class="px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 {{ $plan->type === 'free' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' }}">
+                                                    {{ ucfirst($plan->type) }}
+                                                </span>
+                                                <span class="px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 {{ $plan->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
+                                                    {{ $plan->is_active ? 'Active' : 'Inactive' }}
+                                                </span>
                                             </div>
-                                            
-                                            <!-- Middle Section: Details -->
-                                            <div class="flex flex-wrap xl:flex-nowrap items-center gap-4 xl:gap-6 xl:space-x-6 border-t xl:border-t-0 xl:border-l xl:border-r border-gray-200 dark:border-gray-600 pt-4 xl:pt-0 xl:px-6 flex-1 min-w-0">
-                                                <div class="text-center min-w-[80px] flex-shrink-0">
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Tickets</div>
-                                                    <div class="text-sm lg:text-base font-semibold text-gray-900 dark:text-gray-100">{{ number_format($plan->ticket_quantity) }}</div>
-                                                </div>
-                                                <div class="text-center min-w-[80px] flex-shrink-0">
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Price</div>
-                                                    <div class="text-sm lg:text-base font-semibold text-qricket-600 dark:text-qricket-400 truncate">{{ $plan->formatted_price }}</div>
-                                                </div>
-                                                <div class="text-center min-w-[80px] flex-shrink-0">
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Purchases</div>
-                                                    <div class="text-sm lg:text-base font-semibold text-gray-900 dark:text-gray-100">{{ $plan->purchases_count ?? 0 }}</div>
-                                                </div>
-                                                <div class="text-center min-w-[100px] flex-shrink-0">
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Revenue</div>
-                                                    <div class="text-sm lg:text-base font-semibold text-green-600 dark:text-green-400 truncate">₱{{ number_format(($plan->purchases_count ?? 0) * $plan->price, 2) }}</div>
-                                                </div>
-                                            </div>
+                                            @if($plan->description)
+                                                <p class="text-xs lg:text-sm text-gray-600 dark:text-gray-400 break-words">{{ $plan->description }}</p>
+                                            @endif
                                         </div>
-                                        
-                                        <!-- Right Section: Actions -->
-                                        <div class="flex-shrink-0 flex items-center justify-end xl:justify-start space-x-2 xl:ml-4">
+                                        <!-- Actions -->
+                                        <div class="flex items-center space-x-2 flex-shrink-0">
                                             <button onclick="editPricingPlan({{ $plan->id }})" class="p-2 text-qricket-600 dark:text-qricket-400 hover:bg-qricket-50 dark:hover:bg-qricket-900/20 rounded-md transition-colors" title="Edit">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -176,6 +153,26 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                                 </svg>
                                             </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Details Grid -->
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div class="min-w-0">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Tickets</div>
+                                            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ number_format($plan->ticket_quantity) }}</div>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Price</div>
+                                            <div class="text-sm font-semibold text-qricket-600 dark:text-qricket-400 truncate">{{ $plan->formatted_price }}</div>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Purchases</div>
+                                            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ $plan->purchases_count ?? 0 }}</div>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Revenue</div>
+                                            <div class="text-sm font-semibold text-green-600 dark:text-green-400 truncate">₱{{ number_format(($plan->purchases_count ?? 0) * $plan->price, 2) }}</div>
                                         </div>
                                     </div>
                                 </div>

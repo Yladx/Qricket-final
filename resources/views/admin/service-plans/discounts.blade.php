@@ -114,71 +114,33 @@
     </div>
 
     <!-- Full-width Discount Codes Section -->
-    <div class="mt-8 -mx-6 sm:-mx-6 lg:-mx-8">
+    <div class="mt-8 -mx-6 sm:-mx-6 lg:-mx-8 overflow-x-hidden">
         <div class="px-6 sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
+            <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Discount Codes</h3>
                 </div>
-                <div class="p-6">
+                <div class="p-6 overflow-x-hidden">
                     @if($discounts->count())
                         <div class="space-y-4">
                             @foreach($discounts as $discount)
-                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-4 lg:p-5 hover:shadow-md transition-all duration-200">
-                                    <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-                                        <!-- Left Section: Discount Info -->
-                                        <div class="flex-1 flex flex-col xl:flex-row xl:items-center xl:gap-6 min-w-0">
-                                            <div class="flex-shrink-0 min-w-0">
-                                                <div class="flex flex-wrap items-center gap-2 mb-2">
-                                                    <h4 class="text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ $discount->name }}</h4>
-                                                    <span class="font-mono bg-gray-200 dark:bg-gray-600 px-2 lg:px-3 py-1 rounded-lg text-xs lg:text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ $discount->code }}</span>
-                                                    <span class="px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap {{ $discount->isValid() ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
-                                                        {{ $discount->isValid() ? 'Active' : 'Inactive' }}
-                                                    </span>
-                                                </div>
-                                                @if($discount->description)
-                                                    <p class="text-xs lg:text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{{ $discount->description }}</p>
-                                                @endif
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-4 lg:p-5 hover:shadow-md transition-all duration-200 overflow-hidden">
+                                    <!-- Header: Name, Code, Status -->
+                                    <div class="flex flex-wrap items-start justify-between gap-3 mb-4 pb-4 border-b border-gray-200 dark:border-gray-600">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                                <h4 class="text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100 break-words">{{ $discount->name }}</h4>
+                                                <span class="font-mono bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-xs font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap flex-shrink-0">{{ $discount->code }}</span>
+                                                <span class="px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 {{ $discount->isValid() ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
+                                                    {{ $discount->isValid() ? 'Active' : 'Inactive' }}
+                                                </span>
                                             </div>
-                                            
-                                            <!-- Middle Section: Details -->
-                                            <div class="flex flex-wrap xl:flex-nowrap items-center gap-4 xl:gap-6 xl:space-x-6 border-t xl:border-t-0 xl:border-l xl:border-r border-gray-200 dark:border-gray-600 pt-4 xl:pt-0 xl:px-6 flex-1 min-w-0">
-                                                <div class="text-center min-w-[80px] flex-shrink-0">
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Type</div>
-                                                    <div class="text-sm lg:text-base font-semibold text-gray-900 dark:text-gray-100 truncate">{{ ucfirst(str_replace('_', ' ', $discount->type)) }}</div>
-                                                </div>
-                                                <div class="text-center min-w-[80px] flex-shrink-0">
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Value</div>
-                                                    <div class="text-sm lg:text-base font-semibold text-qricket-600 dark:text-qricket-400 truncate">{{ $discount->formatted_value }}</div>
-                                                </div>
-                                                <div class="text-center min-w-[80px] flex-shrink-0">
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Usage</div>
-                                                    <div class="text-sm lg:text-base font-semibold text-gray-900 dark:text-gray-100">{{ $discount->used_count }}/{{ $discount->usage_limit ?: '∞' }}</div>
-                                                </div>
-                                                <div class="text-center min-w-[100px] flex-shrink-0">
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Applicable To</div>
-                                                    <div class="text-xs lg:text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ ucfirst(str_replace('_', ' ', $discount->applicable_to)) }}</div>
-                                                </div>
-                                                @if($discount->starts_at || $discount->expires_at)
-                                                <div class="text-center min-w-[140px] flex-shrink-0">
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Validity</div>
-                                                    <div class="text-xs font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                                                        @if($discount->starts_at)
-                                                            {{ \Carbon\Carbon::parse($discount->starts_at)->format('M d') }} -
-                                                        @endif
-                                                        @if($discount->expires_at)
-                                                            {{ \Carbon\Carbon::parse($discount->expires_at)->format('M d, Y') }}
-                                                        @else
-                                                            No expiry
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                                @endif
-                                            </div>
+                                            @if($discount->description)
+                                                <p class="text-xs lg:text-sm text-gray-600 dark:text-gray-400 break-words">{{ $discount->description }}</p>
+                                            @endif
                                         </div>
-                                        
-                                        <!-- Right Section: Actions -->
-                                        <div class="flex-shrink-0 flex items-center justify-end xl:justify-start space-x-2 xl:ml-4">
+                                        <!-- Actions -->
+                                        <div class="flex items-center space-x-2 flex-shrink-0">
                                             <button onclick="editDiscount({{ $discount->id }})" class="p-2 text-qricket-600 dark:text-qricket-400 hover:bg-qricket-50 dark:hover:bg-qricket-900/20 rounded-md transition-colors" title="Edit">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -190,6 +152,41 @@
                                                 </svg>
                                             </button>
                                         </div>
+                                    </div>
+                                    
+                                    <!-- Details Grid -->
+                                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                        <div class="min-w-0">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Type</div>
+                                            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ ucfirst(str_replace('_', ' ', $discount->type)) }}</div>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Value</div>
+                                            <div class="text-sm font-semibold text-qricket-600 dark:text-qricket-400 truncate">{{ $discount->formatted_value }}</div>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Usage</div>
+                                            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ $discount->used_count }}/{{ $discount->usage_limit ?: '∞' }}</div>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Applicable To</div>
+                                            <div class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{{ ucfirst(str_replace('_', ' ', $discount->applicable_to)) }}</div>
+                                        </div>
+                                        @if($discount->starts_at || $discount->expires_at)
+                                        <div class="min-w-0 col-span-2 md:col-span-1">
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Validity</div>
+                                            <div class="text-xs font-medium text-gray-900 dark:text-gray-100 break-words">
+                                                @if($discount->starts_at)
+                                                    {{ \Carbon\Carbon::parse($discount->starts_at)->format('M d') }} -
+                                                @endif
+                                                @if($discount->expires_at)
+                                                    {{ \Carbon\Carbon::parse($discount->expires_at)->format('M d, Y') }}
+                                                @else
+                                                    No expiry
+                                                @endif
+                                            </div>
+                                        </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
