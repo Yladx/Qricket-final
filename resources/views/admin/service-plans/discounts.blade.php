@@ -579,4 +579,3 @@
             confirmDelete();
         }
     </script>
-@endsection
