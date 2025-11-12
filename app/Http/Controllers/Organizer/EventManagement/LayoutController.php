@@ -710,9 +710,14 @@ class LayoutController extends Controller
             $isAdminEvent = $event && $event->user_id === null && $isAdmin;
             $isStaff = $event ? $event->staff()->where('user_id', Auth::id())->exists() : false;
 
-            // Simplify: allow autosave unconditionally when the event exists
+            // Check if event exists and user has access (owner, staff, or admin)
             if (!$event) {
                 return response()->json(['success' => false, 'message' => 'Event not found'], 404);
+            }
+            
+            // Verify user has access to this event
+            if (!$isAdmin && !$isOwner && !$isAdminEvent && !$isStaff) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized access to this event'], 403);
             }
 
             $updated = [];

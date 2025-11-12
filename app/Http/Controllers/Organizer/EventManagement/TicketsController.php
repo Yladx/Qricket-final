@@ -823,13 +823,15 @@ class TicketsController extends Controller
             $isAdmin = Auth::guard('admin')->check();
             $isOwner = $event && $event->user_id === Auth::id();
             $isAdminEvent = $event && $event->user_id === null && $isAdmin;
+            $isStaff = $event && $event->staff()->where('user_id', Auth::id())->exists();
             
-            if (!$event || !in_array($event->status, ['draft', 'published', 'approved', 'pending_approval', 'scheduled']) || (!$isOwner && !$isAdminEvent)) {
+            if (!$event || !in_array($event->status, ['draft', 'published', 'approved', 'pending_approval', 'scheduled']) || (!$isOwner && !$isAdminEvent && !$isStaff)) {
                 \Log::error('Autosave Step 3: Event not found or not authorized', [
                     'event_id' => $eventId,
                     'event_exists' => $event ? true : false,
                     'event_status' => $event ? $event->status : 'not found',
-                    'user_id' => Auth::id()
+                    'user_id' => Auth::id(),
+                    'is_staff' => $isStaff
                 ]);
                 return response()->json(['success' => false, 'message' => 'Event not found or not authorized'], 404);
             }

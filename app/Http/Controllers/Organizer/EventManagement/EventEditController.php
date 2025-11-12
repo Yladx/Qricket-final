@@ -736,7 +736,7 @@ class EventEditController extends Controller
         try {
             $event = Event::findOrFail($eventId);
             
-            // Check access permissions - require can_manage_event for staff
+            // Check access permissions - allow staff members assigned to the event
             $isAdmin = Auth::guard('admin')->check();
             $isOwner = $event->user_id === Auth::id();
             $isAdminEvent = $event->user_id === null && $isAdmin;
@@ -744,12 +744,14 @@ class EventEditController extends Controller
             $staff = $event->staff()->where('user_id', $user?->id)->first();
             $staffRole = $staff?->role ?? null;
             $isOrganizerRole = $staffRole === 'organizer';
+            $isStaff = $staff !== null;
             
             // Check if user can manage event (required for certificate autosave)
-            $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
+            // Allow any staff member assigned to the event, not just those with can_manage_event permission
+            $canManageEvent = $isAdmin || $isOwner || $isAdminEvent || $isStaff || ($staff?->can_manage_event ?? false) || $isOrganizerRole;
             
             if (!$canManageEvent) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized. You need can_manage_event permission to save certificate settings.'], 403);
+                return response()->json(['success' => false, 'message' => 'Unauthorized. You need to be assigned as staff to this event to save certificate settings.'], 403);
             }
 
             // Save certificate data to R2 storage
