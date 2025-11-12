@@ -24,7 +24,7 @@
     <div class="md:hidden">
         <div class="rounded-xl overflow-hidden shadow-lg relative">
             <!-- Top section: Colored gradient with holder info -->
-            <div class="p-5 relative ticket-mobile-header {{ $isCheckedIn ? 'blur-sm' : '' }}" style="background: linear-gradient(to bottom right, {{ $primaryColor }}, {{ $secondaryColor }});">
+            <div class="p-5 relative ticket-mobile-header" style="background: linear-gradient(to bottom right, {{ $primaryColor }}, {{ $secondaryColor }});">
                 @if($bgImage)
                     <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('{{ $bgImage }}');"></div>
                     <div class="absolute inset-0 ticket-mobile-overlay" style="background: linear-gradient(to bottom right, {{ $primaryColor }}dd, {{ $secondaryColor }}dd);"></div>
@@ -33,7 +33,7 @@
                 <div class="relative z-10">
                     <!-- QR Code -->
                     <div class="flex justify-center mb-5">
-                        <div class="bg-white p-4 rounded-lg shadow-md border border-white/30">
+                        <div class="bg-white p-4 rounded-lg shadow-md border border-white/30 {{ $isCheckedIn ? 'blur-sm' : '' }}">
                             <div id="qr-code-mobile-preview" class="w-40 h-40 flex items-center justify-center bg-white rounded-lg">
                                 <div class="text-gray-500 text-xs">Loading QR Code...</div>
                             </div>
@@ -61,7 +61,7 @@
             </div>
 
             <!-- Bottom section: Black with event details -->
-            <div class="bg-black text-white p-5 {{ $isCheckedIn ? 'blur-sm' : '' }}">
+            <div class="bg-black text-white p-5">
                 <div class="text-2xl font-extrabold tracking-tight mb-4">{{ $eventTitle }}</div>
 
                 <div class="grid grid-cols-2 gap-4 text-sm mb-4">
@@ -88,8 +88,8 @@
             </div>
         </div>
         @if($isCheckedIn)
-        <!-- Checked In Overlay for Mobile -->
-        <div class="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+        <!-- Checked In Overlay for Mobile - Positioned over QR Code -->
+        <div class="absolute top-5 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none">
             <div class="bg-green-500 text-white px-6 py-3 rounded-full shadow-lg font-bold text-lg">
                 ✓ Checked In
             </div>
@@ -101,7 +101,7 @@
     <div class="hidden md:block">
         <div class="rounded-xl shadow-lg overflow-hidden relative">
             <!-- Top section: Colored gradient -->
-            <div class="relative ticket-desktop-header {{ $isCheckedIn ? 'blur-sm' : '' }}" style="background: linear-gradient(to bottom right, {{ $primaryColor }}, {{ $secondaryColor }});">
+            <div class="relative ticket-desktop-header" style="background: linear-gradient(to bottom right, {{ $primaryColor }}, {{ $secondaryColor }});">
                 @if($bgImage)
                     <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('{{ $bgImage }}');"></div>
                     <div class="absolute inset-0 ticket-desktop-overlay" style="background: linear-gradient(to bottom right, {{ $primaryColor }}dd, {{ $secondaryColor }}dd);"></div>
@@ -127,7 +127,7 @@
                     
                     <!-- Right: QR Code -->
                     <div class="w-56 flex items-center justify-center">
-                        <div class="bg-white p-4 rounded-lg shadow-md border border-white/30">
+                        <div class="bg-white p-4 rounded-lg shadow-md border border-white/30 {{ $isCheckedIn ? 'blur-sm' : '' }}">
                             <div id="qr-code-desktop-preview" class="w-52 h-52 flex items-center justify-center bg-white rounded-lg">
                                 <div class="text-gray-500 text-xs">Loading QR Code...</div>
                             </div>
@@ -137,7 +137,7 @@
             </div>
 
             <!-- Bottom section: Black with event details -->
-            <div class="bg-black text-white p-6 {{ $isCheckedIn ? 'blur-sm' : '' }}">
+            <div class="bg-black text-white p-6">
                 <div class="text-3xl font-extrabold tracking-tight mb-4">{{ $eventTitle }}</div>
                 
                 <div class="grid grid-cols-3 gap-6 text-sm mb-4">
@@ -163,8 +163,8 @@
             </div>
         </div>
         @if($isCheckedIn)
-        <!-- Checked In Overlay for Desktop -->
-        <div class="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+        <!-- Checked In Overlay for Desktop - Positioned over QR Code -->
+        <div class="absolute top-6 right-6 z-50 pointer-events-none">
             <div class="bg-green-500 text-white px-8 py-4 rounded-full shadow-lg font-bold text-xl">
                 ✓ Checked In
             </div>
