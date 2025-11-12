@@ -101,12 +101,12 @@
                 @endif
             </div>
             <div class="text-center">
-                <div id="org_line1" class="text-sm font-semibold uppercase text-gray-700">{{ $certificateData['org_line1'] ?? 'Organization Name' }}</div>
-                <div id="org_line2" class="text-sm font-medium text-gray-700">{{ $certificateData['org_line2'] ?? 'Department/Division' }}</div>
+                <div id="org_line1" class="text-sm font-semibold uppercase" style="color: #000000;">{{ $certificateData['org_line1'] ?? 'Organization Name' }}</div>
+                <div id="org_line2" class="text-sm font-medium" style="color: #000000;">{{ $certificateData['org_line2'] ?? 'Department/Division' }}</div>
                 <div class="mt-2">
-                    <div id="org_school" class="text-2xl font-bold" style="color: {{ $p ?? '#10b981' }};">{{ trim($certificateData['org_school'] ?? '') !== '' ? $certificateData['org_school'] : 'Event Organizer' }}</div>
+                    <div id="org_school" class="text-2xl font-bold" style="color: #000000;">{{ trim($certificateData['org_school'] ?? '') !== '' ? $certificateData['org_school'] : 'Event Organizer' }}</div>
                 </div>
-                <div class="text-sm text-gray-600">Ticket ID: <span id="ticket_id_preview">{{ $certificateData['ticket_id_preview'] ?? '—' }}</span></div>
+                <div class="text-sm" style="color: #000000;">Ticket ID: <span id="ticket_id_preview">{{ $certificateData['ticket_id_preview'] ?? '—' }}</span></div>
             </div>
             <div class="justify-self-end">
                 @if($eventId && $hasRightLogo && !empty($rightLogo))
@@ -118,18 +118,18 @@
         </div>
 
         <div class="mt-6 text-center px-4" style="overflow: visible;">
-            <div class="certificate-title" style="font-family:'Great Vibes', cursive; color: {{ $p ?? '#10b981' }}">Certificate of Participation</div>
+            <div class="certificate-title" style="font-family:'Great Vibes', cursive; color: #000000;">Certificate of Participation</div>
         </div>
 
         <div class="mt-4 text-center px-8 md:px-16">
-            <p class="text-base" style="color: {{ $p ?? '#10b981' }};">This certificate is proudly presented to</p>
-            <div id="recipient_name" class="mt-4 font-serif text-4xl font-bold" style="color: {{ $p ?? '#10b981' }};">{{ $certificateData['recipient_name'] ?? 'Participant Name' }}</div>
-            <p class="mt-4 text-base" style="color: {{ $p ?? '#10b981' }};">for his/her active participation in the event</p>
-            <p class="mt-3 text-base" id="event_when" style="color: {{ $p ?? '#10b981' }};">{{ trim($certificateData['event_when'] ?? '') !== '' ? $certificateData['event_when'] : ($fallbackWhen ?? 'Event Date') }}</p>
+            <p class="text-base" style="color: #000000;">This certificate is proudly presented to</p>
+            <div id="recipient_name" class="mt-4 font-serif text-4xl font-bold" style="color: #000000;">{{ $certificateData['recipient_name'] ?? 'Participant Name' }}</div>
+            <p class="mt-4 text-base" style="color: #000000;">for his/her active participation in the event</p>
+            <p class="mt-3 text-base" id="event_when" style="color: #000000;">{{ trim($certificateData['event_when'] ?? '') !== '' ? $certificateData['event_when'] : ($fallbackWhen ?? 'Event Date') }}</p>
             @if(trim($certificateData['event_given'] ?? '') !== '' || trim($fallbackGiven ?? '') !== '')
-                <p class="mt-3 text-base" id="event_given" style="color: {{ $p ?? '#10b981' }};">at {{ trim($certificateData['event_given'] ?? '') !== '' ? $certificateData['event_given'] : ($fallbackGiven ?? '') }}</p>
+                <p class="mt-3 text-base" id="event_given" style="color: #000000;">at {{ trim($certificateData['event_given'] ?? '') !== '' ? $certificateData['event_given'] : ($fallbackGiven ?? '') }}</p>
             @endif
-            <p class="mt-4 text-base" style="color: {{ $p ?? '#10b981' }};">and this certificate is given at this time of the event.</p>
+            <p class="mt-4 text-base" style="color: #000000;">and this certificate is given at this time of the event.</p>
         </div>
 
         <div class="mt-8" id="signatories-container">
@@ -154,20 +154,23 @@
                 }
                 
                 // Determine grid layout based on count
-                $gridCols = $signatoryCount <= 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
-                
-                // Debug: Log signatory data
-                \Log::info('Certificate signatory data', [
-                    'signatory_count' => $signatoryCount,
-                    'certificate_data_keys' => array_keys($certificateData),
-                    'sig_1_name' => $certificateData['sig_1_name'] ?? 'not set',
-                    'sig_1_title' => $certificateData['sig_1_title'] ?? 'not set',
-                    'sig_left_name' => $certificateData['sig_left_name'] ?? 'not set',
-                    'sig_right_name' => $certificateData['sig_right_name'] ?? 'not set'
-                ]);
+                // Use consistent column layout for both preview and print
+                if ($signatoryCount == 1) {
+                    $gridCols = 'grid-cols-1';
+                    $gridColsStyle = 'grid-template-columns: 1fr;';
+                } elseif ($signatoryCount == 2) {
+                    $gridCols = 'grid-cols-2';
+                    $gridColsStyle = 'grid-template-columns: repeat(2, 1fr);';
+                } elseif ($signatoryCount == 3) {
+                    $gridCols = 'grid-cols-3';
+                    $gridColsStyle = 'grid-template-columns: repeat(3, 1fr);';
+                } else {
+                    $gridCols = 'grid-cols-4';
+                    $gridColsStyle = 'grid-template-columns: repeat(4, 1fr);';
+                }
             @endphp
             
-            <div class="grid {{ $gridCols ?? 'grid-cols-1 md:grid-cols-2' }} gap-6 px-3 md:px-6">
+            <div class="grid {{ $gridCols }} gap-6 px-3 md:px-6" id="signatories-grid" style="display: grid !important; {{ $gridColsStyle }} --signatory-count: {{ $signatoryCount }}; width: 100%; gap: 1.5rem;">
                 @if(($signatoryCount ?? 0) == 0 || (!empty($certificateData['sig_left_name']) && empty($certificateData['sig_1_name'])))
                     {{-- Fallback to old format --}}
                     <div class="text-center">
@@ -177,8 +180,8 @@
                                 <img src="{{ $signatureLeftUrl }}" alt="Left Signature" class="absolute left-1/2 -translate-x-1/2 h-10 object-contain select-none pointer-events-none certificate-image" style="bottom: 2px; display: none;" onerror="this.style.display='none'" onload="this.style.display='block'">                                                                                 
                             @endif
                         </div>
-                        <div id="sig_left_name" class="mt-2 font-semibold" style="color: {{ $p ?? '#10b981' }};">{{ $certificateData['sig_left_name'] ?? 'Event Coordinator' }}</div>          
-                        <div id="sig_left_title" class="text-sm" style="color: {{ $p ?? '#10b981' }};">{{ $certificateData['sig_left_title'] ?? 'Signature' }}</div>                           
+                        <div id="sig_left_name" class="mt-2 font-semibold" style="color: #000000;">{{ $certificateData['sig_left_name'] ?? 'Event Coordinator' }}</div>          
+                        <div id="sig_left_title" class="text-sm" style="color: #000000;">{{ $certificateData['sig_left_title'] ?? 'Signature' }}</div>                           
                     </div>
                     <div class="text-center">
                         <div class="relative mx-auto w-4/5 h-16">
@@ -187,8 +190,8 @@
                                 <img src="{{ $signatureRightUrl }}" alt="Right Signature" class="absolute left-1/2 -translate-x-1/2 h-10 object-contain select-none pointer-events-none certificate-image" style="bottom: 2px; display: none;" onerror="this.style.display='none'" onload="this.style.display='block'">                                                                               
                             @endif
                         </div>
-                        <div id="sig_right_name" class="mt-2 font-semibold sig-line" style="color: {{ $p ?? '#10b981' }};">{{ $certificateData['sig_right_name'] ?? 'Event Director' }}</div>           
-                        <div id="sig_right_title" class="text-sm sig-role" style="color: {{ $p ?? '#10b981' }};">{{ $certificateData['sig_right_title'] ?? 'Signature' }}</div>                         
+                        <div id="sig_right_name" class="mt-2 font-semibold sig-line" style="color: #000000;">{{ $certificateData['sig_right_name'] ?? 'Event Director' }}</div>           
+                        <div id="sig_right_title" class="text-sm sig-role" style="color: #000000;">{{ $certificateData['sig_right_title'] ?? 'Signature' }}</div>                         
                     </div>
                 @else
                     {{-- New dynamic format --}}
@@ -201,8 +204,8 @@
                                         <img src="{{ $signatureUrls[$i] }}" alt="Signature {{ $i }}" class="absolute left-1/2 -translate-x-1/2 h-10 object-contain select-none pointer-events-none certificate-image" style="bottom: 2px; display: none;" onerror="this.style.display='none'" onload="this.style.display='block'">                                                                                 
                                     @endif
                                 </div>
-                                <div id="sig_{{$i}}_name" class="mt-2 font-semibold sig-line" style="color: {{ $p ?? '#10b981' }};">{{ $certificateData["sig_{$i}_name"] ?? 'Signatory ' . $i }}</div>          
-                                <div id="sig_{{$i}}_title" class="text-sm sig-role" style="color: {{ $p ?? '#10b981' }};">{{ $certificateData["sig_{$i}_title"] ?? 'Signature' }}</div>                           
+                                <div id="sig_{{$i}}_name" class="mt-2 font-semibold sig-line" style="color: #000000;">{{ $certificateData["sig_{$i}_name"] ?? 'Signatory ' . $i }}</div>          
+                                <div id="sig_{{$i}}_title" class="text-sm sig-role" style="color: #000000;">{{ $certificateData["sig_{$i}_title"] ?? 'Signature' }}</div>                           
                             </div>
                         @endif
                     @endfor
@@ -210,7 +213,7 @@
             </div>
         </div>
 
-        <div class="mt-6 text-center text-xs text-gray-500">
+        <div class="mt-6 text-center text-xs" style="color: #000000;">
             This certificate is issued by <span class="font-medium">{{ $certificateData['org_school'] ?? 'Event Organizer' }}</span>. Reproduction or alteration without authorization is prohibited.
         </div>
     </div>

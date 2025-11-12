@@ -114,6 +114,62 @@
                 print-color-adjust: exact !important;
             }
             
+            /* Ensure all text is black in print */
+            #cert-print-wrapper * {
+                color: #000000 !important;
+            }
+            
+            /* Keep border and gradient colors (decorative elements) */
+            #cert-print-wrapper .page {
+                border-color: inherit !important;
+            }
+            #cert-print-wrapper .band-top,
+            #cert-print-wrapper .band-bottom {
+                background-image: inherit !important;
+                border-color: inherit !important;
+            }
+            #cert-print-wrapper .absolute.inset-x-0.bottom-0 {
+                background-color: inherit !important;
+            }
+            
+            /* Fix signature grid layout for print - ensure columns display properly */
+            #signatories-container {
+                display: block !important;
+                width: 100% !important;
+                margin-top: 2rem !important;
+            }
+            
+            #signatories-grid {
+                display: grid !important;
+                grid-template-columns: repeat(var(--signatory-count, 2), 1fr) !important;
+                gap: 1.5rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 auto !important;
+                padding: 0 0.75rem !important;
+                grid-auto-flow: row !important;
+                grid-auto-rows: auto !important;
+            }
+            
+            /* Ensure signature items display in columns, not stacked vertically */
+            #signatories-grid > div {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                float: none !important;
+                clear: none !important;
+            }
+            
+            /* Ensure signature text elements are black */
+            #signatories-grid .sig-line,
+            #signatories-grid .sig-role,
+            #signatories-grid [id^="sig_"],
+            #signatories-grid [id*="sig_"] {
+                color: #000000 !important;
+            }
+            
             /* Hide any duplicate pages */
             .page ~ .page { display: none !important; }
             
