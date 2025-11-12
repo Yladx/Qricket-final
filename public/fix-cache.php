@@ -1,10 +1,10 @@
 <?php
 /**
  * Emergency Cache Clearing Tool
- * 
+ *
  * WARNING: This file clears all application caches.
  * Access this file via: https://yourdomain.com/fix-cache.php
- * 
+ *
  * IMPORTANT: DELETE THIS FILE AFTER USE FOR SECURITY!
  */
 
@@ -39,18 +39,18 @@ if (!isset($_GET['key']) || $_GET['key'] !== CACHE_KEY) {
 <body>
     <div class="container">
         <h1>Laravel Cache Clear Tool</h1>
-        
+
         <?php
         $results = [];
-        
+
         try {
             // Get the Laravel app instance
             require __DIR__ . '/../vendor/autoload.php';
             $app = require_once __DIR__ . '/../bootstrap/app.php';
             $kernel = $app->make(\Illuminate\Contracts\Console\Kernel::class);
-            
+
             echo '<div class="info">Laravel application loaded successfully.</div>';
-            
+
             // Run artisan commands
             // NOTE: cache:clear and optimize:clear try to delete from database
             // We'll skip those to avoid database connection issues
@@ -59,7 +59,7 @@ if (!isset($_GET['key']) || $_GET['key'] !== CACHE_KEY) {
                 'route:clear',
                 'view:clear',
             ];
-            
+
             // Manually clear cache files without database
             try {
                 // Clear application cache files
@@ -69,7 +69,7 @@ if (!isset($_GET['key']) || $_GET['key'] !== CACHE_KEY) {
                     __DIR__ . '/../bootstrap/cache/routes.php',
                     __DIR__ . '/../bootstrap/cache/config.php',
                 ];
-                
+
                 foreach ($cacheFiles as $path) {
                     if (is_dir($path)) {
                         $files = glob($path . '*');
@@ -82,12 +82,12 @@ if (!isset($_GET['key']) || $_GET['key'] !== CACHE_KEY) {
                         @unlink($path);
                     }
                 }
-                
+
                 echo '<div class="success">✓ Manual cache files cleared</div>';
             } catch (\Exception $e) {
                 echo '<div class="error">✗ Manual cache clear failed: ' . $e->getMessage() . '</div>';
             }
-            
+
             foreach ($commands as $command) {
                 try {
                     $kernel->call($command);
@@ -100,7 +100,7 @@ if (!isset($_GET['key']) || $_GET['key'] !== CACHE_KEY) {
                 }
                 ob_start();
             }
-            
+
             // Try to optimize
             try {
                 $kernel->call('config:cache');
@@ -110,7 +110,7 @@ if (!isset($_GET['key']) || $_GET['key'] !== CACHE_KEY) {
                 $results[] = ['command' => 'config:cache', 'status' => 'error', 'error' => $e->getMessage()];
                 echo '<div class="error">✗ config:cache - Failed: ' . $e->getMessage() . '</div>';
             }
-            
+
             // Try to cache routes
             try {
                 $kernel->call('route:cache');
@@ -120,14 +120,14 @@ if (!isset($_GET['key']) || $_GET['key'] !== CACHE_KEY) {
                 $results[] = ['command' => 'route:cache', 'status' => 'error', 'error' => $e->getMessage()];
                 echo '<div class="error">✗ route:cache - Failed: ' . $e->getMessage() . '</div>';
             }
-            
+
             ob_end_clean();
-            
+
         } catch (\Exception $e) {
             echo '<div class="error">Failed to initialize Laravel: ' . $e->getMessage() . '</div>';
         }
         ?>
-        
+
         <h2>Completed!</h2>
         <p>You can now <strong>DELETE this file</strong> for security.</p>
         <p><em>Access this file at: <code>https://yourdomain.com/fix-cache.php?key=YOUR_SECRET_KEY</code></em></p>

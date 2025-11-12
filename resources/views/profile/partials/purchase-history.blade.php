@@ -372,3 +372,37 @@
                         </div>
                     @endforeach
                 </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<script>
+function filterPurchases(status) {
+    const rows = document.querySelectorAll('.purchase-row');
+    const buttons = document.querySelectorAll('.filter-btn');
+
+    buttons.forEach(btn => {
+        if (btn.getAttribute('data-filter') === status) {
+            btn.classList.remove('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-200');
+            btn.classList.add('bg-qricket-600', 'text-white', 'hover:bg-qricket-700');
+        } else {
+            btn.classList.add('bg-gray-100', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-200');
+            btn.classList.remove('bg-qricket-600', 'text-white', 'hover:bg-qricket-700');
+        }
+    });
+
+    rows.forEach(row => {
+        if (status === 'all') {
+            row.style.display = '';
+        } else {
+            const rowStatus = row.getAttribute('data-status');
+            row.style.display = rowStatus === status ? '' : 'none';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    filterPurchases('all');
+});
+</script>
