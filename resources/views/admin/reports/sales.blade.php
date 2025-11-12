@@ -227,7 +227,7 @@
                                         @foreach($paidEvents as $event)
                                             <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-900/10 event-revenue-row paid-event" data-is-free="0">
                                                 <td class="py-2 px-4 font-medium">
-                                                <a href="{{ route('admin.events.approval.show', $event['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline">
+                                                <a href="{{ route('admin.event.manage', $event['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline">
                                                     {{ $event['title'] }}
                                                 </a>
                                             </td>
@@ -294,7 +294,7 @@
                                         @foreach($freeEvents as $event)
                                             <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/10 event-revenue-row free-event" data-is-free="1">
                                                 <td class="py-2 px-4 font-medium">
-                                                    <a href="{{ route('admin.events.approval.show', $event['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline">
+                                                    <a href="{{ route('admin.event.manage', $event['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:underline">
                                                         {{ $event['title'] }}
                                                     </a>
                                                 </td>
@@ -498,7 +498,7 @@
                                     @forelse(($ticketLimitByEvent ?? []) as $row)
                                         <tr class="border-t border-gray-200 dark:border-gray-700">
                                             <td class="py-2 pr-4">
-                                                <a href="{{ route('admin.events.approval.show', $row['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:underline">{{ $row['title'] }}</a>
+                                                <a href="{{ route('admin.event.manage', $row['event_id']) }}" class="text-teal-600 dark:text-teal-400 hover:underline">{{ $row['title'] }}</a>
                                             </td>
                                             <td class="py-2 pr-4">{{ number_format($row['orders']) }}</td>
                                             <td class="py-2 pr-4">{{ number_format($row['tickets']) }}</td>
