@@ -77,7 +77,7 @@
             <!-- Filters -->
             <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-3">
                 <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Filter Users</h3>
-                <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <form method="GET" class="grid grid-cols-1 md:grid-cols-6 gap-3">
                     <div>
                         <label for="organizer_status" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Organizer Status</label>
                         <select name="organizer_status" id="organizer_status" class="w-full px-2.5 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-qricket-500 dark:focus:ring-qricket-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
@@ -103,7 +103,16 @@
                             <option value="offline" {{ request('online_status')==='offline' ? 'selected' : '' }}>Offline</option>
                         </select>
                     </div>
-                    <div class="flex items-end space-x-2">
+                    <div>
+                        <label for="status" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Account Status</label>
+                        <select name="status" id="status" class="w-full px-2.5 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-qricket-500 dark:focus:ring-qricket-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                            <option value="" {{ request('status')==='' ? 'selected' : '' }}>All Accounts</option>
+                            <option value="active" {{ request('status')==='active' ? 'selected' : '' }}>Active</option>
+                            <option value="banned" {{ request('status')==='banned' ? 'selected' : '' }}>Banned</option>
+                            <option value="deleted" {{ request('status')==='deleted' ? 'selected' : '' }}>Deleted</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end space-x-2 md:col-span-2">
                         <button type="submit" class="flex-1 bg-qricket-500 hover:bg-qricket-600 text-white px-3 py-2 rounded-md font-medium transition-colors duration-200 text-sm">Filter</button>
                         <a href="{{ route('admin.users') }}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-md font-medium transition-colors duration-200 text-center text-sm">Clear</a>
                     </div>
@@ -140,6 +149,19 @@
                                 Name: {{ request('name') }}
                             </span>
                         @endif
+                        @if(request('status'))
+                            @php
+                                $statusLabel = match(request('status')) {
+                                    'active' => 'Active Accounts',
+                                    'banned' => 'Banned Accounts',
+                                    'deleted' => 'Deleted Accounts',
+                                    default => 'All Accounts',
+                                };
+                            @endphp
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                {{ $statusLabel }}
+                            </span>
+                        @endif
                     </div>
                 </div>
             @endif
@@ -159,7 +181,8 @@
                                 <th class="px-4 py-2 text-left text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 sortable" data-column="email">
                                     Email <span class="sort-indicator">↕</span>
                                 </th>
-                                <th class="px-4 py-2 text-left text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-2 text-left text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Account Status</th>
+                                <th class="px-4 py-2 text-left text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Online Status</th>
                                 <th class="px-4 py-2 text-left text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Organizer Status</th>
                                 <th class="px-4 py-2 text-left text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 sortable" data-column="created_at">
                                     Joined <span class="sort-indicator">↕</span>
@@ -197,6 +220,36 @@
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-900 dark:text-gray-100">{{ $user->email }}</td>
                                     <td class="px-4 py-3 whitespace-nowrap text-xs">
+                                        @php
+                                            switch ($user->status) {
+                                                case \App\Models\User::STATUS_BANNED:
+                                                    $accountLabel = 'Banned';
+                                                    $accountClasses = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+                                                    break;
+                                                case \App\Models\User::STATUS_DELETED:
+                                                    $accountLabel = 'Deleted';
+                                                    $accountClasses = 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+                                                    break;
+                                                default:
+                                                    $accountLabel = 'Active';
+                                                    $accountClasses = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+                                                    break;
+                                            }
+                                        @endphp
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium {{ $accountClasses }}">
+                                            {{ $accountLabel }}
+                                        </span>
+                                        @if($user->status === \App\Models\User::STATUS_BANNED && $user->banned_at)
+                                            <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+                                                {{ $user->banned_at->timezone(config('app.timezone'))->format('M d, Y g:i A') }}
+                                            </div>
+                                        @elseif($user->status === \App\Models\User::STATUS_DELETED && $user->deleted_at)
+                                            <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
+                                                {{ $user->deleted_at->timezone(config('app.timezone'))->format('M d, Y g:i A') }}
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-xs">
                                         @php $isOnline = in_array($user->id, $onlineUserIds ?? []); @endphp
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium {{ $isOnline ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300' }} online-pill" data-user-id="{{ $user->id }}">
                                             <span class="inline-block w-1.5 h-1.5 rounded-full mr-1.5 {{ $isOnline ? 'bg-green-500' : 'bg-gray-400' }}"></span>
@@ -218,7 +271,15 @@
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">{{ $user->created_at->diffForHumans() }}</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+                                        @php $joinedAt = $user->created_at?->timezone(config('app.timezone')); @endphp
+                                        @if($joinedAt)
+                                            <div>{{ $joinedAt->format('M d, Y g:i A') }}</div>
+                                            <div class="text-[10px] text-gray-400">{{ $user->created_at->diffForHumans() }}</div>
+                                        @else
+                                            <div>—</div>
+                                        @endif
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Emergency Cache Clearing Tool
  *
@@ -25,17 +26,53 @@ if (!isset($_GET['key']) || $_GET['key'] !== CACHE_KEY) {
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Cache Clear Tool</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-        .container { background: white; padding: 20px; border-radius: 8px; max-width: 600px; }
-        .success { color: green; padding: 10px; background: #e8f5e9; border-radius: 4px; }
-        .error { color: red; padding: 10px; background: #ffebee; border-radius: 4px; }
-        .info { color: #1976d2; padding: 10px; background: #e3f2fd; border-radius: 4px; }
-        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+        }
+
+        .success {
+            color: green;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 4px;
+        }
+
+        .error {
+            color: red;
+            padding: 10px;
+            background: #ffebee;
+            border-radius: 4px;
+        }
+
+        .info {
+            color: #1976d2;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 4px;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Laravel Cache Clear Tool</h1>
@@ -122,7 +159,6 @@ if (!isset($_GET['key']) || $_GET['key'] !== CACHE_KEY) {
             }
 
             ob_end_clean();
-
         } catch (\Exception $e) {
             echo '<div class="error">Failed to initialize Laravel: ' . $e->getMessage() . '</div>';
         }
@@ -133,5 +169,5 @@ if (!isset($_GET['key']) || $_GET['key'] !== CACHE_KEY) {
         <p><em>Access this file at: <code>https://yourdomain.com/fix-cache.php?key=YOUR_SECRET_KEY</code></em></p>
     </div>
 </body>
-</html>
 
+</html>

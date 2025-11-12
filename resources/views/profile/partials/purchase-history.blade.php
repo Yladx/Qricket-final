@@ -263,79 +263,79 @@
                     </table>
                 </div>
 
-                <div class="md:hidden space-y-4">
+                <div class="md:hidden space-y-3">
                     @foreach($allPurchases as $purchase)
                         @php($status = strtolower($purchase['status']))
                         @php($badge = $status === 'paid' || $status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200'))
                         @php($filterStatus = in_array($status, ['paid', 'active']) ? 'paid' : ($status === 'pending' ? 'pending' : 'other'))
-                        <div class="purchase-row border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm bg-white dark:bg-gray-800 {{ ($status === 'paid' || $status === 'active') ? 'ring-1 ring-green-200 dark:ring-green-900/40' : '' }}" data-status="{{ $filterStatus }}">
-                            <div class="flex items-start justify-between gap-3">
+                        <div class="purchase-row border border-gray-200 dark:border-gray-700 rounded-lg p-3 shadow-sm bg-white dark:bg-gray-800 {{ ($status === 'paid' || $status === 'active') ? 'ring-1 ring-green-200 dark:ring-green-900/40' : '' }}" data-status="{{ $filterStatus }}">
+                            <div class="flex items-start justify-between gap-2.5">
                                 <div>
-                                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $purchase['title'] }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $purchase['date']->format('M d, Y • h:i A') }}</p>
-                                    <p class="text-xs text-gray-400 dark:text-gray-500">ID: {{ $purchase['purchase_id'] }}</p>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">{{ $purchase['title'] }}</p>
+                                    <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">{{ $purchase['date']->format('M d, Y • h:i A') }}</p>
+                                    <p class="text-[11px] text-gray-400 dark:text-gray-500">ID: {{ $purchase['purchase_id'] }}</p>
                                 </div>
-                                <div class="text-right space-y-2">
-                                    <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full {{ $badge }}">
+                                <div class="text-right space-y-1.5">
+                                    <span class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full {{ $badge }}">
                                         @if($status === 'paid' || $status === 'active')
-                                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                         @elseif($status === 'pending')
-                                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                         @endif
                                         {{ ucfirst($status) }}
                                     </span>
                                     <div>
                                         @if($purchase['type'] === 'ticket')
-                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Ticket</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Ticket</span>
                                         @elseif($purchase['type'] === 'subscription')
-                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">Subscription</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">Subscription</span>
                                         @elseif($purchase['type'] === 'additional_ticket')
-                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">Additional</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">Additional</span>
                                         @endif
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="mt-3 grid grid-cols-2 gap-3 text-xs text-gray-600 dark:text-gray-300">
+                            <div class="mt-3 grid grid-cols-2 gap-2 text-[11px] text-gray-600 dark:text-gray-300">
                                 <div>
-                                    <p class="font-medium text-gray-500 dark:text-gray-400">Quantity</p>
+                                    <p class="font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide text-[10px]">Quantity</p>
                                     <p class="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{{ $purchase['quantity'] }}</p>
                                 </div>
                                 <div>
-                                    <p class="font-medium text-gray-500 dark:text-gray-400">Total Paid</p>
+                                    <p class="font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide text-[10px]">Total Paid</p>
                                     <p class="mt-0.5 text-sm text-gray-900 dark:text-gray-100">₱{{ number_format((float)$purchase['amount'], 2) }}</p>
                                 </div>
                                 @if(isset($purchase['participants']))
                                     <div>
-                                        <p class="font-medium text-gray-500 dark:text-gray-400">Participants</p>
+                                        <p class="font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide text-[10px]">Participants</p>
                                         <p class="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{{ $purchase['participants'] ?? 0 }}</p>
                                     </div>
                                     <div>
-                                        <p class="font-medium text-gray-500 dark:text-gray-400">Checked In</p>
+                                        <p class="font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide text-[10px]">Checked In</p>
                                         <p class="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{{ $purchase['checked_in'] ?? 0 }}</p>
                                     </div>
                                 @endif
                                 <div>
-                                    <p class="font-medium text-gray-500 dark:text-gray-400">Refund Deadline</p>
+                                    <p class="font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide text-[10px]">Refund Deadline</p>
                                     <p class="mt-0.5 text-sm text-gray-900 dark:text-gray-100">{{ $purchase['refund_deadline'] ?? 'N/A' }}</p>
                                 </div>
                             </div>
 
-                            <div class="mt-4 flex flex-col gap-2">
+                            <div class="mt-3 flex flex-col gap-1.5">
                                 @if($purchase['invoice_route'])
-                                    <a href="{{ $purchase['invoice_route'] }}?from=profile" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md bg-qricket-600 text-white hover:bg-qricket-700 transition-colors">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <a href="{{ $purchase['invoice_route'] }}?from=profile" class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium rounded-md bg-qricket-600 text-white hover:bg-qricket-700 transition-colors">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
-                                        View Invoice
+                                        Invoice
                                     </a>
                                 @endif
 
                                 @if($purchase['has_pending_refund'] && isset($purchase['pending_refund_id']))
-                                    <div class="flex flex-col gap-2">
-                                        <span class="inline-flex items-center justify-center px-3 py-2 text-xs font-medium rounded-md bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
-                                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="flex flex-col gap-1">
+                                        <span class="inline-flex items-center justify-center px-2.5 py-1.5 text-[11px] font-medium rounded-md bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
                                             Refund Pending
@@ -343,30 +343,30 @@
                                         <form method="POST" action="{{ route('refund.cancel', $purchase['pending_refund_id']) }}" class="inline" onsubmit="return confirm('Are you sure you want to cancel this refund request?');">
                                             @csrf
                                             @method('POST')
-                                            <button type="submit" class="inline-flex items-center justify-center px-3 py-2 text-xs font-medium rounded-md bg-gray-600 text-white hover:bg-gray-700 transition-colors">
-                                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <button type="submit" class="inline-flex items-center justify-center px-2.5 py-1.5 text-[11px] font-medium rounded-md bg-gray-600 text-white hover:bg-gray-700 transition-colors">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                 </svg>
-                                                Cancel Refund
+                                                Cancel
                                             </button>
                                         </form>
                                     </div>
                                 @elseif($purchase['refund_eligible'])
-                                    <button onclick="openRefundModal('{{ $purchase['type'] }}', '{{ $purchase['id'] }}', '{{ $purchase['purchase_id'] }}', '{{ $purchase['amount'] }}')" class="inline-flex items-center justify-center px-3 py-2 text-xs font-medium rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">
+                                    <button onclick="openRefundModal('{{ $purchase['type'] }}', '{{ $purchase['id'] }}', '{{ $purchase['purchase_id'] }}', '{{ $purchase['amount'] }}')" class="inline-flex items-center justify-center px-2.5 py-1.5 text-[11px] font-medium rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                                         </svg>
                                         Request Refund
                                     </button>
                                 @elseif(($purchase['status'] === 'paid' || $purchase['status'] === 'active'))
-                                    <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center" title="Refund period has expired (7 days from purchase)">
+                                    <span class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-center" title="Refund period has expired (7 days from purchase)">
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                         </svg>
                                         Refund Not Available
                                     </span>
                                 @else
-                                    <span class="text-gray-500 text-xs text-center">—</span>
+                                    <span class="text-gray-500 text-[11px] text-center">—</span>
                                 @endif
                             </div>
                         </div>
