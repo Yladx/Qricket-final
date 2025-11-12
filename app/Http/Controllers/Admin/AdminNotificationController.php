@@ -77,6 +77,7 @@ class AdminNotificationController extends Controller
                         'type' => $displayType,
                         'action' => $notification->action,
                         'reference_id' => $notification->reference_id,
+                        'data' => $notification->data ?? [],
                         'created_at' => $notification->created_at->toISOString(),
                         'is_read' => (bool) $notification->is_read,
                     ];

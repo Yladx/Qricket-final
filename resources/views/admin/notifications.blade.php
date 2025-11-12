@@ -86,7 +86,8 @@
                                     notification.is_read,
                                     notification.id,
                                     notification.action || null,
-                                    notification.reference_id || null
+                                    notification.reference_id || null,
+                                    notification.data || null
                                 );
                             });
                             updateUnreadCount();
@@ -100,8 +101,8 @@
                     });
             }
 
-            function prependItem(title, message, type, timestamp, isRead = false, notificationId = null, action = null, referenceId = null) {
-                console.log('prependItem called with:', { title, message, type, timestamp, isRead, notificationId, action, referenceId });
+            function prependItem(title, message, type, timestamp, isRead = false, notificationId = null, action = null, referenceId = null, notificationData = null) {
+                console.log('prependItem called with:', { title, message, type, timestamp, isRead, notificationId, action, referenceId, notificationData });
                 
                 // Check if list element exists
                 if (!list) {
@@ -110,7 +111,7 @@
                 }
                 
                 // Generate route URL based on notification type and action
-                const notificationUrl = generateNotificationUrl(type, action, referenceId, notificationId);
+                const notificationUrl = generateNotificationUrl(type, action, referenceId, notificationId, notificationData);
                 const isClickable = notificationUrl !== null;
                 const cursorClass = isClickable ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50' : '';
                 
@@ -169,15 +170,78 @@
                 console.log('Notification added to list');
             }
 
-            function generateNotificationUrl(type, action, referenceId, notificationId) {
+            function generateNotificationUrl(type, action, referenceId, notificationId, data = null) {
                 if (!notificationId) return null;
-                
-                // Build the go route URL
-                return `/admin/notifications/${notificationId}/go`;
+
+                const normalizedType = (type || '').toString().toLowerCase();
+                const normalizedAction = (action || '').toString().toLowerCase();
+                const info = data || {};
+                const fallbackUrl = `/admin/notifications/${notificationId}/go`;
+
+                const hasRefundFlag = () => {
+                    return !!(info && (info.refund_request_id || info.type === 'refund' || ['refund_requested', 'refund_completed', 'refund_rejected'].includes(normalizedAction)));
+                };
+
+                if (['payout'].includes(normalizedType)) {
+                    return '/admin/payouts';
+                }
+
+                if (['refund'].includes(normalizedType) || hasRefundFlag()) {
+                    return '/admin/refunds';
+                }
+
+                if (normalizedType === 'organizer') {
+                    if (referenceId) {
+                        return `/admin/organizer-verifications/${referenceId}`;
+                    }
+                    return '/admin/organizer-verifications';
+                }
+
+                if (normalizedType === 'support' || normalizedType === 'ticket') {
+                    if (hasRefundFlag()) {
+                        return '/admin/refunds';
+                    }
+                    if (referenceId) {
+                        return `/admin/support/${referenceId}`;
+                    }
+                    return '/admin/support';
+                }
+
+                if (normalizedType === 'event') {
+                    if (hasRefundFlag()) {
+                        return '/admin/refunds';
+                    }
+
+                    if (['payout_processed'].includes(normalizedAction) || info.payout_request_id) {
+                        return '/admin/payouts';
+                    }
+
+                    if (referenceId) {
+                        if (['accept', 'reject', 'pending', 'published', 'approval_request', 'submitted'].includes(normalizedAction)) {
+                            return `/admin/events/approval/${referenceId}`;
+                        }
+                        return `/admin/event/${referenceId}/manage`;
+                    }
+
+                    return '/admin/events/approval';
+                }
+
+                if (normalizedType === 'subscription') {
+                    return '/admin/subscriptions';
+                }
+
+                if (normalizedType === 'system') {
+                    return '/admin/dashboard';
+                }
+
+                return fallbackUrl;
             }
 
             function markAsRead(li) {
                 const notificationId = li.getAttribute('data-id');
+                if (!notificationId || notificationId === 'null') {
+                    return;
+                }
                 
                 // Update UI immediately
                 li.setAttribute('data-read', 'true');
@@ -313,7 +377,17 @@
             // Listen for admin-specific notifications
             window.addEventListener('notification:received', (e) => {
                 const { title, message, options, type, receivedAt, id, action, reference_id } = (e.detail || {});
-                prependItem(title, message, (options && options.icon) || type || 'info', receivedAt, false, id, action, reference_id);
+                prependItem(
+                    title,
+                    message,
+                    (options && options.icon) || type || 'info',
+                    receivedAt,
+                    false,
+                    id,
+                    action,
+                    reference_id,
+                    e.detail?.data || null
+                );
                 updateUnreadCount();
                 
                 // Show desktop notification
@@ -326,21 +400,31 @@
 
             // Listen for admin notification events from global handler
             window.addEventListener('admin-notification:received', function(e) {
-                const { title, message, type, receivedAt, id, action, reference_id } = (e.detail || {});
+                const { title, message, type, receivedAt, id, action, reference_id, data } = (e.detail || {});
                 
                 // Add to list if we're on the notifications page
                 if (typeof prependItem === 'function') {
-                    prependItem(title, message, type || 'info', receivedAt, false, id, action, reference_id);
+                    prependItem(title, message, type || 'info', receivedAt, false, id, action, reference_id, data || null);
                     updateUnreadCount();
                 }
             });
 
             // Also listen for legacy event name (backwards compatibility)
             window.addEventListener('notification:received', function(e) {
-                const { title, message, options, type, receivedAt, id, action, reference_id } = (e.detail || {});
+                const { title, message, options, type, receivedAt, id, action, reference_id, data } = (e.detail || {});
                 
                 if (typeof prependItem === 'function') {
-                    prependItem(title, message, (options && options.icon) || type || 'info', receivedAt, false, id, action, reference_id);
+                    prependItem(
+                        title,
+                        message,
+                        (options && options.icon) || type || 'info',
+                        receivedAt,
+                        false,
+                        id,
+                        action,
+                        reference_id,
+                        data || null
+                    );
                     updateUnreadCount();
                 }
             });
