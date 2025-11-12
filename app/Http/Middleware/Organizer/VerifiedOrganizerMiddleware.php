@@ -177,10 +177,26 @@ class VerifiedOrganizerMiddleware
                     'input_params' => $request->input(),
                     'user_id' => $user->id
                 ]);
+                
+                // For edit routes without event param, if it's an AJAX request, 
+                // don't block - let the controller handle it
+                // This prevents false positives when event ID extraction fails
+                if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
+                    // Allow the request to continue - the controller will handle access control
+                    // This is especially important for routes that don't require an event ID
+                    // or routes where the event ID is optional
+                    \Log::debug('VerifiedOrganizerMiddleware: Allowing AJAX edit route without event param', [
+                        'route' => $routeName,
+                        'user_id' => $user->id
+                    ]);
+                    return $next($request);
+                }
             }
         }
 
-        if (!$user->isVerifiedOrganizer()) {
+        // Only check verification if this is NOT an edit route OR if edit route check failed
+        // This prevents blocking staff members on edit routes
+        if (!$isEditRoute && !$user->isVerifiedOrganizer()) {
             // For AJAX requests, return JSON response with SweetAlert notification
             if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
                 return response()->json([

@@ -1,45 +1,53 @@
 @php
-    $success = session('success') ?? session('status');
-    $error = session('error');
-    $warning = session('warning');
-    $info = session('info');
-    $sweetalert = session('sweetalert');
+$success = session('success') ?? session('status');
+$error = session('error');
+$warning = session('warning');
+$info = session('info');
+$sweetalert = session('sweetalert');
 @endphp
 
 <!-- Always load SweetAlert functionality -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
         // console.log('Flash alerts script loaded');
-        
+
         // Safely get session values
-        const success = {!! json_encode($success) !!};
-        const error = {!! json_encode($error) !!};
-        const warning = {!! json_encode($warning) !!};
-        const info = {!! json_encode($info) !!};
-        
+        const success = {
+            !!json_encode($success) !!
+        };
+        const error = {
+            !!json_encode($error) !!
+        };
+        const warning = {
+            !!json_encode($warning) !!
+        };
+        const info = {
+            !!json_encode($info) !!
+        };
+
         // console.log('Success:', success);
         // console.log('Error:', error);
         // console.log('Warning:', warning);
         // console.log('Info:', info);
         // console.log('SweetAlert available:', typeof Swal !== 'undefined');
-        
+
         // Check SweetAlert availability
         // if (typeof Swal !== 'undefined') {
         //     console.log('SweetAlert is available');
         // } else {
         //     console.error('SweetAlert is NOT available!');
         // }
-        
-            const isDark = document.documentElement.classList.contains('dark');
-            const common = {
-                customClass: {
-                    popup: isDark ? 'dark:bg-gray-800 dark:text-gray-100' : '',
-                    title: isDark ? 'dark:text-gray-100' : '',
-                    htmlContainer: isDark ? 'dark:text-gray-300' : '',
-                    confirmButton: 'bg-qricket-500 hover:bg-qricket-600',
-                }
-            };
-            
+
+        const isDark = document.documentElement.classList.contains('dark');
+        const common = {
+            customClass: {
+                popup: isDark ? 'dark:bg-gray-800 dark:text-gray-100' : '',
+                title: isDark ? 'dark:text-gray-100' : '',
+                htmlContainer: isDark ? 'dark:text-gray-300' : '',
+                confirmButton: 'bg-qricket-500 hover:bg-qricket-600',
+            }
+        };
+
         // Initialize switch states on page load (only if function exists)
         if (typeof initializeModeSwitchStates === 'function') {
             initializeModeSwitchStates();
@@ -47,7 +55,7 @@
 
         // Skip SweetAlert on verification page
         const isVerificationPage = window.location.pathname.includes('email-verification') || window.location.pathname.includes('verify-email');
-        
+
         // Handle session messages (skip on verification page)
         if ((success || error || warning || info) && !isVerificationPage) {
             if (success) {
@@ -70,15 +78,15 @@
                         allowEscapeKey: false
                     }));
                 } else {
-            Swal.fire(Object.assign({}, common, {
-                icon: 'success',
-                title: 'Success',
+                    Swal.fire(Object.assign({}, common, {
+                        icon: 'success',
+                        title: 'Success',
                         text: success,
-                timer: 1800,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            }));
+                        timer: 1800,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    }));
                 }
             }
 
@@ -120,40 +128,40 @@
                                         Swal.showLoading();
                                     }
                                 });
-                                
+
                                 // Send resend request
                                 fetch('/email/verification-notification', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                    },
-                                    body: JSON.stringify({})
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Email Sent!',
-                                        text: 'A new verification email has been sent to your registered email address.',
-                                        confirmButtonColor: '#00B388'
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                        },
+                                        body: JSON.stringify({})
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Email Sent!',
+                                            text: 'A new verification email has been sent to your registered email address.',
+                                            confirmButtonColor: '#00B388'
+                                        });
+                                    })
+                                    .catch(error => {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: 'Failed to send verification email. Please try again.',
+                                            confirmButtonColor: '#00B388'
+                                        });
                                     });
-                                })
-                                .catch(error => {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error',
-                                        text: 'Failed to send verification email. Please try again.',
-                                        confirmButtonColor: '#00B388'
-                                    });
-                                });
                             });
                         }
                     }));
-                        } else {
-                    Swal.fire(Object.assign({}, common, { 
-                        icon: 'error', 
-                        title: 'Event Ended', 
+                } else {
+                    Swal.fire(Object.assign({}, common, {
+                        icon: 'error',
+                        title: 'Event Ended',
                         text: error,
                         customClass: {
                             popup: 'rounded-xl shadow-2xl',
@@ -166,17 +174,45 @@
             }
 
             if (warning) {
-                Swal.fire(Object.assign({}, common, { icon: 'warning', title: 'Please review', text: warning }));
+                Swal.fire(Object.assign({}, common, {
+                    icon: 'warning',
+                    title: 'Please review',
+                    text: warning
+                }));
             }
 
             if (info) {
-                Swal.fire(Object.assign({}, common, { icon: 'info', title: 'Information', text: info }));
+                Swal.fire(Object.assign({}, common, {
+                    icon: 'info',
+                    title: 'Information',
+                    text: info
+                }));
             }
         }
 
         // Handle SweetAlert session data (e.g., verification required)
-        const sweetalert = {!! json_encode($sweetalert) !!};
+        const sweetalert = {
+            !!json_encode($sweetalert) !!
+        };
         if (sweetalert && !isVerificationPage) {
+            // Don't show verification required SweetAlert on edit pages
+            // Staff members can edit even without verification
+            const isEditPage = window.location.pathname.includes('/edit/basic') ||
+                window.location.pathname.includes('/edit/layout') ||
+                window.location.pathname.includes('/edit/certificate') ||
+                window.location.pathname.includes('/edit/tickets');
+            const isVerificationRequired = sweetalert.title &&
+                (sweetalert.title.includes('Verification Required') ||
+                    sweetalert.title.includes('Verification'));
+
+            // Skip verification alerts on edit pages - staff can edit without verification
+            if (isEditPage && isVerificationRequired) {
+                // Clear the session flash data by making a request to clear it
+                // This prevents the alert from showing on subsequent page loads
+                console.log('Skipping verification SweetAlert on edit page - staff can edit without verification');
+                return;
+            }
+
             const alertOptions = {
                 title: sweetalert.title || 'Notification',
                 text: sweetalert.text || '',
@@ -209,6 +245,19 @@
                             const clonedResponse = response.clone();
                             const data = await clonedResponse.json();
                             if (data.requires_verification && data.sweetalert) {
+                                // Don't show verification errors on edit pages - staff can edit without verification
+                                const isEditPage = window.location.pathname.includes('/edit/basic') ||
+                                    window.location.pathname.includes('/edit/layout') ||
+                                    window.location.pathname.includes('/edit/certificate') ||
+                                    window.location.pathname.includes('/edit/tickets');
+
+                                if (isEditPage) {
+                                    // Skip verification errors on edit pages - let the request fail silently
+                                    // Staff members can edit even without verification
+                                    console.log('Skipping verification error on edit page - staff can edit without verification');
+                                    return response; // Return the response without showing SweetAlert
+                                }
+
                                 // Show SweetAlert with verification prompt
                                 if (typeof Swal !== 'undefined' && window.Swal) {
                                     const alertOptions = {
@@ -248,6 +297,19 @@
                     try {
                         const data = JSON.parse(xhr.responseText);
                         if (data.requires_verification && data.sweetalert) {
+                            // Don't show verification errors on edit pages - staff can edit without verification
+                            const isEditPage = window.location.pathname.includes('/edit/basic') ||
+                                window.location.pathname.includes('/edit/layout') ||
+                                window.location.pathname.includes('/edit/certificate') ||
+                                window.location.pathname.includes('/edit/tickets');
+
+                            if (isEditPage) {
+                                // Skip verification errors on edit pages - let the request fail silently
+                                // Staff members can edit even without verification
+                                console.log('Skipping verification error on edit page - staff can edit without verification');
+                                return; // Don't prevent default, let it fail silently
+                            }
+
                             if (typeof Swal !== 'undefined' && window.Swal) {
                                 const alertOptions = {
                                     title: data.sweetalert.title || 'Verification Required',
