@@ -441,18 +441,45 @@
 
         // Admin layout rendering (like public event show)
         const adminEventData = dataContainer ? JSON.parse(dataContainer.getAttribute('data-event') || '{}') : {};
-        let adminLayoutData = dataContainer ? JSON.parse(dataContainer.getAttribute('data-layout') || '{}') : {};
+        let adminLayoutData = dataContainer ? JSON.parse(dataContainer.getAttribute('data-layout') || '[]') : [];
+        
+        // Set event data globally for layout rendering (like event preview page)
+        window.eventData = adminEventData;
 
         function loadAdminLayout() {
             let components = adminLayoutData;
-            if (!components) return;
-            if (typeof components === 'string') {
-                try { components = JSON.parse(components); } catch (e) { components = []; }
-            }
-            if (!Array.isArray(components) || components.length === 0) {
+            console.log('Admin: Raw layout data:', components);
+            console.log('Admin: Layout data type:', typeof components);
+            
+            if (!components) {
+                console.log('Admin: No layout data found');
                 document.getElementById('admin-layout-container').innerHTML = '<div class="text-sm text-gray-500">No layout configured.</div>';
                 return;
             }
+            
+            if (typeof components === 'string') {
+                try { 
+                    components = JSON.parse(components); 
+                    console.log('Admin: Parsed layout data from string');
+                } catch (e) { 
+                    console.error('Admin: Failed to parse layout data:', e);
+                    components = []; 
+                }
+            }
+            
+            if (!Array.isArray(components)) {
+                console.error('Admin: Layout data is not an array:', components);
+                document.getElementById('admin-layout-container').innerHTML = '<div class="text-sm text-red-500">Invalid layout data format.</div>';
+                return;
+            }
+            
+            if (components.length === 0) {
+                console.log('Admin: Layout data is empty array');
+                document.getElementById('admin-layout-container').innerHTML = '<div class="text-sm text-gray-500">No layout configured.</div>';
+                return;
+            }
+            
+            console.log('Admin: Processing', components.length, 'layout components');
 
             const container = document.getElementById('admin-layout-container');
 
@@ -474,8 +501,22 @@
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             components.forEach((component, index) => {
-                const layoutType = component.layout;
-                const details = component.details || {};
+                const layoutType = component.layout || component.type;
+                const details = component.details || component.data || {};
+
+                if (!layoutType) {
+                    console.error('Admin: Component missing layout/type property:', component);
+                    results[index] = `
+                        <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg mb-4">
+                            <div class="text-red-500 text-sm">Invalid component: missing layout/type property</div>
+                        </div>
+                    `;
+                    loadedComponents++;
+                    if (loadedComponents === components.length) {
+                        container.innerHTML = results.join('');
+                    }
+                    return;
+                }
 
                 console.log(`Admin: Loading component ${index + 1}/${components.length}: ${layoutType}`);
 
