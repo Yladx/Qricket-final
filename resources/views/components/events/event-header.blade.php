@@ -269,7 +269,7 @@
                         // Use the userCertificatePage route which handles multiple ticket selection automatically
                         $certUrl = route('events.certificate.view', $event);
                     @endphp
-                    <a href="{{ $certUrl }}" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs flex items-center justify-center font-medium shadow-sm transition-colors duration-200">
+                    <a href="{{ $certUrl }}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs flex items-center justify-center font-medium shadow-sm transition-colors duration-200">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
