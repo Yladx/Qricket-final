@@ -268,61 +268,6 @@
                 </div>
             </div>
 
-            <!-- Publish Options Section -->
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                    @if(isset($eventData['status']) && $eventData['status'] === 'rejected')
-                        Resubmission Options
-                    @else
-                        Publish Options
-                    @endif
-                </h3>
-                
-                <div class="space-y-3">
-                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
-                        <input type="radio" name="publish_option" value="draft" checked class="text-blue-600 focus:ring-blue-500">
-                        <div>
-                            <div class="font-medium text-gray-900 dark:text-gray-100">Save as Draft</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Save your event as a draft to continue editing later</div>
-                        </div>
-                    </label>
-                    
-                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
-                        <input type="radio" name="publish_option" value="pending_approval" class="text-blue-600 focus:ring-blue-500">
-                        <div>
-                            <div class="font-medium text-gray-900 dark:text-gray-100">
-                                @if(isset($eventData['status']) && $eventData['status'] === 'rejected')
-                                    Resubmit for Approval
-                                @else
-                                    Submit for Approval
-                                @endif
-                            </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">
-                                @if(isset($eventData['status']) && $eventData['status'] === 'rejected')
-                                    Resubmit your event for admin review after addressing the feedback
-                                @else
-                                    Submit your event for admin review and approval
-                                @endif
-                            </div>
-                        </div>
-                    </label>
-                    
-                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
-                        <input type="radio" name="publish_option" value="scheduled" class="text-blue-600 focus:ring-blue-500">
-                        <div>
-                            <div class="font-medium text-gray-900 dark:text-gray-100">Schedule Publication</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Schedule your event to be published at a specific time</div>
-                        </div>
-                    </label>
-                </div>
-
-                <!-- Schedule DateTime Input -->
-                <div id="schedule-input" class="mt-4 hidden">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Publish At</label>
-                    <input type="datetime-local" name="publish_at" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-            </div>
-
             <!-- Certificate Section -->
             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                 <div class="flex items-center justify-between mb-2">
@@ -386,6 +331,61 @@
                             </div>
                         </div>
                     @endif
+                </div>
+            </div>
+
+            <!-- Publish Options Section -->
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                    @if(isset($eventData['status']) && $eventData['status'] === 'rejected')
+                        Resubmission Options
+                    @else
+                        Publish Options
+                    @endif
+                </h3>
+                
+                <div class="space-y-3">
+                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                        <input type="radio" name="publish_option" value="draft" checked class="text-blue-600 focus:ring-blue-500">
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-gray-100">Save as Draft</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Save your event as a draft to continue editing later</div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                        <input type="radio" name="publish_option" value="pending_approval" class="text-blue-600 focus:ring-blue-500">
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-gray-100">
+                                @if(isset($eventData['status']) && $eventData['status'] === 'rejected')
+                                    Resubmit for Approval
+                                @else
+                                    Submit for Approval
+                                @endif
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                @if(isset($eventData['status']) && $eventData['status'] === 'rejected')
+                                    Resubmit your event for admin review after addressing the feedback
+                                @else
+                                    Submit your event for admin review and approval
+                                @endif
+                            </div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                        <input type="radio" name="publish_option" value="scheduled" class="text-blue-600 focus:ring-blue-500">
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-gray-100">Schedule Publication</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Schedule your event to be published at a specific time</div>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Schedule DateTime Input -->
+                <div id="schedule-input" class="mt-4 hidden">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Publish At</label>
+                    <input type="datetime-local" name="publish_at" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
     </div>

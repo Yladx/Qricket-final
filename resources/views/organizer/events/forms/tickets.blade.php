@@ -31,7 +31,7 @@
         </div>
     @endif
 
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 Ticket Types
@@ -41,7 +41,7 @@
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">Add options like General Admission, VIP, or Student. Fields autosave.</p>
         </div>
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center justify-end sm:justify-start space-x-2">
             @php
                 $eventEnded = isset($event) && $event->end_date && now()->gt($event->end_date);
                 $isCreateFlow = request()->routeIs('organizer.events.create*') || request()->routeIs('organizer.events.create');

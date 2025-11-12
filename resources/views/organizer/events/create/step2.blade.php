@@ -21,59 +21,28 @@
                         @include('organizer.events.forms.layout', ['eventData' => $eventData])
 
                         <!-- Navigation Buttons - Mobile Responsive -->
-                        <div class="pt-0 border-t border-gray-200 dark:border-gray-700">
-                            <!-- Mobile Layout: Stacked Buttons -->
-                            <div class="flex flex-col space-y-3 md:hidden">
-                                <!-- Back Button -->
-                                <a href="{{ route('organizer.events.step1') }}?id={{ $eventId }}" class="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-0 border-t border-gray-200 dark:border-gray-700">
+                            <a href="{{ route('organizer.events.step1') }}?id={{ $eventId }}" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                                Back to Basic Info
+                            </a>
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                                <a href="{{ route('organizer.events.step2.preview', $eventId ?? ($event->id ?? 0)) }}" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 text-sm font-medium bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                     </svg>
-                                    Back to Basic Info
+                                    Preview
                                 </a>
-                                
-                                <!-- Action Buttons Row -->
-                                <div class="flex space-x-3">
-                                    <a href="{{ route('organizer.events.step2.preview', $eventId ?? ($event->id ?? 0)) }}" class="flex-1 px-4 py-3 text-sm font-medium bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                        Preview
-                                    </a>
-                                    <button type="submit" class="flex-1 px-4 py-3 text-sm font-medium text-white bg-qricket-500 hover:bg-qricket-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qricket-500 flex items-center justify-center">
-                                        <span class="hidden sm:inline">Next: Ticket Pricing</span>
-                                        <span class="sm:hidden">Next</span>
-                                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Desktop Layout: Side by Side -->
-                            <div class="hidden md:flex items-center justify-between">
-                                <a href="{{ route('organizer.events.step1') }}?id={{ $eventId }}" class="px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 text-sm font-medium text-white bg-qricket-500 hover:bg-qricket-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qricket-500">
+                                    <span class="hidden sm:inline">Next: Ticket Pricing</span>
+                                    <span class="sm:hidden">Next</span>
+                                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                                     </svg>
-                                    Back to Basic Info
-                                </a>
-                                <div class="flex items-center space-x-4">
-                                    <a href="{{ route('organizer.events.step2.preview', $eventId ?? ($event->id ?? 0)) }}" class="px-6 py-3 text-sm font-medium bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                        Preview
-                                    </a>
-                                    <x-primary-button class="px-6 py-3 flex items-center">
-                                        <span>Next: Ticket Pricing</span>
-                                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                        </svg>
-                                    </x-primary-button>
-                                </div>
+                                </button>
                             </div>
                         </div>
                     </form>

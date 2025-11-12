@@ -21,19 +21,19 @@
 
                             <hr>
                             <!-- Navigation Buttons -->
-                            <div class="flex items-center justify-between pt-6">
-                                <div class="flex items-center space-x-3">
-                                    <button type="button" id="btnCancelDraft" class="inline-flex items-center px-6 py-3 bg-gray-300 dark:bg-gray-700 border border-transparent rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600 focus:bg-gray-400 dark:focus:bg-gray-600 active:bg-gray-500 dark:active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-6">
+                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                                    <button type="button" id="btnCancelDraft" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gray-300 dark:bg-gray-700 border border-transparent rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600 focus:bg-gray-400 dark:focus:bg-gray-600 active:bg-gray-500 dark:active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                                         Cancel
                                     </button>
                                     @if($eventId)
-                                    <button type="button" id="btnDeleteEvent" class="inline-flex items-center px-6 py-3 bg-red-100 dark:bg-red-900 border border-transparent rounded-lg font-medium text-sm text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    <button type="button" id="btnDeleteEvent" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-red-100 dark:bg-red-900 border border-transparent rounded-lg font-medium text-sm text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                         Delete
                                     </button>
                                     @endif
                                 </div>
 
-                                <button type="submit" id="submitBtn" class="inline-flex items-center px-6 py-3 bg-qricket-500 border border-transparent rounded-lg font-medium text-sm text-white hover:bg-qricket-600 focus:bg-qricket-600 active:bg-qricket-700 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <button type="submit" id="submitBtn" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-qricket-500 border border-transparent rounded-lg font-medium text-sm text-white hover:bg-qricket-600 focus:bg-qricket-600 active:bg-qricket-700 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     <span id="submitText">Next Step</span>
                                     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white hidden" id="submitSpinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
