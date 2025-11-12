@@ -26,7 +26,7 @@
 
         /* ---------- Print styles ---------- */
         @media print{
-            @page{size:A4 landscape;margin:0}
+            @page{size:A4 landscape;margin:12mm}
             html,body{margin:0!important;padding:0!important;width:297mm!important;height:210mm!important;background:#fff!important;-webkit-print-color-adjust:exact;color-adjust:exact}
             .no-print{display:none!important}
             .certificate-container{margin:0!important;padding:0!important;box-shadow:none!important;background:#fff!important}

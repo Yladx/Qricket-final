@@ -405,9 +405,17 @@
         </div>
     </div>
 
+    <!-- Hidden data container for JavaScript -->
+    <div id="admin-event-data" 
+         data-event-id="{{ $event->id ?? null }}"
+         data-event="{{ htmlspecialchars(json_encode($event ?? []), ENT_QUOTES, 'UTF-8') }}"
+         data-layout="{{ htmlspecialchars(json_encode($layoutData ?? []), ENT_QUOTES, 'UTF-8') }}"
+         style="display: none;"></div>
+
     <script>
         // Set event ID for JavaScript image loading (used by layout templates)
-        window.currentEventId = {{ $event->id }};
+        const dataContainer = document.getElementById('admin-event-data');
+        window.currentEventId = dataContainer ? parseInt(dataContainer.getAttribute('data-event-id')) || null : null;
         
         function promptReject(hiddenId = 'rejection_reason') {
             const reason = prompt('Enter rejection reason (optional):');
@@ -432,8 +440,8 @@
         }
 
         // Admin layout rendering (like public event show)
-        const adminEventData = @json($event);
-        let adminLayoutData = @json($layoutData);
+        const adminEventData = dataContainer ? JSON.parse(dataContainer.getAttribute('data-event') || '{}') : {};
+        let adminLayoutData = dataContainer ? JSON.parse(dataContainer.getAttribute('data-layout') || '{}') : {};
 
         function loadAdminLayout() {
             let components = adminLayoutData;

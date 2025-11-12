@@ -142,7 +142,7 @@
                                         <label for="rejection_reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Rejection Reason (if rejecting)
                                         </label>
-                                        <textarea id="rejection_reason" name="rejection_reason" rows="3" 
+                                        <textarea id="rejection_reason" name="rejection_reason" rows="3"
                                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-qricket-500 focus:border-qricket-500 dark:bg-gray-700 dark:text-gray-300"
                                             placeholder="Explain why the event is being rejected..."></textarea>
                                     </div>
@@ -161,14 +161,14 @@
                                     @if($event->poster)
                                     <div>
                                         <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Poster</p>
-                                        <img src="{{ Storage::url($event->poster) }}" alt="Event Poster" 
+                                        <img src="{{ Storage::url($event->poster) }}" alt="Event Poster"
                                             class="w-full h-48 object-cover rounded-lg">
                                     </div>
                                     @endif
                                     @if($event->thumbnail)
                                     <div>
                                         <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Thumbnail</p>
-                                        <img src="{{ Storage::url($event->thumbnail) }}" alt="Event Thumbnail" 
+                                        <img src="{{ Storage::url($event->thumbnail) }}" alt="Event Thumbnail"
                                             class="w-full h-32 object-cover rounded-lg">
                                     </div>
                                     @endif
@@ -195,13 +195,16 @@
                                             </span>
                                         </div>
                                         @if($ticket->quantity)
+                                        @php
+                                        $percentage = $ticket->quantity > 0 ? round(($ticket->sold_count / $ticket->quantity) * 100, 2) : 0;
+                                        @endphp
                                         <div class="mt-2">
                                             <p class="text-xs text-gray-600 dark:text-gray-400">
                                                 {{ $ticket->sold_count }} / {{ $ticket->quantity }} sold
                                             </p>
                                             <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-1">
-                                                <div class="bg-qricket-500 h-2 rounded-full" 
-                                                     style="width: {{ $ticket->quantity > 0 ? ($ticket->sold_count / $ticket->quantity) * 100 : 0 }}%"></div>
+                                                <div class="bg-qricket-500 h-2 rounded-full"
+                                                    style="width: {{ $percentage }}%"></div>
                                             </div>
                                         </div>
                                         @endif
@@ -215,8 +218,8 @@
 
                     <!-- Back Button -->
                     <div class="mt-8 flex justify-start">
-                        <a href="{{ route('admin.events.approval') }}" 
-                           class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
+                        <a href="{{ route('admin.events.approval') }}"
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
                             ← Back to Event Approval
                         </a>
                     </div>
