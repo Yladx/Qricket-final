@@ -1,7 +1,5 @@
 <x-admin-layout title="Qricket Feedback" page-title="Qricket Feedback">
     @php
-    use Illuminate\Support\Str;
-
     $renderStars = function($value) {
     if (is_null($value)) return '';
     $max = 5; $fill = max(0, min($max, round($value)));
@@ -103,7 +101,7 @@
                     <div class="p-4 space-y-3 text-sm">
                         @forelse($recentComments as $item)
                         <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-800/40">
-                            <p class="text-gray-800 dark:text-gray-200 leading-snug">“{{ Str::limit($item->additional_comments, 160) }}”</p>
+                            <p class="text-gray-800 dark:text-gray-200 leading-snug">“{{ \Illuminate\Support\Str::limit($item->additional_comments, 160) }}”</p>
                             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ $item->created_at->timezone(config('app.timezone'))->diffForHumans() }}</p>
                         </div>
                         @empty
