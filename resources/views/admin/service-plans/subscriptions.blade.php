@@ -220,76 +220,199 @@
     </div>
 
     <!-- Subscription Plan Modal -->
-    <div id="subscriptionPlanModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
-            <div class="mt-3">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4" id="subscriptionPlanModalTitle">Add Subscription Plan</h3>
-                <form id="subscriptionPlanForm" method="POST">
-                    @csrf
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                            <input type="text" name="name" required class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
+    <div id="subscriptionPlanModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="subscriptionPlanModalTitle" aria-modal="true" role="dialog">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" onclick="closeSubscriptionPlanModal()"></div>
+        
+        <!-- Modal Container -->
+        <div class="flex min-h-full items-center justify-center p-4" onclick="event.stopPropagation()">
+            <div class="relative w-full max-w-3xl transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-2xl transition-all" onclick="event.stopPropagation()">
+                <!-- Header -->
+                <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-6 py-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-qricket-100 dark:bg-qricket-900/50">
+                            <svg class="h-6 w-6 text-qricket-600 dark:text-qricket-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M9 8h6M5 4h14a2 2 0 012 2v12l-4-2-4 2-4-2-4 2V6a2 2 0 012-2z"></path>
+                            </svg>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Slug</label>
-                            <input type="text" name="slug" required class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                            <textarea name="description" rows="3" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Price (PHP)</label>
-                            <input type="number" name="price" required min="0" step="0.01" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Events per Month</label>
-                            <input type="number" name="events_per_month" min="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Leave empty for unlimited</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tickets per Event</label>
-                            <input type="number" name="tickets_per_event" min="1" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Leave empty for unlimited</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Free Events Included</label>
-                                <input type="number" name="free_events_count" min="0" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
-                                <p class="text-xs text-gray-500 dark:text-gray-400">0 to disable</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Free Event Ticket Limit</label>
-                                <input type="number" name="free_event_ticket_limit" min="0" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
-                                <p class="text-xs text-gray-500 dark:text-gray-400">0 to disable</p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="checkbox" name="advanced_layouts" class="rounded border-gray-300 text-qricket-600 shadow-sm focus:border-qricket-300 focus:ring focus:ring-qricket-200 focus:ring-opacity-50">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Advanced Layouts</span>
-                                </label>
-                            </div>
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="checkbox" name="advanced_analytics" class="rounded border-gray-300 text-qricket-600 shadow-sm focus:border-qricket-300 focus:ring focus:ring-qricket-200 focus:ring-opacity-50">
-                                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Advanced Analytics</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sort Order</label>
-                            <input type="number" name="sort_order" min="0" class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:ring-qricket-500 focus:border-qricket-500">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100" id="subscriptionPlanModalTitle">Add Subscription Plan</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Create a new subscription plan for organizers</p>
                         </div>
                     </div>
-                    <div class="flex justify-end space-x-3 mt-6">
-                        <button type="button" onclick="closeSubscriptionPlanModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md">
+                    <button type="button" onclick="closeSubscriptionPlanModal()" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-qricket-500">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Form Content -->
+                <form id="subscriptionPlanForm" method="POST" class="p-6">
+                    @csrf
+                    <div class="space-y-6">
+                        <!-- Basic Information -->
+                        <div>
+                            <h4 class="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">Basic Information</h4>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="flex items-center">
+                                            <svg class="mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                            </svg>
+                                            Plan Name
+                                        </span>
+                                    </label>
+                                    <input type="text" name="name" required placeholder="e.g., Premium Plan" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-300 px-3 py-2 shadow-sm transition-colors focus:border-qricket-500 focus:ring-qricket-500 dark:focus:border-qricket-400 dark:focus:ring-qricket-400">
+                                </div>
+                                <div>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="flex items-center">
+                                            <svg class="mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                                            </svg>
+                                            Slug
+                                        </span>
+                                    </label>
+                                    <input type="text" name="slug" required placeholder="premium-plan" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-300 px-3 py-2 shadow-sm transition-colors focus:border-qricket-500 focus:ring-qricket-500 dark:focus:border-qricket-400 dark:focus:ring-qricket-400">
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">URL-friendly identifier</p>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <span class="flex items-center">
+                                        <svg class="mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        Description
+                                    </span>
+                                </label>
+                                <textarea name="description" rows="3" placeholder="Enter plan description..." class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-300 px-3 py-2 shadow-sm transition-colors focus:border-qricket-500 focus:ring-qricket-500 dark:focus:border-qricket-400 dark:focus:ring-qricket-400"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Pricing & Limits -->
+                        <div>
+                            <h4 class="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">Pricing & Limits</h4>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="flex items-center">
+                                            <svg class="mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                            </svg>
+                                            Price (PHP)
+                                        </span>
+                                    </label>
+                                    <input type="number" name="price" required min="0" step="0.01" placeholder="0.00" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-300 px-3 py-2 shadow-sm transition-colors focus:border-qricket-500 focus:ring-qricket-500 dark:focus:border-qricket-400 dark:focus:ring-qricket-400">
+                                </div>
+                                <div>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="flex items-center">
+                                            <svg class="mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                            </svg>
+                                            Sort Order
+                                        </span>
+                                    </label>
+                                    <input type="number" name="sort_order" min="0" placeholder="0" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-300 px-3 py-2 shadow-sm transition-colors focus:border-qricket-500 focus:ring-qricket-500 dark:focus:border-qricket-400 dark:focus:ring-qricket-400">
+                                </div>
+                            </div>
+                            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="flex items-center">
+                                            <svg class="mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            Events per Month
+                                        </span>
+                                    </label>
+                                    <input type="number" name="events_per_month" min="1" placeholder="Unlimited" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-300 px-3 py-2 shadow-sm transition-colors focus:border-qricket-500 focus:ring-qricket-500 dark:focus:border-qricket-400 dark:focus:ring-qricket-400">
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Leave empty for unlimited</p>
+                                </div>
+                                <div>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="flex items-center">
+                                            <svg class="mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                                            </svg>
+                                            Tickets per Event
+                                        </span>
+                                    </label>
+                                    <input type="number" name="tickets_per_event" min="1" placeholder="Unlimited" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-300 px-3 py-2 shadow-sm transition-colors focus:border-qricket-500 focus:ring-qricket-500 dark:focus:border-qricket-400 dark:focus:ring-qricket-400">
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Leave empty for unlimited</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Free Event Settings -->
+                        <div>
+                            <h4 class="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">Free Event Settings</h4>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="flex items-center">
+                                            <svg class="mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Free Events Included
+                                        </span>
+                                    </label>
+                                    <input type="number" name="free_events_count" min="0" placeholder="0" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-300 px-3 py-2 shadow-sm transition-colors focus:border-qricket-500 focus:ring-qricket-500 dark:focus:border-qricket-400 dark:focus:ring-qricket-400">
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Set to 0 to disable</p>
+                                </div>
+                                <div>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="flex items-center">
+                                            <svg class="mr-1.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Free Event Ticket Limit
+                                        </span>
+                                    </label>
+                                    <input type="number" name="free_event_ticket_limit" min="0" placeholder="0" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700/50 dark:text-gray-300 px-3 py-2 shadow-sm transition-colors focus:border-qricket-500 focus:ring-qricket-500 dark:focus:border-qricket-400 dark:focus:ring-qricket-400">
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Set to 0 to disable</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Features -->
+                        <div>
+                            <h4 class="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">Features</h4>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <label class="flex items-start space-x-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700/50 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <input type="checkbox" name="advanced_layouts" class="mt-1 h-4 w-4 rounded border-gray-300 text-qricket-600 focus:ring-qricket-500 dark:border-gray-600">
+                                    <div>
+                                        <span class="block text-sm font-medium text-gray-700 dark:text-gray-300">Advanced Layouts</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Access to premium event layouts</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-start space-x-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700/50 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    <input type="checkbox" name="advanced_analytics" class="mt-1 h-4 w-4 rounded border-gray-300 text-qricket-600 focus:ring-qricket-500 dark:border-gray-600">
+                                    <div>
+                                        <span class="block text-sm font-medium text-gray-700 dark:text-gray-300">Advanced Analytics</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Access to detailed analytics and reports</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div class="mt-8 flex items-center justify-end space-x-3 border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <button type="button" onclick="closeSubscriptionPlanModal()" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-qricket-600 hover:bg-qricket-700 rounded-md">
-                            Save
+                        <button type="submit" class="rounded-lg bg-qricket-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-qricket-700 focus:outline-none focus:ring-2 focus:ring-qricket-500 focus:ring-offset-2 dark:bg-qricket-500 dark:hover:bg-qricket-600">
+                            <span class="flex items-center">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Save Subscription Plan
+                            </span>
                         </button>
                     </div>
                 </form>
@@ -450,8 +573,11 @@
 
         // Modal Functions
         function openSubscriptionPlanModal() {
-            document.getElementById('subscriptionPlanModal').classList.remove('hidden');
+            const modal = document.getElementById('subscriptionPlanModal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
             document.getElementById('subscriptionPlanModalTitle').textContent = 'Add Subscription Plan';
+            document.querySelector('#subscriptionPlanModal .text-sm.text-gray-500').textContent = 'Create a new subscription plan for organizers';
             document.getElementById('subscriptionPlanForm').action = '{{ route("admin.subscriptions.plans.store") }}';
             document.getElementById('subscriptionPlanForm').method = 'POST';
             
@@ -466,7 +592,9 @@
         }
 
         function closeSubscriptionPlanModal() {
-            document.getElementById('subscriptionPlanModal').classList.add('hidden');
+            const modal = document.getElementById('subscriptionPlanModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = ''; // Restore scrolling
         }
 
         function editSubscriptionPlan(id) {
@@ -480,8 +608,11 @@
             }
             
             // Open modal and populate with existing data
-            document.getElementById('subscriptionPlanModal').classList.remove('hidden');
+            const modal = document.getElementById('subscriptionPlanModal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
             document.getElementById('subscriptionPlanModalTitle').textContent = 'Edit Subscription Plan';
+            document.querySelector('#subscriptionPlanModal .text-sm.text-gray-500').textContent = 'Update subscription plan information';
             
             // Set form action for update
             document.getElementById('subscriptionPlanForm').action = `{{ url('admin/subscriptions/plans') }}/${id}`;

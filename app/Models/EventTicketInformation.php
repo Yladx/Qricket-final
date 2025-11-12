@@ -190,12 +190,21 @@ class EventTicketInformation extends Model
      */
     private function generateSignature(string $ticketNumber): string
     {
-        $data = $ticketNumber . $this->id . config('app.key');
+        return self::generateSignatureForValidation($ticketNumber, $this->id);
+    }
+    
+    /**
+     * Generate a signature for validation (static method that doesn't require instance).
+     */
+    private static function generateSignatureForValidation(string $ticketId, int $ticketInformationId): string
+    {
+        $data = $ticketId . $ticketInformationId . config('app.key');
         return hash('sha256', $data);
     }
 
     /**
      * Validate encrypted QR code data and return ticket information.
+     * Uses QR code data directly instead of looking up by ticket_information_id.
      */
     public static function validateQRCode(string $qrData, int $eventId): ?self
     {
@@ -204,35 +213,20 @@ class EventTicketInformation extends Model
             $decryptedJson = decrypt($qrData);
             $decryptedData = json_decode($decryptedJson, true);
             
-            if (!$decryptedData || !isset($decryptedData['ticket_information_id'])) {
-                \Log::warning('QR code validation failed - invalid decrypted data', [
-                    'event_id' => $eventId,
-                    'decrypted_data' => $decryptedData
-                ]);
-                return null;
+            // Validate that required fields exist in QR code data
+            $requiredFields = ['ticket_id', 'event_id', 'purchase_id', 'user_id', 'signature'];
+            foreach ($requiredFields as $field) {
+                if (!isset($decryptedData[$field])) {
+                    \Log::warning('QR code validation failed - missing required field', [
+                        'event_id' => $eventId,
+                        'missing_field' => $field,
+                        'decrypted_data_keys' => array_keys($decryptedData ?? [])
+                    ]);
+                    return null;
+                }
             }
             
-            // Verify the signature
-            $ticket = self::find($decryptedData['ticket_information_id']);
-            if (!$ticket) {
-                \Log::warning('QR code validation failed - ticket not found', [
-                    'ticket_information_id' => $decryptedData['ticket_information_id'],
-                    'event_id' => $eventId
-                ]);
-                return null;
-            }
-            
-            $expectedSignature = $ticket->generateSignature($decryptedData['ticket_id']);
-            if ($decryptedData['signature'] !== $expectedSignature) {
-                \Log::warning('QR code validation failed - invalid signature', [
-                    'ticket_id' => $decryptedData['ticket_id'],
-                    'expected_signature' => $expectedSignature,
-                    'provided_signature' => $decryptedData['signature']
-                ]);
-                return null;
-            }
-            
-            // Verify event ID matches
+            // Verify event ID matches first
             if ($decryptedData['event_id'] != $eventId) {
                 \Log::warning('QR code validation failed - event ID mismatch', [
                     'expected_event_id' => $eventId,
@@ -241,10 +235,70 @@ class EventTicketInformation extends Model
                 return null;
             }
             
-            \Log::info('QR code validation successful', [
+            // Find ticket using QR code data (ticket_id and event_id)
+            $ticket = self::where('ticket_id', $decryptedData['ticket_id'])
+                ->where('event_id', $decryptedData['event_id'])
+                ->whereHas('ticketPurchase', function($query) use ($decryptedData) {
+                    $query->where('purchase_id', $decryptedData['purchase_id'])
+                          ->where('status', 'paid');
+                })
+                ->where('user_id', $decryptedData['user_id'])
+                ->with('ticketPurchase')
+                ->first();
+            
+            if (!$ticket) {
+                \Log::warning('QR code validation failed - ticket not found using QR code data', [
+                    'ticket_id' => $decryptedData['ticket_id'],
+                    'event_id' => $decryptedData['event_id'],
+                    'purchase_id' => $decryptedData['purchase_id'],
+                    'user_id' => $decryptedData['user_id']
+                ]);
+                return null;
+            }
+            
+            // Verify the signature matches
+            // We need to generate the signature using the ticket's ID and ticket_id from QR data
+            $expectedSignature = self::generateSignatureForValidation(
+                $decryptedData['ticket_id'],
+                $ticket->id
+            );
+            
+            if ($decryptedData['signature'] !== $expectedSignature) {
+                \Log::warning('QR code validation failed - invalid signature', [
+                    'ticket_id' => $decryptedData['ticket_id'],
+                    'ticket_information_id' => $ticket->id,
+                    'expected_signature' => $expectedSignature,
+                    'provided_signature' => $decryptedData['signature']
+                ]);
+                return null;
+            }
+            
+            // Additional validation: Verify purchase_id matches
+            if ($ticket->ticketPurchase->purchase_id !== $decryptedData['purchase_id']) {
+                \Log::warning('QR code validation failed - purchase_id mismatch', [
+                    'ticket_id' => $decryptedData['ticket_id'],
+                    'expected_purchase_id' => $ticket->ticketPurchase->purchase_id,
+                    'provided_purchase_id' => $decryptedData['purchase_id']
+                ]);
+                return null;
+            }
+            
+            // Additional validation: Verify user_id matches
+            if ($ticket->user_id != $decryptedData['user_id']) {
+                \Log::warning('QR code validation failed - user_id mismatch', [
+                    'ticket_id' => $decryptedData['ticket_id'],
+                    'expected_user_id' => $ticket->user_id,
+                    'provided_user_id' => $decryptedData['user_id']
+                ]);
+                return null;
+            }
+            
+            \Log::info('QR code validation successful using QR code data', [
                 'ticket_id' => $ticket->ticket_id,
                 'event_id' => $eventId,
-                'user_id' => $ticket->user_id
+                'user_id' => $ticket->user_id,
+                'purchase_id' => $ticket->ticketPurchase->purchase_id,
+                'validated_using' => 'qr_code_data'
             ]);
             
             return $ticket;
@@ -252,7 +306,8 @@ class EventTicketInformation extends Model
         } catch (\Exception $e) {
             \Log::error('QR code validation failed with exception', [
                 'error' => $e->getMessage(),
-                'event_id' => $eventId
+                'event_id' => $eventId,
+                'trace' => $e->getTraceAsString()
             ]);
             return null;
         }

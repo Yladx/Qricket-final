@@ -26,7 +26,7 @@ class RefundController extends Controller
             abort(403);
         }
 
-        $query = RefundRequest::with(['user', 'ticketPurchase.event', 'subscription']);
+        $query = RefundRequest::with(['user', 'ticketPurchase.event', 'subscription', 'additionalTicketPurchase.event']);
 
         // Filter by status
         if ($request->has('status') && $request->status !== '') {
@@ -711,18 +711,14 @@ class RefundController extends Controller
                     ]);
                 } elseif ($refundRequest->type === 'additional_ticket') {
                     $additionalTicketPurchase = $refundRequest->additionalTicketPurchase;
-                    $additionalTicketPurchase->update(['status' => 'refunded']);
-                    
-                    // For additional tickets, we need to reduce the sold count of the original ticket type
-                    $additionalTicketPurchase->load('ticketType');
-                    if ($additionalTicketPurchase->ticketType) {
-                        $ticketType = $additionalTicketPurchase->ticketType;
-                        $ticketType->decrement('sold_count', $additionalTicketPurchase->quantity);
-                        Log::info('Reduced sold count for additional ticket type', [
-                            'ticket_type_id' => $ticketType->id,
-                            'ticket_type_name' => $ticketType->name,
-                            'quantity_refunded' => $additionalTicketPurchase->quantity,
-                            'new_sold_count' => $ticketType->sold_count
+                    if ($additionalTicketPurchase) {
+                        $additionalTicketPurchase->update(['status' => 'refunded']);
+                        // Note: Additional ticket purchases don't have ticket types
+                        // They represent capacity unlocks, not actual sold tickets
+                        Log::info('Additional ticket purchase refunded', [
+                            'purchase_id' => $additionalTicketPurchase->purchase_id,
+                            'event_id' => $additionalTicketPurchase->event_id,
+                            'amount' => $additionalTicketPurchase->amount
                         ]);
                     }
                 }
@@ -1802,20 +1798,8 @@ class RefundController extends Controller
                 if ($additionalTicketPurchase) {
                     // Update status
                     $additionalTicketPurchase->update(['status' => 'refunded']);
-                    
-                    // For additional tickets, we need to reduce the sold count of the original ticket type
-                    $additionalTicketPurchase->load('ticketType');
-                    if ($additionalTicketPurchase->ticketType) {
-                        $ticketType = $additionalTicketPurchase->ticketType;
-                        $ticketType->decrement('sold_count', $additionalTicketPurchase->quantity);
-                        Log::info('Reduced sold count for additional ticket type (manual refund)', [
-                            'ticket_type_id' => $ticketType->id,
-                            'ticket_type_name' => $ticketType->name,
-                            'quantity_refunded' => $additionalTicketPurchase->quantity,
-                            'new_sold_count' => $ticketType->sold_count
-                        ]);
-                    }
-                    
+                    // Note: Additional ticket purchases don't have ticket types
+                    // They represent capacity unlocks, not actual sold tickets
                     Log::info('Additional ticket refunded (manual)', [
                         'ticket_limit_purchase_id' => $additionalTicketPurchase->id,
                         'quantity' => $additionalTicketPurchase->quantity,
