@@ -15,7 +15,7 @@
             <div class="lg:bg-white lg:dark:bg-gray-800 lg:shadow-sm lg:rounded-lg">
                 <div class="p-6">
                     <!-- Mobile cards -->
-                    <div class="space-y-3 sm:hidden">
+                    <div class="sm:hidden space-y-3">
                         @forelse($tickets as $ticket)
                             @php($badge = [
                                 'open' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
@@ -23,16 +23,34 @@
                                 'resolved' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
                                 'closed' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
                             ][$ticket->status] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200')
-                            <a href="{{ route('support.ticket', $ticket->ticket_number) }}" class="block rounded-lg border border-gray-200 dark:border-gray-700 p-3 transition-colors">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-qricket-600 dark:text-qricket-400 font-mono text-xs">{{ $ticket->ticket_number }}</span>
+                            <a href="{{ route('support.ticket', $ticket->ticket_number) }}" class="block rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex flex-col space-y-1">
+                                        <span class="font-mono text-xs text-gray-500 dark:text-gray-400">Ticket #</span>
+                                        <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $ticket->ticket_number }}</span>
+                                    </div>
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badge }}">
                                         {{ ucwords(str_replace('_', ' ', $ticket->status)) }}
                                     </span>
                                 </div>
-                                <div class="mt-1 text-sm text-gray-900 dark:text-gray-100 line-clamp-1">{{ $ticket->subject }}</div>
-                                <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Created {{ $ticket->created_at->format('M d, Y') }}</div>
-                                <div class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Updated {{ $ticket->updated_at->diffForHumans() }}</div>
+                                <div class="mt-3">
+                                    <p class="text-base font-semibold text-gray-900 dark:text-gray-100 leading-snug">{{ $ticket->subject }}</p>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        Created <span class="font-medium">{{ $ticket->created_at->format('M d, Y') }}</span>
+                                    </p>
+                                    <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                        Updated {{ $ticket->updated_at->diffForHumans() }}
+                                    </p>
+                                </div>
+                                <div class="mt-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                    <div class="flex items-center space-x-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 8v8"></path>
+                                        </svg>
+                                        <span>{{ $ticket->messages_count ?? 0 }} message{{ ($ticket->messages_count ?? 0) !== 1 ? 's' : '' }}</span>
+                                    </div>
+                                    <span class="text-qricket-600 dark:text-qricket-400 font-medium">View details →</span>
+                                </div>
                             </a>
                         @empty
                             <div class="text-center text-gray-500 dark:text-gray-400 py-6">No tickets yet.</div>
