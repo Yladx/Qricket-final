@@ -5,6 +5,13 @@
     {{-- The Add Discount button is moved to the bottom-right --}}
 </x-slot>
 
+<!-- Hidden data container for JavaScript -->
+<div id="discounts-data"
+    data-discounts="{{ htmlspecialchars(json_encode($discounts->keyBy('id')), ENT_QUOTES, 'UTF-8') }}"
+    data-usage-data="{{ htmlspecialchars(json_encode($usageData ?? ['labels' => [], 'values' => []]), ENT_QUOTES, 'UTF-8') }}"
+    data-discount-types-data="{{ htmlspecialchars(json_encode($discountTypesData ?? ['labels' => [], 'values' => []]), ENT_QUOTES, 'UTF-8') }}"
+    style="display: none;"></div>
+
 <!-- Success/Error Messages -->
 @if(session('success'))
 <div class="mb-6 bg-green-100 dark:bg-green-900 border border-green-400 text-green-700 dark:text-green-300 px-4 py-3 rounded">
@@ -411,8 +418,15 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Chart data from backend
-        const usageData = @json($usageData ?? ['labels' => [], 'values' => []]);
-        const discountTypesData = @json($discountTypesData ?? ['labels' => [], 'values' => []]);
+        const discountsContainer = document.getElementById('discounts-data');
+        const usageData = discountsContainer ? JSON.parse(discountsContainer.getAttribute('data-usage-data') || '{"labels":[],"values":[]}') : {
+            labels: [],
+            values: []
+        };
+        const discountTypesData = discountsContainer ? JSON.parse(discountsContainer.getAttribute('data-discount-types-data') || '{"labels":[],"values":[]}') : {
+            labels: [],
+            values: []
+        };
 
         console.log('Usage Data:', usageData);
         console.log('Discount Types Data:', discountTypesData);
@@ -603,7 +617,8 @@
 
     function editDiscount(id) {
         // Find the discount data
-        const discountData = @json($discounts - > keyBy('id'));
+        const discountsContainer = document.getElementById('discounts-data');
+        const discountData = discountsContainer ? JSON.parse(discountsContainer.getAttribute('data-discounts') || '{}') : {};
         const discount = discountData[id];
 
         if (!discount) {
