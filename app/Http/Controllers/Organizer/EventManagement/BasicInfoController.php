@@ -76,9 +76,10 @@ class BasicInfoController extends Controller
                 $isAdmin = Auth::guard('admin')->check();
                 $isOwner = $existing && $existing->user_id === Auth::id();
                 $isAdminEvent = $existing && $existing->user_id === null && $isAdmin;
+                $isStaff = $existing && $existing->staff()->where('user_id', Auth::id())->exists();
                 
-                // Allow both draft and rejected events to be continued
-                if ($existing && in_array($existing->status, ['draft', 'rejected']) && ($isOwner || $isAdminEvent)) {
+                // Allow both draft and rejected events to be continued by owner, admin, or staff
+                if ($existing && in_array($existing->status, ['draft', 'rejected']) && ($isOwner || $isAdminEvent || $isStaff)) {
                     return redirect()->route('organizer.events.create.basicinfo', ['id' => $id]);
                 }
             }
@@ -112,8 +113,11 @@ class BasicInfoController extends Controller
         $isAdmin = Auth::guard('admin')->check();
         $isOwner = $event && $event->user_id === Auth::id();
         $isAdminEvent = $event && $event->user_id === null && $isAdmin;
+        $isStaff = $event && $event->staff()->where('user_id', Auth::id())->exists();
         
-        if (!$event || $event->status !== 'draft' || (!$isOwner && !$isAdminEvent)) {
+        // Allow access for owner, admin, or staff - but only for draft events in step1 (for editing existing events, use edit.basic route)
+        // For editing published/approved events, staff should use the edit.basic route instead
+        if (!$event || (!$isOwner && !$isAdminEvent && !$isStaff)) {
             return redirect()->route('organizer.events.index')->with('error', 'Event not found or not authorized.');
         }
 
