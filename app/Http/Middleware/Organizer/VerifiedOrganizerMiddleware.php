@@ -26,34 +26,76 @@ class VerifiedOrganizerMiddleware
 
         $user = auth()->user();
 
-        // Allow access for event owner or staff for routes that carry an {event} or {id} parameter
-        $routeEvent = $request->route('event') ?? $request->route('id');
-
-        if ($routeEvent) {
-            try {
-                // Resolve to model if it's an ID
-                $event = is_object($routeEvent) ? $routeEvent : \App\Models\Event::find($routeEvent);
-                if ($event) {
-                    $isOwner = (int) $event->user_id === (int) $user->id;
-                    $isStaff = $event->staff()->where('user_id', $user->id)->exists();
-                    if ($isOwner || $isStaff) {
-                        // Event owners and staff can always access their events, even if not verified
-                        \Log::info('VerifiedOrganizerMiddleware: Allowing access via route parameter', [
-                            'user_id' => $user->id,
-                            'event_id' => $event->id,
-                            'is_owner' => $isOwner,
-                            'is_staff' => $isStaff,
-                            'route' => $request->route()->getName()
-                        ]);
-                        return $next($request);
-                    }
+        // Helper function to check if user is owner or staff of an event
+        $checkEventAccess = function($event) use ($user) {
+            if (!$event) {
+                return false;
+            }
+            
+            // Resolve to model if it's an ID
+            if (!is_object($event)) {
+                try {
+                    $event = \App\Models\Event::find($event);
+                } catch (\Exception $e) {
+                    \Log::warning('Error finding event in VerifiedOrganizerMiddleware', [
+                        'error' => $e->getMessage(),
+                        'event_id' => $event,
+                        'user_id' => $user->id
+                    ]);
+                    return false;
                 }
+            }
+            
+            if (!$event) {
+                return false;
+            }
+            
+            $isOwner = (int) $event->user_id === (int) $user->id;
+            
+            // Check if user is staff member
+            try {
+                $isStaff = $event->staff()->where('user_id', $user->id)->exists();
             } catch (\Exception $e) {
-                \Log::warning('Error checking event access via route parameter', [
+                \Log::warning('Error checking staff access in VerifiedOrganizerMiddleware', [
                     'error' => $e->getMessage(),
-                    'route_event' => $routeEvent,
+                    'event_id' => $event->id,
                     'user_id' => $user->id
                 ]);
+                $isStaff = false;
+            }
+            
+            return $isOwner || $isStaff;
+        };
+
+        // Allow access for event owner or staff for routes that carry an {event} or {id} parameter
+        // Try multiple ways to get the event parameter
+        $routeEvent = null;
+        
+        // First, try route parameter (works with route model binding)
+        $routeEvent = $request->route('event') ?? $request->route('id');
+        
+        // If route model binding returned a model, use it directly
+        if ($routeEvent && is_object($routeEvent)) {
+            if ($checkEventAccess($routeEvent)) {
+                \Log::info('VerifiedOrganizerMiddleware: Allowing access via route model binding', [
+                    'user_id' => $user->id,
+                    'event_id' => $routeEvent->id,
+                    'route' => $request->route()->getName()
+                ]);
+                return $next($request);
+            }
+        } elseif ($routeEvent) {
+            // Route parameter exists but might be an ID
+            if ($checkEventAccess($routeEvent)) {
+                $event = is_object($routeEvent) ? $routeEvent : \App\Models\Event::find($routeEvent);
+                if ($event) {
+                    \Log::info('VerifiedOrganizerMiddleware: Allowing access via route parameter', [
+                        'user_id' => $user->id,
+                        'event_id' => $event->id,
+                        'route' => $request->route()->getName()
+                    ]);
+                    return $next($request);
+                }
             }
         }
 
@@ -100,35 +142,23 @@ class VerifiedOrganizerMiddleware
             }
 
             if ($eventParam) {
-                try {
+                // Use the helper function to check access
+                if ($checkEventAccess($eventParam)) {
                     $event = is_object($eventParam) ? $eventParam : \App\Models\Event::find($eventParam);
                     if ($event) {
-                        $isOwner = (int) $event->user_id === (int) $user->id;
-                        $isStaff = $event->staff()->where('user_id', $user->id)->exists();
-                        if ($isOwner || $isStaff) {
-                            // Event owner and staff can always access their events for editing/saving, even if not verified
-                            \Log::info('VerifiedOrganizerMiddleware: Allowing access for owner/staff', [
-                                'user_id' => $user->id,
-                                'event_id' => $event->id,
-                                'is_owner' => $isOwner,
-                                'is_staff' => $isStaff,
-                                'route' => $routeName
-                            ]);
-                            return $next($request);
-                        }
+                        // Event owner and staff can always access their events for editing/saving, even if not verified
+                        \Log::info('VerifiedOrganizerMiddleware: Allowing access for owner/staff on edit route', [
+                            'user_id' => $user->id,
+                            'event_id' => $event->id,
+                            'route' => $routeName,
+                            'event_param_type' => is_object($eventParam) ? 'model' : 'id'
+                        ]);
+                        return $next($request);
                     }
-                } catch (\Exception $e) {
-                    // Log error but continue to verification check
-                    \Log::warning('Error checking event ownership in VerifiedOrganizerMiddleware', [
-                        'error' => $e->getMessage(),
-                        'route' => $routeName,
-                        'user_id' => $user->id,
-                        'event_param' => $eventParam
-                    ]);
                 }
             } else {
                 // Log when event param is not found for debugging
-                \Log::debug('VerifiedOrganizerMiddleware: No event parameter found', [
+                \Log::debug('VerifiedOrganizerMiddleware: No event parameter found for edit route', [
                     'route' => $routeName,
                     'route_params' => $request->route()->parameters(),
                     'query_params' => $request->query(),
