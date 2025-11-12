@@ -303,9 +303,9 @@ class AdminNotificationController extends Controller
             // Handle organizer verification notifications
             if ($notification->type === 'organizer' && $notification->reference_id) {
                 if ($notification->action === 'verified') {
-                    return redirect()->route('admin.organizer-verifications.show', ['verification' => $notification->reference_id]);
+                    return redirect()->route('admin.verification.show', ['verification' => $notification->reference_id]);
                 }
-                return redirect()->route('admin.organizer-verifications.index');
+                return redirect()->route('admin.verifications');
             }
 
             // Handle event notifications
@@ -354,7 +354,7 @@ class AdminNotificationController extends Controller
             // Fallback routing based on notification type
             switch ($notification->type) {
                 case 'organizer':
-                    return redirect()->route('admin.organizer-verifications.index');
+                    return redirect()->route('admin.verifications');
                 case 'ticket':
                     // Check if it's a refund or support ticket
                     if (isset($notification->data['refund_request_id']) || in_array($notification->action, ['refund_requested', 'refund_completed', 'refund_rejected'])) {

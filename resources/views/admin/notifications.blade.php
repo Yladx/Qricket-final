@@ -192,9 +192,9 @@
 
                 if (normalizedType === 'organizer') {
                     if (referenceId) {
-                        return `/admin/organizer-verifications/${referenceId}`;
+                        return `/admin/verifications/${referenceId}`;
                     }
-                    return '/admin/organizer-verifications';
+                    return '/admin/verifications';
                 }
 
                 if (normalizedType === 'support' || normalizedType === 'ticket') {
