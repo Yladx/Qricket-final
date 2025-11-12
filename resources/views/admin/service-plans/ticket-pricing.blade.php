@@ -129,13 +129,32 @@
     <div class="px-6 sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Pricing Plans</h3>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Pricing Plans</h3>
+                </div>
+                <!-- Tabs -->
+                <div class="mt-4 border-b border-gray-200 dark:border-gray-700">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button onclick="switchPricingTab('all')" id="tab-all" class="pricing-tab active border-b-2 border-qricket-500 text-qricket-600 dark:text-qricket-400 whitespace-nowrap py-4 px-1 text-sm font-medium">
+                            All Plans
+                            <span class="ml-2 bg-qricket-100 dark:bg-qricket-900 text-qricket-600 dark:text-qricket-400 py-0.5 px-2.5 rounded-full text-xs font-medium">{{ $pricingPlans->count() }}</span>
+                        </button>
+                        <button onclick="switchPricingTab('paid')" id="tab-paid" class="pricing-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 text-sm font-medium">
+                            Paid Plans
+                            <span class="ml-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 py-0.5 px-2.5 rounded-full text-xs font-medium">{{ $pricingPlans->where('type', 'paid')->count() }}</span>
+                        </button>
+                        <button onclick="switchPricingTab('free')" id="tab-free" class="pricing-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 whitespace-nowrap py-4 px-1 text-sm font-medium">
+                            Free Plans
+                            <span class="ml-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 py-0.5 px-2.5 rounded-full text-xs font-medium">{{ $pricingPlans->where('type', 'free')->count() }}</span>
+                        </button>
+                    </nav>
+                </div>
             </div>
             <div class="p-6 overflow-x-hidden">
                 @if($pricingPlans->count())
-                <div class="space-y-4">
+                <div class="space-y-4" id="pricing-plans-container">
                     @foreach($pricingPlans as $plan)
-                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-4 lg:p-5 hover:shadow-md transition-all duration-200 overflow-hidden">
+                    <div class="pricing-plan-card bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-4 lg:p-5 hover:shadow-md transition-all duration-200 overflow-hidden" data-plan-type="{{ $plan->type }}">
                         <!-- Header: Name, Badges, Actions -->
                         <div class="flex flex-wrap items-start justify-between gap-3 mb-4 pb-4 border-b border-gray-200 dark:border-gray-600">
                             <div class="flex-1 min-w-0">
@@ -188,6 +207,14 @@
                         </div>
                     </div>
                     @endforeach
+                </div>
+                <!-- Empty state for filtered tabs -->
+                <div id="pricing-empty-state" class="text-center py-12 hidden">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No plans in this category</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Switch to another tab or create a new pricing plan.</p>
                 </div>
                 @else
                 <div class="text-center py-12">
@@ -540,6 +567,54 @@
                     cutout: '60%'
                 }
             });
+        }
+    }
+
+    // Tab Switching Function
+    function switchPricingTab(type) {
+        // Update tab buttons
+        document.querySelectorAll('.pricing-tab').forEach(tab => {
+            tab.classList.remove('active', 'border-qricket-500', 'text-qricket-600', 'dark:text-qricket-400');
+            tab.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300');
+        });
+
+        const activeTab = document.getElementById(`tab-${type}`);
+        if (activeTab) {
+            activeTab.classList.add('active', 'border-qricket-500', 'text-qricket-600', 'dark:text-qricket-400');
+            activeTab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300');
+        }
+
+        // Show/hide plan cards based on type
+        const planCards = document.querySelectorAll('.pricing-plan-card');
+        let visibleCount = 0;
+
+        planCards.forEach(card => {
+            const planType = card.getAttribute('data-plan-type');
+            if (type === 'all') {
+                card.style.display = '';
+                visibleCount++;
+            } else if (planType === type) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Update empty state message if needed
+        const emptyState = document.getElementById('pricing-empty-state');
+        const plansContainer = document.getElementById('pricing-plans-container');
+
+        if (visibleCount === 0 && emptyState && plansContainer) {
+            emptyState.classList.remove('hidden');
+            plansContainer.style.display = 'none';
+        } else {
+            if (emptyState) {
+                emptyState.classList.add('hidden');
+            }
+            if (plansContainer) {
+                plansContainer.style.display = '';
+            }
         }
     }
 
