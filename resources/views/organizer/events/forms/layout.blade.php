@@ -22,12 +22,10 @@
             'user' => $event->user ?? null, // Add user relationship for event-header component
         ]
     )
-    <div class="-mx-6 sm:mx-0">
-    <div>
-    <div class="relative -mx-4 sm:mx-0">
-        <x-events.event-header :event="$eventObj" :section="'info'" :hideActions="true" :previewPosterUrl="$posterUrl" :previewThumbnailUrl="$thumbUrl" :previewMode="true" />
-    </div>
-    </div>
+    <div class="w-full overflow-hidden">
+        <div class="relative -mx-4 sm:-mx-6 md:mx-0">
+            <x-events.event-header :event="$eventObj" :section="'info'" :hideActions="true" :previewPosterUrl="$posterUrl" :previewThumbnailUrl="$thumbUrl" :previewMode="true" />
+        </div>
     </div>
 
 
