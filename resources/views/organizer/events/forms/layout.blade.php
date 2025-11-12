@@ -72,13 +72,7 @@
     <!-- Current Event ID for JS uploads/hydration -->
     @if(isset($eventObj) && isset($eventObj->id) && $eventObj->id)
     <meta name="event-id" content="{{ $eventObj->id }}">
-    <script>
-        window.currentEventId = {
-            {
-                (int) $eventObj - > id
-            }
-        };
-    </script>
+
     @endif
 
     <!-- Hidden layout JSON field for submission/autosave -->
