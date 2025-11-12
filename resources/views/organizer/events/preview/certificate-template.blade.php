@@ -4,7 +4,22 @@
     $b = $certificateData['theme_border'] ?? $p ?? '#10b981';
     $gradStyle = "background-image: linear-gradient(to right, {$p}, {$s});";
     // Resolve R2 logo URLs or fallback to local asset route
-    $eventId = $event->id ?? (is_object($event) ? ($event->id ?? null) : null) ?? request()->get('id');
+    // Support both organizer and admin contexts
+    if (is_object($event) && isset($event->id)) {
+        $eventId = $event->id;
+    } elseif (is_array($event) && isset($event['id'])) {
+        $eventId = $event['id'];
+    } else {
+        $eventId = request()->get('id') ?? request()->route('event') ?? request()->route('id') ?? null;
+        // Try to get from route parameters if available
+        if (!$eventId && request()->route()) {
+            $routeParams = request()->route()->parameters();
+            $eventId = $routeParams['event'] ?? $routeParams['id'] ?? null;
+            if (is_object($eventId)) {
+                $eventId = $eventId->id ?? null;
+            }
+        }
+    }
     $leftLogoRaw = $certificateData['logo_left_url'] ?? null;
     $rightLogoRaw = $certificateData['logo_right_url'] ?? null;
     $leftLogo = $leftLogoRaw;
