@@ -29,6 +29,15 @@
 </div>
 @endif
 
+<div class="fixed bottom-6 right-6 z-40 drop-shadow-lg">
+    <button onclick="openPricingModal()" class="inline-flex items-center px-4 py-2 bg-qricket-600 hover:bg-qricket-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Add Additional Ticket
+    </button>
+</div>
+
 <!-- Analytics Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
@@ -364,132 +373,140 @@
 <script>
     // Chart data from backend
     const pricingContainer = document.getElementById('pricing-data');
-    const revenueData = pricingContainer ? JSON.parse(pricingContainer.getAttribute('data-revenue-data') || '[]') : [];
-    const popularPlansData = pricingContainer ? JSON.parse(pricingContainer.getAttribute('data-popular-plans-data') || '[]') : [];
+    const parseJsonData = (container, attribute, fallbackJson) => {
+        if (!container) {
+            return JSON.parse(fallbackJson);
+        }
+        try {
+            const raw = container.getAttribute(attribute);
+            return JSON.parse(raw || fallbackJson);
+        } catch (error) {
+            console.error('Failed to parse data attribute', attribute, error);
+            return JSON.parse(fallbackJson);
+        }
+    };
 
-    // Revenue Chart
-    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-    new Chart(revenueCtx, {
-        type: 'line',
-        data: {
-            labels: revenueData.labels,
-            datasets: [{
-                label: 'Revenue (₱)',
-                data: revenueData.values,
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
-                        font: {
-                            size: 12
-                        }
-                    }
+    const revenueData = parseJsonData(pricingContainer, 'data-revenue-data', '{"labels":[],"values":[]}');
+    const popularPlansData = parseJsonData(pricingContainer, 'data-popular-plans-data', '{"labels":[],"values":[]}');
+
+    if (typeof Chart !== 'undefined') {
+        const revenueCanvas = document.getElementById('revenueChart');
+        if (revenueCanvas && revenueCanvas.getContext) {
+            const revenueCtx = revenueCanvas.getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.isArray(revenueData.labels) ? revenueData.labels : [],
+                    datasets: [{
+                        label: 'Revenue (₱)',
+                        data: Array.isArray(revenueData.values) ? revenueData.values : [],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
                 },
-                tooltip: {
-                    enabled: true,
-                    mode: 'index',
-                    intersect: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
-                        font: {
-                            size: 11
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            mode: 'index',
+                            intersect: false
                         }
                     },
-                    grid: {
-                        color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
-                        font: {
-                            size: 11
-                        },
-                        maxRotation: 45,
-                        minRotation: 45
-                    },
-                    grid: {
-                        color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
-                        display: false
-                    }
-                }
-            }
-        }
-    });
-
-    // Popular Plans Chart
-    const popularPlansCtx = document.getElementById('popularPlansChart').getContext('2d');
-    new Chart(popularPlansCtx, {
-        type: 'doughnut',
-        data: {
-            labels: popularPlansData.labels,
-            datasets: [{
-                data: popularPlansData.values,
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.8)',
-                    'rgba(16, 185, 129, 0.8)',
-                    'rgba(245, 158, 11, 0.8)',
-                    'rgba(239, 68, 68, 0.8)',
-                    'rgba(139, 92, 246, 0.8)',
-                    'rgba(236, 72, 153, 0.8)',
-                    'rgba(14, 165, 233, 0.8)'
-                ],
-                borderWidth: 2,
-                borderColor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'right',
-                    labels: {
-                        color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
-                        font: {
-                            size: 12
-                        },
-                        padding: 15,
-                        boxWidth: 15,
-                        boxHeight: 15
-                    }
-                },
-                tooltip: {
-                    enabled: true,
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.label || '';
-                            if (label) {
-                                label += ': ';
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
                             }
-                            if (context.parsed !== null) {
-                                label += context.parsed;
+                        },
+                        x: {
+                            ticks: {
+                                color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                font: {
+                                    size: 11
+                                },
+                                maxRotation: 45,
+                                minRotation: 45
+                            },
+                            grid: {
+                                color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
+                                display: false
                             }
-                            return label;
                         }
                     }
                 }
-            },
-            cutout: '60%'
+            });
         }
-    });
+
+        const popularPlansCanvas = document.getElementById('popularPlansChart');
+        if (popularPlansCanvas && popularPlansCanvas.getContext) {
+            const popularPlansCtx = popularPlansCanvas.getContext('2d');
+            new Chart(popularPlansCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Array.isArray(popularPlansData.labels) ? popularPlansData.labels : [],
+                    datasets: [{
+                        data: Array.isArray(popularPlansData.values) ? popularPlansData.values : [],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(139, 92, 246, 0.8)',
+                            'rgba(236, 72, 153, 0.8)'
+                        ],
+                        borderColor: '#0f172a',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || 'Unknown';
+                                    const value = context.parsed || 0;
+                                    return `${label}: ${value} orders`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+    }
 
     // Modal Functions
     function openPricingModal() {
@@ -520,7 +537,7 @@
     function editPricingPlan(id) {
         // Find the pricing plan data
         const pricingContainer = document.getElementById('pricing-data');
-        const planData = pricingContainer ? JSON.parse(pricingContainer.getAttribute('data-pricing-plans') || '{}') : {};
+        const planData = parseJsonData(pricingContainer, 'data-pricing-plans', '{}');
         const plan = planData[id];
 
         if (!plan) {

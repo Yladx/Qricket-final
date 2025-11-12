@@ -429,155 +429,169 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Chart data from backend
     const subscriptionsContainer = document.getElementById('subscriptions-data');
-    const subscriptionGrowthData = subscriptionsContainer ? JSON.parse(subscriptionsContainer.getAttribute('data-subscription-growth-data') || '[]') : [];
-    const planDistributionData = subscriptionsContainer ? JSON.parse(subscriptionsContainer.getAttribute('data-plan-distribution-data') || '[]') : [];
+    const parseJsonData = (container, attribute, fallbackJson) => {
+        if (!container) {
+            return JSON.parse(fallbackJson);
+        }
+        try {
+            const raw = container.getAttribute(attribute);
+            return JSON.parse(raw || fallbackJson);
+        } catch (error) {
+            console.error('Failed to parse data attribute', attribute, error);
+            return JSON.parse(fallbackJson);
+        }
+    };
 
-    // Subscription Growth Chart
-    const subscriptionGrowthCtx = document.getElementById('subscriptionGrowthChart').getContext('2d');
-    const isDark = document.documentElement.classList.contains('dark');
-    new Chart(subscriptionGrowthCtx, {
-        type: 'line',
-        data: {
-            labels: subscriptionGrowthData.labels || [],
-            datasets: [{
-                label: 'New Subscriptions',
-                data: subscriptionGrowthData.values || [],
-                borderColor: 'rgb(16, 185, 129)',
-                backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                tension: 0.4,
-                fill: true,
-                borderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                pointBackgroundColor: 'rgb(16, 185, 129)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(16, 185, 129)',
-                pointHoverBorderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
+    const subscriptionGrowthData = parseJsonData(subscriptionsContainer, 'data-subscription-growth-data', '{"labels":[],"values":[]}');
+    const planDistributionData = parseJsonData(subscriptionsContainer, 'data-plan-distribution-data', '{"labels":[],"values":[]}');
+
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js failed to load');
+    } else {
+        const isDark = document.documentElement.classList.contains('dark');
+        const subscriptionGrowthCanvas = document.getElementById('subscriptionGrowthChart');
+        if (subscriptionGrowthCanvas && subscriptionGrowthCanvas.getContext) {
+            const subscriptionGrowthCtx = subscriptionGrowthCanvas.getContext('2d');
+            new Chart(subscriptionGrowthCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.isArray(subscriptionGrowthData.labels) ? subscriptionGrowthData.labels : [],
+                    datasets: [{
+                        label: 'New Subscriptions',
+                        data: Array.isArray(subscriptionGrowthData.values) ? subscriptionGrowthData.values : [],
+                        borderColor: 'rgb(16, 185, 129)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: 'rgb(16, 185, 129)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(16, 185, 129)',
+                        pointHoverBorderWidth: 2
+                    }]
                 },
-                tooltip: {
-                    backgroundColor: isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                    titleColor: isDark ? '#e5e7eb' : '#374151',
-                    bodyColor: isDark ? '#e5e7eb' : '#374151',
-                    borderColor: isDark ? '#4b5563' : '#e5e7eb',
-                    borderWidth: 1,
-                    padding: 12,
-                    displayColors: false,
-                    callbacks: {
-                        label: function(context) {
-                            return 'Subscriptions: ' + context.parsed.y;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: isDark ? '#9ca3af' : '#6b7280',
-                        font: {
-                            size: 11
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
                         },
-                        stepSize: 1
-                    },
-                    grid: {
-                        color: isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(229, 231, 235, 0.5)',
-                        drawBorder: false
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: isDark ? '#9ca3af' : '#6b7280',
-                        font: {
-                            size: 11
+                        tooltip: {
+                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                            titleColor: isDark ? '#e5e7eb' : '#374151',
+                            bodyColor: isDark ? '#e5e7eb' : '#374151',
+                            borderColor: isDark ? '#4b5563' : '#e5e7eb',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Subscriptions: ${context.parsed.y}`;
+                                }
+                            }
                         }
                     },
-                    grid: {
-                        display: false
-                    }
-                }
-            },
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            }
-        }
-    });
-
-    // Plan Distribution Chart
-    const planDistributionCtx = document.getElementById('planDistributionChart').getContext('2d');
-    const isDarkMode = document.documentElement.classList.contains('dark');
-    new Chart(planDistributionCtx, {
-        type: 'doughnut',
-        data: {
-            labels: planDistributionData.labels || [],
-            datasets: [{
-                data: planDistributionData.values || [],
-                backgroundColor: [
-                    'rgb(59, 130, 246)',
-                    'rgb(16, 185, 129)',
-                    'rgb(245, 158, 11)',
-                    'rgb(239, 68, 68)',
-                    'rgb(139, 92, 246)',
-                    'rgb(236, 72, 153)',
-                    'rgb(14, 165, 233)'
-                ],
-                borderWidth: 2,
-                borderColor: isDarkMode ? '#1f2937' : '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        color: isDarkMode ? '#d1d5db' : '#4b5563',
-                        font: {
-                            size: 11
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: isDark ? '#9ca3af' : '#6b7280',
+                                font: {
+                                    size: 11
+                                },
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: isDark ? 'rgba(75, 85, 99, 0.3)' : 'rgba(229, 231, 235, 0.5)',
+                                drawBorder: false
+                            }
                         },
-                        padding: 12,
-                        usePointStyle: true,
-                        pointStyle: 'circle'
-                    }
-                },
-                tooltip: {
-                    backgroundColor: isDarkMode ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                    titleColor: isDarkMode ? '#e5e7eb' : '#374151',
-                    bodyColor: isDarkMode ? '#e5e7eb' : '#374151',
-                    borderColor: isDarkMode ? '#4b5563' : '#e5e7eb',
-                    borderWidth: 1,
-                    padding: 12,
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.parsed || 0;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                            return label + ': ' + value + ' (' + percentage + '%)';
+                        x: {
+                            ticks: {
+                                color: isDark ? '#9ca3af' : '#6b7280',
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
                         }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
                     }
                 }
-            },
-            cutout: '60%',
-            animation: {
-                animateRotate: true,
-                animateScale: true
-            }
+            });
         }
-    });
+
+        const planDistributionCanvas = document.getElementById('planDistributionChart');
+        if (planDistributionCanvas && planDistributionCanvas.getContext) {
+            const planDistributionCtx = planDistributionCanvas.getContext('2d');
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            new Chart(planDistributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Array.isArray(planDistributionData.labels) ? planDistributionData.labels : [],
+                    datasets: [{
+                        data: Array.isArray(planDistributionData.values) ? planDistributionData.values : [],
+                        backgroundColor: [
+                            'rgb(59, 130, 246)',
+                            'rgb(16, 185, 129)',
+                            'rgb(245, 158, 11)',
+                            'rgb(239, 68, 68)',
+                            'rgb(139, 92, 246)',
+                            'rgb(236, 72, 153)',
+                            'rgb(14, 165, 233)'
+                        ],
+                        borderWidth: 2,
+                        borderColor: isDarkMode ? '#1f2937' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: isDarkMode ? '#d1d5db' : '#4b5563',
+                                font: {
+                                    size: 11
+                                },
+                                padding: 12,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDarkMode ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                            titleColor: isDarkMode ? '#e5e7eb' : '#374151',
+                            bodyColor: isDarkMode ? '#e5e7eb' : '#374151',
+                            borderColor: isDarkMode ? '#4b5563' : '#e5e7eb',
+                            borderWidth: 1,
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || 'Unknown';
+                                    const value = context.parsed || 0;
+                                    return `${label}: ${value} subscriber${value === 1 ? '' : 's'}`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+    }
 
     // Modal Functions
     function openSubscriptionPlanModal() {
@@ -608,7 +622,7 @@
     function editSubscriptionPlan(id) {
         // Find the subscription plan data
         const subscriptionsContainer = document.getElementById('subscriptions-data');
-        const planData = subscriptionsContainer ? JSON.parse(subscriptionsContainer.getAttribute('data-subscription-plans') || '{}') : {};
+        const planData = parseJsonData(subscriptionsContainer, 'data-subscription-plans', '{}');
         const plan = planData[id];
 
         if (!plan) {
