@@ -122,11 +122,12 @@
                         <thead class="bg-gray-50 dark:bg-gray-900">
                             <tr class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                                 <th class="px-4 py-3 text-left">Submitted</th>
+                                <th class="px-4 py-3 text-left">User</th>
                                 @foreach($ratingMetrics as $metric)
                                 <th class="px-4 py-3 text-left">{{ $metric['label'] }}</th>
                                 @endforeach
                                 <th class="px-4 py-3 text-left">Overall</th>
-                                <th class="px-4 py-3 text-left">Comments</th>
+                                <th class="px-4 py-3 text-left w-72">Comments</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -141,6 +142,14 @@
                                 <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">
                                     <div class="font-medium text-gray-900 dark:text-gray-100">{{ $item->created_at->timezone(config('app.timezone'))->format('M j, Y') }}</div>
                                     <div>{{ $item->created_at->timezone(config('app.timezone'))->format('g:i A') }}</div>
+                                </td>
+                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                    @if($item->user)
+                                    <div class="font-medium text-gray-900 dark:text-gray-100">{{ $item->user->name ?? ($item->user->first_name . ' ' . $item->user->last_name) }}</div>
+                                    <div class="text-gray-500 dark:text-gray-400 text-[11px]">ID: {{ $item->user->id }}</div>
+                                    @else
+                                    <span class="text-gray-400">Anonymous</span>
+                                    @endif
                                 </td>
                                 @foreach($ratingMetrics as $metric)
                                 @php $value = $item->{$metric['key']}; @endphp
@@ -165,7 +174,7 @@
                                     <span class="text-gray-400">—</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300 max-w-xs">
+                                <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-300 align-top w-80">
                                     @if($item->additional_comments)
                                     <p class="line-clamp-3">{{ $item->additional_comments }}</p>
                                     @else
@@ -175,7 +184,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="8" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No feedback recorded yet.</td>
+                                <td colspan="9" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No feedback recorded yet.</td>
                             </tr>
                             @endforelse
                         </tbody>

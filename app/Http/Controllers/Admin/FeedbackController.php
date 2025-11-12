@@ -10,6 +10,7 @@ class FeedbackController extends Controller
     public function index()
     {
         $feedback = QricketFeedback::website()
+            ->with('user')
             ->latest()
             ->paginate(20)
             ->withQueryString();
