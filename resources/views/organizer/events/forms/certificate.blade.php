@@ -5,7 +5,7 @@
     <div class="flex items-start justify-between">
         <div>
             <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">Certificate Details</h1>
-            <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400">Set organization, theme, logos, recipient and signatories.</p>
+            <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400">Set organization, theme, recipient and signatories.</p>
         </div>
     </div>
 
@@ -28,9 +28,9 @@
         </div>
     </div>
 
-    <!-- Theme & Logos -->
+    <!-- Theme -->
     <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
-        <h3 class="text-xs font-semibold text-gray-800 dark:text-gray-100 mb-3">Theme & Logos</h3>
+        <h3 class="text-xs font-semibold text-gray-800 dark:text-gray-100 mb-3">Theme</h3>
         
         <!-- Certificate Color Customization - Inline -->
         <div>
@@ -61,7 +61,8 @@
         </div>
         
         <!-- Logos - Next Line -->
-        <div>
+        {{-- Logo upload functionality commented out for now --}}
+        {{-- <div>
             <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Logos</label>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -117,7 +118,7 @@
                     </label>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 
     <!-- Recipient -->
@@ -126,8 +127,9 @@
         <div class="grid grid-cols-1">
             <div>
                 <label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Recipient Preview Name</label>
-                @php($hasLogo = !empty($cd['logo_left_url']) || !empty($cd['logo_right_url']))
-                <input id="recipient_name_input" name="recipient_name" @if(!$hasLogo) disabled @endif type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['recipient_name'] ?? '' }}" placeholder="Upload a logo first, then enter name">
+                {{-- Logo check disabled - recipient name can be entered without logos --}}
+                {{-- @php($hasLogo = !empty($cd['logo_left_url']) || !empty($cd['logo_right_url'])) --}}
+                <input id="recipient_name_input" name="recipient_name" type="text" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" value="{{ $cd['recipient_name'] ?? '' }}" placeholder="Enter recipient name">
             </div>
         </div>
     </div>

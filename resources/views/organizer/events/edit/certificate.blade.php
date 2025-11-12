@@ -10,7 +10,7 @@
                 @method('PUT')
                 <input type="hidden" name="skip_certificate" id="skip_certificate_hidden" value="0">
                 <input type="hidden" id="certificate_data_json" name="certificate_data_json" value='@json($certificateData ?? [])'>
-                
+
                 <!-- Top: Form -->
                 <div>
                     <div class="flex items-center justify-between mb-3">
@@ -22,16 +22,16 @@
                     </div>
                     @php($cd = $certificateData ?? [])
                     @php(
-                        $fallbackWhen = (isset($event) && ($event->start_date ?? null))
-                            ? ('held on ' . \Carbon\Carbon::parse($event->start_date)->format('F j, Y \a\t g:i A') .
-                               (($event->location ?? null) ? ' at ' . $event->location : '') . '.')
-                            : ''
+                    $fallbackWhen = (isset($event) && ($event->start_date ?? null))
+                    ? ('held on ' . \Carbon\Carbon::parse($event->start_date)->format('F j, Y \a\t g:i A') .
+                    (($event->location ?? null) ? ' at ' . $event->location : '') . '.')
+                    : ''
                     )
                     @php(
-                        $fallbackGiven = (isset($event) && ($event->start_date ?? null))
-                            ? ('Given this ' . \Carbon\Carbon::parse($event->start_date)->format('jS') . ' day of '
-                               . \Carbon\Carbon::parse($event->start_date)->format('F, Y') . '.')
-                            : ''
+                    $fallbackGiven = (isset($event) && ($event->start_date ?? null))
+                    ? ('Given this ' . \Carbon\Carbon::parse($event->start_date)->format('jS') . ' day of '
+                    . \Carbon\Carbon::parse($event->start_date)->format('F, Y') . '.')
+                    : ''
                     )
                     <div id="certificate-form-container">
                         @include('organizer.events.forms.certificate', ['certificateData' => $certificateData, 'event' => $event])
@@ -42,17 +42,17 @@
                     <summary class="cursor-pointer select-none px-4 py-3 text-sm font-medium flex items-center justify-between">
                         <span>Certificate Preview</span>
                         <div class="flex items-center gap-3">
-                            <button type="button" onclick="window.print()" class="px-3 py-1.5 text-xs rounded bg-qricket-500 text-white hover:bg-qricket-600">Print</button>
+                            <button type="button" onclick="window.print()" class="px-3 py-1.5 text-xs rounded bg-qricket-500 text-white hover:bg-qricket-600 no-print">Print</button>
                             <span class="text-xs text-gray-500">Click to collapse/expand</span>
                         </div>
                     </summary>
                     <div class="p-4">
                         <div id="cert_preview_wrapper">
                             @include('organizer.events.preview.certificate-template', [
-                                'certificateData' => $certificateData, 
-                                'event' => $event ?? (object)['id' => $event->id ?? request()->get('id')], 
-                                'fallbackWhen' => $fallbackWhen, 
-                                'fallbackGiven' => $fallbackGiven
+                            'certificateData' => $certificateData,
+                            'event' => $event ?? (object)['id' => $event->id ?? request()->get('id')],
+                            'fallbackWhen' => $fallbackWhen,
+                            'fallbackGiven' => $fallbackGiven
                             ])
                         </div>
                     </div>
@@ -81,19 +81,29 @@
 
     <script>
         const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const eventId = {{ $eventId ?? 'null' }};
-        window.currentEventId = {{ $event->id }};
+        const eventId = {
+            {
+                $eventId ?? 'null'
+            }
+        };
+        window.currentEventId = {
+            {
+                $event - > id
+            }
+        };
 
-        function syncPreview(idInput, idPreview){
+        function syncPreview(idInput, idPreview) {
             const elI = document.getElementById(idInput);
             const elP = document.getElementById(idPreview);
             if (!elI || !elP) return;
-            elI.addEventListener('input', () => { elP.textContent = elI.value; });
+            elI.addEventListener('input', () => {
+                elP.textContent = elI.value;
+            });
         }
         // Sync preview for basic fields
-        ['org_line1','org_line2','org_school','recipient_name','event_title','event_when','event_given']
-            .forEach(k => syncPreview(`${k}_input`, k));
-        
+        ['org_line1', 'org_line2', 'org_school', 'recipient_name', 'event_title', 'event_when', 'event_given']
+        .forEach(k => syncPreview(`${k}_input`, k));
+
         // Sync preview for dynamic signatory fields
         function syncAllSignatories() {
             document.querySelectorAll('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]').forEach(input => {
@@ -102,28 +112,28 @@
                 syncPreview(fieldName, previewId);
             });
         }
-        
+
         // Update preview when signatories change
         function updateSignatoryPreview() {
             // Remove all existing signatory previews
             document.querySelectorAll('[id^="sig_"][id$="_name"], [id^="sig_"][id$="_title"]').forEach(el => {
                 el.textContent = '';
             });
-            
+
             // Add current signatories to preview
             const signatoryItems = document.querySelectorAll('.signatory-item');
             signatoryItems.forEach((item, index) => {
                 const signatoryNum = index + 1;
                 const nameInput = item.querySelector(`input[name="sig_${signatoryNum}_name"]`);
                 const titleInput = item.querySelector(`input[name="sig_${signatoryNum}_title"]`);
-                
+
                 if (nameInput) {
                     const namePreview = document.getElementById(`sig_${signatoryNum}_name`);
                     if (namePreview) {
                         namePreview.textContent = nameInput.value || `Signatory ${signatoryNum}`;
                     }
                 }
-                
+
                 if (titleInput) {
                     const titlePreview = document.getElementById(`sig_${signatoryNum}_title`);
                     if (titlePreview) {
@@ -132,15 +142,21 @@
                 }
             });
         }
-        
+
         // Initial sync
         syncAllSignatories();
         updateSignatoryPreview();
-        
+
         // Define autosave functions early so they can be used by addSignatory/removeSignatory
-        const debounce = (fn, d=600)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), d); }; };
+        const debounce = (fn, d = 600) => {
+            let t;
+            return (...a) => {
+                clearTimeout(t);
+                t = setTimeout(() => fn(...a), d);
+            };
+        };
         const statusEl = document.getElementById('cert_autosave_status');
-        
+
         // Function to show autosave indicator (like in autosave.js)
         function showAutosaveIndicator(status) {
             // Remove existing indicator
@@ -148,19 +164,19 @@
             if (existingIndicator) {
                 existingIndicator.remove();
             }
-            
+
             // Create new indicator
             const indicator = document.createElement('div');
             indicator.id = 'autosave-indicator';
             indicator.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 shadow-lg ${
-                status === 'success' 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                status === 'success'
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                     : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
             }`;
             indicator.textContent = status === 'success' ? '✓ Auto-saved' : '✗ Save failed';
-            
+
             document.body.appendChild(indicator);
-            
+
             // Remove after 3 seconds
             setTimeout(() => {
                 if (indicator && indicator.parentNode) {
@@ -168,17 +184,17 @@
                 }
             }, 3000);
         }
-        
+
         // We'll define autosaveCert and autosaveDebounced after collectPayload is defined
         let autosaveDebounced = null;
-        
+
         // Define addSignatory function for edit certificate
         const existingCertificateData = @json($certificateData ?? []);
         let signatoryCount = document.querySelectorAll('.signatory-item').length || 1;
-        
+
         window.addSignatory = function addSignatory() {
             console.log('addSignatory called from edit certificate, current signatoryCount:', signatoryCount);
-            
+
             if (signatoryCount >= 4) {
                 if (typeof Swal !== 'undefined' && window.Swal) {
                     Swal.fire({
@@ -192,10 +208,10 @@
                 }
                 return;
             }
-            
+
             signatoryCount++;
             console.log('New signatoryCount:', signatoryCount);
-            
+
             const container = document.getElementById('signatory-details-container');
             if (!container) {
                 console.error('Container not found: signatory-details-container');
@@ -203,69 +219,69 @@
                 signatoryCount--; // Revert count
                 return;
             }
-            
+
             console.log('Container found, creating new signatory...');
             const newSignatory = document.createElement('div');
             newSignatory.className = 'signatory-item border border-gray-200 dark:border-gray-700 rounded-lg p-3';
             newSignatory.setAttribute('data-signatory', signatoryCount);
-            
+
             // Build signatory HTML using string concatenation
             const sigNum = signatoryCount;
-            newSignatory.innerHTML = 
+            newSignatory.innerHTML =
                 '<div class="flex items-center justify-between mb-2">' +
-                    '<h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory ' + sigNum + '</h4>' +
-                    '<button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" onclick="window.removeSignatory(' + sigNum + ')">' +
-                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
-                        '</svg>' +
-                    '</button>' +
+                '<h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Signatory ' + sigNum + '</h4>' +
+                '<button type="button" class="remove-signatory-btn text-red-500 hover:text-red-700 text-xs" onclick="window.removeSignatory(' + sigNum + ')">' +
+                '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
+                '</svg>' +
+                '</button>' +
                 '</div>' +
                 '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">' +
-                    '<div>' +
-                        '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>' +
-                        '<input id="sig_' + sigNum + '_name_input" name="sig_' + sigNum + '_name" type="text" maxlength="36" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 36 characters">' +
-                    '</div>' +
-                    '<div>' +
-                        '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>' +
-                        '<input id="sig_' + sigNum + '_title_input" name="sig_' + sigNum + '_title" type="text" maxlength="28" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 28 characters">' +
-                    '</div>' +
+                '<div>' +
+                '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Name</label>' +
+                '<input id="sig_' + sigNum + '_name_input" name="sig_' + sigNum + '_name" type="text" maxlength="36" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 36 characters">' +
+                '</div>' +
+                '<div>' +
+                '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Title</label>' +
+                '<input id="sig_' + sigNum + '_title_input" name="sig_' + sigNum + '_title" type="text" maxlength="28" class="w-full text-xs bg-white text-gray-900 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md py-1.5 px-2" placeholder="Max 28 characters">' +
+                '</div>' +
                 '</div>' +
                 '<div class="mt-3">' +
-                    '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>' +
-                    '<div class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 hover:bg-gray-50 dark:hover:bg-gray-800">' +
-                        '<div class="flex items-center gap-2 flex-1">' +
-                            '<div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">' +
-                                '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>' +
-                            '</div>' +
-                            '<div>' +
-                                '<div class="text-xs font-medium">Signature ' + sigNum + '</div>' +
-                                '<div class="text-xs text-gray-500 dark:text-gray-400">PNG/JPG/WebP, up to 2MB</div>' +
-                                '<div class="mt-0.5 flex items-center gap-1">' +
-                                    '<img id="sig_' + sigNum + '_preview" src="" class="w-5 h-5 rounded object-contain border border-gray-200 dark:border-gray-700 hidden" alt="Signature ' + sigNum + ' preview">' +
-                                    '<span id="sig_' + sigNum + '_status" class="text-xs text-gray-500 dark:text-gray-400">No file</span>' +
-                                    '<button type="button" id="sig_' + sigNum + '_remove_btn" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hidden" title="Remove signature">' +
-                                        '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' +
-                                        '</svg>' +
-                                    '</button>' +
-                                '</div>' +
-                            '</div>' +
-                        '</div>' +
-                        '<label class="cursor-pointer">' +
-                            '<input type="file" id="sig_' + sigNum + '_file" accept="image/*" class="hidden">' +
-                            '<span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white cursor-pointer">Choose</span>' +
-                        '</label>' +
-                    '</div>' +
+                '<label class="block text-xs text-gray-600 dark:text-gray-300 mb-0.5">Signature Image</label>' +
+                '<div class="flex items-center justify-between gap-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-md p-2 hover:bg-gray-50 dark:hover:bg-gray-800">' +
+                '<div class="flex items-center gap-2 flex-1">' +
+                '<div class="w-8 h-8 flex items-center justify-center rounded bg-qricket-50 text-qricket-600 dark:bg-gray-800 dark:text-gray-200">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"/></svg>' +
+                '</div>' +
+                '<div>' +
+                '<div class="text-xs font-medium">Signature ' + sigNum + '</div>' +
+                '<div class="text-xs text-gray-500 dark:text-gray-400">PNG/JPG/WebP, up to 2MB</div>' +
+                '<div class="mt-0.5 flex items-center gap-1">' +
+                '<img id="sig_' + sigNum + '_preview" src="" class="w-5 h-5 rounded object-contain border border-gray-200 dark:border-gray-700 hidden" alt="Signature ' + sigNum + ' preview">' +
+                '<span id="sig_' + sigNum + '_status" class="text-xs text-gray-500 dark:text-gray-400">No file</span>' +
+                '<button type="button" id="sig_' + sigNum + '_remove_btn" class="ml-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hidden" title="Remove signature">' +
+                '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' +
+                '</svg>' +
+                '</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '<label class="cursor-pointer">' +
+                '<input type="file" id="sig_' + sigNum + '_file" accept="image/*" class="hidden">' +
+                '<span class="px-2 py-0.5 text-xs rounded bg-qricket-500 text-white cursor-pointer">Choose</span>' +
+                '</label>' +
+                '</div>' +
                 '</div>';
-            
+
             try {
                 container.appendChild(newSignatory);
                 console.log('Successfully appended signatory', sigNum);
-                
+
                 // Attach event listeners after element is added to DOM (prevents onclick from firing on load)
                 const fileInput = document.getElementById(`sig_${sigNum}_file`);
                 const removeBtn = document.getElementById(`sig_${sigNum}_remove_btn`);
-                
+
                 if (fileInput) {
                     // Attach change event listener with stopPropagation
                     fileInput.addEventListener('change', function(e) {
@@ -275,7 +291,7 @@
                         }
                     });
                 }
-                
+
                 if (removeBtn) {
                     removeBtn.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -291,7 +307,7 @@
                 signatoryCount--; // Revert count
                 return;
             }
-            
+
             // Update add button state
             const addBtn = document.getElementById('add-signatory-btn');
             if (addBtn) {
@@ -300,23 +316,23 @@
                     addBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 }
             }
-            
+
             // Show remove buttons for all signatories
             document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
                 btn.classList.remove('hidden');
             });
-            
+
             // Sync with preview
             updateSignatoryPreview();
-            
+
             // Trigger autosave
             if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                 autosaveDebounced();
             }
-            
+
             console.log('addSignatory completed successfully');
         };
-        
+
         // Define removeSignatory function
         window.removeSignatory = function removeSignatory(signatoryNum) {
             if (signatoryCount <= 1) {
@@ -332,16 +348,16 @@
                 }
                 return;
             }
-            
+
             const signatoryItem = document.querySelector(`[data-signatory="${signatoryNum}"]`);
             if (!signatoryItem) {
                 console.warn('Signatory item not found:', signatoryNum);
                 return;
             }
-            
+
             signatoryItem.remove();
             signatoryCount--;
-            
+
             // Update add button state
             const addBtn = document.getElementById('add-signatory-btn');
             if (addBtn) {
@@ -350,26 +366,26 @@
                     addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
             }
-            
+
             // Hide remove buttons if only one signatory left
             if (signatoryCount === 1) {
                 document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
                     btn.classList.add('hidden');
                 });
             }
-            
+
             // Renumber remaining signatories
             const remainingSignatories = document.querySelectorAll('.signatory-item');
             remainingSignatories.forEach((item, index) => {
                 const newNum = index + 1;
                 item.setAttribute('data-signatory', newNum);
-                
+
                 // Update all input IDs and names
                 const nameInput = item.querySelector('input[name^="sig_"][name$="_name"]');
                 const titleInput = item.querySelector('input[name^="sig_"][name$="_title"]');
                 const fileInput = item.querySelector('input[type="file"][id^="sig_"]');
                 const statusEl = item.querySelector('[id^="sig_"][id$="_status"]');
-                
+
                 if (nameInput) {
                     nameInput.id = `sig_${newNum}_name_input`;
                     nameInput.name = `sig_${newNum}_name`;
@@ -384,7 +400,7 @@
                     // Remove old event listeners and add new one
                     const newFileInput = fileInput.cloneNode(true);
                     fileInput.parentNode.replaceChild(newFileInput, fileInput);
-                    
+
                     newFileInput.addEventListener('change', function(e) {
                         e.stopPropagation();
                         if (typeof window.uploadSignature === 'function') {
@@ -413,34 +429,34 @@
                         }
                     });
                 }
-                
+
                 // Update remove signatory button onclick
                 const removeBtn = item.querySelector('.remove-signatory-btn');
                 if (removeBtn) {
                     removeBtn.setAttribute('onclick', `window.removeSignatory(${newNum})`);
                 }
-                
+
                 // Update heading
                 const heading = item.querySelector('h4');
                 if (heading) {
                     heading.textContent = `Signatory ${newNum}`;
                 }
             });
-            
+
             // Update preview
             updateSignatoryPreview();
-            
+
             // Trigger autosave
             if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                 autosaveDebounced();
             }
         };
-        
+
         // Update uploadSignature to handle dynamic signatory numbers
-        window.uploadSignature = async function(signatoryNum){
+        window.uploadSignature = async function(signatoryNum) {
             const file = document.getElementById(`sig_${signatoryNum}_file`)?.files?.[0];
             if (!file) return;
-            
+
             // Show immediate preview using FileReader
             const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
             if (previewEl && file) {
@@ -451,12 +467,18 @@
                 };
                 reader.readAsDataURL(file);
             }
-            
+
             const fd = new FormData();
             fd.append('event_id', eventId);
             fd.append('signatory_num', String(signatoryNum));
             fd.append('signature', file);
-            const resp = await fetch('/organizer/events/certificate/upload-signature', { method:'POST', headers:{ 'X-CSRF-TOKEN': csrf }, body: fd });
+            const resp = await fetch('/organizer/events/certificate/upload-signature', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrf
+                },
+                body: fd
+            });
             const res = await resp.json();
             const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
             if (res && res.success) {
@@ -471,7 +493,7 @@
                 }
                 // Show remove button
                 showSignatureRemoveButton(signatoryNum);
-                
+
                 // Update hidden JSON field with new signature path
                 const jsonEl = document.getElementById('certificate_data_json');
                 if (jsonEl && res.signature_path) {
@@ -483,18 +505,18 @@
                         console.error('Failed to update certificate_data_json:', e);
                     }
                 }
-                
+
                 // Update certificate preview signature
                 if (typeof updateSignatoryPreview === 'function') {
                     updateSignatoryPreview();
                 }
-                
+
                 // Refresh preview with updated data
                 if (typeof collectPayload === 'function' && typeof refreshPreview === 'function') {
                     const payload = collectPayload();
                     refreshPreview(payload);
                 }
-                
+
                 if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                     autosaveDebounced();
                 }
@@ -507,33 +529,33 @@
                 hideSignatureRemoveButton(signatoryNum);
             }
         };
-        
+
         function showSignatureRemoveButton(signatoryNum) {
             const removeBtn = document.getElementById(`sig_${signatoryNum}_remove_btn`);
             if (removeBtn) {
                 removeBtn.classList.remove('hidden');
             }
         }
-        
+
         function hideSignatureRemoveButton(signatoryNum) {
             const removeBtn = document.getElementById(`sig_${signatoryNum}_remove_btn`);
             if (removeBtn) {
                 removeBtn.classList.add('hidden');
             }
         }
-        
+
         window.removeSignature = async function(signatoryNum) {
             if (!confirm('Are you sure you want to remove this signature?')) {
                 return;
             }
-            
+
             try {
                 // Call backend API to remove signature from R2 and update JSON
                 const formData = new FormData();
                 formData.append('id', eventId);
                 formData.append('signatory_num', signatoryNum);
                 formData.append('_token', csrf);
-                
+
                 const response = await fetch('/organizer/events/certificate/remove-signature', {
                     method: 'POST',
                     headers: {
@@ -542,9 +564,9 @@
                     },
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     // Clear preview
                     const previewEl = document.getElementById(`sig_${signatoryNum}_preview`);
@@ -552,23 +574,23 @@
                         previewEl.src = '';
                         previewEl.classList.add('hidden');
                     }
-                    
+
                     // Reset status
                     const statusEl = document.getElementById(`sig_${signatoryNum}_status`);
                     if (statusEl) {
                         statusEl.textContent = 'No file';
                         statusEl.className = 'text-xs text-gray-500 dark:text-gray-400';
                     }
-                    
+
                     // Clear file input
                     const fileInput = document.getElementById(`sig_${signatoryNum}_file`);
                     if (fileInput) {
                         fileInput.value = '';
                     }
-                    
+
                     // Hide remove button
                     hideSignatureRemoveButton(signatoryNum);
-                    
+
                     // Update certificate data JSON to remove signature path
                     const jsonEl = document.getElementById('certificate_data_json');
                     if (jsonEl) {
@@ -576,7 +598,7 @@
                         delete current[`sig_${signatoryNum}_signature`];
                         jsonEl.value = JSON.stringify(current);
                     }
-                    
+
                     // Update signature image in certificate preview
                     const previewWrapper = document.getElementById('cert_preview_wrapper');
                     if (previewWrapper) {
@@ -599,7 +621,7 @@
                             }
                         }
                     }
-                    
+
                     // Reload certificate data from R2 to ensure consistency
                     // Use collectPayload to get current data and refresh preview
                     if (typeof collectPayload === 'function' && typeof refreshPreview === 'function') {
@@ -608,7 +630,7 @@
                     } else if (typeof syncCertificateData === 'function') {
                         await syncCertificateData();
                     }
-                    
+
                     showAutosaveIndicator('success');
                 } else {
                     throw new Error(data.message || 'Failed to remove signature');
@@ -619,7 +641,7 @@
                 showAutosaveIndicator('error');
             }
         }
-        
+
         // Attach event listener to add button
         document.addEventListener('DOMContentLoaded', function() {
             const addBtn = document.getElementById('add-signatory-btn');
@@ -637,7 +659,7 @@
                 console.log('Event listener attached to add button in edit certificate');
             }
         });
-        
+
         // Also try immediately if DOM is ready
         if (document.readyState !== 'loading') {
             const addBtn = document.getElementById('add-signatory-btn');
@@ -655,34 +677,34 @@
                 console.log('Event listener attached to add button in edit certificate (immediate)');
             }
         }
-        
+
         // Load existing signatories
-        (function loadExistingSignatories(){
+        (function loadExistingSignatories() {
             if (!existingCertificateData) return;
-            
+
             // Wait for window.addSignatory to be available
             function tryLoad() {
                 if (typeof window.addSignatory !== 'function') {
                     setTimeout(tryLoad, 100);
                     return;
                 }
-                
+
                 const currentSignatories = document.querySelectorAll('.signatory-item');
                 const currentCount = currentSignatories.length;
-                
+
                 // Calculate signatory_count from data - check for sig_1 through sig_4
                 let calculatedSignatoryCount = 1;
                 for (let i = 1; i <= 4; i++) {
-                    if (existingCertificateData[`sig_${i}_name`] || 
-                        existingCertificateData[`sig_${i}_title`] || 
+                    if (existingCertificateData[`sig_${i}_name`] ||
+                        existingCertificateData[`sig_${i}_title`] ||
                         existingCertificateData[`sig_${i}_signature`]) {
                         calculatedSignatoryCount = Math.max(calculatedSignatoryCount, i);
                     }
                 }
-                
+
                 // Use the calculated count or fallback to signatory_count if available
                 const savedSignatoryCount = existingCertificateData.signatory_count || calculatedSignatoryCount;
-                
+
                 // Also check if we have data for signatories 2-4 even if count isn't set
                 let maxSignatoryWithData = savedSignatoryCount;
                 for (let i = 2; i <= 4; i++) {
@@ -690,7 +712,7 @@
                         maxSignatoryWithData = Math.max(maxSignatoryWithData, i);
                     }
                 }
-                
+
                 console.log('Loading signatories (edit):', {
                     currentCount: currentCount,
                     savedCount: savedSignatoryCount,
@@ -698,7 +720,7 @@
                     maxSignatoryWithData: maxSignatoryWithData,
                     existingData: Object.keys(existingCertificateData).filter(k => k.startsWith('sig_'))
                 });
-                
+
                 // If we need to add more signatories (use maxSignatoryWithData instead of savedSignatoryCount)
                 if (maxSignatoryWithData > currentCount) {
                     console.log('Adding', maxSignatoryWithData - currentCount, 'missing signatories (edit)');
@@ -706,13 +728,13 @@
                         console.log('Adding signatory', i, '(edit)');
                         window.addSignatory();
                     }
-                    
+
                     // Wait longer for DOM to fully update, then populate all values
                     setTimeout(() => {
                         console.log('First populate attempt after', 200, 'ms (edit)');
                         populateAllValues();
                     }, 200);
-                    
+
                     // Also try again after a longer delay in case first attempt fails
                     setTimeout(() => {
                         console.log('Second populate attempt after', 500, 'ms (edit)');
@@ -724,15 +746,15 @@
                     populateAllValues();
                 }
             }
-            
+
             function populateAllValues() {
                 const allSignatories = document.querySelectorAll('.signatory-item');
-                
+
                 // Calculate max signatory with data (same logic as above)
                 let calculatedSignatoryCount = 1;
                 for (let i = 1; i <= 4; i++) {
-                    if (existingCertificateData[`sig_${i}_name`] || 
-                        existingCertificateData[`sig_${i}_title`] || 
+                    if (existingCertificateData[`sig_${i}_name`] ||
+                        existingCertificateData[`sig_${i}_title`] ||
                         existingCertificateData[`sig_${i}_signature`]) {
                         calculatedSignatoryCount = Math.max(calculatedSignatoryCount, i);
                     }
@@ -744,34 +766,34 @@
                         maxSignatoryWithData = Math.max(maxSignatoryWithData, i);
                     }
                 }
-                
+
                 console.log('Populating values for', allSignatories.length, 'signatories (edit). Max signatory with data:', maxSignatoryWithData);
-                
+
                 for (let i = 1; i <= maxSignatoryWithData && i <= 4; i++) {
                     const name = existingCertificateData[`sig_${i}_name`];
                     const title = existingCertificateData[`sig_${i}_title`];
                     const sigPath = existingCertificateData[`sig_${i}_signature`];
-                    
+
                     // Find the signatory item by data attribute
                     const signatoryItem = document.querySelector(`[data-signatory="${i}"]`);
-                    
+
                     if (!signatoryItem) {
                         console.warn('Signatory item not found for index (edit):', i);
                         continue;
                     }
-                    
+
                     // Try multiple selectors to find inputs - search within the signatory item
-                    const nameInput = signatoryItem.querySelector(`input[name="sig_${i}_name"]`) || 
-                                     signatoryItem.querySelector(`#sig_${i}_name_input`) ||
-                                     document.getElementById(`sig_${i}_name_input`) || 
-                                     document.querySelector(`input[name="sig_${i}_name"]`);
-                    const titleInput = signatoryItem.querySelector(`input[name="sig_${i}_title"]`) || 
-                                      signatoryItem.querySelector(`#sig_${i}_title_input`) ||
-                                      document.getElementById(`sig_${i}_title_input`) || 
-                                      document.querySelector(`input[name="sig_${i}_title"]`);
-                    const statusEl = signatoryItem.querySelector(`#sig_${i}_status`) || 
-                                    document.getElementById(`sig_${i}_status`);
-                    
+                    const nameInput = signatoryItem.querySelector(`input[name="sig_${i}_name"]`) ||
+                        signatoryItem.querySelector(`#sig_${i}_name_input`) ||
+                        document.getElementById(`sig_${i}_name_input`) ||
+                        document.querySelector(`input[name="sig_${i}_name"]`);
+                    const titleInput = signatoryItem.querySelector(`input[name="sig_${i}_title"]`) ||
+                        signatoryItem.querySelector(`#sig_${i}_title_input`) ||
+                        document.getElementById(`sig_${i}_title_input`) ||
+                        document.querySelector(`input[name="sig_${i}_title"]`);
+                    const statusEl = signatoryItem.querySelector(`#sig_${i}_status`) ||
+                        document.getElementById(`sig_${i}_status`);
+
                     console.log('Signatory', i, 'inputs found (edit):', {
                         nameInput: !!nameInput,
                         titleInput: !!titleInput,
@@ -780,36 +802,40 @@
                         title: title,
                         sigPath: sigPath
                     });
-                    
+
                     if (nameInput) {
                         if (name !== undefined && name !== null) {
                             nameInput.value = name || '';
-                            nameInput.dispatchEvent(new Event('input', { bubbles: true })); // Trigger input event for autosave
+                            nameInput.dispatchEvent(new Event('input', {
+                                bubbles: true
+                            })); // Trigger input event for autosave
                             console.log('✓ Populated sig_' + i + '_name:', name || '(empty)');
                         }
                     } else {
                         console.warn('❌ Name input not found for signatory (edit)', i);
                     }
-                    
+
                     if (titleInput) {
                         if (title !== undefined && title !== null) {
                             titleInput.value = title || '';
-                            titleInput.dispatchEvent(new Event('input', { bubbles: true })); // Trigger input event for autosave
+                            titleInput.dispatchEvent(new Event('input', {
+                                bubbles: true
+                            })); // Trigger input event for autosave
                             console.log('✓ Populated sig_' + i + '_title:', title || '(empty)');
                         }
                     } else {
                         console.warn('❌ Title input not found for signatory (edit)', i);
                     }
-                    
+
                     if (statusEl && sigPath) {
                         statusEl.textContent = 'Uploaded';
                         statusEl.className = 'text-xs text-green-500 dark:text-green-400';
                         console.log('Set sig_' + i + ' status to Uploaded');
                     }
-                    
+
                     // Show preview image if signature exists
-                    const previewEl = signatoryItem.querySelector(`#sig_${i}_preview`) || 
-                                     document.getElementById(`sig_${i}_preview`);
+                    const previewEl = signatoryItem.querySelector(`#sig_${i}_preview`) ||
+                        document.getElementById(`sig_${i}_preview`);
                     if (previewEl && sigPath) {
                         // Construct URL from signature path
                         const sigUrl = sigPath.startsWith('http') ? sigPath : `/storage/${sigPath}`;
@@ -820,31 +846,31 @@
                         showSignatureRemoveButton(i);
                     }
                 }
-                
+
                 signatoryCount = allSignatories.length;
-                
+
                 // Show remove buttons if more than one signatory
                 if (allSignatories.length > 1) {
                     document.querySelectorAll('.remove-signatory-btn').forEach(btn => {
                         btn.classList.remove('hidden');
                     });
                 }
-                
+
                 updateSignatoryPreview();
-                
+
                 // Trigger autosave after populating all values
                 if (autosaveDebounced && typeof autosaveDebounced === 'function') {
                     console.log('Triggering autosave after populating signatories (edit)');
                     autosaveDebounced();
                 }
-                
+
                 console.log('Finished populating signatory values (edit)');
             }
-            
+
             // Start loading process
             tryLoad();
         })();
-        
+
         // Re-sync when signatories are added/removed
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
@@ -854,12 +880,15 @@
                 }
             });
         });
-        
+
         const container = document.getElementById('signatory-details-container');
         if (container) {
-            observer.observe(container, { childList: true, subtree: true });
+            observer.observe(container, {
+                childList: true,
+                subtree: true
+            });
         }
-        
+
         // Also listen for input changes on signatory fields
         document.addEventListener('input', function(e) {
             if (e.target.matches('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]')) {
@@ -867,22 +896,24 @@
             }
         });
         // Autosave helpers (debounced) - initialize autosaveDebounced now that collectPayload is defined
-        async function autosaveCert(){
+        async function autosaveCert() {
             try {
                 if (statusEl) statusEl.textContent = 'Saving…';
                 const payload = collectPayload();
                 // Persist JSON to R2 via controller autosave endpoint
                 const autosaveUrl = '{{ route("organizer.events.certificate.autosave", [], false) }}' + '?id=' + encodeURIComponent(eventId);
-                const response = await fetch(autosaveUrl, { 
-                    method:'POST', 
-                    headers:{
-                        'Content-Type':'application/json', 
+                const response = await fetch(autosaveUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': csrf,
                         'X-Requested-With': 'XMLHttpRequest'
-                    }, 
-                    body: JSON.stringify({ certificate_data_json: JSON.stringify(payload) }) 
+                    },
+                    body: JSON.stringify({
+                        certificate_data_json: JSON.stringify(payload)
+                    })
                 });
-                
+
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     if (response.status === 403) {
@@ -893,17 +924,19 @@
                     }
                     throw new Error(errorData.message || `HTTP ${response.status}`);
                 }
-                
+
                 const result = await response.json();
                 if (result.success) {
-                if (statusEl) statusEl.textContent = 'Saved';
-                refreshPreview(payload);
-                showAutosaveIndicator('success');
-                setTimeout(()=>{ if (statusEl) statusEl.textContent=''; }, 1200);
+                    if (statusEl) statusEl.textContent = 'Saved';
+                    refreshPreview(payload);
+                    showAutosaveIndicator('success');
+                    setTimeout(() => {
+                        if (statusEl) statusEl.textContent = '';
+                    }, 1200);
                 } else {
                     throw new Error(result.message || 'Autosave failed');
                 }
-            } catch(e) {
+            } catch (e) {
                 if (statusEl) statusEl.textContent = 'Save failed';
                 showAutosaveIndicator('error');
                 console.error('Certificate autosave failed', e);
@@ -911,10 +944,12 @@
         }
         autosaveDebounced = debounce(autosaveCert, 700);
 
-        window.uploadLogo = async function(side){
+        // Logo upload functionality commented out for now
+        /*
+        window.uploadLogo = async function(side) {
             const file = document.getElementById(`logo_${side}_file`).files[0];
             if (!file) return;
-            
+
             // Show immediate preview using FileReader
             const previewEl = document.getElementById(`logo_${side}_preview`);
             if (previewEl && file) {
@@ -925,14 +960,20 @@
                 };
                 reader.readAsDataURL(file);
             }
-            
+
             const fd = new FormData();
             fd.append('id', eventId);
             fd.append('side', side);
             fd.append('image', file);
-            const resp = await fetch('/organizer/events/certificate/upload-logo', { method:'POST', headers:{ 'X-CSRF-TOKEN': csrf }, body: fd });
+            const resp = await fetch('/organizer/events/certificate/upload-logo', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrf
+                },
+                body: fd
+            });
             const data = await resp.json();
-                if (data.success) {
+            if (data.success) {
                 const img = document.getElementById(`logo_${side}_img`);
                 if (img) img.src = data.url;
                 const rName = document.getElementById('recipient_name_input');
@@ -940,18 +981,50 @@
                     rName.disabled = false;
                     rName.placeholder = 'e.g., JUAN DE LA CRUZ';
                 }
-                    // Show small preview/status near inputs (update with server URL)
-                    const pv = document.getElementById(`logo_${side}_preview`);
-                    const st = document.getElementById(`logo_${side}_status`);
-                    if (pv) { pv.src = data.url; pv.classList.remove('hidden'); }
-                    if (st) { st.textContent = 'Uploaded'; }
-                    // Show remove button
-                    showLogoRemoveButton(side);
-                    
-                    // Update certificate preview logo image
-                    const previewImg = document.getElementById(`logo_${side}_img`);
+                // Show small preview/status near inputs (update with server URL)
+                const pv = document.getElementById(`logo_${side}_preview`);
+                const st = document.getElementById(`logo_${side}_status`);
+                if (pv) {
+                    pv.src = data.url;
+                    pv.classList.remove('hidden');
+                }
+                if (st) {
+                    st.textContent = 'Uploaded';
+                }
+                // Show remove button
+                showLogoRemoveButton(side);
+
+                // Update certificate preview logo image
+                const previewImg = document.getElementById(`logo_${side}_img`);
+                if (previewImg) {
+                    previewImg.src = data.url + '?t=' + Date.now(); // Add timestamp to force reload
+                    previewImg.style.display = 'block';
+                    previewImg.onload = function() {
+                        this.style.display = 'block';
+                    };
+                    previewImg.onerror = function() {
+                        this.style.display = 'none';
+                    };
+                }
+
+                // Update hidden JSON field with new logo URL
+                const jsonEl = document.getElementById('certificate_data_json');
+                if (jsonEl) {
+                    try {
+                        const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
+                        current[`logo_${side}_url`] = data.url;
+                        jsonEl.value = JSON.stringify(current);
+                    } catch (e) {
+                        console.error('Failed to update certificate_data_json:', e);
+                    }
+                }
+
+                // Update certificate preview logo image in preview wrapper
+                const previewWrapper = document.getElementById('cert_preview_wrapper');
+                if (previewWrapper) {
+                    const previewImg = previewWrapper.querySelector(`#logo_${side}_img`);
                     if (previewImg) {
-                        previewImg.src = data.url + '?t=' + Date.now(); // Add timestamp to force reload
+                        previewImg.src = data.url + '?t=' + Date.now();
                         previewImg.style.display = 'block';
                         previewImg.onload = function() {
                             this.style.display = 'block';
@@ -960,44 +1033,17 @@
                             this.style.display = 'none';
                         };
                     }
-                    
-                    // Update hidden JSON field with new logo URL
-                    const jsonEl = document.getElementById('certificate_data_json');
-                    if (jsonEl) {
-                        try {
-                            const current = jsonEl.value ? JSON.parse(jsonEl.value) : {};
-                            current[`logo_${side}_url`] = data.url;
-                            jsonEl.value = JSON.stringify(current);
-                        } catch (e) {
-                            console.error('Failed to update certificate_data_json:', e);
-                        }
-                    }
-                    
-                    // Update certificate preview logo image in preview wrapper
-                    const previewWrapper = document.getElementById('cert_preview_wrapper');
-                    if (previewWrapper) {
-                        const previewImg = previewWrapper.querySelector(`#logo_${side}_img`);
-                        if (previewImg) {
-                            previewImg.src = data.url + '?t=' + Date.now();
-                            previewImg.style.display = 'block';
-                            previewImg.onload = function() {
-                                this.style.display = 'block';
-                            };
-                            previewImg.onerror = function() {
-                                this.style.display = 'none';
-                            };
-                        }
-                    }
-                    
-                    // Refresh preview with updated data
-                    if (typeof collectPayload === 'function' && typeof refreshPreview === 'function') {
-                        const payload = collectPayload();
-                        refreshPreview(payload);
-                    }
-                    
-                    if (autosaveDebounced && typeof autosaveDebounced === 'function') {
-                        autosaveDebounced();
-                    }
+                }
+
+                // Refresh preview with updated data
+                if (typeof collectPayload === 'function' && typeof refreshPreview === 'function') {
+                    const payload = collectPayload();
+                    refreshPreview(payload);
+                }
+
+                if (autosaveDebounced && typeof autosaveDebounced === 'function') {
+                    autosaveDebounced();
+                }
             } else {
                 // Hide preview on failure
                 if (previewEl) {
@@ -1006,7 +1052,10 @@
                 hideLogoRemoveButton(side);
             }
         }
-        
+        */
+
+        // Logo remove button functions commented out for now
+        /*
         function showLogoRemoveButton(side) {
             // Check if remove button exists, if not create it
             let removeBtn = document.getElementById(`logo_${side}_remove_btn`);
@@ -1020,7 +1069,7 @@
                     removeBtn.title = 'Remove logo';
                     removeBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
                     statusEl.parentNode.appendChild(removeBtn);
-                    
+
                     // Attach event listener with stopPropagation
                     removeBtn.addEventListener('click', function(e) {
                         e.stopPropagation();
@@ -1035,26 +1084,29 @@
                 removeBtn.classList.remove('hidden');
             }
         }
-        
+
         function hideLogoRemoveButton(side) {
             const removeBtn = document.getElementById(`logo_${side}_remove_btn`);
             if (removeBtn) {
                 removeBtn.classList.add('hidden');
             }
         }
-        
+        */
+
+        // Logo remove functionality commented out for now
+        /*
         window.removeLogo = async function(side) {
             if (!confirm('Are you sure you want to remove this logo?')) {
                 return;
             }
-            
+
             try {
                 // Call backend API to remove logo from R2 and update JSON
                 const formData = new FormData();
                 formData.append('id', eventId);
                 formData.append('side', side);
                 formData.append('_token', csrf);
-                
+
                 const response = await fetch('/organizer/events/certificate/remove-logo', {
                     method: 'POST',
                     headers: {
@@ -1063,9 +1115,9 @@
                     },
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     // Clear preview
                     const previewEl = document.getElementById(`logo_${side}_preview`);
@@ -1073,23 +1125,23 @@
                         previewEl.src = '';
                         previewEl.classList.add('hidden');
                     }
-                    
+
                     // Reset status
                     const statusEl = document.getElementById(`logo_${side}_status`);
                     if (statusEl) {
                         statusEl.textContent = 'No file';
                         statusEl.className = 'text-xs text-gray-500 dark:text-gray-400';
                     }
-                    
+
                     // Clear file input
                     const fileInput = document.getElementById(`logo_${side}_file`);
                     if (fileInput) {
                         fileInput.value = '';
                     }
-                    
+
                     // Hide remove button
                     hideLogoRemoveButton(side);
-                    
+
                     // Update certificate data JSON to remove logo URL
                     const jsonEl = document.getElementById('certificate_data_json');
                     if (jsonEl) {
@@ -1097,7 +1149,7 @@
                         delete current[`logo_${side}_url`];
                         jsonEl.value = JSON.stringify(current);
                     }
-                    
+
                     // Update preview image in certificate preview
                     const previewWrapper = document.getElementById('cert_preview_wrapper');
                     if (previewWrapper) {
@@ -1115,7 +1167,7 @@
                         img.style.display = 'none';
                         img.removeAttribute('src');
                     }
-                    
+
                     // Reload certificate data from R2 to ensure consistency
                     // Use collectPayload to get current data and refresh preview
                     if (typeof collectPayload === 'function' && typeof refreshPreview === 'function') {
@@ -1124,7 +1176,7 @@
                     } else if (typeof syncCertificateData === 'function') {
                         await syncCertificateData();
                     }
-                    
+
                     showAutosaveIndicator('success');
                 } else {
                     throw new Error(data.message || 'Failed to remove logo');
@@ -1135,10 +1187,11 @@
                 showAutosaveIndicator('error');
             }
         }
+        */
 
         // uploadSignature is defined later after addSignatory/removeSignatory
-        
-        function collectPayload(){
+
+        function collectPayload() {
             // First, try to get the most up-to-date data from the hidden JSON input
             let basePayload = {};
             try {
@@ -1146,10 +1199,10 @@
                 if (jsonEl && jsonEl.value) {
                     basePayload = JSON.parse(jsonEl.value);
                 }
-            } catch(e) {
+            } catch (e) {
                 console.warn('Failed to parse certificate_data_json:', e);
             }
-            
+
             const payload = {
                 org_line1: document.getElementById('org_line1_input')?.value || basePayload.org_line1 || '',
                 org_line2: document.getElementById('org_line2_input')?.value || basePayload.org_line2 || '',
@@ -1160,34 +1213,34 @@
                 theme_secondary: document.getElementById('theme_secondary')?.value || basePayload.theme_secondary || '#092557',
                 theme_border: document.getElementById('theme_border')?.value || basePayload.theme_border || basePayload.theme_primary || '#0b2f6b',
             };
-            
+
             // Copy non-signatory fields from JSON (like logos, event details, etc.)
             Object.keys(basePayload).forEach(key => {
                 if (!key.startsWith('sig_') && !payload.hasOwnProperty(key)) {
                     payload[key] = basePayload[key];
                 }
             });
-            
+
             // Dynamic signatories - ONLY include signatories that exist in DOM
             const items = document.querySelectorAll('.signatory-item');
             payload.signatory_count = items.length;
-            
+
             // First, clear any old signatory data from payload (only keep what exists in DOM)
             for (let i = 1; i <= 10; i++) {
                 delete payload[`sig_${i}_name`];
                 delete payload[`sig_${i}_title`];
                 delete payload[`sig_${i}_signature`];
             }
-            
+
             // Now only add signatories that exist in DOM
-            items.forEach((item, index)=>{
+            items.forEach((item, index) => {
                 const n = index + 1;
                 const nameInput = item.querySelector(`input[name="sig_${n}_name"]`);
                 const titleInput = item.querySelector(`input[name="sig_${n}_title"]`);
-                
+
                 payload[`sig_${n}_name`] = nameInput?.value || '';
                 payload[`sig_${n}_title`] = titleInput?.value || '';
-                
+
                 // Get signature path from JSON if it exists for this signatory
                 const statusEl = document.getElementById(`sig_${n}_status`);
                 if (statusEl && (statusEl.textContent === 'Uploaded' || statusEl.textContent.includes('signature'))) {
@@ -1197,7 +1250,7 @@
                         if (current[`sig_${n}_signature`]) {
                             payload[`sig_${n}_signature`] = current[`sig_${n}_signature`];
                         }
-                    } catch(_) {}
+                    } catch (_) {}
                 } else {
                     // Also include signature if it exists in JSON even if status element doesn't show "Uploaded"
                     try {
@@ -1206,32 +1259,38 @@
                         if (current[`sig_${n}_signature`]) {
                             payload[`sig_${n}_signature`] = current[`sig_${n}_signature`];
                         }
-                    } catch(_) {}
+                    } catch (_) {}
                 }
             });
-            
+
             return payload;
         }
 
-        function refreshPreview(payload){
+        function refreshPreview(payload) {
             // Update text fields inline
             const map = {
-                org_line1: 'org_line1', org_line2: 'org_line2', org_line3: 'org_line3',
-                org_school: 'org_school', recipient_name: 'recipient_name', event_title: 'event_title'
+                org_line1: 'org_line1',
+                org_line2: 'org_line2',
+                org_line3: 'org_line3',
+                org_school: 'org_school',
+                recipient_name: 'recipient_name',
+                event_title: 'event_title'
             };
-            Object.keys(map).forEach(k=>{
+            Object.keys(map).forEach(k => {
                 const el = document.getElementById(map[k]);
                 if (el && payload[k] !== undefined) el.textContent = payload[k];
             });
             // Dynamic signatory names/titles
             const count = payload.signatory_count || 0;
-            for (let i=1;i<=count;i++){
+            for (let i = 1; i <= count; i++) {
                 const nEl = document.getElementById(`sig_${i}_name`);
                 const tEl = document.getElementById(`sig_${i}_title`);
                 if (nEl && payload[`sig_${i}_name`] !== undefined) nEl.textContent = payload[`sig_${i}_name`] || `Signatory ${i}`;
                 if (tEl && payload[`sig_${i}_title`] !== undefined) tEl.textContent = payload[`sig_${i}_title`] || 'Signature';
             }
-            
+
+            // Logo images update commented out for now
+            /*
             // Update logo images in preview
             ['left', 'right'].forEach(side => {
                 const logoUrl = payload[`logo_${side}_url`];
@@ -1275,7 +1334,8 @@
                     }
                 }
             });
-            
+            */
+
             // Update signature images in preview
             const signatoryCount = payload.signatory_count || 0;
             for (let i = 1; i <= signatoryCount; i++) {
@@ -1324,13 +1384,17 @@
                     }
                 }
             }
-            
+
             // Apply colors
             const primary = payload.theme_primary;
             document.querySelectorAll('#cert_preview_wrapper .text-blue-900, #cert_preview_wrapper .text-violet-900, #cert_preview_wrapper .text-emerald-900')
-                .forEach(el=>{ el.style.color = primary; });
+                .forEach(el => {
+                    el.style.color = primary;
+                });
             const bands = document.querySelectorAll('#cert_preview_wrapper .band-top, #cert_preview_wrapper .band-bottom');
-            bands.forEach(el=>{ el.style.backgroundImage = `linear-gradient(to right, ${payload.theme_primary}, ${payload.theme_secondary})`; });
+            bands.forEach(el => {
+                el.style.backgroundImage = `linear-gradient(to right, ${payload.theme_primary}, ${payload.theme_secondary})`;
+            });
             // Apply border color
             const borderColor = payload.theme_border || payload.theme_primary || '#0b2f6b';
             const pageElement = document.querySelector('#cert_preview_wrapper .page');
@@ -1340,14 +1404,14 @@
         }
 
         // Wire autosave on inputs
-        ['org_line1_input','org_line2_input','org_line3_input','org_school_input','recipient_name_input','theme_primary','theme_secondary','theme_border','theme_primary-hex','theme_secondary-hex','theme_border-hex']
-            .forEach(function(id) {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.addEventListener('input', autosaveDebounced);
-                    el.addEventListener('change', autosaveDebounced);
-                }
-            });
+        ['org_line1_input', 'org_line2_input', 'org_line3_input', 'org_school_input', 'recipient_name_input', 'theme_primary', 'theme_secondary', 'theme_border', 'theme_primary-hex', 'theme_secondary-hex', 'theme_border-hex']
+        .forEach(function(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', autosaveDebounced);
+                el.addEventListener('change', autosaveDebounced);
+            }
+        });
         // Dynamic signatory inputs also trigger autosave
         document.addEventListener('input', function(e) {
             if (e.target && e.target.matches('input[name^="sig_"][name$="_name"], input[name^="sig_"][name$="_title"]')) {
@@ -1358,6 +1422,8 @@
         // Initialize remove buttons for existing logos and signatures on page load
         // Wrap in DOMContentLoaded to ensure all functions are defined
         (function() {
+            // Logo display initialization commented out for now
+            /*
             function initializeLogoDisplay() {
                 try {
                     ['left', 'right'].forEach(side => {
@@ -1367,7 +1433,7 @@
                             if (jsonEl && jsonEl.value) {
                                 const certData = JSON.parse(jsonEl.value);
                                 const logoUrl = certData[`logo_${side}_url`];
-                                
+
                                 if (logoUrl && typeof logoUrl === 'string' && logoUrl.trim() !== '') {
                                     // Update preview image in certificate template
                                     const previewImg = document.getElementById(`logo_${side}_img`);
@@ -1389,10 +1455,10 @@
                                     }
                                 }
                             }
-                        } catch(e) {
+                        } catch (e) {
                             console.error('Error initializing logo display for', side, ':', e);
                         }
-                        
+
                         // Check for existing logos in form and show remove buttons
                         try {
                             const previewEl = document.getElementById(`logo_${side}_preview`);
@@ -1402,21 +1468,21 @@
                                     showLogoRemoveButton(side);
                                 }
                             }
-                        } catch(e) {
+                        } catch (e) {
                             console.error('Error showing logo remove button for', side, ':', e);
                         }
-                        
+
                         // Initialize file input event listeners
                         try {
                             const fileInput = document.getElementById(`logo_${side}_file`);
                             const removeBtn = document.getElementById(`logo_${side}_remove_btn`);
-                            
+
                             // Set up file input change handler
                             if (fileInput) {
                                 // Remove any existing event listeners by cloning
                                 const newFileInput = fileInput.cloneNode(true);
                                 fileInput.parentNode.replaceChild(newFileInput, fileInput);
-                                
+
                                 // Attach change event listener
                                 newFileInput.addEventListener('change', function(e) {
                                     e.stopPropagation();
@@ -1425,14 +1491,14 @@
                                     }
                                 });
                             }
-                            
+
                             // Set up remove button click handler with stopPropagation
                             if (removeBtn) {
                                 // Remove any existing onclick
                                 removeBtn.removeAttribute('onclick');
                                 const newRemoveBtn = removeBtn.cloneNode(true);
                                 removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
-                                
+
                                 newRemoveBtn.addEventListener('click', function(e) {
                                     e.stopPropagation();
                                     e.preventDefault();
@@ -1441,15 +1507,16 @@
                                     }
                                 });
                             }
-                        } catch(e) {
+                        } catch (e) {
                             console.error('Error initializing logo file input for', side, ':', e);
                         }
                     });
-                } catch(e) {
+                } catch (e) {
                     console.error('Error in initializeLogoDisplay:', e);
                 }
             }
-            
+            */
+
             function initializeSignatureButtons() {
                 try {
                     // Also check for existing signatures and show remove buttons
@@ -1460,14 +1527,14 @@
                             const statusEl = document.getElementById(`sig_${i}_status`);
                             const removeBtn = document.getElementById(`sig_${i}_remove_btn`);
                             const fileInput = document.getElementById(`sig_${i}_file`);
-                            
+
                             // Show remove button if signature exists
                             if (previewEl && statusEl && !previewEl.classList.contains('hidden') && (statusEl.textContent === 'Uploaded' || previewEl.src)) {
                                 if (typeof showSignatureRemoveButton === 'function') {
                                     showSignatureRemoveButton(i);
                                 }
                             }
-                            
+
                             // Replace inline onclick with event listener for remove button
                             if (removeBtn) {
                                 removeBtn.removeAttribute('onclick');
@@ -1481,7 +1548,7 @@
                                     }
                                 });
                             }
-                            
+
                             // Replace inline onchange with event listener for file input
                             // Remove any inline handlers and attach proper event listener
                             if (fileInput) {
@@ -1490,7 +1557,7 @@
                                 // Clone node to remove any existing event listeners
                                 const newFileInput = fileInput.cloneNode(true);
                                 fileInput.parentNode.replaceChild(newFileInput, fileInput);
-                                
+
                                 // Attach proper event listener that won't fire on load
                                 newFileInput.addEventListener('change', function(e) {
                                     e.stopPropagation();
@@ -1499,26 +1566,26 @@
                                     }
                                 });
                             }
-                        } catch(e) {
+                        } catch (e) {
                             console.error('Error showing signature remove button for', i, ':', e);
                         }
                     }
-                } catch(e) {
+                } catch (e) {
                     console.error('Error in initializeSignatureButtons:', e);
                 }
             }
-            
+
             // Initialize after DOM is ready and functions are defined
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', function() {
                     setTimeout(function() {
-                        initializeLogoDisplay();
+                        // initializeLogoDisplay(); // Commented out - logo functionality disabled
                         initializeSignatureButtons();
                     }, 300);
                 });
             } else {
                 setTimeout(function() {
-                    initializeLogoDisplay();
+                    // initializeLogoDisplay(); // Commented out - logo functionality disabled
                     initializeSignatureButtons();
                 }, 300);
             }
@@ -1530,17 +1597,17 @@
             if (!box) {
                 return;
             }
-            
+
             // Initialize visibility on page load
             const formContainer = document.getElementById('certificate-form-container');
             const previewSection = document.getElementById('cert_section');
             const hiddenField = document.getElementById('skip_certificate_hidden');
-            
+
             function updateVisibility() {
                 if (hiddenField) {
                     hiddenField.value = box.checked ? '1' : '0';
                 }
-                
+
                 if (box.checked) {
                     // Hide form and preview if checkbox is checked
                     if (formContainer) {
@@ -1565,18 +1632,18 @@
                     }
                 }
             }
-            
+
             // Load existing flag from database
             async function loadCertificateSetting() {
                 try {
-                    const response = await fetch(`/organizer/events/certificate-status?id=${encodeURIComponent(eventId)}`, { 
+                    const response = await fetch(`/organizer/events/certificate-status?id=${encodeURIComponent(eventId)}`, {
                         credentials: 'same-origin',
-                        headers: { 
+                        headers: {
                             'X-Requested-With': 'XMLHttpRequest',
                             'X-CSRF-TOKEN': csrf
                         }
                     });
-                    
+
                     if (response.ok) {
                         const data = await response.json();
                         if (data.success && typeof data.certificate_enabled !== 'undefined') {
@@ -1594,7 +1661,7 @@
                     console.error('Failed to load certificate setting:', error);
                 }
             }
-            
+
             loadCertificateSetting();
 
             const persist = async (enabled) => {
@@ -1607,22 +1674,22 @@
                     const skipCert = enabled ? '0' : '1';
                     formData.append('certificate_enabled', certEnabled);
                     formData.append('skip_certificate', skipCert);
-                    
+
                     console.log('Certificate persist - Sending values:', {
                         enabled: enabled,
                         certificate_enabled: certEnabled,
                         skip_certificate: skipCert
                     });
-                    
+
                     const response = await fetch('/organizer/events/certificate/autosave', {
                         method: 'POST',
-                        headers: { 
+                        headers: {
                             'X-Requested-With': 'XMLHttpRequest',
                             'X-CSRF-TOKEN': csrf
                         },
                         body: formData
                     });
-                    
+
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
                         if (response.status === 403) {
@@ -1635,10 +1702,10 @@
                         }
                         throw new Error(errorData.message || `HTTP ${response.status}`);
                     }
-                    
+
                     const result = await response.json();
                     if (result.success) {
-                    console.log('Certificate enabled setting persisted:', enabled);
+                        console.log('Certificate enabled setting persisted:', enabled);
                         showAutosaveIndicator('success');
                     } else {
                         throw new Error(result.message || 'Failed to persist certificate setting');
@@ -1654,24 +1721,24 @@
             box.addEventListener('change', () => {
                 const enableCert = !box.checked;
                 persist(enableCert);
-                
+
                 // Update hidden form field
                 const hiddenField = document.getElementById('skip_certificate_hidden');
                 if (hiddenField) {
                     hiddenField.value = box.checked ? '1' : '0';
                 }
-                
+
                 // Hide/show certificate form and preview based on checkbox state
                 const formContainer = document.getElementById('certificate-form-container');
                 const previewSection = document.getElementById('cert_section');
-                
+
                 // Use updateVisibility function for consistency
                 updateVisibility();
             });
-            
+
             // Initialize visibility on page load
             updateVisibility();
-            
+
             // Update visibility after loading the setting (if async finishes)
             loadCertificateSetting().then(() => {
                 updateVisibility();
@@ -1684,18 +1751,18 @@
         // Certificate autosave functionality
         (function() {
             let autosaveTimer = null;
-            
+
             function queueCertificateAutosave() {
                 clearTimeout(autosaveTimer);
                 autosaveTimer = setTimeout(autosaveCertificate, 1000);
             }
-            
+
             async function autosaveCertificate() {
                 try {
                     const formData = new FormData();
                     formData.append('_token', csrf);
                     formData.append('id', eventId);
-                    
+
                     // Collect all form data
                     const inputs = document.querySelectorAll('#certificate-form-container input, #certificate-form-container select, #certificate-form-container textarea');
                     inputs.forEach(input => {
@@ -1707,7 +1774,7 @@
                             formData.append(input.name, input.value);
                         }
                     });
-                    
+
                     // Also include the skip certificate setting
                     const skipCheckbox = document.getElementById('skip_certificate_step4');
                     if (skipCheckbox) {
@@ -1721,16 +1788,16 @@
                             skip_certificate: skipCert
                         });
                     }
-                    
+
                     const response = await fetch('/organizer/events/certificate/autosave', {
-                method: 'POST',
-                headers: {
+                        method: 'POST',
+                        headers: {
                             'X-Requested-With': 'XMLHttpRequest',
                             'X-CSRF-TOKEN': csrf
                         },
                         body: formData
                     });
-                    
+
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
                         if (response.status === 403) {
@@ -1740,11 +1807,11 @@
                         }
                         throw new Error(errorData.message || `HTTP ${response.status}`);
                     }
-                    
+
                     const result = await response.json();
                     if (result.success) {
-                    console.log('Certificate autosaved successfully');
-                    showAutosaveIndicator('success');
+                        console.log('Certificate autosaved successfully');
+                        showAutosaveIndicator('success');
                     } else {
                         throw new Error(result.message || 'Autosave failed');
                     }
@@ -1753,7 +1820,7 @@
                     showAutosaveIndicator('error');
                 }
             }
-            
+
             // Set up autosave listeners
             const certificateContainer = document.getElementById('certificate-form-container');
             if (certificateContainer) {
@@ -1765,7 +1832,7 @@
                     }
                 });
             }
-            
+
             // Also autosave when skip certificate checkbox changes
             const skipCheckbox = document.getElementById('skip_certificate_step4');
             if (skipCheckbox) {
@@ -1775,14 +1842,142 @@
     </script>
     <style>
         @media print {
+
+            /* Set page orientation to landscape - works with both US Letter and A4 */
+            @page {
+                size: landscape;
+                margin: 0.25in;
+            }
+
+            /* Reset body for print */
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+
             /* Hide everything except the certificate preview area */
-            body * { visibility: hidden !important; }
-            #cert_preview_wrapper, #cert_preview_wrapper * { visibility: visible !important; }
-            /* Ensure the preview fills the page */
-            #cert_preview_wrapper { position: absolute; left: 0; top: 0; right: 0; margin: 0; padding: 0; }
+            body * {
+                visibility: hidden !important;
+            }
+
+            #cert_preview_wrapper,
+            #cert_preview_wrapper * {
+                visibility: visible !important;
+            }
+
+            /* Ensure the preview fills the printable area in landscape */
+            #cert_preview_wrapper {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: white;
+                overflow: visible;
+            }
+
+            /* Certificate container - optimized for landscape printing (11" x 8.5" for US Letter) */
+            #cert_preview_wrapper .page {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                aspect-ratio: 11/8.5 !important;
+                /* Landscape: 11 inches wide, 8.5 inches tall */
+                margin: 0 auto !important;
+                padding: 1.5rem 2rem !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+                background: white !important;
+                border: 8px solid !important;
+                border-color: inherit !important;
+                display: block !important;
+                position: relative !important;
+            }
+
+            /* Ensure certificate content fits within page */
+            #cert_preview_wrapper .page>div {
+                width: 100%;
+                height: 100%;
+                position: relative;
+            }
+
             /* Expand details container and remove summary */
-            #cert_section, #cert_section > div { overflow: visible !important; }
-            #cert_section > summary { display: none !important; }
+            #cert_section,
+            #cert_section>div {
+                overflow: visible !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            #cert_section>summary {
+                display: none !important;
+            }
+
+            /* Hide all non-certificate elements */
+            header,
+            nav,
+            footer,
+            button,
+            summary,
+            .no-print,
+            details summary,
+            form,
+            .flex.items-center.justify-between,
+            a[href] {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            /* Ensure images print correctly */
+            img.certificate-image {
+                max-width: 100% !important;
+                height: auto !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Ensure gradients and colors print correctly */
+            .band-top,
+            .band-bottom {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            /* Prevent page breaks inside certificate elements */
+            #cert_preview_wrapper .page * {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            /* Ensure text is black for printing */
+            #cert_preview_wrapper * {
+                color: #000000 !important;
+            }
+
+            /* Preserve decorative colors (borders, gradients) */
+            #cert_preview_wrapper .page {
+                border-color: inherit !important;
+            }
+
+            #cert_preview_wrapper .band-top,
+            #cert_preview_wrapper .band-bottom {
+                background-image: inherit !important;
+                border-color: inherit !important;
+            }
         }
     </style>
 </x-unified-layout>
