@@ -99,7 +99,7 @@ class VerifiedOrganizerMiddleware
             }
         }
 
-        // Allow access to edit/save routes for event owners even if not verified
+        // Allow access to edit/save routes for event owners and staff even if not verified
         // Check if this is an edit route (basic, layout, certificate, tickets) or autosave/store route
         $routeName = $request->route()->getName() ?? '';
         $isEditRoute = str_contains($routeName, 'edit.basic') ||
@@ -122,7 +122,10 @@ class VerifiedOrganizerMiddleware
             str_contains($routeName, 'certificate.remove') ||
             str_contains($routeName, 'certificate.status') ||
             str_contains($routeName, 'upload-layout-image') ||
+            str_contains($routeName, 'get-fresh-image-url') ||
             str_contains($routeName, 'update-session-layout') ||
+            str_contains($routeName, 'layouts.render') ||
+            str_contains($routeName, 'layout.preview') ||
             str_contains($routeName, 'tag-category-mappings') ||
             str_contains($routeName, 'existing-tags') ||
             str_contains($routeName, 'events.cancel');
@@ -139,6 +142,15 @@ class VerifiedOrganizerMiddleware
                     // Then check POST/PUT body
                     $request->input('id') ??
                     $request->input('event_id');
+            }
+
+            // For layout.preview.load route, extract event ID from cloudPath parameter
+            // cloudPath format: events/{eventId}/layout.json
+            if (!$eventParam && str_contains($routeName, 'layout.preview.load')) {
+                $cloudPath = $request->route('cloudPath');
+                if ($cloudPath && preg_match('#events/(\d+)/#', $cloudPath, $matches)) {
+                    $eventParam = (int) $matches[1];
+                }
             }
 
             if ($eventParam) {
