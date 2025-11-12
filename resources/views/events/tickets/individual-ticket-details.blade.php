@@ -49,9 +49,8 @@
         $qrUrl = route('tickets.qr-code', $ticket->id);
         $bgImage = $ticket->event->thumbnail_url ?? null;
         
-        // Use QR code data if available, otherwise fallback to ticket_id
-        // QR code data is encrypted and contains all ticket information for validation
-        $qrText = $ticket->qr_code_data ?? $ticket->ticket_id;
+        // Use ticket_id for QR code
+        $qrText = $ticket->ticket_id;
         
         // Format date for preview template
         $formattedDateTime = optional($ticket->event->start_date)->format('n/j/Y \\a\\t g:i A') ?? 'Date & Time';
@@ -68,7 +67,7 @@
                 'ticketType' => $ticketType,
                 'ticketId' => $ticketId,
                 'status' => $status,
-                'qrText' => $qrText, // Use encrypted QR code data for validation
+                'qrText' => $qrText, // Use ticket_id for QR code
                 'bgImage' => $bgImage,
                 'primaryColor' => $primaryColor ?? '#10b981',
                 'secondaryColor' => $secondaryColor ?? '#f59e0b',

@@ -794,30 +794,7 @@ class TicketPurchaseController extends Controller
             $purchase->refresh();
         }
 
-        // Ensure all tickets have QR code data generated
-        foreach ($purchase->ticketInformation as $ticket) {
-            if (!$ticket->qr_code_data) {
-                \Log::info('Generating QR code data for ticket in purchase details', [
-                    'ticket_id' => $ticket->id,
-                    'purchase_id' => $purchaseId
-                ]);
-                try {
-                    $qrData = $ticket->generateQRCodeData();
-                    $ticket->update(['qr_code_data' => $qrData]);
-                    \Log::info('QR code data generated and saved for ticket in purchase details', [
-                        'ticket_id' => $ticket->id,
-                        'qr_data_length' => strlen($qrData)
-                    ]);
-                } catch (\Exception $e) {
-                    \Log::error('Failed to generate QR code data for ticket in purchase details', [
-                        'ticket_id' => $ticket->id,
-                        'error' => $e->getMessage()
-                    ]);
-                }
-            }
-        }
-        
-        // Refresh purchase to get updated ticket information
+        // Refresh purchase to get updated ticket information (QR codes now use ticket_id directly)
         $purchase->refresh();
         $purchase->load('ticketInformation');
 
@@ -857,24 +834,7 @@ class TicketPurchaseController extends Controller
             abort(403, 'This ticket is not valid.');
         }
 
-        // Generate QR code data if it doesn't exist
-        if (!$ticket->qr_code_data) {
-            \Log::info('Generating QR code data for ticket view', ['ticket_id' => $ticketId]);
-            try {
-                $qrData = $ticket->generateQRCodeData();
-                $ticket->update(['qr_code_data' => $qrData]);
-                $ticket->refresh();
-                \Log::info('QR code data generated and saved for ticket view', [
-                    'ticket_id' => $ticketId,
-                    'qr_data_length' => strlen($qrData)
-                ]);
-            } catch (\Exception $e) {
-                \Log::error('Failed to generate QR code data for ticket view', [
-                    'ticket_id' => $ticketId,
-                    'error' => $e->getMessage()
-                ]);
-            }
-        }
+        // QR codes now use ticket_id directly, no need to generate qr_code_data
 
         // Load ticket settings from R2 for color theming
         $ticketSettings = $this->loadTicketSettingsFromR2($ticket->event);
@@ -918,25 +878,18 @@ class TicketPurchaseController extends Controller
                     'event_id' => $purchase->event_id,
                     'ticket_type_id' => $ticketTypeId,
                     'ticket_purchase_id' => $purchase->id,
-                    'qr_code_data' => null, // Will be generated when ticket is first accessed
+                    // QR codes now use ticket_id directly, no need for qr_code_data
                 ]);
             }
         }
         
-        // Generate QR code data for each ticket after insertion
+        // Get all inserted tickets for storing ticket IDs
         $insertedTickets = \App\Models\EventTicketInformation::where('ticket_purchase_id', $purchase->id)
             ->orderBy('id', 'desc')
             ->limit($purchase->quantity)
             ->get();
             
-        $ticketIds = [];
-        foreach ($insertedTickets as $ticket) {
-            $ticketModel = EventTicketInformation::find($ticket->id);
-            if ($ticketModel) {
-                $ticketModel->update(['qr_code_data' => $ticketModel->generateQRCodeData()]);
-                $ticketIds[] = $ticket->id;
-            }
-        }
+        $ticketIds = $insertedTickets->pluck('id')->toArray();
         
         // Store ticket IDs in payment details
         $paymentDetails = $purchase->payment_details;
@@ -966,7 +919,7 @@ class TicketPurchaseController extends Controller
             'ticket_id' => $ticket->id,
             'event_id' => $ticket->event_id,
             'purchase_status' => $ticket->ticketPurchase->status,
-            'has_qr_data' => !empty($ticket->qr_code_data)
+            'ticket_display_id' => $ticket->ticket_id
         ]);
 
         // Ensure ticket belongs to paid purchase
@@ -975,15 +928,13 @@ class TicketPurchaseController extends Controller
             abort(403, 'This ticket is not valid.');
         }
 
-        // Generate QR code data if not exists
-        if (!$ticket->qr_code_data) {
-            \Log::info('Generating QR code data for ticket', ['ticket_id' => $ticketId]);
-            $qrData = $ticket->generateQRCodeData();
-            $ticket->update(['qr_code_data' => $qrData]);
-            \Log::info('QR code data generated and saved', ['ticket_id' => $ticketId, 'qr_data_length' => strlen($qrData)]);
-        } else {
-            \Log::info('Using existing QR code data', ['ticket_id' => $ticketId, 'qr_data_length' => strlen($ticket->qr_code_data)]);
-        }
+        // Use ticket_id for QR code
+        $qrData = $ticket->ticket_id;
+        
+        \Log::info('Generating QR code using ticket_id', [
+            'ticket_id' => $ticketId,
+            'ticket_display_id' => $qrData
+        ]);
 
         try {
             // Check if BaconQrCode is available
@@ -998,7 +949,7 @@ class TicketPurchaseController extends Controller
                     $renderer = new \BaconQrCode\Renderer\ImageRenderer($rendererStyle, new \BaconQrCode\Renderer\Image\SvgImageBackEnd());
                     $writer = new \BaconQrCode\Writer($renderer);
                     
-                    $qrCodeSvg = $writer->writeString($ticket->qr_code_data);
+                    $qrCodeSvg = $writer->writeString($qrData);
                     \Log::info('BaconQrCode SVG generated', ['svg_length' => strlen($qrCodeSvg)]);
                     
                     return response($qrCodeSvg, 200, [
@@ -1012,7 +963,6 @@ class TicketPurchaseController extends Controller
                     ]);
                     
                     // Fall through to simple SVG fallback
-                    $qrData = $ticket->qr_code_data;
                     $qrSvg = $this->generateSimpleQRSVG($qrData);
                     
                     \Log::info('Simple SVG QR generated as fallback', ['svg_length' => strlen($qrSvg)]);
@@ -1026,7 +976,6 @@ class TicketPurchaseController extends Controller
                 \Log::info('BaconQrCode not available, using improved SVG fallback');
                 
                 // Fallback: Generate a proper QR-like SVG pattern
-                $qrData = $ticket->qr_code_data;
                 $qrSvg = $this->generateSimpleQRSVG($qrData);
                 
                 \Log::info('Improved SVG QR generated', ['svg_length' => strlen($qrSvg)]);
@@ -1190,24 +1139,7 @@ class TicketPurchaseController extends Controller
             abort(403, 'This ticket is not valid.');
         }
 
-        // Generate QR code data if it doesn't exist
-        if (!$ticket->qr_code_data) {
-            \Log::info('Generating QR code data for individual ticket view', ['ticket_id' => $ticketId]);
-            try {
-                $qrData = $ticket->generateQRCodeData();
-                $ticket->update(['qr_code_data' => $qrData]);
-                $ticket->refresh();
-                \Log::info('QR code data generated and saved for individual ticket view', [
-                    'ticket_id' => $ticketId,
-                    'qr_data_length' => strlen($qrData)
-                ]);
-            } catch (\Exception $e) {
-                \Log::error('Failed to generate QR code data for individual ticket view', [
-                    'ticket_id' => $ticketId,
-                    'error' => $e->getMessage()
-                ]);
-            }
-        }
+        // QR codes now use ticket_id directly, no need to generate qr_code_data
 
         // Load ticket settings from R2 for color theming
         $ticketSettings = $this->loadTicketSettingsFromR2($ticket->event);

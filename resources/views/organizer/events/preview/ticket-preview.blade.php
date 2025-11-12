@@ -159,9 +159,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Use QR code data (encrypted) if available, otherwise fallback to ticket ID
-        // QR code data contains encrypted ticket information for validation
-        const qrData = @json($qrText ?? ($ticketId ?? "TKT-" + Date.now()));
+        // Use ticket_id for QR code
+        const qrData = @json($qrText ?? $ticketId ?? "TKT-" + Date.now());
         
         // Function to generate QR code
         function generateQRCode(container, size) {
