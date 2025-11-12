@@ -52,6 +52,9 @@ class VerifiedOrganizerMiddleware
             str_contains($routeName, 'info.basic') ||
             str_contains($routeName, 'info.layout') ||
             str_contains($routeName, 'info.certificate') ||
+            str_contains($routeName, 'step1.store') ||
+            str_contains($routeName, 'step1') ||
+            str_contains($routeName, 'basicinfo') ||
             str_contains($routeName, 'layout.autosave') ||
             str_contains($routeName, 'ticket.autosave') ||
             str_contains($routeName, 'certificate.autosave') ||
@@ -62,7 +65,10 @@ class VerifiedOrganizerMiddleware
             str_contains($routeName, 'certificate.remove') ||
             str_contains($routeName, 'certificate.status') ||
             str_contains($routeName, 'upload-layout-image') ||
-            str_contains($routeName, 'update-session-layout');
+            str_contains($routeName, 'update-session-layout') ||
+            str_contains($routeName, 'tag-category-mappings') ||
+            str_contains($routeName, 'existing-tags') ||
+            str_contains($routeName, 'events.cancel');
 
         if ($isEditRoute) {
             // Try to get event from route parameter first
