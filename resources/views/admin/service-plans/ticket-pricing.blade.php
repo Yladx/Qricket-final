@@ -373,21 +373,56 @@
 <script>
     // Chart data from backend
     const pricingContainer = document.getElementById('pricing-data');
-    const parseJsonData = (container, attribute, fallbackJson) => {
-        if (!container) {
-            return JSON.parse(fallbackJson);
+    const parseJsonData = (container, {
+        attribute,
+        datasetKey,
+        fallback
+    }) => {
+        const fallbackJson = fallback || '{}';
+        let raw = '';
+
+        if (container) {
+            if (datasetKey && container.dataset && container.dataset[datasetKey] !== undefined) {
+                raw = container.dataset[datasetKey];
+            }
+
+            if (!raw && attribute) {
+                raw = container.getAttribute(attribute) || '';
+            }
         }
+
+        if (!raw) {
+            raw = fallbackJson;
+        }
+
+        const normalized = raw
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&amp;/g, '&');
+
         try {
-            const raw = container.getAttribute(attribute);
-            return JSON.parse(raw || fallbackJson);
+            return JSON.parse(normalized);
         } catch (error) {
-            console.error('Failed to parse data attribute', attribute, error);
-            return JSON.parse(fallbackJson);
+            console.error('Failed to parse data attribute', attribute || datasetKey, error);
+            try {
+                return JSON.parse(fallbackJson);
+            } catch (fallbackError) {
+                console.error('Failed to parse fallback JSON', fallbackJson, fallbackError);
+                return {};
+            }
         }
     };
 
-    const revenueData = parseJsonData(pricingContainer, 'data-revenue-data', '{"labels":[],"values":[]}');
-    const popularPlansData = parseJsonData(pricingContainer, 'data-popular-plans-data', '{"labels":[],"values":[]}');
+    const revenueData = parseJsonData(pricingContainer, {
+        attribute: 'data-revenue-data',
+        datasetKey: 'revenueData',
+        fallback: '{"labels":[],"values":[]}'
+    });
+    const popularPlansData = parseJsonData(pricingContainer, {
+        attribute: 'data-popular-plans-data',
+        datasetKey: 'popularPlansData',
+        fallback: '{"labels":[],"values":[]}'
+    });
 
     if (typeof Chart !== 'undefined') {
         const revenueCanvas = document.getElementById('revenueChart');
@@ -537,7 +572,11 @@
     function editPricingPlan(id) {
         // Find the pricing plan data
         const pricingContainer = document.getElementById('pricing-data');
-        const planData = parseJsonData(pricingContainer, 'data-pricing-plans', '{}');
+        const planData = parseJsonData(pricingContainer, {
+            attribute: 'data-pricing-plans',
+            datasetKey: 'pricingPlans',
+            fallback: '{}'
+        });
         const plan = planData[id];
 
         if (!plan) {

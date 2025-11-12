@@ -418,21 +418,56 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const discountsContainer = document.getElementById('discounts-data');
-        const parseJsonData = (container, attribute, fallbackJson) => {
-            if (!container) {
-                return JSON.parse(fallbackJson);
+        const parseJsonData = (container, {
+            attribute,
+            datasetKey,
+            fallback
+        }) => {
+            const fallbackJson = fallback || '{}';
+            let raw = '';
+
+            if (container) {
+                if (datasetKey && container.dataset && container.dataset[datasetKey] !== undefined) {
+                    raw = container.dataset[datasetKey];
+                }
+
+                if (!raw && attribute) {
+                    raw = container.getAttribute(attribute) || '';
+                }
             }
+
+            if (!raw) {
+                raw = fallbackJson;
+            }
+
+            const normalized = raw
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                .replace(/&amp;/g, '&');
+
             try {
-                const raw = container.getAttribute(attribute);
-                return JSON.parse(raw || fallbackJson);
+                return JSON.parse(normalized);
             } catch (error) {
-                console.error('Failed to parse data attribute', attribute, error);
-                return JSON.parse(fallbackJson);
+                console.error('Failed to parse data attribute', attribute || datasetKey, error);
+                try {
+                    return JSON.parse(fallbackJson);
+                } catch (fallbackError) {
+                    console.error('Failed to parse fallback JSON', fallbackJson, fallbackError);
+                    return {};
+                }
             }
         };
 
-        const usageData = parseJsonData(discountsContainer, 'data-usage-data', '{"labels":[],"values":[]}');
-        const discountTypesData = parseJsonData(discountsContainer, 'data-discount-types-data', '{"labels":[],"values":[]}');
+        const usageData = parseJsonData(discountsContainer, {
+            attribute: 'data-usage-data',
+            datasetKey: 'usageData',
+            fallback: '{"labels":[],"values":[]}'
+        });
+        const discountTypesData = parseJsonData(discountsContainer, {
+            attribute: 'data-discount-types-data',
+            datasetKey: 'discountTypesData',
+            fallback: '{"labels":[],"values":[]}'
+        });
 
         if (typeof Chart === 'undefined') {
             console.error('Chart.js failed to load');

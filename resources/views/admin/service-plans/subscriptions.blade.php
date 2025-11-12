@@ -430,21 +430,56 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const subscriptionsContainer = document.getElementById('subscriptions-data');
-    const parseJsonData = (container, attribute, fallbackJson) => {
-        if (!container) {
-            return JSON.parse(fallbackJson);
+    const parseJsonData = (container, {
+        attribute,
+        datasetKey,
+        fallback
+    }) => {
+        const fallbackJson = fallback || '{}';
+        let raw = '';
+
+        if (container) {
+            if (datasetKey && container.dataset && container.dataset[datasetKey] !== undefined) {
+                raw = container.dataset[datasetKey];
+            }
+
+            if (!raw && attribute) {
+                raw = container.getAttribute(attribute) || '';
+            }
         }
+
+        if (!raw) {
+            raw = fallbackJson;
+        }
+
+        const normalized = raw
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&amp;/g, '&');
+
         try {
-            const raw = container.getAttribute(attribute);
-            return JSON.parse(raw || fallbackJson);
+            return JSON.parse(normalized);
         } catch (error) {
-            console.error('Failed to parse data attribute', attribute, error);
-            return JSON.parse(fallbackJson);
+            console.error('Failed to parse data attribute', attribute || datasetKey, error);
+            try {
+                return JSON.parse(fallbackJson);
+            } catch (fallbackError) {
+                console.error('Failed to parse fallback JSON', fallbackJson, fallbackError);
+                return {};
+            }
         }
     };
 
-    const subscriptionGrowthData = parseJsonData(subscriptionsContainer, 'data-subscription-growth-data', '{"labels":[],"values":[]}');
-    const planDistributionData = parseJsonData(subscriptionsContainer, 'data-plan-distribution-data', '{"labels":[],"values":[]}');
+    const subscriptionGrowthData = parseJsonData(subscriptionsContainer, {
+        attribute: 'data-subscription-growth-data',
+        datasetKey: 'subscriptionGrowthData',
+        fallback: '{"labels":[],"values":[]}'
+    });
+    const planDistributionData = parseJsonData(subscriptionsContainer, {
+        attribute: 'data-plan-distribution-data',
+        datasetKey: 'planDistributionData',
+        fallback: '{"labels":[],"values":[]}'
+    });
 
     if (typeof Chart === 'undefined') {
         console.error('Chart.js failed to load');
@@ -622,7 +657,11 @@
     function editSubscriptionPlan(id) {
         // Find the subscription plan data
         const subscriptionsContainer = document.getElementById('subscriptions-data');
-        const planData = parseJsonData(subscriptionsContainer, 'data-subscription-plans', '{}');
+        const planData = parseJsonData(subscriptionsContainer, {
+            attribute: 'data-subscription-plans',
+            datasetKey: 'subscriptionPlans',
+            fallback: '{}'
+        });
         const plan = planData[id];
 
         if (!plan) {
