@@ -49,11 +49,11 @@ class BasicInfoController extends Controller
         if ($request->boolean('new')) {
             // For new events, don't create in database yet - just show empty form
             $eventData = [
-                'title' => '', 
-                'description' => '', 
+                'title' => '',
+                'description' => '',
                 'category' => '',
-                'start_date' => '', 
-                'end_date' => '', 
+                'start_date' => '',
+                'end_date' => '',
                 'location' => '',
                 'location_url' => '',
                 'is_free' => false,
@@ -77,7 +77,7 @@ class BasicInfoController extends Controller
                 $isOwner = $existing && $existing->user_id === Auth::id();
                 $isAdminEvent = $existing && $existing->user_id === null && $isAdmin;
                 $isStaff = $existing && $existing->staff()->where('user_id', Auth::id())->exists();
-                
+
                 // Allow both draft and rejected events to be continued by owner, admin, or staff
                 if ($existing && in_array($existing->status, ['draft', 'rejected']) && ($isOwner || $isAdminEvent || $isStaff)) {
                     return redirect()->route('organizer.events.create.basicinfo', ['id' => $id]);
@@ -88,11 +88,11 @@ class BasicInfoController extends Controller
         if (!$eventId) {
             // For new events without ID, show empty form
             $eventData = [
-                'title' => '', 
-                'description' => '', 
+                'title' => '',
+                'description' => '',
                 'category' => '',
-                'start_date' => '', 
-                'end_date' => '', 
+                'start_date' => '',
+                'end_date' => '',
                 'location' => '',
                 'location_url' => '',
                 'is_free' => false,
@@ -114,7 +114,7 @@ class BasicInfoController extends Controller
         $isOwner = $event && $event->user_id === Auth::id();
         $isAdminEvent = $event && $event->user_id === null && $isAdmin;
         $isStaff = $event && $event->staff()->where('user_id', Auth::id())->exists();
-        
+
         // Allow access for owner, admin, or staff - but only for draft events in step1 (for editing existing events, use edit.basic route)
         // For editing published/approved events, staff should use the edit.basic route instead
         if (!$event || (!$isOwner && !$isAdminEvent && !$isStaff)) {
@@ -143,24 +143,24 @@ class BasicInfoController extends Controller
         // Determine if event is free (for locking the checkbox in the UI)
         // If event is already saved as free, lock it to prevent changing to paid
         $isFreeEvent = (bool)($event->is_free ?? false);
-        
+
         // For step1 (create/edit), check if event has sales (only if event exists)
         $hasSales = false;
         $eventIsPaidWithSales = false;
         $isFreeEventLocked = false;
-        
+
         if ($event) {
             // Check if paid event has sales (to prevent changing to free)
             if (!$isFreeEvent) {
-                $hasSales = $event->eventTickets()->where('sold_count', '>', 0)->exists() 
-                         || \App\Models\TicketPurchase::whereHas('ticketInformation', function($query) use ($event) {
-                                $query->where('event_id', $event->id);
-                            })
-                            ->where('status', 'paid')
-                            ->exists();
+                $hasSales = $event->eventTickets()->where('sold_count', '>', 0)->exists()
+                    || \App\Models\TicketPurchase::whereHas('ticketInformation', function ($query) use ($event) {
+                        $query->where('event_id', $event->id);
+                    })
+                    ->where('status', 'paid')
+                    ->exists();
                 $eventIsPaidWithSales = $hasSales;
             }
-            
+
             // Lock the checkbox if:
             // 1. Event is free (can't change to paid), OR
             // 2. Event is paid and has sales (can't change to free)
@@ -173,7 +173,7 @@ class BasicInfoController extends Controller
     public function step1Store(Request $request)
     {
         $eventId = $request->get('id');
-        
+
         // If no eventId, this is a new event - create it in database
         if (!$eventId) {
             $event = new Event();
@@ -181,20 +181,20 @@ class BasicInfoController extends Controller
             if (Auth::guard('admin')->check()) {
                 $event->user_id = null; // Admin-created event
             } else {
-            $event->user_id = Auth::id();
+                $event->user_id = Auth::id();
             }
             $event->status = 'draft';
         } else {
             // Find existing event
             $event = Event::find($eventId);
-            
+
             if (!$event) {
                 if ($request->expectsJson() || $request->ajax()) {
                     return response()->json(['success' => false, 'message' => 'Event not found.'], 404);
                 }
                 return redirect()->route('organizer.events.index')->with('error', 'Event not found.');
             }
-            
+
             // Check authorization - allow editing draft and published events
             if (!in_array($event->status, ['draft', 'published', 'approved', 'pending_approval', 'scheduled'])) {
                 if ($request->expectsJson() || $request->ajax()) {
@@ -202,13 +202,13 @@ class BasicInfoController extends Controller
                 }
                 return redirect()->route('organizer.events.index')->with('error', 'This event cannot be edited in its current status.');
             }
-            
+
             // Check authorization - allow admin, owner, or staff to edit events
             $isAdmin = Auth::guard('admin')->check();
             $isOwner = $event->user_id === Auth::id();
             $isAdminEvent = $event->user_id === null && $isAdmin;
             $isStaff = $event->staff()->where('user_id', Auth::id())->exists();
-            
+
             // Allow staff members to manage events even without explicit can_manage_event permission
             if (!$isOwner && !$isAdminEvent && !$isStaff) {
                 if ($request->expectsJson() || $request->ajax()) {
@@ -218,19 +218,13 @@ class BasicInfoController extends Controller
             }
         }
 
-        // Determine if this is a new event or editing an existing one
-        $isNewEvent = is_null($eventId);
-        
-        // For existing events, allow dates in the past (for events that already started)
-        // For new events, require start date to be in the future
-        $startDateRule = $isNewEvent ? 'required|date|after:now' : 'required|date';
-        
+        // Validation rules - require future dates for all events (new and existing)
         $validator = Validator::make($request->all(), [
             'title' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
             'description' => 'required|string|min:10',
             'category' => 'required|string|in:conference,workshop,seminar,meetup,training,networking,social,sports,entertainment,other',
             'tags' => 'required|string|min:2',
-            'start_date' => $startDateRule,
+            'start_date' => 'required|date|after:now',
             'end_date' => 'nullable|date|after:start_date',
             'location' => 'required|string|max:500',
             'location_url' => 'nullable|url|max:1000',
@@ -243,7 +237,7 @@ class BasicInfoController extends Controller
             'category.in' => 'Please select a valid event category.',
             'start_date.required' => 'Event start date and time is required.',
             'start_date.date' => 'Please enter a valid start date and time.',
-            'start_date.after' => $isNewEvent ? 'Event start date must be in the future.' : 'Please enter a valid start date and time.',
+            'start_date.after' => 'Event start date must be in the future. Past dates are not allowed.',
             'end_date.date' => 'Please enter a valid end date and time.',
             'end_date.after' => 'Event end date must be after the start date.',
             'location.required' => 'Event location is required.',
@@ -251,15 +245,15 @@ class BasicInfoController extends Controller
             'location_url.url' => 'Please enter a valid URL for the location.',
             'location_url.max' => 'Location URL cannot be longer than 1000 characters.',
         ]);
-        
+
         if ($validator->fails()) {
             if ($request->expectsJson() || $request->ajax()) {
                 // Get all validation errors as an array
                 $errors = $validator->errors()->all();
-                
+
                 // Get first error message for the main message
                 $firstError = $errors[0] ?? 'Validation failed. Please check your input.';
-                
+
                 return response()->json([
                     'success' => false,
                     'message' => $firstError,
@@ -271,35 +265,35 @@ class BasicInfoController extends Controller
         }
 
         try {
-            $step1Data = $request->only(['title','description','category','start_date','end_date','location','location_url','tags']);
-            
+            $step1Data = $request->only(['title', 'description', 'category', 'start_date', 'end_date', 'location', 'location_url', 'tags']);
+
             $wasExistingEvent = !is_null($eventId);
-            $originalData = $wasExistingEvent ? $event->only(['title','description','category','start_date','end_date','location','location_url','tags','is_free']) : null;
-            
+            $originalData = $wasExistingEvent ? $event->only(['title', 'description', 'category', 'start_date', 'end_date', 'location', 'location_url', 'tags', 'is_free']) : null;
+
             // Prevent changing event type if it has sales
             if ($wasExistingEvent) {
                 // Check if event has any ticket sales
-                $hasSales = $event->eventTickets()->where('sold_count', '>', 0)->exists() 
-                         || \App\Models\TicketPurchase::whereHas('ticketInformation', function($query) use ($event) {
-                                $query->where('event_id', $event->id);
-                            })
-                            ->where('status', 'paid')
-                            ->exists();
-                
+                $hasSales = $event->eventTickets()->where('sold_count', '>', 0)->exists()
+                    || \App\Models\TicketPurchase::whereHas('ticketInformation', function ($query) use ($event) {
+                        $query->where('event_id', $event->id);
+                    })
+                    ->where('status', 'paid')
+                    ->exists();
+
                 if ($event->is_free) {
-                // Event is already free - keep it free and ignore any attempt to change it
-                $step1Data['is_free'] = true;
-                
-                // If user tried to uncheck the free event checkbox, show an error
-                if (!$request->boolean('is_free')) {
-                    if ($request->expectsJson() || $request->ajax()) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.',
-                            'errors' => ['is_free' => ['Cannot change free event to paid event.']]
-                        ], 422);
-                    }
-                    return back()->withErrors(['is_free' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.'])->withInput();
+                    // Event is already free - keep it free and ignore any attempt to change it
+                    $step1Data['is_free'] = true;
+
+                    // If user tried to uncheck the free event checkbox, show an error
+                    if (!$request->boolean('is_free')) {
+                        if ($request->expectsJson() || $request->ajax()) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.',
+                                'errors' => ['is_free' => ['Cannot change free event to paid event.']]
+                            ], 422);
+                        }
+                        return back()->withErrors(['is_free' => 'Cannot change free event to paid event. Once an event is created as free, it cannot be changed to a paid event.'])->withInput();
                     }
                 } elseif ($hasSales && $request->boolean('is_free')) {
                     // Event is paid and has sales - prevent changing to free
@@ -319,7 +313,7 @@ class BasicInfoController extends Controller
                 // Normalize boolean for is_free (for new events)
                 $step1Data['is_free'] = $request->boolean('is_free');
             }
-            
+
             \Log::info('Basic info update request', [
                 'event_id' => $eventId,
                 'request_data' => $step1Data,
@@ -327,15 +321,15 @@ class BasicInfoController extends Controller
                 'was_free' => $wasExistingEvent ? $event->is_free : false,
                 'is_free_locked' => $wasExistingEvent && $event->is_free
             ]);
-            
+
             \Log::info('Original event data', [
                 'event_id' => $eventId,
                 'original_data' => $originalData
             ]);
-            
+
             // Fill the event with data and save
             $event->fill($step1Data);
-            
+
             // Capture subscription_id only when creating a new event (not on updates)
             // This preserves the subscription that was active at event creation time
             if (!$wasExistingEvent && !$event->subscription_id) {
@@ -352,9 +346,9 @@ class BasicInfoController extends Controller
                     }
                 }
             }
-            
+
             $event->save();
-            
+
             // Log admin activity for event creation (when user_id is null)
             if (!$wasExistingEvent && Auth::guard('admin')->check() && $event->user_id === null) {
                 Auth::guard('admin')->user()->logActivity('admin_event_create', [
@@ -366,15 +360,15 @@ class BasicInfoController extends Controller
                     'event_tags' => $event->tags,
                 ], 'Created admin event: ' . $event->title);
             }
-            
+
             \Log::info('Event saved successfully', [
                 'event_id' => $event->id,
-                'saved_data' => $event->only(['title','description','category','start_date','end_date','location','location_url','tags','latitude','longitude','is_free'])
+                'saved_data' => $event->only(['title', 'description', 'category', 'start_date', 'end_date', 'location', 'location_url', 'tags', 'latitude', 'longitude', 'is_free'])
             ]);
-            
+
             // Get the final event ID (for new events, this will be the generated ID)
             $finalEventId = $event->id;
-            
+
             // Log activity for event edit only when there are actual changes
             if ($wasExistingEvent && $originalData) {
                 $changedFields = [];
@@ -406,8 +400,8 @@ class BasicInfoController extends Controller
                         'latitude' => 'Latitude',
                         'longitude' => 'Longitude',
                     ];
-                    $labels = array_map(function($f) use ($friendly) {
-                        return $friendly[$f] ?? ucfirst(str_replace('_',' ', $f));
+                    $labels = array_map(function ($f) use ($friendly) {
+                        return $friendly[$f] ?? ucfirst(str_replace('_', ' ', $f));
                     }, $changedFields);
                     $summary = 'Updated: ' . implode(', ', $labels);
 
@@ -427,41 +421,40 @@ class BasicInfoController extends Controller
                     ]);
                 }
             }
-            
+
             if ($request->expectsJson() || $request->ajax()) {
                 // For existing events, redirect to event management page
                 // For new events, redirect to layout creation page
-                $redirectUrl = $wasExistingEvent 
+                $redirectUrl = $wasExistingEvent
                     ? route('organizer.events.manage', ['event' => $finalEventId])
                     : route('organizer.events.create.layout', ['id' => $finalEventId]);
-                
+
                 return response()->json([
                     'success' => true,
-                    'message' => $wasExistingEvent 
-                        ? 'Event information updated successfully.' 
+                    'message' => $wasExistingEvent
+                        ? 'Event information updated successfully.'
                         : 'Event information saved successfully.',
                     'redirect_url' => $redirectUrl
                 ]);
             }
-            
+
             // For existing events, redirect to event management page
             // For new events, redirect to layout creation page
             if ($wasExistingEvent) {
                 return redirect()->route('organizer.events.manage', ['event' => $finalEventId])
                     ->with('success', 'Event information updated successfully.');
             }
-            
+
             return redirect()->route('organizer.events.create.layout', ['id' => $finalEventId]);
-            
         } catch (\Exception $e) {
-            
+
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to save event information. Please try again.'
                 ], 500);
             }
-            
+
             return back()->with('error', 'Failed to save event information. Please try again.');
         }
     }
@@ -470,7 +463,7 @@ class BasicInfoController extends Controller
     {
         // Simply redirect back to events index - don't delete the event
         // The event will remain as a draft that can be continued later
-        
+
         return redirect()->route('organizer.events.index')->with('info', 'Returned to events list.');
     }
 
@@ -483,9 +476,9 @@ class BasicInfoController extends Controller
             'is_ajax' => $request->expectsJson() || $request->ajax(),
             'request_method' => $request->method()
         ]);
-        
+
         $event = Event::find($id);
-        
+
         // Handle AJAX requests
         if ($request->expectsJson() || $request->ajax()) {
             if (!$event) {
@@ -496,7 +489,7 @@ class BasicInfoController extends Controller
             $isOwner = $event->user_id === Auth::id();
             $isAdminEvent = $event->user_id === null && $isAdmin;
             $isOrganizer = $event->staff->where('user_id', Auth::id())->where('role', 'organizer')->isNotEmpty();
-            
+
             \Log::info('Event delete authorization check', [
                 'event_id' => $id,
                 'event_user_id' => $event->user_id,
@@ -507,53 +500,54 @@ class BasicInfoController extends Controller
                 'is_organizer' => $isOrganizer,
                 'authorized' => $isOwner || $isAdminEvent || $isOrganizer
             ]);
-            
+
             if (!$isOwner && !$isAdminEvent && !$isOrganizer) {
                 return response()->json(['success' => false, 'message' => 'Not authorized to delete this event.']);
             }
-            
+
             try {
-                try { 
-                    Storage::disk('r2')->deleteDirectory("events/{$event->id}"); 
+                try {
+                    Storage::disk('r2')->deleteDirectory("events/{$event->id}");
                 } catch (\Throwable $t) {
                     \Log::warning('Failed to delete R2 directory', ['event_id' => $id, 'error' => $t->getMessage()]);
                 }
                 $event->delete();
-                
+
                 \Log::info('Event deleted successfully', [
                     'event_id' => $id,
                     'user_id' => Auth::id()
                 ]);
-                
+
                 return response()->json(['success' => true, 'message' => 'Event deleted successfully.']);
             } catch (\Throwable $t) {
                 \Log::error('Failed to delete event', ['event_id' => $id, 'error' => $t->getMessage()]);
                 return response()->json(['success' => false, 'message' => 'Failed to delete event.']);
             }
         }
-        
+
         // Handle regular form submissions (redirect responses)
         if (!$event) return redirect()->route('organizer.events.index')->with('error', 'Event not found.');
-        
+
         // Check authorization - allow admin to delete admin-created events (user_id = null) or user's own events or organizers
         $isAdmin = Auth::guard('admin')->check();
         $isOwner = $event->user_id === Auth::id();
         $isAdminEvent = $event->user_id === null && $isAdmin;
         $isOrganizer = $event->staff->where('user_id', Auth::id())->where('role', 'organizer')->isNotEmpty();
-        
+
         if (!$isOwner && !$isAdminEvent && !$isOrganizer) {
             return redirect()->route('organizer.events.index')->with('error', 'Not authorized.');
         }
-        
+
         try {
-            try { 
-                Storage::disk('r2')->deleteDirectory("events/{$event->id}"); 
-            } catch (\Throwable $t) {}
+            try {
+                Storage::disk('r2')->deleteDirectory("events/{$event->id}");
+            } catch (\Throwable $t) {
+            }
             $event->delete();
         } catch (\Throwable $t) {
             return redirect()->back()->with('error', 'Failed to delete event.');
         }
-        
+
         return redirect()->route('organizer.events.index')->with('success', 'Event deleted.');
     }
 
@@ -563,12 +557,12 @@ class BasicInfoController extends Controller
     public function getTagCategoryMappings()
     {
         \Log::info('🔍 getTagCategoryMappings() called');
-        
+
         // Cache the mappings for 1 hour to avoid repeated database queries
         return Cache::remember('tag_category_mappings', 3600, function () {
             \Log::info('📊 Loading tag-category mappings from database...');
             $mappings = [];
-            
+
             // Get all events with tags and categories
             $events = Event::whereNotNull('tags')
                 ->whereNotNull('category')
@@ -576,31 +570,31 @@ class BasicInfoController extends Controller
                 ->where('category', '!=', '')
                 ->select('tags', 'category')
                 ->get();
-            
+
             foreach ($events as $event) {
                 if (empty($event->tags)) continue;
-                
+
                 // Split tags by comma and clean them
                 $tags = array_map('trim', explode(',', $event->tags));
                 $category = $event->category;
-                
+
                 foreach ($tags as $tag) {
                     $tag = strtolower($tag);
                     if (empty($tag)) continue;
-                    
+
                     // Count occurrences of this tag with this category
                     if (!isset($mappings[$tag])) {
                         $mappings[$tag] = [];
                     }
-                    
+
                     if (!isset($mappings[$tag][$category])) {
                         $mappings[$tag][$category] = 0;
                     }
-                    
+
                     $mappings[$tag][$category]++;
                 }
             }
-            
+
             // For each tag, find the most common category
             $tagCategoryMap = [];
             foreach ($mappings as $tag => $categories) {
@@ -610,7 +604,7 @@ class BasicInfoController extends Controller
                 $mostCommonCategory = array_key_first($categories);
                 $tagCategoryMap[$tag] = $mostCommonCategory;
             }
-            
+
             // Add fallback mappings to supplement existing mappings
             $fallbackMappings = [
                 'music' => 'music',
@@ -674,14 +668,14 @@ class BasicInfoController extends Controller
                 'movie' => 'entertainment',
                 'gaming' => 'entertainment'
             ];
-            
+
             // Add fallback mappings only for tags that don't have existing mappings
             foreach ($fallbackMappings as $tag => $category) {
                 if (!isset($tagCategoryMap[$tag])) {
                     $tagCategoryMap[$tag] = $category;
                 }
             }
-            
+
             return $tagCategoryMap;
         });
     }
@@ -694,69 +688,115 @@ class BasicInfoController extends Controller
         // Cache the tags for 30 minutes
         return Cache::remember('existing_tags', 1800, function () {
             $tags = [];
-            
+
             // Get all unique tags from events
             $events = Event::whereNotNull('tags')
                 ->where('tags', '!=', '')
                 ->select('tags')
                 ->get();
-            
+
             \Log::info('📋 Found events with tags:', ['count' => $events->count()]);
-            
+
             foreach ($events as $event) {
                 if (empty($event->tags)) continue;
-                
+
                 \Log::info('📝 Processing event tags:', ['tags' => $event->tags]);
-                
+
                 // Split tags by comma and clean them
                 $eventTags = array_map('trim', explode(',', $event->tags));
-                
+
                 foreach ($eventTags as $tag) {
                     $tag = strtolower($tag);
                     if (empty($tag)) continue;
-                    
+
                     if (!isset($tags[$tag])) {
                         $tags[$tag] = 0;
                     }
                     $tags[$tag]++;
                 }
             }
-            
+
             \Log::info('📊 Processed tags from events:', ['count' => count($tags), 'tags' => array_keys($tags)]);
-            
+
             // Add fallback tags to supplement existing tags
             $fallbackTags = [
-                'music', 'concert', 'festival', 'party', 'dance',
-                'conference', 'seminar', 'workshop', 'training', 'meeting',
-                'sports', 'football', 'basketball', 'marathon', 'tournament',
-                'art', 'exhibition', 'gallery', 'painting', 'sculpture',
-                'technology', 'programming', 'coding', 'ai', 'blockchain',
-                'business', 'networking', 'startup', 'entrepreneur', 'finance',
-                'education', 'learning', 'course', 'certification', 'degree',
-                'health', 'wellness', 'fitness', 'yoga', 'meditation',
-                'food', 'cooking', 'restaurant', 'chef', 'culinary',
-                'travel', 'adventure', 'tourism', 'culture', 'heritage',
-                'charity', 'fundraising', 'volunteer', 'community', 'social',
-                'entertainment', 'comedy', 'theater', 'movie', 'gaming'
+                'music',
+                'concert',
+                'festival',
+                'party',
+                'dance',
+                'conference',
+                'seminar',
+                'workshop',
+                'training',
+                'meeting',
+                'sports',
+                'football',
+                'basketball',
+                'marathon',
+                'tournament',
+                'art',
+                'exhibition',
+                'gallery',
+                'painting',
+                'sculpture',
+                'technology',
+                'programming',
+                'coding',
+                'ai',
+                'blockchain',
+                'business',
+                'networking',
+                'startup',
+                'entrepreneur',
+                'finance',
+                'education',
+                'learning',
+                'course',
+                'certification',
+                'degree',
+                'health',
+                'wellness',
+                'fitness',
+                'yoga',
+                'meditation',
+                'food',
+                'cooking',
+                'restaurant',
+                'chef',
+                'culinary',
+                'travel',
+                'adventure',
+                'tourism',
+                'culture',
+                'heritage',
+                'charity',
+                'fundraising',
+                'volunteer',
+                'community',
+                'social',
+                'entertainment',
+                'comedy',
+                'theater',
+                'movie',
+                'gaming'
             ];
-            
+
             // Add fallback tags with lower priority (count = 0.5) so existing tags rank higher
             foreach ($fallbackTags as $tag) {
                 if (!isset($tags[$tag])) {
                     $tags[$tag] = 0.5; // Lower priority than real event tags
                 }
             }
-            
+
             // Sort by frequency (most used tags first)
             arsort($tags);
-            
+
             $finalTags = array_keys($tags);
             \Log::info('✅ Final tags array:', ['count' => count($finalTags), 'first_10' => array_slice($finalTags, 0, 10)]);
-            
+
             // Return only the tag names as array
             return $finalTags;
         });
     }
 }
-
-
