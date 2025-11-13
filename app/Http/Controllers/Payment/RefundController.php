@@ -48,7 +48,7 @@ class RefundController extends Controller
             });
         }
 
-        $refunds = $query->latest()->paginate(20);
+        $refunds = $query->latest()->paginate(20)->appends($request->query());
 
         $stats = [
             'total' => RefundRequest::count(),
