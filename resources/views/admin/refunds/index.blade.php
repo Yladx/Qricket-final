@@ -159,6 +159,30 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Refund Requests</h3>
                 </div>
                 <div class="p-6">
+                    @if(session('error'))
+                        <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                            <p class="text-sm text-red-800 dark:text-red-200">{{ session('error') }}</p>
+                        </div>
+                    @endif
+                    
+                    @if(request()->hasAny(['status', 'type', 'search']))
+                        <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                            <p class="text-sm text-blue-800 dark:text-blue-200">
+                                <strong>Active Filters:</strong>
+                                @if(request('status'))
+                                    Status: {{ ucfirst(request('status')) }}
+                                @endif
+                                @if(request('type'))
+                                    {{ request('status') ? ' • ' : '' }}Type: {{ ucfirst(str_replace('_', ' ', request('type'))) }}
+                                @endif
+                                @if(request('search'))
+                                    {{ (request('status') || request('type')) ? ' • ' : '' }}Search: "{{ request('search') }}"
+                                @endif
+                                - Showing {{ $refunds->total() }} result(s)
+                            </p>
+                        </div>
+                    @endif
+                    
                     @forelse($refunds as $refund)
                         @php
                             $statusColors = [
@@ -181,13 +205,13 @@
                                         <div class="flex items-start space-x-4">
                                             <!-- User Avatar -->
                                             <div class="flex-shrink-0">
-                                                @if($refund->user->profile_picture_url)
+                                                @if($refund->user && $refund->user->profile_picture_url)
                                                     <img src="{{ $refund->user->profile_picture_url }}" 
-                                                         alt="{{ $refund->user->full_name }}" 
+                                                         alt="{{ $refund->user->full_name ?? 'User' }}" 
                                                          class="h-14 w-14 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
                                                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                                 @endif
-                                                <div class="h-14 w-14 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center border-2 border-gray-200 dark:border-gray-600 {{ $refund->user->profile_picture_url ? 'hidden' : '' }}">
+                                                <div class="h-14 w-14 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center border-2 border-gray-200 dark:border-gray-600 {{ ($refund->user && $refund->user->profile_picture_url) ? 'hidden' : '' }}">
                                                     <svg class="w-7 h-7 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                                     </svg>
@@ -198,7 +222,7 @@
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex items-center space-x-3 mb-2">
                                                     <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                                        {{ $refund->user->first_name }} {{ $refund->user->last_name }}
+                                                        {{ $refund->user ? ($refund->user->first_name . ' ' . $refund->user->last_name) : 'Unknown User' }}
                                                     </h4>
                                                     <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full {{ $typeColors[$refund->type] ?? 'bg-gray-100 text-gray-700 dark:bg-gray-900/40 dark:text-gray-300' }}">
                                                         {{ ucfirst(str_replace('_', ' ', $refund->type)) }}
@@ -207,7 +231,7 @@
                                                         {{ ucfirst($refund->status ?? 'Unknown') }}
                                                     </span>
                                                 </div>
-                                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ $refund->user->email }}</p>
+                                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ $refund->user ? $refund->user->email : 'N/A' }}</p>
                                                 
                                                 <!-- Item Info -->
                                                 <div class="flex items-center space-x-4 text-sm text-gray-700 dark:text-gray-300 mb-3">
@@ -265,7 +289,7 @@
                                         <!-- Actions -->
                                         @if($refund->status === 'pending')
                                             @php
-                                                $userName = $refund->user->first_name . ' ' . $refund->user->last_name;
+                                                $userName = $refund->user ? ($refund->user->first_name . ' ' . $refund->user->last_name) : 'Unknown User';
                                                 $itemName = 'Organizer Subscription';
                                                 if ($refund->type === 'ticket' && $refund->ticketPurchase) {
                                                     $itemName = $refund->ticketPurchase->event?->title ?? ('Event #' . ($refund->ticketPurchase->event_id ?? 'N/A'));

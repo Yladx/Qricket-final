@@ -26,39 +26,79 @@ class RefundController extends Controller
             abort(403);
         }
 
-        $query = RefundRequest::with(['user', 'ticketPurchase.event', 'subscription', 'additionalTicketPurchase.event']);
+        try {
+            // Start with base query
+            $query = RefundRequest::query();
 
-        // Filter by status
-        if ($request->has('status') && $request->status !== '') {
-            $query->where('status', $request->status);
+            // Eager load relationships
+            $query->with([
+                'user',
+                'ticketPurchase.event',
+                'subscription',
+                'additionalTicketPurchase.event'
+            ]);
+
+            // Filter by status
+            if ($request->has('status') && $request->status !== '') {
+                $query->where('status', $request->status);
+            }
+
+            // Filter by type
+            if ($request->has('type') && $request->type !== '') {
+                $query->where('type', $request->type);
+            }
+
+            // Search by user name or email - use whereHas with proper grouping
+            if ($request->has('search') && trim($request->search) !== '') {
+                $search = trim($request->search);
+                $query->whereHas('user', function($q) use ($search) {
+                    $q->where(function($subQuery) use ($search) {
+                        $subQuery->where('email', 'like', "%{$search}%")
+                                 ->orWhere('first_name', 'like', "%{$search}%")
+                                 ->orWhere('last_name', 'like', "%{$search}%");
+                    });
+                });
+            }
+
+            // Order by latest and paginate - preserve query string for filters
+            $refunds = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+
+            // Calculate stats (always show total stats regardless of filters)
+            $stats = [
+                'total' => RefundRequest::count(),
+                'pending' => RefundRequest::where('status', 'pending')->count(),
+                'approved' => RefundRequest::where('status', 'approved')->count(),
+                'processed' => RefundRequest::where('status', 'processed')->count(),
+                'rejected' => RefundRequest::where('status', 'rejected')->count(),
+            ];
+
+            // Debug logging
+            \Log::debug('RefundController@index', [
+                'filters' => $request->only(['status', 'type', 'search']),
+                'total_results' => $refunds->total(),
+                'count' => $refunds->count(),
+            ]);
+
+            return view('admin.refunds.index', compact('refunds', 'stats'));
+        } catch (\Exception $e) {
+            \Log::error('Error loading refunds', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Return empty results on error
+            $refunds = RefundRequest::paginate(20);
+            $stats = [
+                'total' => 0,
+                'pending' => 0,
+                'approved' => 0,
+                'processed' => 0,
+                'rejected' => 0,
+            ];
+
+            return view('admin.refunds.index', compact('refunds', 'stats'))
+                ->with('error', 'Error loading refunds: ' . $e->getMessage());
         }
-
-        // Filter by type
-        if ($request->has('type') && $request->type !== '') {
-            $query->where('type', $request->type);
-        }
-
-        // Search by user
-        if ($request->has('search') && $request->search !== '') {
-            $search = $request->search;
-            $query->whereHas('user', function($q) use ($search) {
-                $q->where('email', 'like', "%{$search}%")
-                  ->orWhere('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%");
-            });
-        }
-
-        $refunds = $query->latest()->paginate(20)->appends($request->query());
-
-        $stats = [
-            'total' => RefundRequest::count(),
-            'pending' => RefundRequest::pending()->count(),
-            'approved' => RefundRequest::approved()->count(),
-            'processed' => RefundRequest::processed()->count(),
-            'rejected' => RefundRequest::where('status', 'rejected')->count(),
-        ];
-
-        return view('admin.refunds.index', compact('refunds', 'stats'));
     }
 
     /**
