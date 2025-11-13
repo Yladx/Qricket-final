@@ -165,7 +165,7 @@
                         </div>
                     @endif
                     
-                    @if(request()->hasAny(['status', 'type', 'search']))
+                    @if(request()->hasAny(['status', 'type', 'search']) && (request('status') || request('type') || request('search')))
                         <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                             <p class="text-sm text-blue-800 dark:text-blue-200">
                                 <strong>Active Filters:</strong>
@@ -179,6 +179,12 @@
                                     {{ (request('status') || request('type')) ? ' • ' : '' }}Search: "{{ request('search') }}"
                                 @endif
                                 - Showing {{ $refunds->total() }} result(s)
+                            </p>
+                        </div>
+                    @else
+                        <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                <strong>Showing all refund requests</strong> - {{ $refunds->total() }} total
                             </p>
                         </div>
                     @endif

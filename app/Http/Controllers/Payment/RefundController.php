@@ -27,30 +27,48 @@ class RefundController extends Controller
         }
 
         try {
-            // Start with base query
+            // Start with base query - get ALL refund requests
             $query = RefundRequest::query();
 
-            // Eager load relationships
+            // Eager load relationships - use null checks to include refunds even if relationships are missing
             $query->with([
-                'user',
-                'ticketPurchase.event',
-                'subscription',
-                'additionalTicketPurchase.event'
+                'user' => function($q) {
+                    // Include even if user is soft deleted
+                },
+                'ticketPurchase' => function($q) {
+                    // Include even if purchase is deleted
+                },
+                'ticketPurchase.event' => function($q) {
+                    // Include even if event is deleted
+                },
+                'subscription' => function($q) {
+                    // Include even if subscription is deleted
+                },
+                'additionalTicketPurchase' => function($q) {
+                    // Include even if purchase is deleted
+                },
+                'additionalTicketPurchase.event' => function($q) {
+                    // Include even if event is deleted
+                }
             ]);
 
-            // Filter by status
-            if ($request->has('status') && $request->status !== '') {
-                $query->where('status', $request->status);
+            // Filter by status - only apply if status is provided and not empty
+            $statusFilter = $request->input('status');
+            if (!empty($statusFilter) && trim($statusFilter) !== '') {
+                $query->where('status', trim($statusFilter));
             }
 
-            // Filter by type
-            if ($request->has('type') && $request->type !== '') {
-                $query->where('type', $request->type);
+            // Filter by type - only apply if type is provided and not empty
+            $typeFilter = $request->input('type');
+            if (!empty($typeFilter) && trim($typeFilter) !== '') {
+                $query->where('type', trim($typeFilter));
             }
 
-            // Search by user name or email - use whereHas with proper grouping
-            if ($request->has('search') && trim($request->search) !== '') {
-                $search = trim($request->search);
+            // Search by user name or email - only apply if search is provided and not empty
+            $searchFilter = $request->input('search');
+            if (!empty($searchFilter) && trim($searchFilter) !== '') {
+                $search = trim($searchFilter);
+                // Use whereHas to find refunds with matching users
                 $query->whereHas('user', function($q) use ($search) {
                     $q->where(function($subQuery) use ($search) {
                         $subQuery->where('email', 'like', "%{$search}%")
@@ -60,8 +78,14 @@ class RefundController extends Controller
                 });
             }
 
-            // Order by latest and paginate - preserve query string for filters
-            $refunds = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+            // Order by latest first
+            $query->orderBy('created_at', 'desc');
+
+            // Get total count for debugging (clone the query to avoid modifying it)
+            $totalBeforePagination = (clone $query)->count();
+
+            // Paginate - preserve query string for filters
+            $refunds = $query->paginate(20)->withQueryString();
 
             // Calculate stats (always show total stats regardless of filters)
             $stats = [
@@ -73,10 +97,21 @@ class RefundController extends Controller
             ];
 
             // Debug logging
-            \Log::debug('RefundController@index', [
-                'filters' => $request->only(['status', 'type', 'search']),
-                'total_results' => $refunds->total(),
-                'count' => $refunds->count(),
+            \Log::info('RefundController@index - Query executed', [
+                'request_all' => $request->all(),
+                'request_params' => $request->only(['status', 'type', 'search']),
+                'filters_applied' => [
+                    'status' => $statusFilter ?? 'none',
+                    'type' => $typeFilter ?? 'none',
+                    'search' => $searchFilter ?? 'none',
+                ],
+                'total_before_pagination' => $totalBeforePagination,
+                'paginated_total' => $refunds->total(),
+                'paginated_count' => $refunds->count(),
+                'current_page' => $refunds->currentPage(),
+                'per_page' => $refunds->perPage(),
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings(),
             ]);
 
             return view('admin.refunds.index', compact('refunds', 'stats'));
