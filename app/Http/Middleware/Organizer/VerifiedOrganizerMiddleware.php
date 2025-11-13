@@ -73,7 +73,7 @@ class VerifiedOrganizerMiddleware
         
         // First, try route parameter (works with route model binding)
         $routeEvent = $request->route('event') ?? $request->route('id');
-        
+
         // If route model binding returned a model, use it directly
         if ($routeEvent && is_object($routeEvent)) {
             if ($checkEventAccess($routeEvent)) {
@@ -89,14 +89,14 @@ class VerifiedOrganizerMiddleware
             if ($checkEventAccess($routeEvent)) {
                 $event = is_object($routeEvent) ? $routeEvent : \App\Models\Event::find($routeEvent);
                 if ($event) {
-                    \Log::info('VerifiedOrganizerMiddleware: Allowing access via route parameter', [
-                        'user_id' => $user->id,
-                        'event_id' => $event->id,
-                        'route' => $request->route()->getName()
-                    ]);
-                    return $next($request);
+                        \Log::info('VerifiedOrganizerMiddleware: Allowing access via route parameter', [
+                            'user_id' => $user->id,
+                            'event_id' => $event->id,
+                            'route' => $request->route()->getName()
+                        ]);
+                        return $next($request);
+                    }
                 }
-            }
         }
 
         // Allow access to edit/save routes for event owners and staff even if not verified
@@ -158,15 +158,15 @@ class VerifiedOrganizerMiddleware
                 if ($checkEventAccess($eventParam)) {
                     $event = is_object($eventParam) ? $eventParam : \App\Models\Event::find($eventParam);
                     if ($event) {
-                        // Event owner and staff can always access their events for editing/saving, even if not verified
+                            // Event owner and staff can always access their events for editing/saving, even if not verified
                         \Log::info('VerifiedOrganizerMiddleware: Allowing access for owner/staff on edit route', [
-                            'user_id' => $user->id,
-                            'event_id' => $event->id,
+                                'user_id' => $user->id,
+                                'event_id' => $event->id,
                             'route' => $routeName,
                             'event_param_type' => is_object($eventParam) ? 'model' : 'id'
-                        ]);
-                        return $next($request);
-                    }
+                            ]);
+                            return $next($request);
+                        }
                 }
             } else {
                 // Log when event param is not found for debugging
@@ -190,8 +190,8 @@ class VerifiedOrganizerMiddleware
                         'user_id' => $user->id
                     ]);
                     return $next($request);
-                }
             }
+        }
         }
 
         // Only check verification if this is NOT an edit route OR if edit route check failed

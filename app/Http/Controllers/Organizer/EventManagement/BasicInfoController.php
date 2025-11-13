@@ -218,12 +218,19 @@ class BasicInfoController extends Controller
             }
         }
 
+        // Determine if this is a new event or editing an existing one
+        $isNewEvent = is_null($eventId);
+        
+        // For existing events, allow dates in the past (for events that already started)
+        // For new events, require start date to be in the future
+        $startDateRule = $isNewEvent ? 'required|date|after:now' : 'required|date';
+        
         $validator = Validator::make($request->all(), [
             'title' => ['required', 'string', 'max:255', new \App\Rules\NoProfanity()],
             'description' => 'required|string|min:10',
             'category' => 'required|string|in:conference,workshop,seminar,meetup,training,networking,social,sports,entertainment,other',
             'tags' => 'required|string|min:2',
-            'start_date' => 'required|date|after:now',
+            'start_date' => $startDateRule,
             'end_date' => 'nullable|date|after:start_date',
             'location' => 'required|string|max:500',
             'location_url' => 'nullable|url|max:1000',
@@ -235,9 +242,9 @@ class BasicInfoController extends Controller
             'category.required' => 'Please select an event category.',
             'category.in' => 'Please select a valid event category.',
             'start_date.required' => 'Event start date and time is required.',
-            'start_date.date' => 'Please enter a valid start date.',
-            'start_date.after' => 'Event start date must be in the future.',
-            'end_date.date' => 'Please enter a valid end date.',
+            'start_date.date' => 'Please enter a valid start date and time.',
+            'start_date.after' => $isNewEvent ? 'Event start date must be in the future.' : 'Please enter a valid start date and time.',
+            'end_date.date' => 'Please enter a valid end date and time.',
             'end_date.after' => 'Event end date must be after the start date.',
             'location.required' => 'Event location is required.',
             'location.max' => 'Location cannot be longer than 500 characters.',
@@ -247,12 +254,17 @@ class BasicInfoController extends Controller
         
         if ($validator->fails()) {
             if ($request->expectsJson() || $request->ajax()) {
+                // Get all validation errors as an array
                 $errors = $validator->errors()->all();
+                
+                // Get first error message for the main message
+                $firstError = $errors[0] ?? 'Validation failed. Please check your input.';
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'Validation failed.',
+                    'message' => $firstError,
                     'errors' => $errors,
-                    'error_details' => $validator->errors()
+                    'error_details' => $validator->errors()->toArray()
                 ], 422);
             }
             return back()->withErrors($validator)->withInput();
@@ -417,11 +429,26 @@ class BasicInfoController extends Controller
             }
             
             if ($request->expectsJson() || $request->ajax()) {
+                // For existing events, redirect to event management page
+                // For new events, redirect to layout creation page
+                $redirectUrl = $wasExistingEvent 
+                    ? route('organizer.events.manage', ['event' => $finalEventId])
+                    : route('organizer.events.create.layout', ['id' => $finalEventId]);
+                
                 return response()->json([
                     'success' => true,
-                    'message' => 'Event information saved successfully.',
-                    'redirect_url' => route('organizer.events.create.layout', ['id' => $finalEventId])
+                    'message' => $wasExistingEvent 
+                        ? 'Event information updated successfully.' 
+                        : 'Event information saved successfully.',
+                    'redirect_url' => $redirectUrl
                 ]);
+            }
+            
+            // For existing events, redirect to event management page
+            // For new events, redirect to layout creation page
+            if ($wasExistingEvent) {
+                return redirect()->route('organizer.events.manage', ['event' => $finalEventId])
+                    ->with('success', 'Event information updated successfully.');
             }
             
             return redirect()->route('organizer.events.create.layout', ['id' => $finalEventId]);

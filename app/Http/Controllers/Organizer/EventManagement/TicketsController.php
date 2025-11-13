@@ -1656,7 +1656,7 @@ class TicketsController extends Controller
         // Determine layout type
         $isAdmin = Auth::guard('admin')->check();
         $layoutType = $isAdmin ? 'admin' : 'organizer';
-        
+
         // Check if user is owner or staff (for showing/hiding buy buttons)
         $isOwner = $event->user_id === $currentUser->id;
         $isStaff = $event->staff()->where('user_id', $currentUser->id)->exists();

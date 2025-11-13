@@ -78,23 +78,45 @@
                             // Redirect back to event management
                             window.location.href = "{{ route('organizer.events.manage', ['event' => $event->id]) }}";
                         } else {
-                            // Show error message
-                            let errorMessage = data.message || 'An error occurred while saving.';
+                            // Show error message - handle different error formats
+                            let errorMessage = 'An error occurred while saving. Please check your input.';
                             
-                            if (data.errors && Array.isArray(data.errors)) {
-                                errorMessage = data.errors.join('<br>');
-                            } else if (data.error_details) {
-                                // Convert validation errors to readable format
+                            // Priority 1: Use error_details (structured validation errors)
+                            if (data.error_details && typeof data.error_details === 'object') {
                                 const errorList = [];
                                 for (const field in data.error_details) {
-                                    errorList.push('<strong>' + field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ') + ':</strong> ' + data.error_details[field][0]);
+                                    if (Array.isArray(data.error_details[field]) && data.error_details[field].length > 0) {
+                                        const fieldName = field.charAt(0).toUpperCase() + field.slice(1).replace(/_/g, ' ');
+                                        errorList.push('<strong>' + fieldName + ':</strong> ' + data.error_details[field][0]);
+                                    }
                                 }
-                                errorMessage = errorList.join('<br>');
+                                if (errorList.length > 0) {
+                                    errorMessage = errorList.join('<br>');
+                                }
                             }
-
-                            if (typeof showError === 'function') {
+                            // Priority 2: Use errors array
+                            else if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+                                errorMessage = data.errors.join('<br>');
+                            }
+                            // Priority 3: Use message if it's a string (not boolean)
+                            else if (data.message && typeof data.message === 'string' && data.message.trim() !== '') {
+                                errorMessage = data.message;
+                            }
+                            
+                            // Show error using SweetAlert
+                            if (typeof Swal !== 'undefined' && window.Swal) {
+                                await Swal.fire({
+                                    icon: 'error',
+                                    title: 'Validation Error',
+                                    html: errorMessage,
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#dc2626'
+                                });
+                            } else if (typeof showError === 'function') {
                                 await showError('Validation Error', errorMessage, { html: true });
-                            } else { alert(errorMessage.replace(/<br>/g, '\n')); }
+                            } else {
+                                alert(errorMessage.replace(/<br>/g, '\n').replace(/<strong>/g, '').replace(/<\/strong>/g, ''));
+                            }
                         }
                     } catch (error) {
                         console.error('Edit basic info submission error:', error);
