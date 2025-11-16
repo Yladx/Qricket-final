@@ -121,13 +121,18 @@
                             @endif
                         </div>
 
-                        <!-- Audience Behavior Chart -->
+                        <!-- Audience Behavior Roadmap Chart -->
                         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md p-4">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Audience Behavior</h3>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">Check-in vs Event Start</span>
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Audience Behavior Roadmap</h3>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">Timeline vs Event Start</span>
                             </div>
-                            @if(!empty($audienceBehaviorData['behavior_data']) && array_sum($audienceBehaviorData['behavior_data']) > 0)
+                            @if(!empty($audienceBehaviorData['checkin_counts']) && array_sum($audienceBehaviorData['checkin_counts']) > 0)
+                                <div class="mb-2">
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                                        Event Start: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ $audienceBehaviorData['event_start_label'] ?? 'N/A' }}</span>
+                                    </p>
+                                </div>
                                 <div class="h-64">
                                     <canvas id="audienceBehaviorChart"></canvas>
                                 </div>
@@ -137,7 +142,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <p class="text-sm font-medium">No check-in data yet</p>
-                                    <p class="text-xs mt-1">Behavior analysis will appear after attendees check in</p>
+                                    <p class="text-xs mt-1">Behavior roadmap will appear after attendees check in</p>
                                 </div>
                             @endif
                         </div>
@@ -449,31 +454,44 @@
         });
         @endif
 
-        // Initialize Audience Behavior Chart
-        @if(!empty($audienceBehaviorData['behavior_data']) && array_sum($audienceBehaviorData['behavior_data']) > 0)
+        // Initialize Audience Behavior Roadmap Chart
+        @if(!empty($audienceBehaviorData['checkin_counts']) && array_sum($audienceBehaviorData['checkin_counts']) > 0)
         document.addEventListener('DOMContentLoaded', function() {
             const behaviorCtx = document.getElementById('audienceBehaviorChart');
             if (behaviorCtx) {
+                const labels = @json($audienceBehaviorData['labels'] ?? []);
+                const checkinCounts = @json($audienceBehaviorData['checkin_counts'] ?? []);
+                
+                // Find the index of "Event Start" to mark it on the chart
+                const eventStartIndex = labels.indexOf('Event Start');
+                
                 new Chart(behaviorCtx, {
-                    type: 'doughnut',
+                    type: 'bar',
                     data: {
-                        labels: @json($audienceBehaviorData['behavior_labels'] ?? []),
+                        labels: labels,
                         datasets: [{
-                            data: @json($audienceBehaviorData['behavior_data'] ?? []),
-                            backgroundColor: [
-                                'rgba(34, 197, 94, 0.8)',  // Green for Early Birds
-                                'rgba(59, 130, 246, 0.8)', // Blue for On Time
-                                'rgba(251, 191, 36, 0.8)', // Yellow for Late
-                                'rgba(239, 68, 68, 0.8)'   // Red for Very Late
-                            ],
-                            borderColor: [
-                                '#22c55e',
-                                '#3b82f6',
-                                '#fbbf24',
-                                '#ef4444'
-                            ],
-                            borderWidth: 2,
-                            hoverOffset: 4
+                            label: 'Check-ins',
+                            data: checkinCounts,
+                            backgroundColor: checkinCounts.map((count, index) => {
+                                if (index === eventStartIndex) {
+                                    return 'rgba(239, 68, 68, 0.9)'; // Red for event start
+                                } else if (index < eventStartIndex) {
+                                    return 'rgba(34, 197, 94, 0.7)'; // Green for before event
+                                } else {
+                                    return 'rgba(251, 191, 36, 0.7)'; // Yellow for after event
+                                }
+                            }),
+                            borderColor: checkinCounts.map((count, index) => {
+                                if (index === eventStartIndex) {
+                                    return '#ef4444';
+                                } else if (index < eventStartIndex) {
+                                    return '#22c55e';
+                                } else {
+                                    return '#fbbf24';
+                                }
+                            }),
+                            borderWidth: 1,
+                            borderRadius: 4,
                         }]
                     },
                     options: {
@@ -481,16 +499,7 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                position: 'bottom',
-                                labels: {
-                                    padding: 15,
-                                    font: {
-                                        size: 11
-                                    },
-                                    color: '#6b7280',
-                                    usePointStyle: true,
-                                    pointStyle: 'circle'
-                                }
+                                display: false
                             },
                             tooltip: {
                                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -503,15 +512,75 @@
                                     size: 12
                                 },
                                 callbacks: {
+                                    title: function(context) {
+                                        const index = context[0].dataIndex;
+                                        const label = labels[index];
+                                        if (label === 'Event Start') {
+                                            return 'Event Start Time';
+                                        }
+                                        return label + ' from event start';
+                                    },
                                     label: function(context) {
-                                        const label = context.label || '';
-                                        const value = context.parsed || 0;
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        return label + ': ' + value + ' (' + percentage + '%)';
+                                        const count = context.parsed.y;
+                                        return count + ' check-in' + (count !== 1 ? 's' : '');
+                                    }
+                                }
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    color: '#6b7280',
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Number of Check-ins',
+                                    color: '#6b7280',
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#6b7280',
+                                    font: {
+                                        size: 10
+                                    },
+                                    maxRotation: 45,
+                                    minRotation: 45,
+                                    callback: function(value, index) {
+                                        const label = labels[index];
+                                        if (label === 'Event Start') {
+                                            return 'START';
+                                        }
+                                        return label;
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Time Relative to Event Start',
+                                    color: '#6b7280',
+                                    font: {
+                                        size: 12
                                     }
                                 }
                             }
+                        },
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
                         }
                     }
                 });

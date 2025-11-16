@@ -868,6 +868,7 @@ class EventAttendanceController extends Controller
     
     /**
      * Calculate audience behavior based on check-in time vs event start time
+     * Returns roadmap-style timeline data
      */
     private function calculateAudienceBehavior(Event $event)
     {
@@ -877,23 +878,20 @@ class EventAttendanceController extends Controller
         
         if (!$event->start_date || $checkedInTickets->isEmpty()) {
             return [
-                'early_birds' => 0,
-                'on_time' => 0,
-                'late' => 0,
-                'very_late' => 0,
-                'behavior_labels' => ['Early Birds (>30min)', 'On Time (±30min)', 'Late (30min-2hr)', 'Very Late (>2hr)'],
-                'behavior_data' => [0, 0, 0, 0],
-                'time_intervals' => []
+                'timeline_data' => [],
+                'labels' => [],
+                'checkin_counts' => [],
+                'event_start_time' => null,
+                'total_checkins' => 0,
             ];
         }
         
         $eventStart = $event->start_date;
-        $earlyBirds = 0; // >30 minutes before start
-        $onTime = 0; // ±30 minutes of start time
-        $late = 0; // 30 minutes to 2 hours after start
-        $veryLate = 0; // >2 hours after start
         
-        $timeIntervals = [];
+        // Group check-ins by time intervals (15-minute intervals)
+        $timelineData = [];
+        $minMinutes = null;
+        $maxMinutes = null;
         
         foreach ($checkedInTickets as $ticket) {
             if (!$ticket->checked_in_at) continue;
@@ -901,34 +899,64 @@ class EventAttendanceController extends Controller
             $checkInTime = $ticket->checked_in_at;
             $minutesDiff = $checkInTime->diffInMinutes($eventStart, false); // negative if before start
             
-            $timeIntervals[] = [
-                'minutes_diff' => $minutesDiff,
-                'check_in_time' => $checkInTime->format('Y-m-d H:i:s'),
-            ];
+            // Round to nearest 15-minute interval
+            $intervalMinutes = round($minutesDiff / 15) * 15;
             
-            if ($minutesDiff < -30) {
-                // More than 30 minutes before event start
-                $earlyBirds++;
-            } elseif ($minutesDiff >= -30 && $minutesDiff <= 30) {
-                // Within ±30 minutes of event start
-                $onTime++;
-            } elseif ($minutesDiff > 30 && $minutesDiff <= 120) {
-                // 30 minutes to 2 hours after start
-                $late++;
-            } else {
-                // More than 2 hours after start
-                $veryLate++;
+            if (!isset($timelineData[$intervalMinutes])) {
+                $timelineData[$intervalMinutes] = 0;
+            }
+            $timelineData[$intervalMinutes]++;
+            
+            if ($minMinutes === null || $intervalMinutes < $minMinutes) {
+                $minMinutes = $intervalMinutes;
+            }
+            if ($maxMinutes === null || $intervalMinutes > $maxMinutes) {
+                $maxMinutes = $intervalMinutes;
             }
         }
         
+        // Create complete timeline from min to max with 15-minute intervals
+        $labels = [];
+        $checkinCounts = [];
+        
+        // Extend range to show at least 2 hours before and 4 hours after event start
+        $minRange = min($minMinutes ?? 0, -120); // At least 2 hours before
+        $maxRange = max($maxMinutes ?? 0, 240); // At least 4 hours after
+        
+        for ($minutes = $minRange; $minutes <= $maxRange; $minutes += 15) {
+            $count = $timelineData[$minutes] ?? 0;
+            
+            // Format label based on minutes difference
+            if ($minutes < 0) {
+                $hours = abs(floor($minutes / 60));
+                $mins = abs($minutes % 60);
+                if ($hours > 0) {
+                    $labels[] = "-{$hours}h {$mins}m";
+                } else {
+                    $labels[] = "-{$mins}m";
+                }
+            } elseif ($minutes == 0) {
+                $labels[] = 'Event Start';
+            } else {
+                $hours = floor($minutes / 60);
+                $mins = $minutes % 60;
+                if ($hours > 0) {
+                    $labels[] = "+{$hours}h {$mins}m";
+                } else {
+                    $labels[] = "+{$mins}m";
+                }
+            }
+            
+            $checkinCounts[] = $count;
+        }
+        
         return [
-            'early_birds' => $earlyBirds,
-            'on_time' => $onTime,
-            'late' => $late,
-            'very_late' => $veryLate,
-            'behavior_labels' => ['Early Birds (>30min before)', 'On Time (±30min)', 'Late (30min-2hr after)', 'Very Late (>2hr after)'],
-            'behavior_data' => [$earlyBirds, $onTime, $late, $veryLate],
-            'time_intervals' => $timeIntervals,
+            'timeline_data' => $timelineData,
+            'labels' => $labels,
+            'checkin_counts' => $checkinCounts,
+            'event_start_time' => $eventStart->format('Y-m-d H:i:s'),
+            'event_start_label' => $eventStart->format('M d, Y g:i A'),
+            'total_checkins' => $checkedInTickets->count(),
         ];
     }
 
