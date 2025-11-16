@@ -98,6 +98,50 @@
                         </div>
                     </div>
 
+                    <!-- Attendance Analytics Graphs -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <!-- Peak Attendance Chart -->
+                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Peak Attendance</h3>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">By Date & Time</span>
+                            </div>
+                            @if(!empty($peakAttendanceData['data']) && count($peakAttendanceData['data']) > 0)
+                                <div class="h-64">
+                                    <canvas id="peakAttendanceChart"></canvas>
+                                </div>
+                            @else
+                                <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                    <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    <p class="text-sm font-medium">No check-in data yet</p>
+                                    <p class="text-xs mt-1">Peak attendance will appear after attendees check in</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Audience Behavior Chart -->
+                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Audience Behavior</h3>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">Check-in vs Event Start</span>
+                            </div>
+                            @if(!empty($audienceBehaviorData['behavior_data']) && array_sum($audienceBehaviorData['behavior_data']) > 0)
+                                <div class="h-64">
+                                    <canvas id="audienceBehaviorChart"></canvas>
+                                </div>
+                            @else
+                                <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                    <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="text-sm font-medium">No check-in data yet</p>
+                                    <p class="text-xs mt-1">Behavior analysis will appear after attendees check in</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
 
                     <!-- Ticket List -->
                     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md p-4">
@@ -298,7 +342,183 @@
         </div>
     </div>
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <script>
+        // Initialize Peak Attendance Chart
+        @if(!empty($peakAttendanceData['data']) && count($peakAttendanceData['data']) > 0)
+        document.addEventListener('DOMContentLoaded', function() {
+            const peakCtx = document.getElementById('peakAttendanceChart');
+            if (peakCtx) {
+                new Chart(peakCtx, {
+                    type: 'line',
+                    data: {
+                        labels: @json($peakAttendanceData['labels'] ?? []),
+                        datasets: [{
+                            label: 'Check-ins',
+                            data: @json($peakAttendanceData['data'] ?? []),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#3b82f6',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 12
+                                    },
+                                    color: '#6b7280'
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    size: 12
+                                },
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y + ' check-in' + (context.parsed.y !== 1 ? 's' : '');
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    color: '#6b7280',
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Number of Check-ins',
+                                    color: '#6b7280',
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#6b7280',
+                                    font: {
+                                        size: 10
+                                    },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        }
+                    }
+                });
+            }
+        });
+        @endif
+
+        // Initialize Audience Behavior Chart
+        @if(!empty($audienceBehaviorData['behavior_data']) && array_sum($audienceBehaviorData['behavior_data']) > 0)
+        document.addEventListener('DOMContentLoaded', function() {
+            const behaviorCtx = document.getElementById('audienceBehaviorChart');
+            if (behaviorCtx) {
+                new Chart(behaviorCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: @json($audienceBehaviorData['behavior_labels'] ?? []),
+                        datasets: [{
+                            data: @json($audienceBehaviorData['behavior_data'] ?? []),
+                            backgroundColor: [
+                                'rgba(34, 197, 94, 0.8)',  // Green for Early Birds
+                                'rgba(59, 130, 246, 0.8)', // Blue for On Time
+                                'rgba(251, 191, 36, 0.8)', // Yellow for Late
+                                'rgba(239, 68, 68, 0.8)'   // Red for Very Late
+                            ],
+                            borderColor: [
+                                '#22c55e',
+                                '#3b82f6',
+                                '#fbbf24',
+                                '#ef4444'
+                            ],
+                            borderWidth: 2,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: {
+                                        size: 11
+                                    },
+                                    color: '#6b7280',
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    size: 12
+                                },
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return label + ': ' + value + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        @endif
+
         function confirmCheckIn(form, event) {
             event.preventDefault();
             

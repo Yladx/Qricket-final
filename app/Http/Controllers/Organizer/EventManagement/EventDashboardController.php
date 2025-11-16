@@ -220,26 +220,48 @@ class EventDashboardController extends Controller
         $totalAmount = $totalAmountQuery->sum('total_amount');
         
         // Calculate net amount and fees excluding refunded
+        // For free events or bypassed payments, exclude fees from calculations
         // Remove orderBy clause for aggregate queries
+        $isFreeEvent = $event->is_free ? 1 : 0;
         $totals = $totalAmountQuery->reorder()->selectRaw('
             SUM(total_amount) as gross_revenue,
-            SUM(COALESCE(net_amount, total_amount)) as net_revenue,
-            SUM(COALESCE(transaction_fee, 0)) as total_transaction_fees,
-            SUM(COALESCE(vat_amount, 0)) as total_vat
-        ')->first();
+            SUM(
+                CASE 
+                    WHEN unit_price = 0 OR payment_method IN (\'bypass\', \'BYPASS\') OR ? = 1 THEN total_amount
+                    ELSE COALESCE(net_amount, total_amount)
+                END
+            ) as net_revenue,
+            SUM(
+                CASE 
+                    WHEN unit_price = 0 OR payment_method IN (\'bypass\', \'BYPASS\') OR ? = 1 THEN 0
+                    ELSE COALESCE(transaction_fee, 0)
+                END
+            ) as total_transaction_fees,
+            SUM(
+                CASE 
+                    WHEN unit_price = 0 OR payment_method IN (\'bypass\', \'BYPASS\') OR ? = 1 THEN 0
+                    ELSE COALESCE(vat_amount, 0)
+                END
+            ) as total_vat
+        ', [$isFreeEvent, $isFreeEvent, $isFreeEvent])->first();
         
         $netAmount = max(0, $totals->net_revenue ?? 0); // Ensure non-negative
-        $totalFees = ($totals->total_transaction_fees ?? 0) + ($totals->total_vat ?? 0);
+        $totalFees = max(0, ($totals->total_transaction_fees ?? 0) + ($totals->total_vat ?? 0)); // Ensure non-negative
         
         // Calculate expected earnings based on net amount (net amount - Qricket fee)
         // If event is free or net is zero/non-positive, force zero expected (skip fee calculation)
         if ($event->is_free || $netAmount <= 0) {
             $expectedEarnings = 0;
+            $netAmount = 0; // Ensure net amount is 0 for free events
+            $totalFees = 0; // Ensure fees are 0 for free events
         } else {
-        $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
-        $qricketFee = $netAmount * ($qricketFeePercentage / 100);
+            $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
+            $qricketFee = $netAmount * ($qricketFeePercentage / 100);
             $expectedEarnings = max(0, $netAmount - $qricketFee); // clamp to zero
         }
+        
+        // Ensure totalAmount is non-negative
+        $totalAmount = max(0, $totalAmount ?? 0);
 
         // Free tickets sold for this event
         $freeTicketsSold = \App\Models\TicketPurchase::where('event_id', $event->id)
@@ -391,17 +413,35 @@ class EventDashboardController extends Controller
             ->where('status', 'paid') // Only paid purchases
             ->sum('total_amount') ?? 0;
         
+        // For free events or bypassed payments, exclude fees from calculations
         // Get additional statistics for fee breakdown (exclude refunded)
+        // Only count fees for non-free events and non-bypassed payments
+        $isFreeEvent = $event->is_free ? 1 : 0;
         $revenueStats = TicketPurchase::whereHas('ticketInformation', function($query) use ($event) {
             $query->where('event_id', $event->id);
         })->where('status', 'paid') // Only paid purchases (refunded have status='refunded')
           ->selectRaw('
             SUM(total_amount) as gross_revenue,
-            SUM(COALESCE(net_amount, total_amount)) as net_revenue,
-            SUM(COALESCE(transaction_fee, 0)) as total_transaction_fees,
-            SUM(COALESCE(vat_amount, 0)) as total_vat,
+            SUM(
+                CASE 
+                    WHEN unit_price = 0 OR payment_method IN (\'bypass\', \'BYPASS\') OR ? = 1 THEN total_amount
+                    ELSE COALESCE(net_amount, total_amount)
+                END
+            ) as net_revenue,
+            SUM(
+                CASE 
+                    WHEN unit_price = 0 OR payment_method IN (\'bypass\', \'BYPASS\') OR ? = 1 THEN 0
+                    ELSE COALESCE(transaction_fee, 0)
+                END
+            ) as total_transaction_fees,
+            SUM(
+                CASE 
+                    WHEN unit_price = 0 OR payment_method IN (\'bypass\', \'BYPASS\') OR ? = 1 THEN 0
+                    ELSE COALESCE(vat_amount, 0)
+                END
+            ) as total_vat,
             COUNT(*) as total_orders
-        ')->first();
+        ', [$isFreeEvent, $isFreeEvent, $isFreeEvent])->first();
 
         $totalRevenue = $revenueStats->gross_revenue ?? 0;
         // Net revenue is already after Xendit fees, now apply Qricket fee (5%)
@@ -410,13 +450,19 @@ class EventDashboardController extends Controller
         // If event is free or net is zero/non-positive, force zero expected (skip fee calculation)
         if ($event->is_free || $netAmountTotal <= 0) {
             $expectedRevenue = 0;
+            $netRevenue = 0;
+            $totalFees = 0;
+            $transactionFees = 0;
+            $vatAmount = 0;
         } else {
-        $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
-        $qricketFee = $netAmountTotal * ($qricketFeePercentage / 100);
+            $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
+            $qricketFee = $netAmountTotal * ($qricketFeePercentage / 100);
             $expectedRevenue = max(0, $netAmountTotal - $qricketFee); // clamp to zero
+            $netRevenue = $expectedRevenue; // Use expected revenue as net revenue
+            $totalFees = ($revenueStats->total_transaction_fees ?? 0) + ($revenueStats->total_vat ?? 0);
+            $transactionFees = $revenueStats->total_transaction_fees ?? 0;
+            $vatAmount = $revenueStats->total_vat ?? 0;
         }
-        $netRevenue = $expectedRevenue; // Use expected revenue as net revenue
-        $totalFees = ($revenueStats->total_transaction_fees ?? 0) + ($revenueStats->total_vat ?? 0);
 
         // Total tickets sold
         $totalTicketsSold = EventTicketInformation::where('event_id', $event->id)
@@ -474,12 +520,12 @@ class EventDashboardController extends Controller
         } catch (\Throwable $e) { $additionalTicketSpend = 0; }
 
         return [
-            'totalRevenue' => $totalRevenue,
-            'netRevenue' => $netRevenue,
-            'expectedRevenue' => $expectedRevenue, // Expected revenue based on net amount less Qricket fee
-            'totalFees' => $totalFees,
-            'transactionFees' => $revenueStats->total_transaction_fees ?? 0,
-            'vatAmount' => $revenueStats->total_vat ?? 0,
+            'totalRevenue' => max(0, $totalRevenue), // Ensure non-negative
+            'netRevenue' => max(0, $netRevenue ?? 0), // Ensure non-negative
+            'expectedRevenue' => max(0, $expectedRevenue ?? 0), // Expected revenue based on net amount less Qricket fee
+            'totalFees' => max(0, $totalFees ?? 0), // Ensure non-negative
+            'transactionFees' => max(0, $transactionFees ?? 0), // Ensure non-negative
+            'vatAmount' => max(0, $vatAmount ?? 0), // Ensure non-negative
             'totalTicketsSold' => $totalTicketsSold,
             'totalCheckedIn' => $totalCheckedIn,
             'conversionRate' => round($conversionRate, 1),
@@ -488,7 +534,7 @@ class EventDashboardController extends Controller
             // Calculate average order value (revenue / orders)
             'totalOrders' => $revenueStats->total_orders ?? 0,
             'averageOrderValue' => ($revenueStats->total_orders ?? 0) > 0 ? round($totalRevenue / ($revenueStats->total_orders ?? 1), 2) : 0,
-            'thisMonthRevenue' => $totalRevenue, // Using total revenue as this month's
+            'thisMonthRevenue' => max(0, $totalRevenue), // Using total revenue as this month's, ensure non-negative
             'additionalTicketSpend' => $additionalTicketSpend,
             'totalCapacity' => $totalTicketsSold + 100, // Mock capacity
             'capacityUtilization' => $totalTicketsSold > 0 ? round(($totalTicketsSold / ($totalTicketsSold + 100)) * 100, 1) : 0,

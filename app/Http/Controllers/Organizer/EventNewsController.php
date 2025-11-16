@@ -62,30 +62,74 @@ class EventNewsController extends Controller
 
     /**
      * Send notifications to users who have saved this event or bought tickets
+     * Respects the news visibility setting: 'public', 'ticket_buyers', or 'saved_users'
      */
     private function notifyEventSubscribers(EventNews $news, Event $event)
     {
-        // Get all users who have saved this event
-        $savedEvents = SavedEvent::where('event_id', $event->id)->with('user')->get();
-        $savedUserIds = $savedEvents->pluck('user_id')->toArray();
+        $userIds = [];
         
-        // Get all users who bought tickets for this event (using correct status)
-        $ticketBuyerIds = \App\Models\TicketPurchase::where('event_id', $event->id)
-            ->where('status', 'paid')
-            ->distinct()
-            ->pluck('user_id')
-            ->toArray();
+        // Respect the visibility setting
+        $visibility = $news->visibility ?? 'public';
         
-        // Combine both groups and remove duplicates
-        $userIds = array_unique(array_merge($savedUserIds, $ticketBuyerIds));
+        // Get users based on visibility setting
+        if ($visibility === 'public' || $visibility === 'ticket_buyers') {
+            // Get all users who bought tickets for this event (using correct status)
+            $ticketBuyerIds = \App\Models\TicketPurchase::where('event_id', $event->id)
+                ->where('status', 'paid')
+                ->distinct()
+                ->pluck('user_id')
+                ->toArray();
+            $userIds = array_merge($userIds, $ticketBuyerIds);
+        }
+        
+        if ($visibility === 'public' || $visibility === 'saved_users') {
+            // Get all users who have saved this event
+            $savedEvents = SavedEvent::where('event_id', $event->id)->with('user')->get();
+            $savedUserIds = $savedEvents->pluck('user_id')->toArray();
+            $userIds = array_merge($userIds, $savedUserIds);
+        }
+        
+        // Remove duplicates
+        $userIds = array_unique($userIds);
+        
+        if (empty($userIds)) {
+            \Log::info('No users to notify for news', [
+                'event_id' => $event->id,
+                'news_id' => $news->id,
+                'visibility' => $visibility,
+            ]);
+            return;
+        }
         
         $notificationsCreated = 0;
+        $emailsSent = 0;
+        $emailsFailed = 0;
         
         // Send notification to each user
         foreach ($userIds as $userId) {
             try {
                 $user = \App\Models\User::find($userId);
                 if (!$user) continue;
+                
+                // Skip if user has no email
+                if (empty($user->email)) {
+                    \Log::warning('User has no email, skipping email notification', [
+                        'user_id' => $userId,
+                    ]);
+                } else {
+                    // Send email notification
+                    try {
+                        $user->notify(new EventNewsNotification($event, $news));
+                        $emailsSent++;
+                    } catch (\Exception $emailException) {
+                        $emailsFailed++;
+                        \Log::error('Failed to send email notification', [
+                            'user_id' => $userId,
+                            'user_email' => $user->email,
+                            'error' => $emailException->getMessage(),
+                        ]);
+                    }
+                }
                 
                 // Create in-app notification
                 Notification::create([
@@ -104,9 +148,6 @@ class EventNewsController extends Controller
                     ],
                 ]);
                 
-                // Send email notification
-                $user->notify(new EventNewsNotification($event, $news));
-                
                 // Broadcast real-time notification
                 event(new EventNewsPublished($userId, $news, $event));
                 
@@ -123,9 +164,10 @@ class EventNewsController extends Controller
             'event_id' => $event->id,
             'news_id' => $news->id,
             'notifications_sent' => $notificationsCreated,
-            'saved_users_count' => count($savedUserIds),
-            'ticket_buyers_count' => count($ticketBuyerIds),
+            'emails_sent' => $emailsSent,
+            'emails_failed' => $emailsFailed,
             'total_users_notified' => count($userIds),
+            'visibility' => $visibility,
             'news_title' => $news->title
         ]);
     }

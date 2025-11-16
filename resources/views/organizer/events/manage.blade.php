@@ -33,7 +33,12 @@
                                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</p>
                                         <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100" data-stat="event-total-revenue">₱{{ number_format($salesStats['totalRevenue'], 2) }}</p>
                                         @php
-                                            $netRevenueAfterFees = ($salesStats['totalRevenue'] ?? 0) - ($salesStats['transactionFees'] ?? 0) - ($salesStats['vatAmount'] ?? 0);
+                                            // Ensure net revenue is never negative
+                                            $netRevenueAfterFees = max(0, ($salesStats['totalRevenue'] ?? 0) - ($salesStats['transactionFees'] ?? 0) - ($salesStats['vatAmount'] ?? 0));
+                                            // For free events, ensure it's 0
+                                            if ($event->is_free ?? false) {
+                                                $netRevenueAfterFees = 0;
+                                            }
                                         @endphp
                                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Net: ₱{{ number_format($netRevenueAfterFees, 2) }}</p>
                                     </div>

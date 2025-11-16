@@ -97,9 +97,16 @@
                                     <td class="px-4 py-2 text-gray-700 dark:text-gray-300">{{ $sale->quantity }}</td>
                                     <td class="px-4 py-2 text-gray-900 dark:text-gray-100">₱{{ number_format($sale->total_amount, 2) }}</td>
                                     <td class="px-4 py-2 text-gray-700 dark:text-gray-300">{{ $sale->payment_method ?? '—' }}</td>
-                                    <td class="px-4 py-2 text-gray-700 dark:text-gray-300">₱{{ number_format($sale->transaction_fee ?? 0, 2) }}</td>
-                                    <td class="px-4 py-2 text-gray-700 dark:text-gray-300">₱{{ number_format($sale->vat_amount ?? 0, 2) }}</td>
-                                    <td class="px-4 py-2 text-gray-900 dark:text-gray-100 font-semibold text-green-600">₱{{ number_format($sale->net_amount ?? $sale->total_amount, 2) }}</td>
+                                    @php
+                                        // For free events or bypassed payments, ensure fees are 0
+                                        $isFreeOrBypass = ($event->is_free ?? false) || ($sale->unit_price == 0) || (strtolower($sale->payment_method ?? '') === 'bypass');
+                                        $transactionFee = $isFreeOrBypass ? 0 : ($sale->transaction_fee ?? 0);
+                                        $vatAmount = $isFreeOrBypass ? 0 : ($sale->vat_amount ?? 0);
+                                        $netAmount = $isFreeOrBypass ? ($sale->total_amount ?? 0) : ($sale->net_amount ?? $sale->total_amount);
+                                    @endphp
+                                    <td class="px-4 py-2 text-gray-700 dark:text-gray-300">₱{{ number_format($transactionFee, 2) }}</td>
+                                    <td class="px-4 py-2 text-gray-700 dark:text-gray-300">₱{{ number_format($vatAmount, 2) }}</td>
+                                    <td class="px-4 py-2 text-gray-900 dark:text-gray-100 font-semibold text-green-600">₱{{ number_format($netAmount, 2) }}</td>
                                     <td class="px-4 py-2 text-gray-700 dark:text-gray-300 flex items-center gap-2">{{ optional($sale->paid_at)->format('M d, Y g:i A') }}
                                         <button type="button" class="ml-auto text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600" data-toggle-details="sale-{{ $sale->id }}">Details</button>
                                     </td>

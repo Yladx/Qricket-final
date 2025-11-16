@@ -82,6 +82,11 @@ class EventAttendanceController extends Controller
         // Get total activity count (in case it's needed by shared components)
         $totalActivityCount = $event->activityLogs()->count();
 
+        // Calculate peak attendance data (by date and time)
+        $peakAttendanceData = $this->calculatePeakAttendance($event);
+        
+        // Calculate audience behavior data (check-in time vs event start)
+        $audienceBehaviorData = $this->calculateAudienceBehavior($event);
 
         // Determine layout type
         $isAdmin = $this->isAdminSession();
@@ -100,7 +105,9 @@ class EventAttendanceController extends Controller
             'totalActivityCount',
             'isAdmin',
             'layoutType',
-            'certificateEnabled'
+            'certificateEnabled',
+            'peakAttendanceData',
+            'audienceBehaviorData'
         ))->with('tickets', $allTickets);
     }
 
@@ -801,6 +808,128 @@ class EventAttendanceController extends Controller
         
         // Return regular user ID
         return Auth::id();
+    }
+
+    /**
+     * Calculate peak attendance data grouped by date and time
+     */
+    private function calculatePeakAttendance(Event $event)
+    {
+        $checkedInTickets = EventTicketInformation::where('event_id', $event->id)
+            ->whereNotNull('checked_in_at')
+            ->get();
+        
+        // Group by date and hour
+        $hourlyData = [];
+        $dailyData = [];
+        
+        foreach ($checkedInTickets as $ticket) {
+            if (!$ticket->checked_in_at) continue;
+            
+            $date = $ticket->checked_in_at->format('Y-m-d');
+            $hour = $ticket->checked_in_at->format('H:00');
+            $dateHourKey = $date . ' ' . $hour;
+            
+            // Hourly data
+            if (!isset($hourlyData[$dateHourKey])) {
+                $hourlyData[$dateHourKey] = [
+                    'date' => $date,
+                    'hour' => $hour,
+                    'count' => 0
+                ];
+            }
+            $hourlyData[$dateHourKey]['count']++;
+            
+            // Daily data
+            if (!isset($dailyData[$date])) {
+                $dailyData[$date] = [
+                    'date' => $date,
+                    'count' => 0
+                ];
+            }
+            $dailyData[$date]['count']++;
+        }
+        
+        // Sort by date and hour
+        ksort($hourlyData);
+        ksort($dailyData);
+        
+        return [
+            'hourly' => array_values($hourlyData),
+            'daily' => array_values($dailyData),
+            'labels' => array_map(function($item) {
+                return $item['date'] . ' ' . $item['hour'];
+            }, array_values($hourlyData)),
+            'data' => array_map(function($item) {
+                return $item['count'];
+            }, array_values($hourlyData)),
+        ];
+    }
+    
+    /**
+     * Calculate audience behavior based on check-in time vs event start time
+     */
+    private function calculateAudienceBehavior(Event $event)
+    {
+        $checkedInTickets = EventTicketInformation::where('event_id', $event->id)
+            ->whereNotNull('checked_in_at')
+            ->get();
+        
+        if (!$event->start_date || $checkedInTickets->isEmpty()) {
+            return [
+                'early_birds' => 0,
+                'on_time' => 0,
+                'late' => 0,
+                'very_late' => 0,
+                'behavior_labels' => ['Early Birds (>30min)', 'On Time (±30min)', 'Late (30min-2hr)', 'Very Late (>2hr)'],
+                'behavior_data' => [0, 0, 0, 0],
+                'time_intervals' => []
+            ];
+        }
+        
+        $eventStart = $event->start_date;
+        $earlyBirds = 0; // >30 minutes before start
+        $onTime = 0; // ±30 minutes of start time
+        $late = 0; // 30 minutes to 2 hours after start
+        $veryLate = 0; // >2 hours after start
+        
+        $timeIntervals = [];
+        
+        foreach ($checkedInTickets as $ticket) {
+            if (!$ticket->checked_in_at) continue;
+            
+            $checkInTime = $ticket->checked_in_at;
+            $minutesDiff = $checkInTime->diffInMinutes($eventStart, false); // negative if before start
+            
+            $timeIntervals[] = [
+                'minutes_diff' => $minutesDiff,
+                'check_in_time' => $checkInTime->format('Y-m-d H:i:s'),
+            ];
+            
+            if ($minutesDiff < -30) {
+                // More than 30 minutes before event start
+                $earlyBirds++;
+            } elseif ($minutesDiff >= -30 && $minutesDiff <= 30) {
+                // Within ±30 minutes of event start
+                $onTime++;
+            } elseif ($minutesDiff > 30 && $minutesDiff <= 120) {
+                // 30 minutes to 2 hours after start
+                $late++;
+            } else {
+                // More than 2 hours after start
+                $veryLate++;
+            }
+        }
+        
+        return [
+            'early_birds' => $earlyBirds,
+            'on_time' => $onTime,
+            'late' => $late,
+            'very_late' => $veryLate,
+            'behavior_labels' => ['Early Birds (>30min before)', 'On Time (±30min)', 'Late (30min-2hr after)', 'Very Late (>2hr after)'],
+            'behavior_data' => [$earlyBirds, $onTime, $late, $veryLate],
+            'time_intervals' => $timeIntervals,
+        ];
     }
 
     /**

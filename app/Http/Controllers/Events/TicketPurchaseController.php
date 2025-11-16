@@ -321,9 +321,16 @@ class TicketPurchaseController extends Controller
                 // Bypass mode or Free event: Mark as paid and update sold count immediately
                 $prefix = $isFreeEvent ? 'FREE' : 'BYPASS';
                 
-                // Calculate fees even for bypass/free events (for consistency)
+                // For free events and bypassed payments, set all fees to 0
+                // Net amount equals total amount (no fees deducted)
                 $paymentMethod = 'BYPASS';
-                $fees = \App\Services\XenditFeeCalculator::calculateFees($totalAmount, $paymentMethod);
+                $fees = [
+                    'transaction_fee' => 0,
+                    'vat_amount' => 0,
+                    'net_amount' => $totalAmount, // Net equals total for free/bypass
+                    'total_fees' => 0,
+                    'payment_method' => $paymentMethod
+                ];
                 
                 $purchase->update([
                     'status' => 'paid',
@@ -1425,12 +1432,32 @@ class TicketPurchaseController extends Controller
             ->sum('total_amount');
 
         // Compute net and expected revenue (net minus platform fee), never negative, 0 if free
+        // For free events or bypassed payments, net_amount should equal total_amount (fees are 0)
+        // Sum only net amounts that aren't from free/bypassed purchases (or use total_amount for those)
+        $isFreeEvent = $event->is_free ? 1 : 0;
         $netAmount = (float) TicketPurchase::where('event_id', $event->id)
             ->where('status', 'paid')
-            ->sum(\DB::raw('COALESCE(net_amount, total_amount)'));
+            ->selectRaw('
+                SUM(
+                    CASE 
+                        WHEN unit_price = 0 OR payment_method IN (\'bypass\', \'BYPASS\') OR ? = 1 THEN total_amount
+                        ELSE COALESCE(net_amount, total_amount)
+                    END
+                ) as net_revenue
+            ', [$isFreeEvent])
+            ->value('net_revenue') ?? 0;
+        
+        // Ensure non-negative
+        $netAmount = max(0, $netAmount);
         $qricketFeePercentage = config('app.qricket_fee_percentage', 5);
-        $qricketFee = max(0, $netAmount) * ($qricketFeePercentage / 100);
-        $expectedRevenue = ($event->is_free || $netAmount <= 0) ? 0 : max(0, $netAmount - $qricketFee);
+        
+        // If event is free or net is zero/non-positive, force zero expected (skip fee calculation)
+        if ($event->is_free || $netAmount <= 0) {
+            $expectedRevenue = 0;
+        } else {
+            $qricketFee = $netAmount * ($qricketFeePercentage / 100);
+            $expectedRevenue = max(0, $netAmount - $qricketFee);
+        }
 
         $totalTicketsSold = TicketPurchase::where('event_id', $event->id)
             ->where('status', 'paid')

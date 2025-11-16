@@ -1962,10 +1962,27 @@ class XenditWebhookController extends Controller
                 if (!empty($intent) && ($intent['type'] ?? null) === 'ticket') {
                     $purchase = TicketPurchase::where('purchase_id', $intent['purchase_id'] ?? '')->first();
                     if ($purchase) {
-                        // Calculate fees for the payment method
+                        // Check if this is a free event or bypassed payment (shouldn't reach webhook, but safety check)
+                        $event = $purchase->event ?? null;
+                        $isFreeEvent = ($event && $event->is_free) || ($purchase->unit_price == 0);
+                        $isBypassed = strtolower($purchase->payment_method ?? '') === 'bypass' || 
+                                     (isset($intent['bypass_mode']) && $intent['bypass_mode']);
+                        
                         $paymentMethod = $payload['payment_method'] ?? 'CREDIT_CARD';
                         $amount = $payload['amount'] ?? $payload['paid_amount'] ?? $purchase->total_amount ?? 0;
-                        $fees = \App\Services\XenditFeeCalculator::calculateFees($amount, $paymentMethod);
+                        
+                        // For free events or bypassed payments, set fees to 0
+                        if ($isFreeEvent || $isBypassed) {
+                            $fees = [
+                                'transaction_fee' => 0,
+                                'vat_amount' => 0,
+                                'net_amount' => $amount, // Net equals total for free/bypass
+                                'total_fees' => 0,
+                                'payment_method' => $paymentMethod
+                            ];
+                        } else {
+                            $fees = \App\Services\XenditFeeCalculator::calculateFees($amount, $paymentMethod);
+                        }
                         
                         $purchase->update([
                             'status' => 'paid',

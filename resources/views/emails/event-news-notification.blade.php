@@ -28,12 +28,14 @@
             <h3 style="margin:0 0 12px 0; font-size:16px; color:var(--teal-dark); font-weight:600;">📢 Latest News</h3>
             <div style="padding:12px; background-color:#f8f9fa; border-radius:6px; margin-bottom:12px;">
               <h4 style="margin:0 0 8px 0; font-size:15px; color:var(--teal-dark); font-weight:600;">{{ $news->title }}</h4>
-              <p style="margin:0; color:var(--muted); font-size:14px; line-height:1.5;">{{ $news->content }}</p>
+              <div style="margin:0; color:var(--muted); font-size:14px; line-height:1.5;">{!! nl2br(e($news->body)) !!}</div>
             </div>
-            @if($news->image_url)
-            <div style="text-align:center; margin:12px 0;">
-              <img src="{{ $news->image_url }}" alt="{{ $news->title }}" style="max-width:100%; height:auto; border-radius:6px;">
-            </div>
+            @if(!empty($news->attachments) && is_array($news->attachments))
+              @foreach(array_slice($news->attachments, 0, 3) as $imageUrl)
+              <div style="text-align:center; margin:12px 0;">
+                <img src="{{ $imageUrl }}" alt="{{ $news->title }}" style="max-width:100%; height:auto; border-radius:6px;">
+              </div>
+              @endforeach
             @endif
           </td>
         </tr>
